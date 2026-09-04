@@ -1,0 +1,1203 @@
+#!/usr/bin/env python3
+# =============================================================================
+# ALBERTH MASTER PYTHON REFACTOR - Pipeline de Voz Reescrito en Python
+# Versión: 2.0.0 (Refactor con Circuit Breaker, Caching y Métricas)
+# =============================================================================
+
+import os
+import sys
+import json
+import time
+import subprocess
+import threading
+import signal
+from pathlib import Path
+from typing import Optional, Tuple, Dict, Any, Callable
+import logging
+import http.server
+import socketserver
+from enum import Enum
+from dataclasses import dataclass, field
+
+import os
+import sys
+import json
+import time
+import subprocess
+import threading
+import signal
+from pathlib import Path
+from typing import Optional, Tuple, Dict, Any, Callable
+import logging
+import http.server
+import socketserver
+import yaml
+from pydantic import BaseModel, Field, validator
+# ======================= CACHE =======================
+class TTLCache:
+    """Simple thread‑safe TTL cache with LRU eviction when maxsize is reached."""
+    def __init__(self, ttl_seconds: int = 300, maxsize: int = 100):
+        self.ttl = ttl_seconds
+        self.maxsize = maxsize
+        self._cache: Dict[str, Any] = {}
+        self._ts: Dict[str, float] = {}
+        self._lock = threading.RLock()
+
+    def get(self, key: str) -> Optional[Any]:
+        with self._lock:
+            if key in self._cache:
+                if time.time() - self._ts[key] < self.ttl:
+                    self._ts[key] = time.time()  # renew on hit
+                    return self._cache[key]
+                # expired
+                del self._cache[key]
+                del self._ts[key]
+            return None
+
+    def set(self, key: str, value: Any) -> None:
+        with self._lock:
+            if len(self._cache) >= self.maxsize:
+                # evict oldest (simple LRU)
+                oldest = min(self._ts, key=self._ts.get)
+                del self._cache[oldest]
+                del self._ts[oldest]
+            self._cache[key] = value
+            self._ts[key] = time.time()
+
+    def stats(self) -> Dict[str, int]:
+        with self._lock:
+            return {"size": len(self._cache), "maxsize": self.maxsize}
+
+
+# ======================= METRICS =======================
+class Metrics:
+    """Collects counters and latencies, exportable in Prometheus format."""
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._counters: Dict[str, int] = {}
+        self._latency_sums: Dict[str, float] = {}
+        self._latency_counts: Dict[str, int] = {}
+
+    def inc(self, name: str, value: int = 1) -> None:
+        with self._lock:
+            self._counters[name] = self._counters.get(name, 0) + value
+
+    def add_latency(self, name: str, seconds: float) -> None:
+        with self._lock:
+            self._latency_sums[name] = self._latency_sums.get(name, 0.0) + seconds
+            self._latency_counts[name] = self._latency_counts.get(name, 0) + 1
+
+    def snapshot(self) -> Dict[str, Any]:
+        with self._lock:
+            latencies = {}
+            for name in self._latency_sums:
+                cnt = self._latency_counts.get(name, 0)
+                avg = self._latency_sums[name] / cnt if cnt else 0.0
+                latencies[name] = avg
+            return {
+                "counters": dict(self._counters),
+                "latency_avg": latencies,
+                "latency_count": dict(self._latency_counts),
+            }
+
+    def to_prometheus(self) -> str:
+        lines = []
+        with self._lock:
+            for name, val in self._counters.items():
+                lines.append(f"# HELP alberth_{name} Counter")
+                lines.append(f"# TYPE alberth_{name} counter")
+                lines.append(f"alberth_{name} {val}")
+            for name, total in self._latency_sums.items():
+                cnt = self._latency_counts.get(name, 0)
+                avg = total / cnt if cnt else 0.0
+                lines.append(f"# HELP alberth_{name}_seconds Average latency of {name}")
+                lines.append(f"# TYPE alberth_{name}_seconds gauge")
+                lines.append(f"alberth_{name}_seconds {avg}")
+                lines.append(f"# HELP alberth_{name}_count Count of {name}")
+                lines.append(f"# TYPE alberth_{name}_count counter")
+                lines.append(f"alberth_{name}_count {cnt}")
+        return "\n".join(lines) + "\n"
+
+
+# Global instances
+metrics = Metrics()
+query_cache = TTLCache(ttl_seconds=180, maxsize=500)  # 3 min TTL, 500 entries
+
+
+# ======================= CIRCUIT BREAKER =======================
+class CircuitState(Enum):
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
+
+
+@dataclass
+class CircuitBreakerConfig:
+    failure_threshold: int = 5
+    recovery_timeout: int = 30
+    expected_exception: type = Exception
+    success_threshold: int = 3
+    timeout: float = 30.0
+
+
+@dataclass
+class CircuitBreakerStats:
+    failure_count: int = 0
+    success_count: int = 0
+    last_failure_time: Optional[float] = None
+    last_state_change: float = field(default_factory=time.time)
+    total_calls: int = 0
+    successful_calls: int = 0
+    failed_calls: int = 0
+    timeouts: int = 0
+
+
+class CircuitBreakerOpenException(Exception):
+    pass
+
+
+class CircuitBreaker:
+    def __init__(self, name: str, config: CircuitBreakerConfig = None):
+        self.name = name
+        self.config = config or CircuitBreakerConfig()
+        self.state = CircuitState.CLOSED
+        self.stats = CircuitBreakerStats()
+        self._lock = threading.RLock()
+        self._consecutive_successes = 0
+
+    def call(self, func: Callable[..., Any], *args, **kwargs) -> Any:
+        with self._lock:
+            self.stats.total_calls += 1
+            if self.state == CircuitState.OPEN:
+                if self._should_attempt_reset():
+                    self._set_state(CircuitState.HALF_OPEN)
+                else:
+                    raise CircuitBreakerOpenException(
+                        f"Circuit breaker '{self.name}' is OPEN. "
+                        f"Last failure: {self.stats.last_failure_time}"
+                    )
+            try:
+                start = time.time()
+                result = func(*args, **kwargs)
+                elapsed = time.time() - start
+                if elapsed > self.config.timeout:
+                    raise TimeoutError(f"Call timed out after {elapsed:.2f}s")
+                self._on_success()
+                metrics.inc(f"{self.name}_success")
+                metrics.add_latency(f"{self.name}_latency", elapsed)
+                return result
+            except self.config.expected_exception as e:
+                self._on_failure()
+                metrics.inc(f"{self.name}_failure")
+                raise e
+            except TimeoutError as e:
+                self._on_timeout()
+                metrics.inc(f"{self.name}_timeout")
+                raise e
+            except Exception as e:
+                self._on_failure()
+                metrics.inc(f"{self.name}_failure")
+                raise e
+
+    def _should_attempt_reset(self) -> bool:
+        return (
+            self.stats.last_failure_time is not None
+            and time.time() - self.stats.last_failure_time >= self.config.recovery_timeout
+        )
+
+    def _on_success(self) -> None:
+        self.stats.success_count += 1
+        self.stats.successful_calls += 1
+        self.stats.last_state_change = time.time()
+        if self.state == CircuitState.HALF_OPEN:
+            self._consecutive_successes += 1
+            if self._consecutive_successes >= self.config.success_threshold:
+                self._set_state(CircuitState.CLOSED)
+                self._reset_counters()
+        elif self.state == CircuitState.CLOSED:
+            self.stats.failure_count = 0
+
+    def _on_failure(self) -> None:
+        self.stats.failure_count += 1
+        self.stats.failed_calls += 1
+        self.stats.last_failure_time = time.time()
+        self.stats.last_state_change = time.time()
+        if self.state == CircuitState.CLOSED:
+            if self.stats.failure_count >= self.config.failure_threshold:
+                self._set_state(CircuitState.OPEN)
+        elif self.state == CircuitState.HALF_OPEN:
+            self._set_state(CircuitState.OPEN)
+            self._consecutive_successes = 0
+
+    def _on_timeout(self) -> None:
+        self._on_failure()
+        self.stats.timeouts += 1
+
+    def _set_state(self, state: CircuitState) -> None:
+        old_state = self.state
+        self.state = state
+        self.stats.last_state_change = time.time()
+        logging.info(
+            f"Circuit breaker '{self.name}' changed state: "
+            f"{old_state.value} -> {state.value}"
+        )
+
+    def _reset_counters(self) -> None:
+        self.stats.failure_count = 0
+        self.stats.success_count = 0
+        self._consecutive_successes = 0
+
+    def get_state(self) -> dict:
+        with self._lock:
+            return {
+                "name": self.name,
+                "state": self.state.value,
+                "failure_count": self.stats.failure_count,
+                "success_count": self.stats.success_count,
+                "total_calls": self.stats.total_calls,
+                "successful_calls": self.stats.successful_calls,
+                "failed_calls": self.stats.failed_calls,
+                "timeouts": self.stats.timeouts,
+                "last_failure_time": self.stats.last_failure_time,
+                "last_state_change": self.stats.last_state_change,
+            }
+
+    def reset(self) -> None:
+        with self._lock:
+            self._set_state(CircuitState.CLOSED)
+            self._reset_counters()
+            logging.info(f"Circuit breaker '{self.name}' manually reset")
+
+
+# ======================= LOGGER & CONFIG =======================
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# ======================= CONFIGURATION MODELS =======================
+class PathsConfig(BaseModel):
+    workspace_dir: str
+    voice_dir: str
+    input_dir: str
+    output_dir: str
+    log_dir: str
+    lock_file: str
+
+class TimeoutConfig(BaseModel):
+    stt_cloud: int
+    stt_local: int
+    talamo: int
+    helper: int
+    agent: int
+    tts: int
+
+class CBConfig(BaseModel):
+    failure_threshold: int
+    recovery_timeout: int
+    timeout: float
+
+class CircuitBreakerConfigModel(BaseModel):
+    stt_cloud: CBConfig
+    stt_local: CBConfig
+    agent: CBConfig
+    tts: CBConfig
+    helper: CBConfig
+
+class CacheConfig(BaseModel):
+    ttl_seconds: int
+    maxsize: int
+
+class MetricsConfig(BaseModel):
+    port: int
+
+class WakeWordConfig(BaseModel):
+    enabled: bool
+    session_timeout: int
+
+class AppConfig(BaseModel):
+    paths: PathsConfig
+    service_timeouts: TimeoutConfig
+    circuit_breaker: CircuitBreakerConfigModel
+    cache: CacheConfig
+    metrics: MetricsConfig
+    wakeword: WakeWordConfig
+
+    @validator('*', pre=True)
+    def expand_env_vars(cls, v):
+        if isinstance(v, str):
+            return os.path.expandvars(v)
+        elif isinstance(v, dict):
+            return {k: os.path.expandvars(str(v2)) for k, v2 in v.items()}
+        elif isinstance(v, list):
+            return [os.path.expandvars(str(i)) for i in v]
+        return v
+
+# Load configuration
+CONFIG_PATH = Path(__file__).with_name('config.yaml')
+if not CONFIG_PATH.is_file():
+    raise FileNotFoundError(f"Configuration file not found: {CONFIG_PATH}")
+with open(CONFIG_PATH, 'rt', encoding='utf-8') as f:
+    raw_cfg = yaml.safe_load(f)
+CONF = AppConfig(**raw_cfg)
+
+# ======================= LOGGER & CONFIG =======================
+
+logger = logging.getLogger(__name__)
+
+# Circuit Breakers for external services
+STT_CLOUD_CB = CircuitBreaker(
+    'stt_groq',
+    CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30, timeout=25)
+)
+STT_LOCAL_CB = CircuitBreaker(
+    'stt_local',
+    CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30, timeout=30)
+)
+AGENT_CB = CircuitBreaker(
+    'albert_agent',
+    CircuitBreakerConfig(failure_threshold=5, recovery_timeout=30, timeout=60)
+)
+TTS_CB = CircuitBreaker(
+    'tts_pipeline',
+    CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30, timeout=20)
+)
+HELPER_CB = CircuitBreaker(
+    'helper_services',
+    CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30, timeout=15)
+)
+
+# ======================= PATHS =======================
+WORKSPACE_DIR = Path(os.environ.get('HOME', '')) / '.openclaw' / 'workspace'
+VOICE_DIR = WORKSPACE_DIR / 'voice_exchange'
+INPUT_DIR = VOICE_DIR / 'input'
+OUTPUT_DIR = VOICE_DIR / 'output'
+LOG_DIR = VOICE_DIR / 'logs'
+LOCK_FILE = VOICE_DIR / '.alberth.lock'
+METRICS_PORT = 9090
+
+for d in [INPUT_DIR, OUTPUT_DIR, LOG_DIR]:
+    d.mkdir(parents=True, exist_ok=True)
+
+LOGFILE = LOG_DIR / f'alberth_master_{time.strftime("%Y%m%d")}.log'
+
+
+# ======================= HELPERS =======================
+def log_message(message: str, level: str = 'info') -> None:
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    log_line = f'[{timestamp}] {message}'
+    if level == 'error':
+        logger.error(message)
+    elif level == 'warn':
+        logger.warning(message)
+    else:
+        logger.info(message)
+    with open(LOGFILE, 'a', encoding='utf-8') as f:
+        f.write(log_line + '\n')
+
+
+def acquire_lock(timeout: int = 30) -> bool:
+    start = time.time()
+    while time.time() - start < timeout:
+        if not LOCK_FILE.exists():
+            try:
+                LOCK_FILE.write_text(str(os.getpid()))
+                return True
+            except Exception as e:
+                log_message(f"Error al crear lock file: {e}", 'error')
+                return False
+        else:
+            try:
+                pid = int(LOCK_FILE.read_text().strip())
+                os.kill(pid, 0)
+                time.sleep(0.5)
+            except (ValueError, ProcessLookupError):
+                log_message("Eliminando lock file huérfano", 'warn')
+                LOCK_FILE.unlink(missing_ok=True)
+            except Exception as e:
+                log_message(f"Error al verificar lock: {e}", 'error')
+                time.sleep(0.5)
+    log_message(f"Timeout al adquirir lock después de {timeout} segundos", 'warn')
+    return False
+
+
+def release_lock() -> None:
+    try:
+        if LOCK_FILE.exists():
+            LOCK_FILE.unlink()
+    except Exception as e:
+        log_message(f"Error al liberar lock: {e}", 'error')
+
+
+# ======================= SERVICE CALLS =======================
+def run_stt_cloud(audio_file: Path) -> Optional[str]:
+    def _call():
+        try:
+            cmd = [
+                'openclaw', 'infer', 'audio', 'transcribe',
+                '--file', str(audio_file),
+                '--model', 'groq/whisper-large-v3-turbo',
+                '--json'
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
+            if result.returncode == 0 and result.stdout.strip():
+                data = json.loads(result.stdout)
+                query = data.get('result', {}).get('outputs', [{}])[0].get('text', '').strip()
+                if query:
+                    log_message(f"STT CLOUD OK → Transcripción: {query}")
+                    return query
+            raise RuntimeError("STT cloud failed or empty")
+        except subprocess.TimeoutExpired:
+            raise TimeoutError("STT cloud timeout")
+        except Exception as e:
+            log_message(f"ERROR en STT Cloud: {e}", 'error')
+            raise
+    try:
+        return STT_CLOUD_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_stt_local(audio_file: Path) -> Optional[str]:
+    def _call():
+        try:
+            whisper_out_dir = Path(f"/tmp/alberth_whisper_{os.getpid()}")
+            whisper_out_dir.mkdir(parents=True, exist_ok=True)
+            cmd = [
+                'whisper',
+                str(audio_file),
+                '--model', 'base',
+                '--language', 'es',
+                '--output_format', 'txt',
+                '--output_dir', str(whisper_out_dir),
+                '--fp16', 'False'
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            if result.returncode == 0:
+                txts = list(whisper_out_dir.glob('*.txt'))
+                if txts:
+                    query = txts[0].read_text().strip()
+                    if query:
+                        log_message(f"STT LOCAL OK → Transcripción: {query}")
+                        return query
+            raise RuntimeError("STT local failed")
+        except subprocess.TimeoutExpired:
+            raise TimeoutError("STT local timeout")
+        except Exception as e:
+            log_message(f"ERROR en STT Local: {e}", 'error')
+            raise
+        finally:
+            import shutil
+            shutil.rmtree(whisper_out_dir, ignore_errors=True)
+    try:
+        return STT_LOCAL_CB.call(_call)
+    except Exception:
+        return None
+
+
+def filter_junk_transcription(query: str) -> bool:
+    if not query or len(query.strip()) < 4:
+        return True
+    ql = query.strip().lower()
+    junk = {
+        "thank you", "thanks", "thank you.", "thanks.", ".", "..", "...", "!",
+        "ok", "okay", "um", "uh", "hmm", "mm", "bye", "bye.", "you", "the", "a",
+        "si", "sí", "no", "yes", "yes.", "yeah", "yeah.", "yep", "nope", "sure",
+        "right", "this is the video", "this is the video.", "subtítulos realizados por la comunidad de amara.org",
+        "subtitulos en español", "suscríbete", "suscribete", "music", "music.", "applause", "laughter"
+    }
+    return ql in junk
+
+
+def check_wake_word(query: str, wake_word_enabled: bool) -> Tuple[bool, str]:
+    if not wake_word_enabled:
+        return True, query
+    ww_mode_file = WORKSPACE_DIR / '.wakeword_mode'
+    if ww_mode_file.exists() and ww_mode_file.read_text().strip() == 'true':
+        session_file = Path("/tmp/alberth_session_active")
+        session_active = False
+        session_timeout = 45
+        if session_file.exists():
+            try:
+                now = time.time()
+                last_active = os.path.getmtime(str(session_file))
+                if (now - last_active) < session_timeout:
+                    session_active = True
+                    log_message(f"Sesión de voz activa (última actividad hace {int(now - last_active)}s).")
+            except Exception as e:
+                log_message(f"Error al verificar sesión: {e}", 'error')
+        ql = query.lower()
+        wake = ['alberth', 'alberto', 'albert', 'oye alberth', 'hey alberth']
+        if any(w in ql for w in wake) or session_active:
+            try:
+                session_file.touch()
+            except Exception:
+                pass
+            import re
+            pattern = re.compile(r'^(alberth|alberto|albert|oye alberth|hey alberth)[, ]*', re.IGNORECASE)
+            proc = pattern.sub('', query).strip()
+            log_message(f"Wake Word detectado. Query procesada: '{proc}'")
+            return True, proc
+        else:
+            log_message("Ignorando audio: Wake word no detectado y sesión inactiva.", 'warn')
+            return False, query
+    else:
+        try:
+            Path("/tmp/alberth_session_active").touch()
+        except Exception:
+            pass
+        return True, query
+
+
+def run_talo(query: str) -> tuple[Optional[str], Optional[Dict]]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_talamo.py'), query],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                data = json.loads(result.stdout)
+                tt = data.get('tipo_tarea', 'GENERAL_TALK')
+                args = data.get('argumentos', {})
+                log_message(f"Tálamo → Tipo: {tt}")
+                return tt, args
+            raise RuntimeError("Tálamo returned empty")
+        except subprocess.TimeoutExpired:
+            raise TimeoutError("Tálamo timeout")
+        except Exception as e:
+            log_message(f"ERROR en Tálamo: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None, None
+
+
+def run_finance_helper(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            simbolo = args.get('simbolo', args.get('activo', ''))
+            if not simbolo:
+                simbolo = ""
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_finance_helper.py'), simbolo],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                data = json.loads(result.stdout)
+                msg = data.get('message', '')
+                if msg:
+                    log_message(f"FINANCE OK → {msg}")
+                    return msg
+            raise RuntimeError("Finance helper failed")
+        except Exception as e:
+            log_message(f"ERROR en Finance Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_image_helper(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            descr = args.get('descripcion_imagen', args.get('prompt', ''))
+            if not descr:
+                descr = ""
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_image_helper.py'), descr],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                data = json.loads(result.stdout)
+                msg = data.get('message', 'Imagen generada')
+                log_message(f"IMAGE OK → {msg}")
+                return f"Señor, {msg}. La abriré en Preview en un momento."
+            raise RuntimeError("Image helper failed")
+        except Exception as e:
+            log_message(f"ERROR en Image Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_vision_screen(args: Dict, query: str) -> Optional[str]:
+    def _call():
+        try:
+            ql = query.lower()
+            # DIFF
+            if any(p in ql for p in ['qué cambió', 'que cambio', 'cambió algo', 'cambio algo', 'qué pasó', 'que paso', 'hay algo nuevo', 'algo nuevo']):
+                diff = 8
+                result = subprocess.run(
+                    ['python3', str(WORKSPACE_DIR / 'alberth_screen_copilot.py'), '--diff', str(diff)],
+                    capture_output=True, text=True, timeout=10
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    desc = result.stdout.strip()
+                    log_message("Análisis DIFF completado.")
+                    return f"[ANÁLISIS DIFERENCIAL DE PANTALLA: Comparaste dos capturas separadas por {diff} segundos. {diff} segundos. Descripción de los cambios detectados: {desc}]"
+                raise RuntimeError("Vision screen diff failed")
+            # COPILOTO CONTINUO
+            elif any(p in ql for p in ['activa el copiloto', 'inicia el copiloto', 'coploto de pantalla', 'empieza a monitorear', 'monitorea mi pantalla', 'modo copiloto']):
+                watch = 30
+                import re
+                m = re.search(r'cada (\d+) seg', ql)
+                if m:
+                    watch = int(m.group(1))
+                subprocess.Popen(
+                    ['python3', str(WORKSPACE_DIR / 'alberth_screen_copilot.py'), '--watch', str(watch)],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                return f"[SISTEMA: Se ha activado el Copiloto de Pantalla en modo daemon. Alberth ahora analizará tu pantalla automáticamente cada {watch} segundos. Los análisis quedarán guardados en voice_exchange/copilot_latest.txt. Para detenerlo, dile: 'desactiva el copiloto'.]"
+            # DETENER COPILOTO
+            elif any(p in ql for p in ['desactiva el copiloto', 'detén el copiloto', 'detén el monitoreo', 'para el copiloto', 'stop copiloto']):
+                subprocess.run(
+                    ['python3', str(WORKSPACE_DIR / 'alberth_screen_copilot.py'), '--stop'],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                return "[SISTEMA: El Copiloto de Pantalla ha sido desactivado correctamente.]"
+            # SNAPSHOT
+            else:
+                result = subprocess.run(
+                    ['python3', str(WORKSPACE_DIR / 'alberth_screen_copilot.py'), query],
+                    capture_output=True, text=True, timeout=10
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    desc = result.stdout.strip()
+                    log_message("Análisis de pantalla completado con éxito.")
+                    return f"[CONTEXTO DE PANTALLA: El usuario te ha pedido que analices su pantalla de trabajo. La herramienta de visión describe lo siguiente: {desc}]"
+                raise RuntimeError("Vision screen snapshot failed")
+        except Exception as e:
+            log_message(f"ERROR en Vision Screen Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_vision_camera(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_vision.py')],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                desc = result.stdout.strip()
+                log_message("Análisis visual completado con éxito.")
+                return f"[CONTEXTO VISUAL: El usuario te ha pedido que mires/analices su entorno. Tu cámara capturó un cuadro y el servicio de visión describe lo siguiente: {desc}]"
+            raise RuntimeError("Vision camera failed")
+        except Exception as e:
+            log_message(f"ERROR en Vision Camera Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_pdf_helper(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['uv', 'run', str(WORKSPACE_DIR / 'alberth_pdf_helper.py'), json.dumps(args)],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                out = result.stdout.strip()
+                if out:
+                    log_message("Lectura de PDF completada con éxito.")
+                    return f"[CONTEXTO DE ARCHIVO PDF: Se localizó un PDF en su sistema y se extrajo el texto relevante. Aquí está la información del archivo y el texto:\n{out}\nPresenta al Señor un resumen detallado y estructurado de este archivo en base a su contenido, manteniendo tu personalidad semiformal, analítica y directa.]"
+                # special exit codes
+                if result.returncode == 2:
+                    return "[SISTEMA: El usuario solicitó resumir un PDF, pero el archivo localizado está vacío o es una imagen escaneada sin capa de texto legible. Indícale amigablemente al Señor que el PDF es una imagen escaneada y que requieres que te lo envíe en formato de texto o que lo intente de otra forma.]"
+                else:
+                    return "[SISTEMA: El usuario solicitó resumir un PDF, pero no se encontró ningún archivo PDF reciente en Downloads o Desktop. Pídele al Señor que te proporcione el nombre del archivo o que lo coloque en la carpeta de Descargas.]"
+            raise RuntimeError(f"PDF helper failed with code {result.returncode}")
+        except Exception as e:
+            log_message(f"ERROR en PDF Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_youtube_helper(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_youtube_helper.py'), json.dumps(args)],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                out = result.stdout.strip()
+                if out:
+                    log_message("Búsqueda y apertura en YouTube completada.")
+                    return f"[CONTEXTO DE SISTEMA: Ejecutaste con éxito el script de YouTube. Resultados:\n{out}\nConfirma verbalmente al Señor de forma natural y cálida que has buscado y abierto el video correspondiente en su navegador.]"
+                raise RuntimeError("YouTube helper failed")
+            raise RuntimeError(f"YouTube helper failed with code {result.returncode}")
+        except Exception as e:
+            log_message(f"ERROR en YouTube Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_system_helper(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_system_helper.py'), json.dumps(args)],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                data = json.loads(result.stdout)
+                accion = data.get('accion', '')
+                res = data.get('resultado', '')
+                if accion and res:
+                    log_message(f"SISTEMA OK → Acción: {accion} | Resultado: {res}")
+                    return f"[CONTEXTO DE CONTROL DE SISTEMA: Se ejecutó exitosamente la acción '{accion}'. Resultado: {res}. Confirma al Señor de forma directa y natural que lo has completado, con tu tono semiformal y cálido.]"
+                # fallback if missing fields
+                res = data.get('resultado', result.stdout.strip())
+                if res:
+                    log_message(f"WARN: Sistema helper devolvió código {result.returncode}. Resultado: {res}", 'warn')
+                    return f"[CONTEXTO DE CONTROL DE SISTEMA: Se intentó ejecutar la acción de sistema pero ocurrió un problema. Detalle: {res}. Comunica esto al Señor de forma clara y ayúdalo a resolverlo.]"
+                raise RuntimeError("System helper returned no useful data")
+            else:
+                err = result.stderr.strip() if result.stderr else result.stdout.strip()
+                if not err:
+                    err = "Error desconocido"
+                log_message(f"WARN: Sistema helper devolvió código {result.returncode}. Resultado: {err}", 'warn')
+                return f"[CONTEXTO DE CONTROL DE SISTEMA: Se intentó ejecutar la acción de sistema pero ocurrió un problema. Detalle: {err}. Comunica esto al Señor de forma clara y ayúdalo a resolverlo.]"
+        except Exception as e:
+            log_message(f"ERROR en System Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def run_search_helper(args: Dict) -> Optional[str]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_search_helper.py'), json.dumps(args)],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                data = json.loads(result.stdout)
+                res = data.get('resultado', '')
+                if res:
+                    log_message("BÚSQUEDA OK")
+                    return f"[CONTEXTO OBTENIDO DE INTERNET:\n{res}\nUsa esta información de forma analítica para responder al Señor con precisión, manteniendo tu tono cálido y directo.]"
+                raise RuntimeError("Search helper failed")
+            raise RuntimeError(f"Search helper failed with code {result.returncode}")
+        except Exception as e:
+            log_message(f"ERROR en Search Helper: {e}", 'error')
+            raise
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return None
+
+
+def get_memory_context(query: str) -> str:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_memory.py'), '--context', query],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                ctx = result.stdout.strip()
+                if ctx:
+                    log_message(f"Memoria OK → Contexto recuperado ({len(ctx)} chars)")
+                    return ctx
+                log_message("Memoria: Sin contexto previo relevante (primera sesión o sin historial).")
+            else:
+                log_message("WARN: Falló la recuperación de contexto de memoria.", 'warn')
+            return ""
+        except Exception as e:
+            log_message(f"ERROR al obtener contexto de memoria: {e}", 'error')
+            return ""
+    try:
+        return HELPER_CB.call(_call)
+    except Exception:
+        return ""
+
+
+def run_alberth_agent(message: str) -> Optional[str]:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['openclaw', 'agent', '--agent', 'main', '--message', message, '--json'],
+                capture_output=True, text=True, timeout=60
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                data = json.loads(result.stdout)
+                resp = data.get('result', {}).get('payloads', [{}])[0].get('text', '').strip()
+                resp = resp.replace('[assistant turn failed before producing content]', '').strip()
+                if resp:
+                    log_message(f"AGENT OK → Respuesta ({len(resp)} chars)")
+                    return resp
+                log_message("WARN: Respuesta vacía del agente. Usando fallback.", 'warn')
+                raise RuntimeError("Agent returned empty response")
+            else:
+                log_message(f"ERROR: Falló conexión con el agente. Código: {result.returncode}", 'error')
+                raise RuntimeError(f"Agent connection failed with code {result.returncode}")
+        except subprocess.TimeoutExpired:
+            log_message("ERROR: Timeout al ejecutar el agente.", 'error')
+            raise TimeoutError("Agent timeout")
+        except Exception as e:
+            log_message(f"ERROR al ejecutar agente: {e}", 'error')
+            raise
+    try:
+        return AGENT_CB.call(_call)
+    except Exception:
+        return "Señor, ocurrió un error inesperado. Por favor, intente de nuevo más tarde."
+
+
+# ======================= TTS =======================
+def run_tts_premium(text: str, output_file: Path) -> bool:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['python3', str(WORKSPACE_DIR / 'alberth_tts_premium.py'), text, str(output_file)],
+                capture_output=True, text=True, timeout=20
+            )
+            if result.returncode == 0 and output_file.exists():
+                log_message(f"TTS PREMIUM OK → Audio: {output_file.name} (edge-tts)")
+                return True
+            raise RuntimeError("edge-tts failed")
+        except Exception as e:
+            log_message(f"ERROR en TTS Premium: {e}", 'error')
+            raise
+    try:
+        return TTS_CB.call(_call)
+    except Exception:
+        return False
+
+
+def run_tts_openclaw(text: str, output_file: Path) -> bool:
+    def _call():
+        try:
+            result = subprocess.run(
+                ['openclaw', 'infer', 'tts', 'convert', '--text', text, '--output', str(output_file)],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0 and output_file.exists():
+                log_message(f"TTS OPENCLAW OK → Audio: {output_file.name}")
+                return True
+            raise RuntimeError("OpenClaw TTS failed")
+        except Exception as e:
+            log_message(f"ERROR en TTS OpenClaw: {e}", 'error')
+            raise
+    try:
+        return TTS_CB.call(_call)
+    except Exception:
+        return False
+
+
+def run_tts_fallback_say(text: str, output_file: Path) -> bool:
+    try:
+        result = subprocess.run(
+            ['say', '-v', 'Mónica', '-o', str(output_file), '--', text],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0 and output_file.exists():
+            log_message(f"TTS FALLBACK OK → Audio generado con 'say -v Mónica'")
+            return True
+        else:
+            log_message("ERROR: Todos los métodos TTS fallaron.", 'error')
+            return False
+    except Exception as e:
+        log_message(f"ERROR en TTS Fallback: {e}", 'error')
+        return False
+
+
+def play_audio(audio_file: Path) -> None:
+    mute_signal = VOICE_DIR / '.alberth_speaking'
+    try:
+        mute_signal.touch()
+        subprocess.run(['afplay', str(audio_file)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(0.5)  # Esperar para que el eco se disipe
+    except Exception as e:
+        log_message(f"Error al reproducir audio: {e}", 'error')
+    finally:
+        if mute_signal.exists():
+            mute_signal.unlink(missing_ok=True)
+
+
+# ======================= METRICS SERVER =======================
+def start_metrics_server():
+    """Start a simple HTTP server exposing /metrics in Prometheus format."""
+    handler = http.server.SimpleHTTPRequestHandler
+    # We'll override do_GET to serve only /metrics
+    class MetricsHandler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == '/metrics':
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/plain; version=0.0.4')
+                self.end_headers()
+                metrics_data = metrics.to_prometheus()
+                self.wfile.write(metrics_data.encode('utf-8'))
+            else:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'Not Found')
+        def log_message(self, format, *args):
+            # Suppress default log messages
+            pass
+
+    with socketserver.TCPServer(("", METRICS_PORT), MetricsHandler) as httpd:
+        logging.info(f"Metrics server listening on port {METRICS_PORT}")
+        httpd.serve_forever()
+
+
+# ======================= MAIN PROCESSING =======================
+def process_input(audio_file: Optional[Path] = None, text_only: bool = False, query_text: Optional[str] = None) -> None:
+    """
+    Función principal de procesamiento de entrada (audio o texto).
+    """
+    # Adquirir lock
+    if not acquire_lock():
+        log_message("No se pudo adquirir el lock. Abortando.", 'error')
+        return
+
+    try:
+        base_name = None
+        txt_file = None
+        query = None
+
+        if text_only:
+            # Procesar entrada de texto directo
+            base_name = f"web_text_{time.strftime('%Y%m%d_%H%M%S')}"
+            txt_file = OUTPUT_DIR / f"{base_name}.txt"
+            query = query_text.strip()
+            if not query:
+                log_message("Consulta de texto vacía. Abortando.", 'warn')
+                return
+            txt_file.write_text(query)
+            log_message(f"--- PIPELINE INICIADO (TEXTO): {query} ---")
+        else:
+            # Procesar entrada de audio
+            if not audio_file or not audio_file.exists():
+                log_message("Archivo de audio no encontrado. Abortando.", 'error')
+                return
+            if audio_file.stat().st_size == 0:
+                log_message("Archivo de audio vacío. Abortando.", 'error')
+                return
+
+            base_name = audio_file.stem
+            txt_file = OUTPUT_DIR / f"{base_name}.txt"
+            response_txt = OUTPUT_DIR / f"{base_name}_response.txt"
+            response_mp3 = OUTPUT_DIR / f"{base_name}_response.mp3"
+
+            log_message(f"--- PIPELINE INICIADO (AUDIO): {audio_file.name} ---")
+
+            # PASO 1: STT — Transcripción de audio
+            query = None
+            # Intentar STT en la nube (Groq)
+            query = run_stt_cloud(audio_file)
+            if not query:
+                # Fallback a STT local
+                query = run_stt_local(audio_file)
+
+            if not query:
+                log_message("ERROR: No se pudo obtener transcripción por ningún método. Abortando.", 'error')
+                return
+
+            # Filtrar transcripciones de basura/silencio
+            if filter_junk_transcription(query):
+                log_message(f"FILTRO: Transcripción descartada por ser basura/silencio: '{query}'", 'warn')
+                return
+
+            log_message(f"FILTRO: Transcripción válida → '{query}'")
+            txt_file.write_text(query)
+
+            # Mover audio procesado
+            processed_dir = INPUT_DIR / 'processed'
+            processed_dir.mkdir(parents=True, exist_ok=True)
+            processed_file = processed_dir / f"{base_name}.processed_{time.strftime('%Y%m%d_%H%M%S')}{audio_file.suffix}"
+            try:
+                audio_file.rename(processed_file)
+            except Exception as e:
+                log_message(f"Error al mover audio procesado: {e}", 'warn')
+
+        # PASO 1.5: TÁLAMO — Pre-enrutamiento inteligente
+        talamo_type, talamo_args = run_talo(query)
+        is_talamo_routed = bool(talamo_type)
+
+        # Preparar contextos
+        memory_context = get_memory_context(query)
+        visual_context = ""
+        file_context = ""
+        youtube_context = ""
+        system_context = ""
+        search_context = ""
+
+        # Rutas especializadas basadas en Tálamo
+        if talamo_type == "FINANCE_TICKER":
+            finance_msg = run_finance_helper(talamo_args or {})
+            if finance_msg:
+                # Respuesta directa, pasar a TTS
+                response_text = finance_msg
+                # Generar audio y reproducir
+                if response_text:
+                    # TTS
+                    audio_success = False
+                    for tts_func in [run_tts_premium, run_tts_openclaw, run_tts_fallback_say]:
+                        audio_file_path = OUTPUT_DIR / f"{base_name}_response.mp3"
+                        if tts_func(response_text, audio_file_path):
+                            audio_success = True
+                            break
+                    if audio_success:
+                        play_audio(audio_file_path)
+                    else:
+                        log_message("ERROR: No se pudo generar audio para respuesta de finanzas.", 'error')
+                # Guardar en memoria
+                threading.Thread(target=lambda: subprocess.run(
+                    ['python3', str(WORKSPACE_DIR / 'alberth_memory.py'), '--save', query, response_text],
+                    capture_output=True
+                ), daemon=True).start()
+                log_message("--- PIPELINE COMPLETADO (FINANCE) ---")
+                return
+
+        elif talamo_type == "IMAGE_GEN":
+            image_msg = run_image_helper(talamo_args or {})
+            if image_msg:
+                response_text = f"Señor, {image_msg}"
+                # Generar audio y reproducir
+                if response_text:
+                    audio_success = False
+                    for tts_func in [run_tts_premium, run_tts_openclaw, run_tts_fallback_say]:
+                        audio_file_path = OUTPUT_DIR / f"{base_name}_response.mp3"
+                        if tts_func(response_text, audio_file_path):
+                            audio_success = True
+                            break
+                    if audio_success:
+                        play_audio(audio_file_path)
+                    else:
+                        log_message("ERROR: No se pudo generar audio para respuesta de imagen.", 'error')
+                # Guardar en memoria
+                threading.Thread(target=lambda: subprocess.run(
+                    ['python3', str(WORKSPACE_DIR / 'alberth_memory.py'), '--save', query, response_text],
+                    capture_output=True
+                ), daemon=True).start()
+                log_message("--- PIPELINE COMPLETADO (IMAGE_GEN) ---")
+                return
+
+        elif talamo_type == "VISION_SCREEN":
+            visual_context = run_vision_screen(talamo_args or {}, query) or ""
+
+        elif talamo_type == "VISION_CAMERA":
+            visual_context = run_vision_camera(talamo_args or {}) or ""
+
+        elif talamo_type == "READ_PDF":
+            file_context = run_pdf_helper(talamo_args or {}) or ""
+
+        elif talamo_type == "YOUTUBE":
+            youtube_context = run_youtube_helper(talamo_args or {}) or ""
+
+        elif talamo_type in ["SYSTEM_UTILS", "REMINDER_TIMER"]:
+            system_context = run_system_helper(talamo_args or {}) or ""
+
+        elif talamo_type == "WEB_SEARCH":
+            search_context = run_search_helper(talamo_args or {}) or ""
+
+        # Construir mensaje para el agente
+        agent_message = f"{memory_context}{visual_context}{file_context}{youtube_context}{system_context}{search_context}{query}"
+
+        # PASO 2: Ejecutar agente Alberth
+        response_text = run_alberth_agent(agent_message)
+
+        # Guardar en memoria (asincrónico)
+        threading.Thread(target=lambda: subprocess.run(
+            ['python3', str(WORKSPACE_DIR / 'alberth_memory.py'), '--save', query, response_text],
+            capture_output=True
+        ), daemon=True).start()
+
+        # PASO 3: TTS — Síntesis de voz
+        audio_success = False
+        audio_file_path = OUTPUT_DIR / f"{base_name}_response.mp3"
+        for tts_func in [run_tts_premium, run_tts_openclaw, run_tts_fallback_say]:
+            if tts_func(response_text, audio_file_path):
+                audio_success = True
+                break
+
+        if not audio_success:
+            log_message("ERROR: No se pudo generar audio para la respuesta.", 'error')
+            # Aún así, continuamos para intentar reproducir si hay algún archivo parcial
+
+        # PASO 4: REPRODUCCIÓN — Respuesta audible
+        if audio_file_path.exists():
+            play_audio(audio_file_path)
+
+        # Si es modo texto, imprimir la respuesta en stdout para que el web server la capture
+        if text_only:
+            print(response_text)
+
+        log_message("--- PIPELINE COMPLETADO ---")
+
+    finally:
+        # Siempre liberar el lock
+        release_lock()
+
+
+def main():
+    """Función de entrada principal."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Alberth Master - Pipeline de Voz')
+    parser.add_argument('--file', type=str, help='Archivo de audio a procesar')
+    parser.add_argument('--text', action='store_true', help='Modo texto (el siguiente argumento es la consulta)')
+    parser.add_argument('--query', type=str, help='Texto de la consulta (usado con --text)')
+
+    args = parser.parse_args()
+
+    # Start metrics server in background thread
+    metrics_thread = threading.Thread(target=start_metrics_server, daemon=True)
+    metrics_thread.start()
+
+    if args.text:
+        if not args.query:
+            print("Error: Se requiere --query cuando se usa --text")
+            sys.exit(1)
+        process_input(text_only=True, query_text=args.query)
+    elif args.file:
+        process_input(audio_file=Path(args.file))
+    else:
+        print("Error: Se requiere especificar --file o --text")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    # Signal handling for clean shutdown
+    def _signal_handler(sig, frame):
+        log_message("Recibida señal de terminación. Limpiando...", 'info')
+        release_lock()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, _signal_handler)
+    signal.signal(signal.SIGTERM, _signal_handler)
+
+    main(# Rutas base
+WORKSPACE_DIR = Path(CONF.paths.workspace_dir)
+VOICE_DIR = Path(CONF.paths.voice_dir)
+INPUT_DIR = VOICE_DIR / 'input'
+OUTPUT_DIR = VOICE_DIR / 'output'
+LOG_DIR = VOICE_DIR / 'logs'
+LOCK_FILE = VOICE_DIR / '.alberth.lock'
+
+# Asegurar que los directorios existen
+)

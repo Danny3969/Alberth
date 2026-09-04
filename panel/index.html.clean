@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060a14">
+<title>Alberth · Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ALBERTH PANEL — UI Premium Glassmorphism
+   Paleta: Cyan (#4af0ff) + Dorado (#f0c060) + Fondo #060a14
+   ============================================================ */
+:root {
+  --cyan: #4af0ff;
+  --cyan-dim: rgba(74,240,255,.55);
+  --cyan-glow: rgba(74,240,255,.18);
+  --gold: #f0c060;
+  --gold-dim: rgba(240,192,96,.5);
+  --gold-glow: rgba(240,192,96,.15);
+  --bg: #060a14;
+  --bg2: #0b1122;
+  --glass: rgba(255,255,255,.04);
+  --glass-border: rgba(255,255,255,.09);
+  --ink: #e8edf5;
+  --ink-dim: rgba(200,210,230,.6);
+  --ink-muted: rgba(150,165,190,.4);
+  --user-bg: rgba(74,240,255,.1);
+  --ai-bg: rgba(240,192,96,.08);
+  --danger: #ff5a5a;
+  --success: #4aff90;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%; height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ─── Canvas de partículas de fondo ─── */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .35;
+}
+
+/* ─── Glow central ─── */
+.core-glow {
+  position: fixed; left: 50%; top: 20%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle,
+    rgba(74,240,255,.12) 0%,
+    rgba(240,192,96,.06) 40%,
+    transparent 70%);
+  filter: blur(40px);
+  pointer-events: none; z-index: 0;
+  animation: breathe 8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,100% { transform: translate(-50%,-50%) scale(1); opacity:.7; }
+  50%      { transform: translate(-50%,-50%) scale(1.15); opacity:1; }
+}
+
+/* ─── Layout principal ─── */
+#app {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  height: 100%; height: 100dvh;
+  max-width: 540px; margin: 0 auto;
+}
+
+/* ─── Header ─── */
+header {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px 12px;
+  padding-top: calc(16px + env(safe-area-inset-top));
+  background: linear-gradient(180deg, rgba(6,10,20,.95) 0%, transparent 100%);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logo-ring {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74,240,255,.25) 0%, transparent 70%);
+  border: 1.5px solid var(--cyan-dim);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px var(--cyan-glow);
+  animation: ring-pulse 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes ring-pulse {
+  0%,100% { box-shadow: 0 0 16px var(--cyan-glow); }
+  50%      { box-shadow: 0 0 32px rgba(74,240,255,.35), 0 0 60px rgba(74,240,255,.12); }
+}
+.logo-ring svg { width: 22px; height: 22px; }
+
+.header-info { flex: 1; }
+.header-name {
+  font-size: 18px; font-weight: 800; letter-spacing: .3px;
+  background: linear-gradient(90deg, var(--cyan) 0%, #8ff6ff 50%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header-status {
+  font-size: 11px; color: var(--ink-muted); margin-top: 1px;
+  display: flex; align-items: center; gap: 5px;
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: dot-blink 2s ease-in-out infinite;
+}
+@keyframes dot-blink {
+  0%,100% { opacity: 1; } 50% { opacity: .3; }
+}
+
+/* ─── Quick Actions ─── */
+.quick-bar {
+  flex-shrink: 0;
+  display: flex; gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.quick-bar::-webkit-scrollbar { display: none; }
+
+.quick-btn {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  color: var(--ink-dim);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  transition: all .2s ease;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.quick-btn:hover, .quick-btn:active {
+  background: rgba(74,240,255,.08);
+  border-color: var(--cyan-dim);
+  color: var(--cyan);
+  transform: translateY(-1px);
+}
+.quick-btn svg { width: 13px; height: 13px; }
+
+/* ─── Chat area ─── */
+#chat {
+  flex: 1; overflow-y: auto;
+  padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  scroll-behavior: smooth;
+}
+#chat::-webkit-scrollbar { width: 3px; }
+#chat::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+
+/* ─── Mensajes ─── */
+.msg {
+  display: flex; flex-direction: column; gap: 3px;
+  animation: msg-in .25s ease-out;
+}
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg.user { align-items: flex-end; }
+.msg.alberth { align-items: flex-start; }
+
+.msg-bubble {
+  max-width: 82%; padding: 11px 15px;
+  border-radius: 18px; font-size: 14px; line-height: 1.5;
+  backdrop-filter: blur(12px);
+}
+.msg.user .msg-bubble {
+  background: linear-gradient(135deg, rgba(74,240,255,.16), rgba(74,240,255,.08));
+  border: 1px solid rgba(74,240,255,.25);
+  border-bottom-right-radius: 5px;
+  color: var(--ink);
+}
+.msg.alberth .msg-bubble {
+  background: linear-gradient(135deg, rgba(240,192,96,.12), rgba(240,192,96,.06));
+  border: 1px solid rgba(240,192,96,.2);
+  border-bottom-left-radius: 5px;
+  color: var(--ink);
+}
+.msg-time { font-size: 10px; color: var(--ink-muted); padding: 0 4px; }
+.msg-label { font-size: 10px; font-weight: 600; margin-bottom: 1px; }
+.msg.user .msg-label { color: var(--cyan-dim); }
+.msg.alberth .msg-label { color: var(--gold-dim); }
+
+/* ─── Indicador de "pensando" ─── */
+.thinking-bubble {
+  display: none;
+  align-items: flex-start;
+}
+.thinking-bubble.visible { display: flex; }
+.thinking-dots {
+  display: flex; gap: 5px; align-items: center;
+  padding: 12px 16px;
+  background: rgba(240,192,96,.08);
+  border: 1px solid rgba(240,192,96,.2);
+  border-radius: 18px; border-bottom-left-radius: 5px;
+}
+.thinking-dots span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold-dim);
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: .15s; }
+.thinking-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes bounce {
+  0%,80%,100% { transform: scale(.7); opacity: .5; }
+  40%          { transform: scale(1.1); opacity: 1; }
+}
+
+/* ─── Panel de voz ─── */
+.voice-panel {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: linear-gradient(0deg, rgba(6,10,20,.98) 0%, transparent 100%);
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Visualizador de onda con Canvas */
+.waveform-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+#voice-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Input row */
+.input-row {
+  display: flex; gap: 10px; align-items: flex-end;
+}
+
+.input-wrap {
+  flex: 1;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  display: flex; align-items: center;
+  padding: 0 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.input-wrap:focus-within {
+  border-color: var(--cyan-dim);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+}
+
+#msg-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--ink); font-size: 14px;
+  padding: 12px 0;
+  resize: none; max-height: 100px; min-height: 44px;
+  font-family: inherit; line-height: 1.4;
+}
+#msg-input::placeholder { color: var(--ink-muted); }
+
+/* Botón de enviar */
+.btn-send {
+  width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--cyan), #2ad0e8);
+  color: #060a14;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(74,240,255,.35);
+  transition: all .18s ease;
+  flex-shrink: 0;
+}
+.btn-send:hover { transform: scale(1.07); box-shadow: 0 6px 24px rgba(74,240,255,.5); }
+.btn-send:active { transform: scale(.95); }
+.btn-send svg { width: 18px; height: 18px; }
+
+/* Botón de micrófono */
+.btn-mic {
+  width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--glass);
+  border: 1.5px solid var(--glass-border);
+  color: var(--ink-dim);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s ease;
+  flex-shrink: 0;
+}
+.btn-mic:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+.btn-mic.recording {
+  background: rgba(255,90,90,.15);
+  border-color: var(--danger);
+  color: var(--danger);
+  animation: mic-pulse 1s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,90,90,.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(255,90,90,0); }
+}
+.btn-mic svg { width: 20px; height: 20px; }
+
+/* ─── Notificación toast ─── */
+.toast {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  padding: 10px 20px; border-radius: 20px;
+  background: rgba(11,17,34,.92); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  font-size: 13px; color: var(--ink);
+  z-index: 100; white-space: nowrap;
+  transition: all .3s ease;
+  opacity: 0; pointer-events: none;
+}
+.toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+
+/* ─── Modal de control del sistema ─── */
+.sys-modal {
+  display: none; position: fixed; inset: 0; z-index: 50;
+  align-items: flex-end; justify-content: center;
+}
+.sys-modal.open { display: flex; }
+.sys-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+}
+.sys-sheet {
+  position: relative; width: 100%; max-width: 540px;
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  z-index: 51;
+  animation: sheet-up .3s ease-out;
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.sheet-handle {
+  width: 36px; height: 4px; background: var(--glass-border);
+  border-radius: 2px; margin: 0 auto 20px;
+}
+.sheet-title {
+  font-size: 16px; font-weight: 700; margin-bottom: 18px;
+  color: var(--ink);
+}
+.sys-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.sys-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 16px 8px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 16px; cursor: pointer; color: var(--ink-dim);
+  font-size: 11px; font-weight: 500; text-align: center;
+  transition: all .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.sys-btn:hover, .sys-btn:active {
+  background: rgba(74,240,255,.08);
+  border-color: var(--cyan-dim); color: var(--cyan);
+}
+.sys-btn svg { width: 24px; height: 24px; }
+
+/* Slider de volumen */
+.vol-control {
+  margin-top: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.vol-control label { font-size: 13px; color: var(--ink-dim); flex-shrink: 0; }
+#vol-slider {
+  flex: 1; -webkit-appearance: none; height: 4px;
+  background: linear-gradient(90deg, var(--cyan) var(--vol, 50%), var(--glass-border) var(--vol, 50%));
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+#vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+.vol-value { font-size: 13px; font-weight: 600; color: var(--cyan); width: 36px; text-align: right; flex-shrink: 0; }
+
+/* ─── Responsive ─── */
+@media (max-width: 380px) {
+  .msg-bubble { font-size: 13px; max-width: 88%; }
+  .quick-btn { font-size: 11px; padding: 6px 11px; }
+}
+</style>
+</head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/CSS3DRenderer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/UnrealBloomPass.js"></script>
+<body>
+
+<!-- Fondo animado -->
+<canvas id="bg-canvas"></canvas>
+<div class="core-glow"></div>
+
+<div id="app">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-ring">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4af0ff" stroke-width="1.8">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 7v5l3 3"/>
+        <circle cx="12" cy="12" r="2" fill="#4af0ff"/>
+      </svg>
+    </div>
+    <div class="header-info">
+      <div class="header-name">Alberth</div>
+      <div class="header-status">
+        <span class="status-dot"></span>
+        <span id="status-txt">En línea · Novasyscom</span>
+      </div>
+    </div>
+    <button class="quick-btn" id="btn-toggle-hud" onclick="toggleHUDMode()" style="border-color:rgba(74,240,255,.35);color:var(--cyan);margin-right:6px">
+      🌐 HUD
+    </button>
+    <button class="quick-btn" onclick="toggleSysModal()" style="border-color:rgba(240,192,96,.3);color:var(--gold-dim)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Sistema
+    </button>
+  </header>
+
+  <!-- Acciones rápidas -->
+  <div class="quick-bar">
+    <button class="quick-btn" onclick="sendQuick('¿Qué tengo en mi agenda hoy?')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </button>
+    <button class="quick-btn" onclick="sendQuick('Dame un resumen de mi estado actual de proyectos en Novasyscom')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Proyectos
+    </button>
+    <button class="quick-btn" onclick="sendQuick('¿Qué se ha hecho hoy en DRIVO?')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      DRIVO
+    </button>
+    <button class="quick-btn" onclick="sendQuick('Dame el briefing del día')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Briefing
+    </button>
+    <button class="quick-btn" onclick="sendQuick('¿Cuál es el estado de la batería del Mac?')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+      Batería
+    </button>
+  </div>
+
+  <!-- HUD Container (Reactor Holográfico 3D) -->
+  <div id="hud-container" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px;">
+    <canvas id="hud-canvas" style="width: 340px; height: 340px; max-width: 90%; max-height: 90%;"></canvas>
+    <div id="hud-status" style="margin-top: 20px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); text-align: center; text-shadow: 0 0 8px var(--cyan-glow);">Alberth Listo</div>
+  </div>
+
+  <!-- Chat -->
+  <div id="chat">
+    <!-- Los mensajes se insertan dinámicamente -->
+  </div>
+
+  <!-- Indicador de pensando -->
+  <div id="thinking" class="thinking-bubble">
+    <div class="thinking-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Panel de voz -->
+  <div class="voice-panel">
+    <div id="waveform" class="waveform-wrap">
+      <canvas id="voice-canvas"></canvas>
+    </div>
+    <div class="input-row">
+      <button class="btn-mic" id="btn-mic" onclick="toggleRecording()" title="Grabar voz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <div class="input-wrap">
+        <textarea id="msg-input" placeholder="Escriba a Alberth…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      </div>
+      <button class="btn-send" onclick="sendText()" title="Enviar">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal de control del sistema -->
+<div class="sys-modal" id="sys-modal">
+  <div class="sys-backdrop" onclick="toggleSysModal()"></div>
+  <div class="sys-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">⚙️ Control del Mac</div>
+
+    <div class="sys-grid">
+      <button class="sys-btn" onclick="sysCmd('volume','--action set --value 0')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        Silenciar
+      </button>
+      <button class="sys-btn" onclick="sysCmd('volume','--action set --value 50')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Vol 50%
+      </button>
+      <button class="sys-btn" onclick="sysCmd('volume','--action set --value 100')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Vol 100%
+      </button>
+      <button class="sys-btn" onclick="sysCmd('screenshot','')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Captura
+      </button>
+      <button class="sys-btn" onclick="sendQuick('Muéstrame qué hay en la pantalla del Mac ahora mismo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver Mac
+      </button>
+      <button class="sys-btn" onclick="sendQuick('¿Qué aplicaciones están abiertas en el Mac ahora mismo?')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Apps
+      </button>
+    </div>
+
+    <div class="vol-control" style="margin-top:18px">
+      <label>Volumen</label>
+      <input type="range" id="vol-slider" min="0" max="100" value="50"
+        oninput="updateVolSlider(this.value)"
+        onchange="sysCmd('volume','--action set --value ' + this.value)">
+      <span class="vol-value" id="vol-val">50%</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ALBERTH PANEL — Lógica JS
+   ============================================================ */
+
+// ─── WebSocket ───────────────────────────────────────────────
+const WS_URL = `ws://${location.hostname}:${location.port || 8080}/ws`;
+let ws, wsRetries = 0;
+
+function connectWS() {
+  let token = localStorage.getItem("alberth_token") || "";
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("token")) {
+    token = urlParams.get("token");
+    localStorage.setItem("alberth_token", token);
+  }
+
+  const socketUrl = `${WS_URL}?token=${token}`;
+  ws = new WebSocket(socketUrl);
+  
+  ws.onopen = () => {
+    wsRetries = 0;
+    setStatus("🟢 En línea · Novasyscom");
+  };
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === "history") {
+      msg.messages.forEach(m => appendMsg(m, false));
+      scrollChat();
+    } else if (msg.type === "message") {
+      appendMsg(msg.message, true);
+    } else if (msg.type === "thinking") {
+      document.getElementById("thinking").classList.toggle("visible", msg.active);
+      if (msg.active) scrollChat();
+    } else if (msg.type === "system") {
+      showToast(msg.text, 3000);
+    }
+  };
+  ws.onclose = e => {
+    setStatus("🔴 Desconectado");
+    if (e.code === 1008) {
+      const t = prompt("Ingrese el Token de Acceso para conectar con Alberth:");
+      if (t) {
+        localStorage.setItem("alberth_token", t);
+        location.reload();
+      }
+      return;
+    }
+    wsRetries++;
+    setTimeout(connectWS, Math.min(3000 * wsRetries, 15000));
+  };
+  ws.onerror = () => ws.close();
+}
+
+function sendWS(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+}
+
+// ─── Reproducción de Audio ───────────────────────────────────
+function playAudioUrl(url) {
+  try {
+    initAudioContext();
+    const audio = new Audio(url);
+    audio.crossOrigin = "anonymous";
+    
+    if (audioCtx) {
+      if (audioSource) {
+        try { audioSource.disconnect(); } catch(e){}
+      }
+      audioSource = audioCtx.createMediaElementSource(audio);
+      audioSource.connect(speakerAnalyser);
+      speakerAnalyser.connect(audioCtx.destination);
+    }
+    
+    audio.play().then(() => {
+      currentSource = "speaker";
+    }).catch(err => {
+      console.warn("Autoplay bloqueado o falló:", err);
+      audio.play();
+    });
+    
+    audio.onended = () => {
+      currentSource = "idle";
+    };
+  } catch (e) {
+    console.error("Error al reproducir audio:", e);
+  }
+}
+
+// ─── Chat ────────────────────────────────────────────────────
+const chat = document.getElementById("chat");
+
+function appendMsg(msg, animate) {
+  const div = document.createElement("div");
+  div.className = `msg ${msg.role === "user" ? "user" : "alberth"}`;
+  const label = msg.role === "user" ? "Señor Danny" : "Alberth";
+  
+  let contentHtml = escHtml(msg.content);
+  if (msg.image_url) {
+    contentHtml += `
+      <div style="margin-top: 8px; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border)">
+        <img src="${msg.image_url}" style="width: 100%; display: block; max-height: 240px; object-fit: contain; cursor: pointer" onclick="window.open('${msg.image_url}', '_blank')">
+      </div>
+    `;
+  }
+  
+  div.innerHTML = `
+    <div class="msg-label">${label}</div>
+    <div class="msg-bubble">${contentHtml}</div>
+    <div class="msg-time">${msg.ts || ""}</div>
+  `;
+  if (!animate) div.style.animation = "none";
+  chat.appendChild(div);
+  scrollChat();
+
+  // Reproducir audio si viene adjunto y es un mensaje animado (nuevo)
+  if (animate && msg.audio_url) {
+    playAudioUrl(msg.audio_url);
+  }
+}
+
+function scrollChat() {
+  requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+          .replace(/\n/g,"<br>");
+}
+
+// ─── Input ───────────────────────────────────────────────────
+function sendText() {
+  const inp = document.getElementById("msg-input");
+  const txt = inp.value.trim();
+  if (!txt || !ws || ws.readyState !== WebSocket.OPEN) return;
+  sendWS({ type: "text", text: txt });
+  inp.value = "";
+  autoResize(inp);
+}
+
+function sendQuick(txt) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    showToast("Sin conexión a Alberth", 2500); return;
+  }
+  sendWS({ type: "text", text: txt });
+}
+
+// Envío directo con autorización si está disponible
+async function sendTextDirect(txt) {
+  if (!txt) return;
+  const token = localStorage.getItem("alberth_token") || "";
+  try {
+    const resp = await fetch("/command", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ command: "alberth", args: { text: txt } })
+    });
+  } catch (e) {}
+}
+
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault(); sendText();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 100) + "px";
+}
+
+// ─── Grabación de voz ────────────────────────────────────────
+let mediaRecorder, audioChunks = [], isRecording = false;
+
+async function toggleRecording() {
+  const btn = document.getElementById("btn-mic");
+
+  if (!isRecording) {
+    try {
+      initAudioContext();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStream = stream;
+
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = sendAudio;
+      mediaRecorder.start(200);
+
+      if (audioCtx) {
+        if (micSource) {
+          try { micSource.disconnect(); } catch(e){}
+        }
+        micSource = audioCtx.createMediaStreamSource(stream);
+        micSource.connect(micAnalyser);
+      }
+
+      isRecording = true;
+      currentSource = "mic";
+      btn.classList.add("recording");
+      showToast("🎙️ Grabando… Toque para detener", 0);
+    } catch (err) {
+      showToast("❌ Sin permiso de micrófono", 3000);
+    }
+  } else {
+    mediaRecorder.stop();
+    if (micStream) {
+      micStream.getTracks().forEach(t => t.stop());
+    }
+    isRecording = false;
+    currentSource = "idle";
+    btn.classList.remove("recording");
+    hideToast();
+    showToast("⏳ Procesando audio…", 4000);
+  }
+}
+
+async function sendAudio() {
+  if (!audioChunks.length) return;
+  const token = localStorage.getItem("alberth_token") || "";
+  const blob = new Blob(audioChunks, { type: "audio/webm" });
+  const form = new FormData();
+  form.append("file", blob, "audio.webm");
+  try {
+    const resp = await fetch("/audio", { 
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      },
+      body: form 
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast("✅ Audio enviado a Alberth", 3000);
+    } else {
+      showToast("⚠️ Error procesando audio", 3000);
+    }
+  } catch (e) {
+    showToast("❌ Error de conexión", 3000);
+  }
+}
+
+// ─── Comandos del sistema ────────────────────────────────────
+async function sysCmd(command, argStr) {
+  const token = localStorage.getItem("alberth_token") || "";
+  const args = {};
+  const parts = argStr.trim().split(" ");
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i].startsWith("--") && parts[i+1]) {
+      args[parts[i].slice(2)] = parts[i+1]; i++;
+    }
+  }
+  try {
+    const resp = await fetch("/command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command, args })
+    });
+    const data = await resp.json();
+    showToast(data.ok ? "✅ " + (data.output || "Hecho") : "❌ " + (data.output || "Error"), 3000);
+  } catch (e) {
+    showToast("❌ Sin conexión", 2500);
+  }
+}
+
+// ─── Modal del sistema ───────────────────────────────────────
+function toggleSysModal() {
+  document.getElementById("sys-modal").classList.toggle("open");
+}
+
+function updateVolSlider(val) {
+  document.getElementById("vol-val").textContent = val + "%";
+  document.getElementById("vol-slider").style.setProperty("--vol", val + "%");
+}
+
+// ─── Status ──────────────────────────────────────────────────
+function setStatus(txt) {
+  document.getElementById("status-txt").textContent = txt;
+}
+
+// ─── Toast ───────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, duration) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  if (duration > 0) toastTimer = setTimeout(hideToast, duration);
+}
+function hideToast() {
+  document.getElementById("toast").classList.remove("show");
+}
+
+// ─── Canvas de partículas ────────────────────────────────────
+(function() {
+  const canvas = document.getElementById("bg-canvas");
+  const ctx = canvas.getContext("2d");
+  const particles = [];
+  const COLORS = ["rgba(74,240,255,", "rgba(240,192,96,"];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function Particle() {
+    this.reset();
+  }
+  Particle.prototype.reset = function() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.r = Math.random() * 1.5 + 0.3;
+    this.a = Math.random() * .5 + .1;
+    this.vx = (Math.random() - .5) * .3;
+    this.vy = (Math.random() - .5) * .3;
+    this.color = COLORS[Math.random() > .6 ? 1 : 0];
+  };
+  Particle.prototype.draw = function() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.color + this.a + ")";
+    ctx.fill();
+  };
+  Particle.prototype.update = function() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  };
+
+  resize();
+  for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener("resize", resize);
+})();
+
+// ─── Visualizador de Onda Siri / Web Audio ─────────────────────
+let audioCtx;
+let micAnalyser;
+let speakerAnalyser;
+let micSource;
+let audioSource;
+let currentSource = "idle"; // "idle" | "mic" | "speaker"
+let currentVolume = 0;
+let micStream;
+
+const canvasWave = document.getElementById("voice-canvas");
+const ctxWave = canvasWave.getContext("2d");
+
+const waveWaves = [
+  { freq: 0.03, phaseSpeed: 0.04, ampMult: 1.0, color: "rgba(74, 240, 255, 0.7)", width: 2, phase: 0 },   // Cyan principal
+  { freq: 0.05, phaseSpeed: -0.03, ampMult: 0.6, color: "rgba(74, 240, 255, 0.3)", width: 1, phase: 0 },   // Cyan secundario
+  { freq: 0.02, phaseSpeed: 0.02, ampMult: 0.4, color: "rgba(240, 192, 96, 0.45)", width: 1.5, phase: 0 }, // Dorado
+  { freq: 0.07, phaseSpeed: -0.05, ampMult: 0.2, color: "rgba(74, 240, 255, 0.12)", width: 1, phase: 0 }  // Rápido tenue
+];
+
+function initAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    micAnalyser = audioCtx.createAnalyser();
+    micAnalyser.fftSize = 256;
+    speakerAnalyser = audioCtx.createAnalyser();
+    speakerAnalyser.fftSize = 256;
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+function resizeWaveCanvas() {
+  const rect = canvasWave.getBoundingClientRect();
+  canvasWave.width = rect.width * window.devicePixelRatio;
+  canvasWave.height = rect.height * window.devicePixelRatio;
+}
+
+window.addEventListener("resize", resizeWaveCanvas);
+resizeWaveCanvas();
+
+function drawWaveAnimation() {
+  requestAnimationFrame(drawWaveAnimation);
+  
+  const w = canvasWave.width;
+  const h = canvasWave.height;
+  ctxWave.clearRect(0, 0, w, h);
+  
+  let targetAmp = 0;
+  
+  if (currentSource === "mic" && micAnalyser) {
+    const bufferLength = micAnalyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    micAnalyser.getByteTimeDomainData(dataArray);
+    
+    let sum = 0;
+    for (let i = 0; i < bufferLength; i++) {
+      let val = (dataArray[i] - 128) / 128;
+      sum += val * val;
+    }
+    targetAmp = Math.sqrt(sum / bufferLength);
+  } else if (currentSource === "speaker" && speakerAnalyser) {
+    const bufferLength = speakerAnalyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    speakerAnalyser.getByteTimeDomainData(dataArray);
+    
+    let sum = 0;
+    for (let i = 0; i < bufferLength; i++) {
+      let val = (dataArray[i] - 128) / 128;
+      sum += val * val;
+    }
+    targetAmp = Math.sqrt(sum / bufferLength);
+  }
+  
+  currentVolume = currentVolume * 0.75 + targetAmp * 0.25;
+  
+  let baseAmp = currentSource === "idle" ? 3 : currentVolume * (h * 0.45);
+  if (baseAmp < 3) baseAmp = 3;
+  
+  waveWaves.forEach(wave => {
+    ctxWave.beginPath();
+    ctxWave.lineWidth = wave.width * window.devicePixelRatio;
+    
+    let strokeColor = wave.color;
+    if (currentSource === "mic") {
+      strokeColor = wave.color.replace("74, 240, 255", "255, 90, 90").replace("240, 192, 96", "255, 140, 90");
+    } else if (currentSource === "speaker") {
+      strokeColor = wave.color.replace("74, 240, 255", "240, 192, 96").replace("0.3", "0.5");
+    }
+    
+    ctxWave.strokeStyle = strokeColor;
+    
+    for (let x = 0; x < w; x++) {
+      let normX = x / w;
+      let envelope = Math.sin(normX * Math.PI);
+      
+      let angle = (normX * Math.PI * 2 * (1 / wave.freq)) + wave.phase;
+      let y = (h / 2) + Math.sin(angle) * baseAmp * wave.ampMult * envelope;
+      
+      if (x === 0) ctxWave.moveTo(x, y);
+      else ctxWave.lineTo(x, y);
+    }
+    ctxWave.stroke();
+    
+    let speed = currentSource === "idle" ? wave.phaseSpeed : wave.phaseSpeed * 2.5;
+    wave.phase += speed;
+  });
+}
+
+drawWaveAnimation();
+
+// ─── Visualizador de Núcleo Holográfico 3D (Reactor) ──────────
+const hudCanvas = document.getElementById("hud-canvas");
+const hudCtx = hudCanvas.getContext("2d");
+let hudPoints = [];
+const HUD_NUM_POINTS = 95;
+let hudAngleX = 0.3;
+let hudAngleY = 0.3;
+let hudRingAngle1 = 0;
+let hudRingAngle2 = 0;
+let isHUDMode = false;
+
+function initHUDSphere() {
+  hudPoints = [];
+  for (let i = 0; i < HUD_NUM_POINTS; i++) {
+    const y = 1 - (i / (HUD_NUM_POINTS - 1)) * 2;
+    const radius = Math.sqrt(1 - y * y);
+    const theta = 1.6180339887 * 2 * Math.PI * i; // Golden ratio spiral
+    const x = Math.cos(theta) * radius;
+    const z = Math.sin(theta) * radius;
+    hudPoints.push({ x, y, z });
+  }
+}
+initHUDSphere();
+
+function resizeHUDCanvas() {
+  const rect = hudCanvas.getBoundingClientRect();
+  hudCanvas.width = rect.width * window.devicePixelRatio;
+  canvasWave.width = rect.width * window.devicePixelRatio; // keep wave synced
+  hudCanvas.height = rect.height * window.devicePixelRatio;
+}
+
+window.addEventListener("resize", () => {
+  resizeHUDCanvas();
+  resizeWaveCanvas();
+});
+
+function drawHUDAnimation() {
+  requestAnimationFrame(drawHUDAnimation);
+  
+  if (!isHUDMode) return;
+  
+  const w = hudCanvas.width;
+  const h = hudCanvas.height;
+  const centerX = w / 2;
+  const centerY = h / 2;
+  
+  hudCtx.clearRect(0, 0, w, h);
+  
+  let targetSpeed = 0.005;
+  let colorTheme = "74, 240, 255"; // Cyan por defecto
+  let statusText = "Alberth Listo";
+  
+  if (currentSource === "mic") {
+    targetSpeed = 0.03;
+    colorTheme = "255, 90, 90"; // Rojo grabando
+    statusText = "Escuchando...";
+  } else if (currentSource === "speaker") {
+    targetSpeed = 0.018;
+    colorTheme = "240, 192, 96"; // Dorado hablando
+    statusText = "Alberth hablando";
+  } else if (document.getElementById("thinking").classList.contains("visible")) {
+    targetSpeed = 0.022;
+    colorTheme = "240, 192, 96"; // Dorado pensando
+    statusText = "Pensando...";
+  }
+  
+  document.getElementById("hud-status").textContent = statusText;
+  document.getElementById("hud-status").style.color = `rgb(${colorTheme})`;
+  document.getElementById("hud-status").style.textShadow = `0 0 10px rgba(${colorTheme}, 0.5)`;
+  
+  // Rotación del núcleo
+  hudAngleY += targetSpeed;
+  hudAngleX += targetSpeed * 0.45;
+  hudRingAngle1 += targetSpeed * 0.8;
+  hudRingAngle2 -= targetSpeed * 0.6;
+  
+  const baseRadius = Math.min(w, h) * 0.28;
+  
+  // ── 1. Anillo Exterior Discontinuo ──
+  hudCtx.strokeStyle = `rgba(${colorTheme}, 0.22)`;
+  hudCtx.lineWidth = 1.5 * window.devicePixelRatio;
+  hudCtx.beginPath();
+  hudCtx.arc(centerX, centerY, baseRadius * 1.35, 0, Math.PI * 2);
+  hudCtx.setLineDash([12 * window.devicePixelRatio, 18 * window.devicePixelRatio]);
+  hudCtx.stroke();
+  hudCtx.setLineDash([]);
+  
+  // ── 2. Anillo Giratorio Exterior (Con ranuras) ──
+  hudCtx.strokeStyle = `rgba(${colorTheme}, 0.45)`;
+  hudCtx.lineWidth = 2.5 * window.devicePixelRatio;
+  hudCtx.beginPath();
+  hudCtx.arc(centerX, centerY, baseRadius * 1.25, hudRingAngle1, hudRingAngle1 + Math.PI * 0.65);
+  hudCtx.stroke();
+  hudCtx.beginPath();
+  hudCtx.arc(centerX, centerY, baseRadius * 1.25, hudRingAngle1 + Math.PI, hudRingAngle1 + Math.PI * 1.65);
+  hudCtx.stroke();
+  
+  // ── 3. Anillo Giratorio Interno (Dirección contraria) ──
+  hudCtx.strokeStyle = `rgba(${colorTheme}, 0.65)`;
+  hudCtx.lineWidth = 1.8 * window.devicePixelRatio;
+  hudCtx.beginPath();
+  hudCtx.arc(centerX, centerY, baseRadius * 1.15, hudRingAngle2, hudRingAngle2 + Math.PI * 0.45);
+  hudCtx.stroke();
+  hudCtx.beginPath();
+  hudCtx.arc(centerX, centerY, baseRadius * 1.15, hudRingAngle2 + Math.PI * 0.9, hudRingAngle2 + Math.PI * 1.35);
+  hudCtx.stroke();
+  
+  // ── 4. Indicadores de puntos orbitales ──
+  hudCtx.fillStyle = `rgba(${colorTheme}, 0.85)`;
+  for (let i = 0; i < 4; i++) {
+    let angle = hudRingAngle1 + (i * Math.PI / 2);
+    hudCtx.beginPath();
+    hudCtx.arc(centerX + Math.cos(angle) * baseRadius * 1.25, centerY + Math.sin(angle) * baseRadius * 1.25, 3.5 * window.devicePixelRatio, 0, Math.PI*2);
+    hudCtx.fill();
+  }
+  
+  // Proyección 3D de la esfera
+  const scale = baseRadius * 0.95;
+  const projected = hudPoints.map(p => {
+    let x1 = p.x * Math.cos(hudAngleY) - p.z * Math.sin(hudAngleY);
+    let z1 = p.x * Math.sin(hudAngleY) + p.z * Math.cos(hudAngleY);
+    let y2 = p.y * Math.cos(hudAngleX) - z1 * Math.sin(hudAngleX);
+    let z2 = p.y * Math.sin(hudAngleX) + z1 * Math.cos(hudAngleX);
+    
+    const perspective = 320 / (320 + z2 * scale);
+    return {
+      x: x1 * scale * perspective,
+      y: y2 * scale * perspective,
+      z: z2,
+      opacity: (z2 + 1.2) / 2.2
+    };
+  });
+  
+  // ── 5. Líneas de Red 3D ──
+  hudCtx.lineWidth = 0.8 * window.devicePixelRatio;
+  for (let i = 0; i < projected.length; i++) {
+    for (let j = i + 1; j < projected.length; j++) {
+      const dx = hudPoints[i].x - hudPoints[j].x;
+      const dy = hudPoints[i].y - hudPoints[j].y;
+      const dz = hudPoints[i].z - hudPoints[j].z;
+      const dist = dx*dx + dy*dy + dz*dz;
+      if (dist < 0.20) { // Umbral de conexión
+        hudCtx.beginPath();
+        hudCtx.moveTo(centerX + projected[i].x, centerY + projected[i].y);
+        hudCtx.lineTo(centerX + projected[j].x, centerY + projected[j].y);
+        const alpha = Math.min(projected[i].opacity, projected[j].opacity) * 0.28;
+        hudCtx.strokeStyle = `rgba(${colorTheme}, ${alpha})`;
+        hudCtx.stroke();
+      }
+    }
+  }
+  
+  // ── 6. Nodos 3D ──
+  projected.forEach(p => {
+    hudCtx.beginPath();
+    hudCtx.arc(centerX + p.x, centerY + p.y, (1.8 * p.opacity + 0.6) * window.devicePixelRatio, 0, Math.PI * 2);
+    hudCtx.fillStyle = `rgba(${colorTheme}, ${p.opacity * 0.85})`;
+    hudCtx.fill();
+  });
+  
+  // ── 7. Resplandor del núcleo central ──
+  let corePulse = 1.0 + Math.sin(Date.now() * 0.006) * 0.12;
+  if (currentSource === "mic" || currentSource === "speaker") {
+    corePulse = 1.0 + currentVolume * 0.8;
+  }
+  
+  let coreGlow = hudCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, baseRadius * 0.3 * corePulse);
+  coreGlow.addColorStop(0, `rgba(${colorTheme}, 0.9)`);
+  coreGlow.addColorStop(0.35, `rgba(${colorTheme}, 0.5)`);
+  coreGlow.addColorStop(1, "rgba(0,0,0,0)");
+  
+  hudCtx.fillStyle = coreGlow;
+  hudCtx.beginPath();
+  hudCtx.arc(centerX, centerY, baseRadius * 0.3 * corePulse, 0, Math.PI * 2);
+  hudCtx.fill();
+}
+
+function toggleHUDMode() {
+  isHUDMode = !isHUDMode;
+  const chat = document.getElementById("chat");
+  const hudContainer = document.getElementById("hud-container");
+  const btn = document.getElementById("btn-toggle-hud");
+  
+  if (isHUDMode) {
+    chat.style.display = "none";
+    hudContainer.style.display = "flex";
+    btn.textContent = "💬 Chat";
+    btn.style.color = "var(--gold)";
+    btn.style.borderColor = "rgba(240,192,96,.3)";
+    resizeHUDCanvas();
+    drawHUDAnimation();
+  } else {
+    chat.style.display = "flex";
+    hudContainer.style.display = "none";
+    btn.textContent = "🌐 HUD";
+    btn.style.color = "var(--cyan)";
+    btn.style.borderColor = "rgba(74,240,255,.3)";
+    scrollChat();
+  }
+}
+
+// Inicializar dimensiones
+resizeHUDCanvas();
+
+
+// ─── Init ────────────────────────────────────────────────────
+connectWS();
+
+// Mensaje de bienvenida si no hay historial
+setTimeout(() => {
+  if (chat.children.length === 0) {
+    appendMsg({
+      role: "alberth",
+      content: "Buenas tardes, Señor Danny. Alberth en línea y listo. ¿En qué le sirvo hoy?",
+      ts: new Date().toLocaleTimeString("es", {hour:"2-digit", minute:"2-digit"})
+    }, true);
+  }
+}, 1200);
+
+// Ping cada 30s para mantener la conexión
+// ─── ATTENTION TRACKING SYSTEM (PREPARATION FOR EYE-TRACKING/BCI) ────────
+class AttentionTracker {
+  constructor() {
+    this.gazePoints = [];
+    this.fixationThreshold = 100; // ms
+    this.saccadeThreshold = 30; // px
+    this.lastGaze = null;
+    this.fixationStart = null;
+    this.attentionMap = new Map(); // Elemento -> tiempo de atención
+    this.setupGazeSimulation(); // En versión real, usar API de eye-tracking
+  }
+
+  setupGazeSimulation() {
+    // Simulación para desarrollo (en producción usaríamos WebGazer o similares)
+    document.addEventListener('mousemove', (e) => {
+      this.processGaze({ x: e.clientX, y: e.clientY, t: Date.now() });
+    });
+  }
+
+  processGaze(gazePoint) {
+    if (!this.lastGaze) {
+      this.lastGaze = gazePoint;
+      this.fixationStart = gazePoint.t;
+      return;
+    }
+
+    const timeDiff = gazePoint.t - this.lastGaze.t;
+    const distance = Math.hypot(
+      gazePoint.x - this.lastGaze.x,
+      gazePoint.y - this.lastGaze.y
+    );
+
+    // Detectar fijación (mirada estable)
+    if (timeDiff > this.fixationThreshold && distance < this.saccadeThreshold) {
+      // Acumular tiempo de fijación
+      const fixationTime = gazePoint.t - this.fixationStart;
+      this.accumulateAttention(gazePoint.x, gazePoint.y, fixationTime);
+    }
+
+    this.lastGaze = gazePoint;
+  }
+
+  accumulateAttention(x, y, duration) {
+    // Encontrar elemento más cercano a la coordenada de mirada
+    const element = document.elementFromPoint(x, y);
+    if (element) {
+      const id = element.dataset.attentionId || 
+                (element.dataset.attentionId = `elem-${Date.now()}-${Math.random()}`);
+
+      const current = this.attentionMap.get(id) || 0;
+      this.attentionMap.set(id, current + duration);
+
+      // Actualizar UI basada en atención
+      this.updateElementHighlight(element, this.attentionMap.get(id));
+    }
+  }
+
+  updateElementHighlight(element, attentionTime) {
+    // Umbral para considerar "atención significativa"
+    const threshold = 500; // 500ms de atención continua
+
+    if (attentionTime > threshold) {
+      // Aplicar efecto de resalte sutil
+      element.style.setProperty('--attention-glow', 
+        `0 0 ${Math.min(20, attentionTime / attentionTime)}px rgba(74, 240, 255, 0.4)`
+      );
+
+      // Si es un elemento interactivo, prepararlo para activación
+      if (element.matches('button, [role="button"], .quick-btn, .sys-btn')) {
+        element.style.setProperty('--pre-activate', 'true');
+        // En BCI real, esto podría disparar una acción después de umbral de tiempo
+      }
+    } else {
+      element.style.removeProperty('--attention-glow');
+      element.style.removeProperty('--pre-activate');
+    }
+  }
+
+  getAttentionHeatmap() {
+    // Generar mapa de calor de atención para análisis
+    const heatmapData = Array.from(this.attentionMap.entries())
+      .map(([id, time]) => ({ id, time: Math.min(time, 5000) })); // Cap at 5s
+
+    return heatmapData.sort((a, b) => b.time - a.time).slice(0, 10);
+  }
+}
+
+// ─── HAPTIC FEEDBACK VISUAL SYSTEM ────────
+class HapticFeedbackVisual {
+  constructor() {
+    this.pulseEffects = [];
+    this.rippleEffects = [];
+  }
+
+  // Efecto de pulso al hacer click
+  pulseAt(x, y, intensity = 1) {
+    this.pulseEffects.push({
+      x, y,
+      radius: 0,
+      maxRadius: 80 * intensity,
+      opacity: 0.8 * intensity,
+      speed: 150 + Math.random() * 100,
+      color: `hsl(${200 + Math.random() * 40}, 80%, 60%)`,
+      timestamp: Date.now()
+    });
+  }
+
+  // Ondas de concentración al pensar
+  thoughtWave(amplitude = 1) {
+    this.rippleEffects.push({
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      radius: 0,
+      maxRadius: Math.min(window.innerWidth, window.innerHeight) * 0.8 * amplitude,
+      opacity: 0.3 * amplitude,
+      speed: 80,
+      color: 'rgba(240, 192, 96, 0.4)',
+      timestamp: Date.now(),
+      waves: 3 // Múltiples ondas concéntricas
+    });
+  }
+
+  update() {
+    const now = Date.now();
+
+    // Actualizar efectos de pulso
+    this.pulseEffects = this.pulseEffects.filter(effect => {
+      const elapsed = now - effect.timestamp;
+      const progress = elapsed / effect.speed;
+
+      if (progress >= 1) return false;
+
+      effect.radius = effect.maxRadius * progress;
+      effect.opacity = effect.opacity * (1 - progress);
+
+      return true;
+    });
+
+    // Actualizar efectos de onda
+    this.rippleEffects = this.rippleEffects.filter(effect => {
+      const elapsed = now - effect.timestamp;
+      const progress = elapsed / effect.speed;
+
+      if (progress >= 1) return false;
+
+      effect.radius = effect.maxRadius * progress;
+      effect.opacity = effect.opacity * (1 - progress * 0.7); // Desvanecimiento más lento
+
+      return true;
+    });
+  }
+
+  render(ctx) {
+    // Renderizar pulsos
+    this.pulseEffects.forEach(effect => {
+      ctx.save();
+      ctx.globalAlpha = effect.opacity;
+      ctx.beginPath();
+      ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+      ctx.fillStyle = effect.color;
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // Renderizar ondas de pensamiento
+    this.rippleEffects.forEach(effect => {
+      ctx.save();
+      ctx.globalAlpha = effect.opacity;
+      for (let i = 1; i <= effect.waves; i++) {
+        const radius = effect.radius * (i / effect.waves);
+        ctx.beginPath();
+        ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = effect.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+  }
+}
+
+// ─── ENHANCED NEURAL WAVEFORM VISUALIZER ────────
+class NeuralNetworkVisualizer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.nodes = [];
+    this.connections = [];
+    this.activity = new Array(100).fill(0);
+    this.initNetwork();
+  }
+
+  initNetwork() {
+    // Crear nodos en capas (input, hidden, output)
+    const layers = [8, 16, 16, 8]; // Arquitectura de red
+    let yOffset = 30;
+
+    layers.forEach((neuronCount, layerIndex) => {
+      const xStart = (this.canvas.width - (neuronCount - 1) * 50) / 2;
+      for (let i = 0; i < neuronCount; i++) {
+        this.nodes.push({
+          x: xStart + i * 50,
+          y: yOffset + layerIndex * 60,
+          layer: layerIndex,
+          id: this.nodes.length,
+          activation: 0
+        });
+      }
+    });
+
+    // Conectar capas adyacentes
+    for (let l = 0; l < layers.length - 1; l++) {
+      const startIdx = layers.slice(0, l).reduce((a, b) => a + b, 0);
+      const endIdx = startIdx + layers[l];
+      const nextStart = endIdx;
+      const nextEnd = nextStart + layers[l + 1];
+
+      for (let i = startIdx; i < endIdx; i++) {
+        for (let j = nextStart; j < nextEnd; j++) {
+          this.connections.push({ from: i, to: j, weight: Math.random() * 0.5 + 0.5 });
+        }
+      }
+    }
+  }
+
+  update(audioData) {
+    // Mapear datos de audio a activación neuronal
+    const rms = Math.sqrt(audioData.reduce((sum, val) => sum + val * val, 0) / audioData.length);
+    const normalized = Math.min(rms * 5, 1);
+
+    // Propagación hacia adelante con retraso temporal
+    this.activity.unshift(normalized);
+    if (this.activity.length > 100) this.activity.pop();
+
+    // Actualizar activación de nodos basada en onda temporal
+    this.nodes.forEach((node, index) => {
+      const timeOffset = index * 0.01;
+      const activityIndex = Math.floor((performance.now() * 0.001 - timeOffset) * 10) % 100;
+      const activity = this.activity[activityIndex] || 0;
+      node.activation = Math.sin(performance.now() * 0.002 + index) * 0.5 + 0.5 + activity * 0.5;
+    });
+  }
+
+  render() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Dibujar conexiones con intensidad basada en activación
+    this.connections.forEach(conn => {
+      const from = this.nodes[conn.from];
+      const to = this.nodes[conn.to];
+      const intensity = (from.activation + to.activation) / 2;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(from.x, from.y);
+      this.ctx.lineTo(to.x, to.y);
+      this.ctx.strokeStyle = `rgba(74, 240, 255, ${0.1 + intensity * 0.6})`;
+      this.ctx.lineWidth = 1 + intensity * 2;
+      this.ctx.stroke();
+    });
+
+    // Dibujar nodos con pulso
+    this.nodes.forEach(node => {
+      this.ctx.beginPath();
+      this.ctx.arc(node.x, node.y, 4 + node.activation * 6, 0, Math.PI * 2);
+
+      // Gradiente radial para efecto de brillo
+      const gradient = this.ctx.createRadialGradient(
+        node.x, node.y, 0,
+        node.x, node.y, 4 + node.activation * 6
+      );
+      gradient.addColorStop(0, `rgba(240, 192, 96, ${0.3 + node.activation * 0.7})`);
+      gradient.addColorStop(1, 'rgba(240, 192, 96, 0)');
+
+      this.ctx.fillStyle = gradient;
+      this.ctx.fill();
+
+      // Contorno brillante
+      this.ctx.strokeStyle = `rgba(74, 240, 255, ${0.5 + node.activation * 0.5})`;
+      this.ctx.lineWidth = 2;
+      this.ctx.stroke();
+    });
+  }
+}
+
+// ─── CONTEXT-AWARE INTERFACE ────────
+class ContextAwareInterface {
+  constructor() {
+    this.ambientLight = 100; // lux
+    this.noiseLevel = 0; // dB
+    this.userProximity = 1; // metros (estimado)
+    this.timeOfDay = new Date().getHours();
+    this.initSensors();
+  }
+
+  initSensors() {
+    // Simular sensores (en implementación real usaríamos APIs de dispositivo)
+    if ('AmbientLightSensor' in window) {
+      const lightSensor = new AmbientLightSensor();
+      lightSensor.addEventListener('reading', () => {
+        this.ambientLight = lightSensor.illuminance;
+        this.updateTheme();
+      });
+      lightSensor.start();
+    }
+
+    if ('MediaDevices' in window && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          const analyser = new AudioContext().createAnalyser();
+          const source = audioContext.createMediaStreamSource(stream);
+          source.connect(analyser);
+
+          const checkNoise = () => {
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(data);
+            const rms = Math.sqrt(data.reduce((sum, val) => sum + val * val, 0) / data.length);
+            this.noiseLevel = Math.min(rms / 128 * 100, 100); // Escala 0-100
+            this.adjustForNoise();
+            requestAnimationFrame(checkNoise);
+          };
+          requestAnimationFrame(checkNoise);
+        });
+    }
+  }
+
+  updateTheme() {
+    // Adaptar tema según luz ambiental
+    const isDark = this.ambientLight < 50; // Menos de 50 lux = entorno oscuro
+
+    document.documentElement.style.setProperty('--bg', 
+      isDark ? '#040812' : '#0a0f1e'
+    );
+    document.documentElement.style.setProperty('--bg2', 
+      isDark ? '#091020' : '#0f172a'
+    );
+
+    // Ajustar intensidad de efectos según luz ambiental
+    const glowIntensity = isDark ? 0.8 : 0.4;
+    document.documentElement.style.setProperty('--glow-intensity', glowIntensity.toString());
+  }
+
+  adjustForNoise() {
+    // En ambientes ruidosos, aumentar feedback visual
+    const noiseFactor = Math.min(this.noiseLevel / 50, 2); // Normalizar 0-2
+
+    // Incrementar tamaño de elementos visuales en entornos ruidosos
+    document.documentElement.style.setProperty('--visual-scale', 
+      (1 + noiseFactor * 0.2).toString()
+    );
+
+    // Añadir subtítulos automáticos en entornos muy ruidosos
+    if (this.noiseLevel > 70 && !this.subtitlesEnabled) {
+      this.enableSubtitles();
+    }
+  }
+
+  enableSubtitles() {
+    // Implementar sistema de subtítulos en tiempo real usando Web Speech API
+    this.subtitlesEnabled = true;
+    // ... lógica de transcripción y display
+  }
+}
+
+// Instanciar los sistemas
+const attentionTracker = new AttentionTracker();
+const hapticFeedback = new HapticFeedbackVisual();
+
+// Sobrescribir funciones existentes para integrar los nuevos sistemas
+const originalToggleRecording = window.toggleRecording;
+window.toggleRecording = function() {
+  const btn = document.getElementById('btn-mic');
+
+  if (!isRecording) {
+    // ... código original de inicio de grabación ...
+    // Añadir feedback háptico al iniciar grabación
+    const rect = btn.getBoundingClientRect();
+    hapticFeedback.pulseAt(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+      1.0
+    );
+  } else {
+    // ... código original de detención de grabación ...
+    // Añadir feedback háptico al detener grabación
+    const rect = btn.getBoundingClientRect();
+    hapticFeedback.pulseAt(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+      0.7
+    );
+  }
+
+  // Llamar a la función original
+  return originalToggleRecording.apply(this, arguments);
+};
+
+// Sobrescribir sendText para feedback háptico
+const originalSendText = window.sendText;
+window.sendText = function() {
+  const inp = document.getElementById("msg-input");
+  const txt = inp.value.trim();
+  if (!txt || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+  // Añadir feedback háptico al enviar mensaje
+  const rect = inp.getBoundingClientRect();
+  hapticFeedback.pulseAt(
+    rect.left + rect.width / 2,
+    rect.top + rect.height / 2,
+    0.5
+  );
+
+  // Llamar a la función original
+  return originalSendText.apply(this, arguments);
+};
+
+// Sobrescribir sendQuick para feedback háptico
+const originalSendQuick = window.sendQuick;
+window.sendQuick = function(txt) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    showToast("Sin conexión a Alberth", 2500); return;
+  }
+
+  // Encontrar el botón que llamó a esta función (aproximación)
+  // En una implementación real, pasaríamos el elemento directamente
+  hapticFeedback.pulseAt(
+    window.innerWidth / 2,
+    window.innerHeight * 0.8,
+    0.3
+  );
+
+  // Llamar a la función original
+  return originalSendQuick.apply(this, arguments);
+};
+
+// Añadir estilo para los efectos de atención y mejoras de transición
+const style = document.createElement('style');
+style.textContent = `
+  [data-attention-id] {
+    transition: all 0.3s ease;
+  }
+
+  [data-attention-id][style*="--attention-glow"] {
+    box-shadow: var(--attention-glow);
+    transform: translateY(-2px);
+  }
+
+  [data-attention-id][style*="--pre-activate"] {
+    filter: brightness(1.1);
+  }
+
+  /* Mejora de transiciones y micro-interacciones */
+  .quick-btn, .sys-btn, button, [role="button"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .msg-bubble {
+    transition: all 0.3s ease;
+  }
+
+  .msg-bubble:hover {
+    transform: translateX(-3px);
+  }
+
+  .btn-send, .btn-mic {
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-send:active {
+    transform: scale(0.95);
+  }
+
+  .btn-mic:active {
+    transform: scale(0.95);
+  }
+`;
+document.head.appendChild(style);
+
+// Añadir atributos de seguimiento a elementos interactivos
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.quick-btn, .sys-btn, button, [role="button"]').forEach((el, index) => {
+    el.dataset.attentionId = `ui-${index}`;
+  });
+});
+
+// Inicializar dimensiones y crear canvas para feedback háptico
+const hapticCanvas = document.createElement('canvas');
+hapticCanvas.id = 'haptic-canvas';
+hapticCanvas.style.position = 'fixed';
+hapticCanvas.style.top = '0';
+hapticCanvas.style.left = '0';
+hapticCanvas.style.width = '100%';
+hapticCanvas.style.height = '100%';
+hapticCanvas.style.pointerEvents = 'none';
+hapticCanvas.style.zIndex = '999';
+document.body.appendChild(hapticCanvas);
+
+// Inicializar sistemas
+const contextAware = new ContextAwareInterface();
+
+// Función de renderizado para el canvas de feedback háptico
+function renderHapticFeedback() {
+  const canvas = document.getElementById('haptic-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hapticFeedback.update();
+    hapticFeedback.render(ctx);
+  }
+  requestAnimationFrame(renderHapticFeedback);
+}
+
+// Iniciar renderizado
+requestAnimationFrame(renderHapticFeedback);
+
+// Inicializar el visualizador de onda neuronal (reemplazando el existente)
+const voiceCanvas = document.getElementById('voice-canvas');
+if (voiceCanvas) {
+  const neuralVisualizer = new NeuralNetworkVisualizer(voiceCanvas);
+  
+  // Sobrescribir la función de dibujo de onda existente
+  const originalDrawWaveAnimation = window.drawWaveAnimation;
+  window.drawWaveAnimation = function() {
+    requestAnimationFrame(drawWaveAnimation);
+    
+    const w = voiceCanvas.width;
+    const h = voiceCanvas.height;
+    ctxWave.clearRect(0, 0, w, h);
+    
+    // Simular datos de audio para el visualizador neural
+    // En una implementación real, usaríamos los datos reales de audio
+    const fakeAudioData = new Float32Array(128);
+    for (let i = 0; i < fakeAudioData.length; i++) {
+      fakeAudioData[i] = (Math.random() * 2 - 1) * 0.5; // Ruido blanco suave
+    }
+    
+    neuralVisualizer.update(fakeAudioData);
+    neuralVisualizer.render();
+    
+    // Dibujar las ondas originales por debajo
+    waveWaves.forEach(wave => {
+      ctxWave.beginPath();
+      ctxWave.lineWidth = wave.width * window.devicePixelRatio;
+      
+      let strokeColor = wave.color;
+      if (currentSource === "mic") {
+        strokeColor = wave.color.replace("74, 240, 255", "255, 90, 90").replace("240, 192, 96", "255, 140, 90");
+      } else if (currentSource === "speaker") {
+        strokeColor = wave.color.replace("74, 240, 255", "240, 192, 96").replace("0.3", "0.5");
+      }
+      
+      ctxWave.strokeStyle = strokeColor;
+      
+      for (let x = 0; x < w; x++) {
+        let normX = x / w;
+        let envelope = Math.sin(normX * Math.PI);
+        
+        let angle = (normX * Math.PI * 2 * (1 / wave.freq)) + wave.phase;
+        let y = (h / 2) + Math.sin(angle) * baseAmp * wave.ampMult * envelope;
+        
+        if (x === 0) ctxWave.moveTo(x, y);
+        else ctxWave.lineTo(x, y);
+      }
+      ctxWave.stroke();
+      
+      let speed = currentSource === "idle" ? wave.phaseSpeed : wave.phaseSpeed * 2.5;
+      wave.phase += speed;
+    });
+  };
+}
+setInterval(() => sendWS({ type: "ping" }), 30000);
+</script>
+
+</body>
+</html>

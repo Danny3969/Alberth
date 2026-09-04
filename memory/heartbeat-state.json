@@ -1,0 +1,18 @@
+{
+  "lastHeartbeat": "2026-07-14T10:59:00-05:00",
+  "lastChecks": {
+    "email": "2026-07-13T14:07:00-05:00",
+    "calendar": "2026-07-13T14:07:00-05:00",
+    "weather": "2026-07-16T23:30:00-05:00", 
+    "memory_review": "2026-07-14T10:17:00-05:00"
+  },
+  "notes": {
+    "mem0_quota_exceeded": "Mem0 search quota reached (1000/1000). Resets 2026-08-01.",
+    "gog_not_configured": "gog CLI requires OAuth setup. Email and calendar checks unavailable until configured.",
+    "email_fallback": null,
+    "cron_duplication_alert": "CRITICAL: ~40+ duplicate persistent-memory-hygiene cron jobs detected. All fire at 23:00 daily, all failing with 'LLM request failed' or 'gateway restart' errors. Massive resource waste. Cleanup requires Señor's authorization.",
+    "disk_ok": "466GB total, 108GB available (11% used)",
+    "load_ok": "Load avg 3.17 — moderate but acceptable",
+    "weather_ok": "Nublado, 24°C, viento 8km/h, 78% humedad, sin lluvias. Noche tranquila en Guayaquil."
+  }
+}

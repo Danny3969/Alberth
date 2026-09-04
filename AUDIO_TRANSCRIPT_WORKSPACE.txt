@@ -1,0 +1,37 @@
+# TRANSCRIPCIÓN DE AUDIO - WORKSPACE ALBERTH
+## Fecha: 2026-07-17 08:51 GMT-5
+## Contexto previo: El Señor Danny ha mencionado múltiples veces la necesidad de transcribir un audio específico.
+## Últimas expresiones registradas:
+- "See, we have a hidden on this. Think I have a video. Okay. Okay."
+- "I'm sorry."
+- "But you have to take the audio."
+- "Transcribe the audio. But no do not consider that. But there are 96 players without accepting. That's rare. That's not to play all the results."
+- "I have a question."
+- "Thank you. Uy, ya estoy como..."
+- "No, I can't hear it. All right. So, my stomach goes."
+
+## Contexto adicional contextual:
+- El Señor mencionó "I have a question" como audio clave a transcribir.
+- Comentó sobre "55 players" y "Amy" con "50" o "30" en algún conteo.
+- Habló de "gestos", "voces", BOM (Bonos), premios (primero, segundo, tercer lugar).
+- También mencionó "video", "hidden", y comportamiento de audio.
+
+## Estado actual:
+- El audio real no ha sido localizado automáticamente.
+- Se intentó acceder a Mensajes.app, Notas.app y carpetas locales, sin éxito directo.
+- El Señor ha dado expresiones verbales/espontáneas con fragmentos de audio.
+- Necesitamos clarificar: ¿Se refiere a un archivo guardado (.m4a, .mp3, .wav) o a una locución momentánea?
+
+## Siguientes pasos propuestos:
+1. **Confirmar tipo de audio**: ¿Es un archivo guardado en su Mac, un mensaje de voz en Signal/Telegram/WhatsApp, o una expresión en vivo grabada momentáneamente?
+2. **Ubicar fuente exacta**: Si es mensaje de voz, indicar la app donde está guardado para acceder y extraer.
+3. **Priorizar acción**: Transcribir SOLO el audio que llamó "I have a question" o el conjunto de fragmentos registrados en este workspace.
+4. **Alternativa rápida**: Si el audio está en el teléfono Android, puedo usar la skill "imsg" para acceder a archivos multimedia recientes o usar "node-connect" para revisar carpetas compartidas.
+
+## Notas importantes:
+- El audio "I have a question" apareció en el contexto como clave.
+- Si el Señor desea solo transcribir ese segmento específico en lugar del audio completo (que puede contener ruido), por favor indicarlo.
+- También puedo guiar para usar Quick Look (espacio) en Mac si el archivo está en Descargas.
+
+---
+*Registro creado por Alberth para abordar la solicitud del Señor Danny de manera clara y enfocada.*

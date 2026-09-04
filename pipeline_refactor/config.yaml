@@ -1,0 +1,48 @@
+paths:
+  workspace_dir: "$HOME/.openclaw/workspace"
+  voice_dir: "$HOME/.openclaw/workspace/voice_exchange"
+  input_dir: "$HOME/.openclaw/workspace/voice_exchange/input"
+  output_dir: "$HOME/.openclaw/workspace/voice_exchange/output"
+  log_dir: "$HOME/.openclaw/workspace/voice_exchange/logs"
+  lock_file: "$HOME/.openclaw/workspace/voice_exchange/.alberth.lock"
+
+service_timeouts:
+  stt_cloud: 25
+  stt_local: 30
+  talamo: 10
+  helper: 15
+  agent: 60
+  tts: 20
+
+circuit_breaker:
+  stt_cloud:
+    failure_threshold: 3
+    recovery_timeout: 30
+    timeout: 25
+  stt_local:
+    failure_threshold: 3
+    recovery_timeout: 30
+    timeout: 30
+  agent:
+    failure_threshold: 5
+    recovery_timeout: 30
+    timeout: 60
+  tts:
+    failure_threshold: 3
+    recovery_timeout: 30
+    timeout: 20
+  helper:
+    failure_threshold: 3
+    recovery_timeout: 30
+    timeout: 15
+
+cache:
+  ttl_seconds: 180
+  maxsize: 500
+
+metrics:
+  port: 9090
+
+wakeword:
+  enabled: true
+  session_timeout: 45
