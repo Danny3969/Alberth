@@ -21,7 +21,7 @@ import sounddevice as sd
 import webrtcvad
 
 # ── Configuración ──────────────────────────────────────────────────────────────
-WORKSPACE_DIR = "/Users/digitalspace/.openclaw/workspace"
+WORKSPACE_DIR = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 INPUT_DIR     = os.path.join(WORKSPACE_DIR, "voice_exchange", "input")
 
 SAMPLE_RATE    = 16000   # Hz — requerido por webrtcvad

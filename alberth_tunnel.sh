@@ -4,7 +4,8 @@
 # Abre un túnel rápido de Cloudflare y muestra la URL pública.
 # =============================================================================
 
-WORKSPACE_DIR="/Users/digitalspace/.openclaw/workspace"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_DIR="${OPENCLAW_WORKSPACE:-$SCRIPT_DIR}"
 LOG_DIR="$WORKSPACE_DIR/logs"
 mkdir -p "$LOG_DIR"
 TUNNEL_LOG="$LOG_DIR/alberth_tunnel.log"

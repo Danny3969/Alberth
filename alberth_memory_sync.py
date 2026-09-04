@@ -4,12 +4,13 @@
 # Integra memoria semántica Mem0 + memoria de trabajo activa + MEMORY.md
 # =============================================================================
 
+import os
 import sys
 import json
 import time
 from pathlib import Path
 
-WORKSPACE = Path("/Users/digitalspace/.openclaw/workspace")
+WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or Path(__file__).parent.resolve())
 MEMORY_MD = WORKSPACE / "MEMORY.md"
 
 def sync_memory_summary():

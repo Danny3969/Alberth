@@ -32,7 +32,7 @@ import signal
 import argparse
 
 # ── Configuración ─────────────────────────────────────────────────────────────
-WORKSPACE_DIR    = "/Users/digitalspace/.openclaw/workspace"
+WORKSPACE_DIR    = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 VOICE_DIR        = os.path.join(WORKSPACE_DIR, "voice_exchange")
 SCREEN_CURRENT   = os.path.join(VOICE_DIR, "copilot_screen_current.jpg")
 SCREEN_PREVIOUS  = os.path.join(VOICE_DIR, "copilot_screen_previous.jpg")

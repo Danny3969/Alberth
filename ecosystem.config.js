@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: "alberth-web",
-      cwd: "/Users/digitalspace/.openclaw/workspace",
-      script: "/usr/local/bin/python3",
+      cwd: __dirname,
+      script: process.env.PYTHON_PATH || "python3",
       args: "alberth_web_server.py",
       interpreter: "none",
       autorestart: true,
@@ -11,8 +11,8 @@ module.exports = {
     },
     {
       name: "alberth-voice",
-      cwd: "/Users/digitalspace/.openclaw/workspace",
-      script: "/usr/local/bin/python3",
+      cwd: __dirname,
+      script: process.env.PYTHON_PATH || "python3",
       args: "alberth_voice_server.py",
       interpreter: "none",
       autorestart: true,
@@ -20,8 +20,8 @@ module.exports = {
     },
     {
       name: "alberth-reminders",
-      cwd: "/Users/digitalspace/.openclaw/workspace",
-      script: "/usr/local/bin/python3",
+      cwd: __dirname,
+      script: process.env.PYTHON_PATH || "python3",
       args: "alberth_reminders_daemon.py",
       interpreter: "none",
       autorestart: true,
@@ -29,8 +29,8 @@ module.exports = {
     },
     {
       name: "alberth-qa-watcher",
-      cwd: "/Users/digitalspace/.openclaw/workspace",
-      script: "/usr/local/bin/python3",
+      cwd: __dirname,
+      script: process.env.PYTHON_PATH || "python3",
       args: "alberth_qa_watcher.py",
       interpreter: "none",
       autorestart: true,

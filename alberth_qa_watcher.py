@@ -12,7 +12,7 @@ import time
 import subprocess
 from pathlib import Path
 
-WORKSPACE = Path("/Users/digitalspace/.openclaw/workspace")
+WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or Path(__file__).parent.resolve())
 STATE_FILE = WORKSPACE / "qa_state.json"
 TTS_SCRIPT = WORKSPACE / "alberth_tts_premium.py"
 OUTPUT_DIR = WORKSPACE / "voice_exchange" / "output"

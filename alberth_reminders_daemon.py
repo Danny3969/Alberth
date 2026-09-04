@@ -13,7 +13,7 @@ import time
 import subprocess
 import json
 
-WORKSPACE_DIR   = "/Users/digitalspace/.openclaw/workspace"
+WORKSPACE_DIR   = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 MEMORY_SCRIPT   = os.path.join(WORKSPACE_DIR, "alberth_memory.py")
 TTS_SCRIPT      = os.path.join(WORKSPACE_DIR, "alberth_tts_premium.py")
 LOG_DIR         = os.path.join(WORKSPACE_DIR, "voice_exchange", "logs")
