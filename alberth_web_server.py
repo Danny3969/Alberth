@@ -514,6 +514,36 @@ async def export_qa_logs(format: str = "json"):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ── Integración con Calendario & DND ───────────────────────────────────────────
+@app.get("/api/calendar/status")
+async def get_calendar_status():
+    """Retorna el estado de reuniones del sistema para Auto-DND por calendario."""
+    try:
+        res = subprocess.run(
+            ["pgrep", "-i", "-f", "zoom|teams|slack|webex"],
+            capture_output=True, text=True, timeout=2
+        )
+        in_meeting = (res.returncode == 0 and len(res.stdout.strip()) > 0)
+
+        cal_file = WORKSPACE / "calendar_state.json"
+        meeting_event = ""
+        if cal_file.exists():
+            try:
+                data = json.loads(cal_file.read_text(encoding="utf-8"))
+                if data.get("in_meeting"):
+                    in_meeting = True
+                    meeting_event = data.get("current_event", "")
+            except Exception: pass
+
+        return JSONResponse({
+            "ok": True,
+            "in_meeting": in_meeting,
+            "event": meeting_event or ("Reunión activa detectada" if in_meeting else "Sin reuniones de calendario"),
+            "timestamp": time.strftime("%H:%M:%S")
+        })
+    except Exception as e:
+        return JSONResponse({"ok": False, "in_meeting": False, "detail": str(e)})
+
 # ── Canal Bidireccional Mac → APK ─────────────────────────────────────────────
 class PhoneCommand(BaseModel):
     action: str          # e.g. "call", "sms", "notification", "volume", "camera"
