@@ -201,9 +201,35 @@ def _init_schema(conn: sqlite3.Connection):
             device_id   TEXT DEFAULT 'local'
         );
 
+        CREATE TABLE IF NOT EXISTS antigravity_tasks (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp        TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
+            task_description TEXT    NOT NULL,
+            session_id       TEXT    UNIQUE,
+            status           TEXT    DEFAULT 'pending',
+            output_summary   TEXT    DEFAULT '',
+            mode             TEXT    DEFAULT 'goal'
+        );
+
+        CREATE TABLE IF NOT EXISTS antigravity_learning (
+            id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp          TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
+            correction_type    TEXT    NOT NULL DEFAULT 'user_correction',
+            original_behavior  TEXT    DEFAULT '',
+            corrected_behavior TEXT    NOT NULL,
+            learned_rule       TEXT    NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS dnd_settings (
+            key                TEXT PRIMARY KEY,
+            value              TEXT NOT NULL,
+            updated_at         TEXT DEFAULT (datetime('now', 'localtime'))
+        );
+
         CREATE INDEX IF NOT EXISTS idx_conv_timestamp ON conversations(timestamp DESC);
         CREATE INDEX IF NOT EXISTS idx_conv_hash      ON conversations(query_hash);
         CREATE INDEX IF NOT EXISTS idx_rem_trigger    ON reminders(trigger_at) WHERE status = 'pending';
+        CREATE INDEX IF NOT EXISTS idx_agy_tasks_time ON antigravity_tasks(timestamp DESC);
     """)
     # Migraciones seguras para columnas añadidas
     for alter_stmt in [
@@ -527,6 +553,142 @@ def clear_old_entries(days: int = DEFAULT_RETENTION_DAYS):
         conn.commit()
         log(f"Limpieza: {deleted} conversaciones eliminadas (>{days} días)")
         return deleted
+    finally:
+        conn.close()
+
+
+# ── Antigravity Task History & Parallel Sessions ──────────────────────────────
+
+def record_antigravity_task(task_description: str, session_id: str, status: str = "pending", output_summary: str = "", mode: str = "goal") -> dict:
+    """Guarda una tarea delegada a Antigravity en el historial."""
+    conn = get_db()
+    try:
+        conn.execute("""
+            INSERT INTO antigravity_tasks (task_description, session_id, status, output_summary, mode)
+            VALUES (?, ?, ?, ?, ?)
+        """, (task_description, session_id, status, output_summary, mode))
+        conn.commit()
+        log(f"📌 Tarea Antigravity registrada [{session_id}]: {task_description[:50]}...")
+        return {"session_id": session_id, "status": status, "task_description": task_description}
+    except Exception as e:
+        log(f"Error registrando tarea Antigravity: {e}")
+        return {"session_id": session_id, "status": "error", "error": str(e)}
+    finally:
+        conn.close()
+
+
+def update_antigravity_task(session_id: str, status: str, output_summary: str = None):
+    """Actualiza el estado y el resumen de salida de una tarea delegada."""
+    conn = get_db()
+    try:
+        if output_summary is not None:
+            conn.execute("""
+                UPDATE antigravity_tasks
+                SET status = ?, output_summary = ?
+                WHERE session_id = ?
+            """, (status, output_summary, session_id))
+        else:
+            conn.execute("""
+                UPDATE antigravity_tasks
+                SET status = ?
+                WHERE session_id = ?
+            """, (status, session_id))
+        conn.commit()
+        log(f"🔄 Tarea Antigravity actualizada [{session_id}] -> {status}")
+    except Exception as e:
+        log(f"Error actualizando tarea Antigravity: {e}")
+    finally:
+        conn.close()
+
+
+def get_antigravity_tasks(limit: int = 30) -> list:
+    """Obtiene el historial de tareas delegadas a Antigravity."""
+    conn = get_db()
+    try:
+        rows = conn.execute("""
+            SELECT id, timestamp, task_description, session_id, status, output_summary, mode
+            FROM antigravity_tasks
+            ORDER BY id DESC
+            LIMIT ?
+        """, (limit,)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        log(f"Error consultando historial de Antigravity: {e}")
+        return []
+    finally:
+        conn.close()
+
+
+# ── Aprendizaje de Patrones de Antigravity ────────────────────────────────────
+
+def record_antigravity_learning(correction_type: str, original_behavior: str, corrected_behavior: str, learned_rule: str) -> dict:
+    """Registra una corrección del usuario para que Antigravity aprenda el patrón."""
+    conn = get_db()
+    try:
+        conn.execute("""
+            INSERT INTO antigravity_learning (correction_type, original_behavior, corrected_behavior, learned_rule)
+            VALUES (?, ?, ?, ?)
+        """, (correction_type, original_behavior, corrected_behavior, learned_rule))
+        conn.commit()
+        log(f"🧠 Aprendizaje Antigravity registrado: {learned_rule[:60]}...")
+        return {"learned_rule": learned_rule, "status": "ok"}
+    except Exception as e:
+        log(f"Error registrando aprendizaje Antigravity: {e}")
+        return {"status": "error", "error": str(e)}
+    finally:
+        conn.close()
+
+
+def get_antigravity_learning(limit: int = 50) -> list:
+    """Obtiene las reglas y patrones aprendidos por Antigravity a partir de correcciones."""
+    conn = get_db()
+    try:
+        rows = conn.execute("""
+            SELECT id, timestamp, correction_type, original_behavior, corrected_behavior, learned_rule
+            FROM antigravity_learning
+            ORDER BY id DESC
+            LIMIT ?
+        """, (limit,)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        log(f"Error obteniendo aprendizajes de Antigravity: {e}")
+        return []
+    finally:
+        conn.close()
+
+
+# ── Configuración de DND (Apps & Timezones) ───────────────────────────────────
+
+def set_dnd_setting(key: str, value: str):
+    """Guarda o actualiza un ajuste de DND."""
+    conn = get_db()
+    try:
+        conn.execute("""
+            INSERT INTO dnd_settings (key, value, updated_at)
+            VALUES (?, ?, datetime('now', 'localtime'))
+            ON CONFLICT(key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = datetime('now', 'localtime')
+        """, (key, value))
+        conn.commit()
+        log(f"⚙️ DND setting actualizado: {key} = {value}")
+    except Exception as e:
+        log(f"Error guardando DND setting {key}: {e}")
+    finally:
+        conn.close()
+
+
+def get_dnd_setting(key: str, default_val: str = "") -> str:
+    """Obtiene el valor de una configuración de DND."""
+    conn = get_db()
+    try:
+        row = conn.execute("SELECT value FROM dnd_settings WHERE key = ?", (key,)).fetchone()
+        if row:
+            return row["value"]
+        return default_val
+    except Exception as e:
+        log(f"Error obteniendo DND setting {key}: {e}")
+        return default_val
     finally:
         conn.close()
 

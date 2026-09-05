@@ -544,6 +544,192 @@ async def get_calendar_status():
     except Exception as e:
         return JSONResponse({"ok": False, "in_meeting": False, "detail": str(e)})
 
+
+# ── Antigravity Architecture APIs (Capa 2 Native SDK & Sessions) ─────────────
+class AntigravityTaskPayload(BaseModel):
+    task: str
+    mode: Optional[str] = "goal"
+
+class AntigravityLearningPayload(BaseModel):
+    correction_type: str = "user_correction"
+    original_behavior: Optional[str] = ""
+    corrected_behavior: str
+    learned_rule: str
+
+@app.get("/api/antigravity/tasks")
+async def get_antigravity_tasks():
+    """Retorna el historial de tareas delegadas a Antigravity."""
+    try:
+        import alberth_memory as memory
+        tasks = memory.get_antigravity_tasks(limit=30)
+        return JSONResponse({"ok": True, "tasks": tasks})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/antigravity/delegate")
+async def delegate_antigravity_task(payload: AntigravityTaskPayload, _: None = Depends(require_token)):
+    """Delega una tarea síncrona/secuencial a Antigravity Nativo."""
+    try:
+        from agente_antigravity_sdk import AntigravityNativeAgent
+        agent = AntigravityNativeAgent()
+        res = await agent.delegate_task(payload.task, mode=payload.mode or "goal")
+        return JSONResponse({"ok": True, "result": res})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/antigravity/parallel")
+async def launch_antigravity_parallel(payload: AntigravityTaskPayload, _: None = Depends(require_token)):
+    """Delega una tarea en paralelo (segundo plano) a Antigravity."""
+    try:
+        from agente_antigravity_sdk import AntigravityParallelManager
+        session_id = AntigravityParallelManager.launch_task_in_background(payload.task, mode=payload.mode or "goal")
+        return JSONResponse({"ok": True, "session_id": session_id, "message": "Tarea lanzada en paralelo a Antigravity"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/antigravity/sessions")
+async def get_antigravity_sessions():
+    """Retorna las sesiones múltiples activas en paralelo de Antigravity."""
+    try:
+        from agente_antigravity_sdk import AntigravityParallelManager
+        sessions = AntigravityParallelManager.get_active_sessions()
+        return JSONResponse({"ok": True, "sessions": sessions})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/antigravity/learning")
+async def get_antigravity_learning_rules():
+    """Obtiene el historial de reglas y patrones aprendidos por Antigravity."""
+    try:
+        import alberth_memory as memory
+        rules = memory.get_antigravity_learning(limit=50)
+        return JSONResponse({"ok": True, "learning_rules": rules})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/antigravity/learning")
+async def record_antigravity_learning_rule(payload: AntigravityLearningPayload, _: None = Depends(require_token)):
+    """Registra una corrección del usuario para aprendizaje de patrones."""
+    try:
+        import alberth_memory as memory
+        res = memory.record_antigravity_learning(
+            payload.correction_type,
+            payload.original_behavior or "",
+            payload.corrected_behavior,
+            payload.learned_rule
+        )
+        return JSONResponse({"ok": True, "result": res})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── DND Avanzado por Aplicación y Zona Horaria ────────────────────────────────
+class DndAppsPayload(BaseModel):
+    apps: List[str]
+
+class DndTimezonePayload(BaseModel):
+    start_time: str = "23:00"
+    end_time: str = "07:00"
+    timezone: str = "America/Bogota"
+    enabled: bool = False
+
+@app.get("/api/dnd/apps")
+async def get_dnd_apps():
+    """Retorna la lista de aplicaciones silenciadas en DND."""
+    try:
+        import alberth_memory as memory
+        val = memory.get_dnd_setting("dnd_apps", '["Slack", "Teams", "Discord"]')
+        apps = json.loads(val)
+        return JSONResponse({"ok": True, "apps": apps})
+    except Exception as e:
+        return JSONResponse({"ok": True, "apps": ["Slack", "Teams", "Discord"]})
+
+@app.post("/api/dnd/apps")
+async def set_dnd_apps(payload: DndAppsPayload, _: None = Depends(require_token)):
+    """Guarda la lista de apps silenciadas por DND."""
+    try:
+        import alberth_memory as memory
+        memory.set_dnd_setting("dnd_apps", json.dumps(payload.apps))
+        return JSONResponse({"ok": True, "apps": payload.apps})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dnd/timezone_config")
+async def get_dnd_timezone_config():
+    """Retorna la configuración de DND por zona horaria."""
+    try:
+        import alberth_memory as memory
+        val = memory.get_dnd_setting("dnd_tz_config", json.dumps({
+            "start_time": "23:00",
+            "end_time": "07:00",
+            "timezone": "America/Bogota",
+            "enabled": False
+        }))
+        cfg = json.loads(val)
+        return JSONResponse({"ok": True, "config": cfg})
+    except Exception as e:
+        return JSONResponse({"ok": True, "config": {"start_time": "23:00", "end_time": "07:00", "timezone": "America/Bogota", "enabled": False}})
+
+@app.post("/api/dnd/timezone_config")
+async def set_dnd_timezone_config(payload: DndTimezonePayload, _: None = Depends(require_token)):
+    """Guarda la configuración de horas y zona horaria personalizadas para DND."""
+    try:
+        import alberth_memory as memory
+        cfg = payload.model_dump()
+        memory.set_dnd_setting("dnd_tz_config", json.dumps(cfg))
+        return JSONResponse({"ok": True, "config": cfg})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Alertas de Pico Anómalo QA (Análisis Predictivo) ──────────────────────────
+@app.get("/api/qa/predictive_alerts")
+async def get_qa_predictive_alerts():
+    """Analiza la densidad histórica de alertas QA y detecta si hay un pico anómalo actual."""
+    try:
+        import alberth_memory as memory
+        logs_file = WORKSPACE / "logs" / "audit_logs.jsonl"
+        items = []
+        if logs_file.exists():
+            with open(logs_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        try: items.append(json.loads(line))
+                        except: pass
+
+        hour_counts = [0] * 24
+        for it in items:
+            ts_str = it.get("timestamp", "")
+            if len(ts_str) >= 13 and "T" in ts_str:
+                try:
+                    hr = int(ts_str.split("T")[1].split(":")[0])
+                    if 0 <= hr < 24:
+                        hour_counts[hr] += 1
+                except: pass
+
+        avg_per_hour = sum(hour_counts) / 24.0 if sum(hour_counts) > 0 else 1.0
+        current_hr = int(time.strftime("%H"))
+        current_count = hour_counts[current_hr]
+
+        # Detectar pico si la hora actual supera en >1.8x el promedio
+        is_spike = current_count >= (avg_per_hour * 1.8) and current_count >= 3
+        spike_pct = round(((current_count - avg_per_hour) / avg_per_hour) * 100, 1) if avg_per_hour > 0 else 0.0
+
+        max_hr = hour_counts.index(max(hour_counts)) if hour_counts else current_hr
+
+        return JSONResponse({
+            "ok": True,
+            "has_anomaly": is_spike,
+            "current_hour": f"{current_hr:02d}:00",
+            "current_count": current_count,
+            "baseline_avg": round(avg_per_hour, 1),
+            "spike_percentage": max(0.0, spike_pct),
+            "predicted_peak_hour": f"{max_hr:02d}:00",
+            "alert_message": f"⚠️ Pico anómalo detectado ({current_count} alertas a las {current_hr:02d}:00h, +{spike_pct}% sobre la media)" if is_spike else "🟢 Densidad de alertas QA dentro del rango normal"
+        })
+    except Exception as e:
+        return JSONResponse({"ok": False, "has_anomaly": False, "detail": str(e)})
+
 # ── Canal Bidireccional Mac → APK ─────────────────────────────────────────────
 class PhoneCommand(BaseModel):
     action: str          # e.g. "call", "sms", "notification", "volume", "camera"

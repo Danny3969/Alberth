@@ -357,6 +357,44 @@
       border-left: 3px solid var(--cyan);
     }
     .queue-item.critico { border-left-color: var(--red); background: rgba(239, 68, 68, 0.08); }
+
+    .agy-toggle-btn {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: var(--purple);
+      padding: 2px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .agy-toggle-btn:hover { background: rgba(168, 85, 247, 0.28); }
+
+    .dnd-apps-btn {
+      background: rgba(249, 115, 22, 0.15);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      color: var(--orange);
+      padding: 2px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .dnd-apps-btn:hover { background: rgba(249, 115, 22, 0.28); }
+
+    .agy-task-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-left: 3px solid var(--purple);
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .agy-task-card.completed { border-left-color: var(--green); }
+    .agy-task-card.running { border-left-color: var(--cyan); }
+    .agy-task-card.failed { border-left-color: var(--red); }
   </style>
 </head>
 <body>
@@ -369,6 +407,8 @@
       </div>
       <div class="badge-group">
         <span class="privacy-badge" id="privacyBadge">🛡️ CONFIDENCIAL</span>
+        <span class="agy-toggle-btn" id="agyHubBtn" title="Antigravity Task Hub & Parallel Sessions">🚀 ANTIGRAVITY</span>
+        <span class="dnd-apps-btn" id="dndAppsBtn" title="DND por App y Zona Horaria">⚙️ DND APPS</span>
         <span class="queue-badge" id="queueBtn" title="Ver Cola Offline">⚡ COLA (0)</span>
         <span class="dnd-badge" id="dndBtn" title="Modo No Molestar">🔔 DND: OFF</span>
         <span class="qa-toggle-btn" id="qaHistoryBtn" title="Historial QA">QA (0)</span>
@@ -411,6 +451,7 @@
         <div class="export-btns">
           <button class="exp-btn" onclick="exportQAJSON()">📥 JSON</button>
           <button class="exp-btn" onclick="exportQACSV()">📥 CSV</button>
+          <button class="exp-btn" style="background:rgba(168,85,247,0.2); color:var(--purple); border-color:rgba(168,85,247,0.4);" onclick="exportQAChartImage()">📸 PNG</button>
         </div>
       </div>
       <!-- Severity Distribution & Predictive Trend Canvas Chart -->
@@ -422,6 +463,94 @@
         </div>
       </div>
       <div id="qaItemsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+
+    <!-- Antigravity Task Hub & Pattern Learning Drawer -->
+    <div class="drawer-container" id="antigravityDrawer">
+      <div class="drawer-header">
+        <div class="filter-tabs">
+          <button class="tab-btn active" id="agyTabTasks" onclick="switchAgyTab('tasks')">📌 Tareas</button>
+          <button class="tab-btn" id="agyTabParallel" onclick="switchAgyTab('parallel')">⚡ Sesiones Paralelas</button>
+          <button class="tab-btn" id="agyTabLearn" onclick="switchAgyTab('learn')">🧠 Aprendizaje</button>
+        </div>
+        <button class="exp-btn" onclick="loadAntigravityData()">🔄 Refrescar</button>
+      </div>
+
+      <!-- Tab Content 1: Tareas Delegadas -->
+      <div id="agyTasksSection" style="display:flex; flex-direction:column; gap:6px;">
+        <div id="agyTaskList" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;"></div>
+      </div>
+
+      <!-- Tab Content 2: Lanzador Paralelo -->
+      <div id="agyParallelSection" style="display:none; flex-direction:column; gap:6px;">
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="agyParallelInput" style="flex:1; font-size:11px; padding:4px 8px; background:rgba(255,255,255,0.05); border:1px solid rgba(168,85,247,0.3); border-radius:6px; color:var(--text);" placeholder="Ej. Refactorizar módulo X en paralelo..." />
+          <button class="exp-btn" style="background:rgba(168,85,247,0.3); color:var(--purple);" onclick="launchParallelTaskUI()">🚀 Lanzar</button>
+        </div>
+        <div id="agyParallelSessionsList" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;"></div>
+      </div>
+
+      <!-- Tab Content 3: Aprendizaje de Patrones -->
+      <div id="agyLearnSection" style="display:none; flex-direction:column; gap:6px;">
+        <div style="display:flex; flex-direction:column; gap:4px; background:rgba(255,255,255,0.02); padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex; gap:4px;">
+            <select id="agyRuleType" style="font-size:10px; padding:2px; background:rgba(0,0,0,0.5); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px;">
+              <option value="code_style">Estilo de Código</option>
+              <option value="architecture">Arquitectura</option>
+              <option value="user_pref">Preferencia Usuario</option>
+              <option value="bug_fix">Corrección de Bug</option>
+            </select>
+            <input type="text" id="agyRuleLearned" style="flex:1; font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:var(--text);" placeholder="Regla aprendida (ej. Usar f-strings en vez de %s)" />
+          </div>
+          <div style="display:flex; gap:4px;">
+            <input type="text" id="agyRuleOriginal" style="flex:1; font-size:9px; padding:2px 6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; color:var(--text-dim);" placeholder="Comportamiento anterior (opcional)" />
+            <input type="text" id="agyRuleCorrected" style="flex:1; font-size:9px; padding:2px 6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; color:var(--text-dim);" placeholder="Comportamiento corregido" />
+            <button class="exp-btn" style="background:rgba(16,185,129,0.2); color:var(--green);" onclick="saveAgyLearningUI()">💾 Guardar</button>
+          </div>
+        </div>
+        <div id="agyLearningRulesList" style="display:flex; flex-direction:column; gap:4px; max-height:110px; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- DND por Aplicación y Zona Horaria Drawer -->
+    <div class="drawer-container" id="dndAppsDrawer">
+      <div class="drawer-header">
+        <span><b>⚙️ Configuración DND Avanzada</b></span>
+        <span style="font-size:10px; color:var(--text-dim);">Alberth NEXUS</span>
+      </div>
+      
+      <!-- Seccion DND por App -->
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <span style="font-size:10px; color:var(--orange); font-weight:600;">📱 Silenciar Aplicaciones Específicas</span>
+        <div id="dndAppsList" style="display:flex; flex-wrap:wrap; gap:6px;">
+          <label style="font-size:10px; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:4px; cursor:pointer;"><input type="checkbox" value="Slack" onchange="toggleDndAppItem('Slack', this.checked)" checked /> Slack</label>
+          <label style="font-size:10px; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:4px; cursor:pointer;"><input type="checkbox" value="Teams" onchange="toggleDndAppItem('Teams', this.checked)" checked /> Teams</label>
+          <label style="font-size:10px; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:4px; cursor:pointer;"><input type="checkbox" value="Discord" onchange="toggleDndAppItem('Discord', this.checked)" checked /> Discord</label>
+          <label style="font-size:10px; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:4px; cursor:pointer;"><input type="checkbox" value="Mail" onchange="toggleDndAppItem('Mail', this.checked)" /> Mail</label>
+          <label style="font-size:10px; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:4px; cursor:pointer;"><input type="checkbox" value="Zoom" onchange="toggleDndAppItem('Zoom', this.checked)" /> Zoom</label>
+        </div>
+      </div>
+
+      <!-- Seccion DND por Zona Horaria -->
+      <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px; border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:10px; color:var(--cyan); font-weight:600;">🌐 Silencio por Horario y Zona Horaria</span>
+          <label style="font-size:10px; color:var(--text-dim); display:flex; align-items:center; gap:4px;"><input type="checkbox" id="dndTzEnabled" onchange="saveDndTzConfigUI()" /> Activar Horario</label>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <span style="font-size:10px; color:var(--text-dim);">Inicio:</span>
+          <input type="time" id="dndStartTime" value="23:00" style="font-size:10px; padding:2px; background:rgba(0,0,0,0.4); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px;" onchange="saveDndTzConfigUI()" />
+          <span style="font-size:10px; color:var(--text-dim);">Fin:</span>
+          <input type="time" id="dndEndTime" value="07:00" style="font-size:10px; padding:2px; background:rgba(0,0,0,0.4); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px;" onchange="saveDndTzConfigUI()" />
+          <select id="dndTimezoneSelect" style="font-size:9px; padding:2px; background:rgba(0,0,0,0.4); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px;" onchange="saveDndTzConfigUI()">
+            <option value="America/Bogota">Bogotá (UTC-5)</option>
+            <option value="America/Mexico_City">Ciudad de México</option>
+            <option value="America/Argentina/Buenos_Aires">Buenos Aires</option>
+            <option value="Europe/Madrid">Madrid</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <!-- Offline Queue Drawer with Progress Bar -->
@@ -736,6 +865,274 @@
       const peakHour = (new Date().getHours() + 2) % 24;
       if (qaTrendText) qaTrendText.innerText = `📈 Tendencia QA: Pico estimado de actividad a las ${peakHour}:00h (Predicción +18%)`;
     }
+
+    // ── Exportar Gráfico Canvas de Predicción QA como Imagen PNG ──
+    window.exportQAChartImage = function() {
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 640;
+      exportCanvas.height = 140;
+      const ctx = exportCanvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#0a1220';
+      ctx.fillRect(0, 0, 640, 140);
+
+      // Header Title
+      ctx.fillStyle = '#00d4ff';
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.fillText('Alberth NEXUS — Análisis Predictivo QA (7 Días)', 16, 24);
+
+      // Timestamp
+      ctx.fillStyle = '#8b949e';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText(`Generado: ${new Date().toLocaleString()}`, 440, 24);
+
+      // Copy QA Chart onto canvas
+      ctx.drawImage(qaChartCanvas, 16, 36, 608, 64);
+
+      // Footer Legend
+      ctx.fillStyle = '#f0f6fc';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText(qaTrendText ? qaTrendText.innerText : 'Predicción de actividad QA', 16, 120);
+
+      // Trigger Download
+      const link = document.createElement('a');
+      link.download = `alberth_qa_predictions_${Date.now()}.png`;
+      link.href = exportCanvas.toDataURL('image/png');
+      link.click();
+      playBeep(880, 'sine', 0.08);
+    };
+
+    // ── Polling & Alertas de Pico Anómalo QA ──
+    async function checkPredictivePeakAlerts() {
+      try {
+        const res = await fetch('/api/qa/predictive_alerts');
+        const data = await res.json();
+        if (data.ok && data.has_anomaly) {
+          qaToast.className = 'qa-toast visible critico';
+          qaSevTag.innerText = '🔴 PICO ANÓMALO DETECTADO:';
+          qaMsg.innerText = data.alert_message;
+          playSeveritySound('critico');
+        }
+      } catch(e) {}
+    }
+    setInterval(checkPredictivePeakAlerts, 45000);
+
+    // ── Drawer Toggles (Antigravity & DND Apps) ──
+    const agyHubBtn = document.getElementById('agyHubBtn');
+    const agyDrawer = document.getElementById('antigravityDrawer');
+    const dndAppsBtn = document.getElementById('dndAppsBtn');
+    const dndAppsDrawer = document.getElementById('dndAppsDrawer');
+
+    agyHubBtn.addEventListener('click', () => {
+      const isAct = agyDrawer.classList.contains('active');
+      closeAllDrawers();
+      if (!isAct) {
+        agyDrawer.classList.add('active');
+        loadAntigravityData();
+      }
+    });
+
+    dndAppsBtn.addEventListener('click', () => {
+      const isAct = dndAppsDrawer.classList.contains('active');
+      closeAllDrawers();
+      if (!isAct) {
+        dndAppsDrawer.classList.add('active');
+        loadDndAppsConfig();
+        loadDndTzConfig();
+      }
+    });
+
+    function closeAllDrawers() {
+      qaHistoryDrawer.classList.remove('active');
+      queueDrawer.classList.remove('active');
+      if (agyDrawer) agyDrawer.classList.remove('active');
+      if (dndAppsDrawer) dndAppsDrawer.classList.remove('active');
+    }
+
+    // Update existing QA and Queue button handlers to close other drawers
+    qaHistoryBtn.addEventListener('click', () => {
+      const isAct = qaHistoryDrawer.classList.contains('active');
+      closeAllDrawers();
+      if (!isAct) qaHistoryDrawer.classList.add('active');
+    });
+    queueBtn.addEventListener('click', () => {
+      const isAct = queueDrawer.classList.contains('active');
+      closeAllDrawers();
+      if (!isAct) queueDrawer.classList.add('active');
+    });
+
+    // ── Antigravity Hub Logic ──
+    window.switchAgyTab = function(tabName) {
+      document.getElementById('agyTasksSection').style.display = tabName === 'tasks' ? 'flex' : 'none';
+      document.getElementById('agyParallelSection').style.display = tabName === 'parallel' ? 'flex' : 'none';
+      document.getElementById('agyLearnSection').style.display = tabName === 'learn' ? 'flex' : 'none';
+
+      document.getElementById('agyTabTasks').classList.toggle('active', tabName === 'tasks');
+      document.getElementById('agyTabParallel').classList.toggle('active', tabName === 'parallel');
+      document.getElementById('agyTabLearn').classList.toggle('active', tabName === 'learn');
+    };
+
+    async function loadAntigravityData() {
+      try {
+        const [resTasks, resSess, resLearn] = await Promise.all([
+          fetch('/api/antigravity/tasks').then(r=>r.json()),
+          fetch('/api/antigravity/sessions').then(r=>r.json()),
+          fetch('/api/antigravity/learning').then(r=>r.json())
+        ]);
+
+        // Render Tasks
+        const taskListEl = document.getElementById('agyTaskList');
+        if (resTasks.ok && resTasks.tasks) {
+          taskListEl.innerHTML = resTasks.tasks.length === 0 ? '<div style="opacity:0.5;">Sin tareas delegadas aún.</div>' :
+            resTasks.tasks.map(t => `
+              <div class="agy-task-card ${t.status}">
+                <div style="display:flex; justify-content:space-between; font-weight:600; color:var(--text);">
+                  <span>📌 ${t.task_description}</span>
+                  <span style="font-size:9px; opacity:0.7;">[${t.status.toUpperCase()}]</span>
+                </div>
+                <div style="font-size:9px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ID: ${t.session_id} | ${t.timestamp} | Mode: ${t.mode}
+                </div>
+              </div>
+            `).join('');
+        }
+
+        // Render Active Parallel Sessions
+        const sessListEl = document.getElementById('agyParallelSessionsList');
+        if (resSess.ok && resSess.sessions) {
+          sessListEl.innerHTML = resSess.sessions.length === 0 ? '<div style="opacity:0.5; font-size:10px;">Sin sesiones activas en paralelo.</div>' :
+            resSess.sessions.map(s => `
+              <div class="queue-item" style="border-left-color:var(--purple);">
+                <span>⚡ <b>${s.session_id}</b>: ${s.task_description}</span>
+                <span class="tab-btn active" style="color:var(--purple);">${s.status.toUpperCase()}</span>
+              </div>
+            `).join('');
+        }
+
+        // Render Pattern Learning Rules
+        const learnListEl = document.getElementById('agyLearningRulesList');
+        if (resLearn.ok && resLearn.learning_rules) {
+          learnListEl.innerHTML = resLearn.learning_rules.length === 0 ? '<div style="opacity:0.5; font-size:10px;">Sin reglas aprendidas aún.</div>' :
+            resLearn.learning_rules.map(r => `
+              <div style="background:rgba(255,255,255,0.03); padding:4px 6px; border-radius:4px; border-left:2px solid var(--green); font-size:10px;">
+                <b>[${r.correction_type}]</b> ${r.learned_rule}
+              </div>
+            `).join('');
+        }
+
+      } catch(e) {}
+    }
+
+    window.loadAntigravityData = loadAntigravityData;
+
+    window.launchParallelTaskUI = async function() {
+      const input = document.getElementById('agyParallelInput');
+      const val = input.value.trim();
+      if (!val) return;
+      try {
+        const res = await fetch('/api/antigravity/parallel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: val, mode: 'goal' })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          input.value = '';
+          appendBubble('alberth', `🚀 Tarea enviada en paralelo a Antigravity [Session: ${data.session_id}]`);
+          loadAntigravityData();
+        }
+      } catch(e) {}
+    };
+
+    window.saveAgyLearningUI = async function() {
+      const type = document.getElementById('agyRuleType').value;
+      const learned = document.getElementById('agyRuleLearned').value.trim();
+      const orig = document.getElementById('agyRuleOriginal').value.trim();
+      const corr = document.getElementById('agyRuleCorrected').value.trim();
+
+      if (!learned || !corr) {
+        alert('Por favor completa la regla aprendida y el comportamiento corregido.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/antigravity/learning', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ correction_type: type, original_behavior: orig, corrected_behavior: corr, learned_rule: learned })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('agyRuleLearned').value = '';
+          document.getElementById('agyRuleOriginal').value = '';
+          document.getElementById('agyRuleCorrected').value = '';
+          loadAntigravityData();
+          appendBubble('alberth', `🧠 Regla de patrón enseñada a Antigravity: "${learned}"`);
+        }
+      } catch(e) {}
+    };
+
+    // ── DND Apps & Timezone Config Logic ──
+    let activeDndApps = ['Slack', 'Teams', 'Discord'];
+
+    async function loadDndAppsConfig() {
+      try {
+        const res = await fetch('/api/dnd/apps');
+        const data = await res.json();
+        if (data.ok && data.apps) {
+          activeDndApps = data.apps;
+          document.querySelectorAll('#dndAppsList input[type="checkbox"]').forEach(cb => {
+            cb.checked = activeDndApps.includes(cb.value);
+          });
+        }
+      } catch(e) {}
+    }
+
+    window.toggleDndAppItem = async function(appName, isChecked) {
+      if (isChecked) {
+        if (!activeDndApps.includes(appName)) activeDndApps.push(appName);
+      } else {
+        activeDndApps = activeDndApps.filter(a => a !== appName);
+      }
+      try {
+        await fetch('/api/dnd/apps', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apps: activeDndApps })
+        });
+      } catch(e) {}
+    };
+
+    async function loadDndTzConfig() {
+      try {
+        const res = await fetch('/api/dnd/timezone_config');
+        const data = await res.json();
+        if (data.ok && data.config) {
+          const cfg = data.config;
+          document.getElementById('dndStartTime').value = cfg.start_time || '23:00';
+          document.getElementById('dndEndTime').value = cfg.end_time || '07:00';
+          document.getElementById('dndTimezoneSelect').value = cfg.timezone || 'America/Bogota';
+          document.getElementById('dndTzEnabled').checked = !!cfg.enabled;
+        }
+      } catch(e) {}
+    }
+
+    window.saveDndTzConfigUI = async function() {
+      const cfg = {
+        start_time: document.getElementById('dndStartTime').value,
+        end_time: document.getElementById('dndEndTime').value,
+        timezone: document.getElementById('dndTimezoneSelect').value,
+        enabled: document.getElementById('dndTzEnabled').checked
+      };
+      try {
+        await fetch('/api/dnd/timezone_config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cfg)
+        });
+      } catch(e) {}
+    };
 
     function renderQAItems() {
       const query = (qaSearchInput ? qaSearchInput.value.toLowerCase().trim() : '');
