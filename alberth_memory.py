@@ -194,6 +194,13 @@ def _init_schema(conn: sqlite3.Connection):
             created_at  TEXT    DEFAULT (datetime('now', 'localtime'))
         );
 
+        CREATE TABLE IF NOT EXISTS cmd_frequency (
+            command     TEXT PRIMARY KEY,
+            frequency   REAL DEFAULT 1.0,
+            last_used   TEXT DEFAULT (datetime('now', 'localtime')),
+            device_id   TEXT DEFAULT 'local'
+        );
+
         CREATE INDEX IF NOT EXISTS idx_conv_timestamp ON conversations(timestamp DESC);
         CREATE INDEX IF NOT EXISTS idx_conv_hash      ON conversations(query_hash);
         CREATE INDEX IF NOT EXISTS idx_rem_trigger    ON reminders(trigger_at) WHERE status = 'pending';
@@ -260,6 +267,80 @@ def mark_reminder_done(reminder_id: int):
     finally:
         conn.close()
 
+
+def record_cmd_frequency(cmd: str, device_id: str = "local"):
+    """Registra la ejecución de un comando e incrementa su frecuencia con timestamp actualizado."""
+    cmd = cmd.strip().lower()
+    if not cmd:
+        return
+    conn = get_db()
+    try:
+        conn.execute("""
+            INSERT INTO cmd_frequency (command, frequency, last_used, device_id)
+            VALUES (?, 1.0, datetime('now', 'localtime'), ?)
+            ON CONFLICT(command) DO UPDATE SET
+                frequency = frequency + 1.0,
+                last_used = datetime('now', 'localtime'),
+                device_id = excluded.device_id
+        """, (cmd, device_id))
+        conn.commit()
+    except Exception as e:
+        log(f"Error al registrar frecuencia de comando: {e}")
+    finally:
+        conn.close()
+
+
+def get_cmd_frequencies(device_id: str = None) -> dict:
+    """Obtiene el mapa de frecuencias de comandos aplicando decaimiento temporal si aplica."""
+    conn = get_db()
+    freqs = {}
+    try:
+        rows = conn.execute("""
+            SELECT command, frequency, last_used
+            FROM cmd_frequency
+            ORDER BY frequency DESC
+        """).fetchall()
+
+        now = datetime.now()
+        for r in rows:
+            cmd = r["command"]
+            freq = float(r["frequency"])
+            last_used_str = r["last_used"]
+            try:
+                last_used = datetime.strptime(last_used_str, "%Y-%m-%d %H:%M:%S")
+                days_idle = (now - last_used).total_seconds() / 86400.0
+            except Exception:
+                days_idle = 0.0
+
+            decayed_freq = round(freq * (0.95 ** days_idle), 2)
+            if decayed_freq >= 0.1:
+                freqs[cmd] = decayed_freq
+    except Exception as e:
+        log(f"Error al obtener frecuencias de comandos: {e}")
+    finally:
+        conn.close()
+    return freqs
+
+
+def decay_cmd_frequencies(decay_factor: float = 0.95) -> int:
+    """Aplica decaimiento periódico a los comandos no usados."""
+    conn = get_db()
+    updated = 0
+    try:
+        cursor = conn.execute("""
+            UPDATE cmd_frequency
+            SET frequency = ROUND(frequency * ?, 2)
+            WHERE last_used < datetime('now', '-1 day', 'localtime')
+        """, (decay_factor,))
+        updated = cursor.rowcount
+        conn.execute("DELETE FROM cmd_frequency WHERE frequency < 0.1")
+        conn.commit()
+        log(f"Decaimiento aplicado a {updated} comandos.")
+    except Exception as e:
+        log(f"Error al aplicar decaimiento: {e}")
+    finally:
+        conn.close()
+    return updated
 
 
 def _hash_query(query: str) -> str:
@@ -478,13 +559,31 @@ def main():
                         help="Busca eventos coincidentes en los audit logs")
     parser.add_argument("--weekly-summary", action="store_true",
                         help="Muestra un resumen del aprendizaje semanal")
+    parser.add_argument("--record-cmd-freq", metavar="CMD",
+                        help="Registra el uso de un comando para autocompletado")
+    parser.add_argument("--get-cmd-freq", action="store_true",
+                        help="Obtiene el mapa de frecuencias de comandos con decaimiento")
+    parser.add_argument("--decay-cmd-freq", action="store_true",
+                        help="Aplica decaimiento periódico a la frecuencia de comandos")
     parser.add_argument("--tags",    default="",
                         help="Tags para categorizar la entrada (con --save)")
     parser.add_argument("--importance", type=int, default=1,
                         help="Importancia 1-5 de la conversación (con --save)")
     args = parser.parse_args()
 
-    if args.search_audit:
+    if args.record_cmd_freq:
+        record_cmd_frequency(args.record_cmd_freq)
+        print("OK")
+
+    elif args.get_cmd_freq:
+        freqs = get_cmd_frequencies()
+        print(json.dumps(freqs, ensure_ascii=False, indent=2))
+
+    elif args.decay_cmd_freq:
+        updated = decay_cmd_frequencies()
+        print(f"Decay aplicado a {updated} comandos.")
+
+    elif args.search_audit:
         results = search_audit_logs(args.search_audit)
         print(json.dumps(results, ensure_ascii=False, indent=2))
 

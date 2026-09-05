@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alberth Floating Bar v4.3</title>
+  <title>Alberth Floating Bar v4.4</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -37,7 +37,7 @@
 
     /* Floating Bar Overlay Container */
     .floating-bar {
-      width: 580px;
+      width: 600px;
       max-width: 95vw;
       background: var(--bg-glass);
       backdrop-filter: blur(24px);
@@ -55,7 +55,8 @@
 
     .floating-bar.focus-mode .bar-header,
     .floating-bar.focus-mode .history-list,
-    .floating-bar.focus-mode .qa-history-drawer {
+    .floating-bar.focus-mode .qa-history-drawer,
+    .floating-bar.focus-mode .queue-drawer {
       display: none !important;
     }
 
@@ -113,21 +114,26 @@
     .badge-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      flex-wrap: wrap;
     }
 
-    .mode-badge, .focus-badge, .qa-toggle-btn {
+    .mode-badge, .focus-badge, .qa-toggle-btn, .dnd-badge, .queue-badge {
       background: rgba(0, 212, 255, 0.1);
       color: var(--cyan);
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 6px;
-      text-transform: uppercase;
       font-weight: 600;
       font-size: 10px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       border: 1px solid rgba(0, 212, 255, 0.3);
       cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
     }
+
+    .dnd-badge.active { background: rgba(245, 158, 11, 0.2); color: var(--yellow); border-color: var(--yellow); }
+    .queue-badge.has-critical { background: rgba(239, 68, 68, 0.2); color: var(--red); border-color: var(--red); animation: pulse 1.2s infinite; }
 
     .privacy-badge {
       background: rgba(239, 68, 68, 0.15);
@@ -277,23 +283,67 @@
     .chat-bubble.user { align-self: flex-end; background: rgba(0, 212, 255, 0.12); border: 1px solid rgba(0, 212, 255, 0.25); }
     .chat-bubble.alberth { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--cyan); }
 
-    /* QA History Drawer (Last 20 Events) */
-    .qa-history-drawer {
-      background: rgba(15, 23, 42, 0.85);
+    /* Drawers & Controls (QA History & Offline Queue) */
+    .drawer-container {
+      background: rgba(15, 23, 42, 0.9);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 10px;
-      padding: 8px 12px;
+      padding: 10px;
       font-size: 11px;
       display: none;
       flex-direction: column;
-      gap: 6px;
-      max-height: 150px;
+      gap: 8px;
+      max-height: 180px;
       overflow-y: auto;
     }
-    .qa-history-drawer.active { display: flex; }
+    .drawer-container.active { display: flex; }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 6px;
+    }
+
+    .filter-tabs { display: flex; gap: 4px; }
+    .tab-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-dim);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .tab-btn.active { background: rgba(0, 212, 255, 0.2); color: var(--cyan); border-color: var(--cyan); }
+
+    .export-btns { display: flex; gap: 4px; }
+    .exp-btn {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--green);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
     .qa-item { display: flex; justify-content: space-between; gap: 8px; color: var(--text-dim); }
-    .qa-item.critico { color: #fca5a5; }
+    .qa-item.critico { color: #fca5a5; font-weight: 500; }
+    .qa-item.advertencia { color: var(--yellow); }
     .qa-item.sugerencia { color: #7dd3fc; }
+
+    .queue-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.03);
+      padding: 6px 8px;
+      border-radius: 6px;
+      border-left: 3px solid var(--cyan);
+    }
+    .queue-item.critico { border-left-color: var(--red); background: rgba(239, 68, 68, 0.08); }
   </style>
 </head>
 <body>
@@ -306,7 +356,9 @@
       </div>
       <div class="badge-group">
         <span class="privacy-badge" id="privacyBadge">🛡️ CONFIDENCIAL</span>
-        <span class="qa-toggle-btn" id="qaHistoryBtn" title="Historial QA (20)">QA (0)</span>
+        <span class="queue-badge" id="queueBtn" title="Ver Cola Offline">⚡ COLA (0)</span>
+        <span class="dnd-badge" id="dndBtn" title="Modo No Molestar">🔔 DND: OFF</span>
+        <span class="qa-toggle-btn" id="qaHistoryBtn" title="Historial QA">QA (0)</span>
         <span class="focus-badge" id="focusBtn" title="Atajo: Cmd+Shift+F">FOCUS</span>
         <span class="mode-badge" id="modeBadge">LABORAL</span>
       </div>
@@ -333,7 +385,32 @@
     </div>
 
     <div class="history-list" id="historyList"></div>
-    <div class="qa-history-drawer" id="qaHistoryDrawer"></div>
+
+    <!-- QA History Drawer -->
+    <div class="drawer-container" id="qaHistoryDrawer">
+      <div class="drawer-header">
+        <div class="filter-tabs">
+          <button class="tab-btn active" onclick="filterQATab('all', this)">Todas</button>
+          <button class="tab-btn" onclick="filterQATab('critico', this)">🔴 Críticas</button>
+          <button class="tab-btn" onclick="filterQATab('advertencia', this)">🟡 Adv</button>
+          <button class="tab-btn" onclick="filterQATab('sugerencia', this)">🔵 Sug</button>
+        </div>
+        <div class="export-btns">
+          <button class="exp-btn" onclick="exportQAJSON()">📥 JSON</button>
+          <button class="exp-btn" onclick="exportQACSV()">📥 CSV</button>
+        </div>
+      </div>
+      <div id="qaItemsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+
+    <!-- Offline Queue Drawer -->
+    <div class="drawer-container" id="queueDrawer">
+      <div class="drawer-header">
+        <span><b>⚡ Cola de Comandos Offline</b> (Prioridad Crítica Primero)</span>
+        <button class="exp-btn" style="background:rgba(239,68,68,0.2); color:var(--red);" onclick="clearOfflineQueue()">Limpiar Cola</button>
+      </div>
+      <div id="queueItemsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
   </div>
 
   <script>
@@ -351,20 +428,31 @@
     const statusText = document.getElementById('statusText');
     const modeBadge = document.getElementById('modeBadge');
     const focusBtn = document.getElementById('focusBtn');
+    const dndBtn = document.getElementById('dndBtn');
+    const queueBtn = document.getElementById('queueBtn');
     const privacyBadge = document.getElementById('privacyBadge');
     const qaToast = document.getElementById('qaToast');
     const qaSevTag = document.getElementById('qaSevTag');
     const qaMsg = document.getElementById('qaMsg');
     const qaHistoryBtn = document.getElementById('qaHistoryBtn');
     const qaHistoryDrawer = document.getElementById('qaHistoryDrawer');
+    const queueDrawer = document.getElementById('queueDrawer');
+    const qaItemsList = document.getElementById('qaItemsList');
+    const queueItemsList = document.getElementById('queueItemsList');
     const barInput = document.getElementById('barInput');
     const sendBtn = document.getElementById('sendBtn');
     const micBtn = document.getElementById('micBtn');
     const historyList = document.getElementById('historyList');
     const autoDropdown = document.getElementById('autoDropdown');
 
-    // Frequency Counter & Contextual Suggestions
+    // ── Frequency Counter & Cloud Sync ──
     const FREQ = JSON.parse(localStorage.getItem('alberth_cmd_freq') || '{}');
+    fetch('/api/autocomplete/freq').then(r=>r.json()).then(d => {
+      if (d.ok && d.frequencies) {
+        Object.assign(FREQ, d.frequencies);
+        localStorage.setItem('alberth_cmd_freq', JSON.stringify(FREQ));
+      }
+    }).catch(()=>{});
 
     const BASE_SUGGESTIONS = [
       { cmd: 'qué hora es', tag: 'CACHE', mode: 'all' },
@@ -377,16 +465,91 @@
       { cmd: 'alberth aprende que...', tag: 'LEARN', mode: 'laboral' }
     ];
 
-    // Offline Queue
-    const offlineQueue = [];
-    window.addEventListener('online', () => {
-      while (offlineQueue.length > 0) {
-        const q = offlineQueue.shift();
-        ws.send(JSON.stringify({ type: 'text', text: q }));
-      }
+    // ── Offline Priority Queue ──
+    let offlineQueue = JSON.parse(localStorage.getItem('alberth_offline_queue') || '[]');
+
+    function isCriticalCmd(cmd) {
+      const lower = cmd.toLowerCase();
+      return lower.includes('critico') || lower.includes('emergencia') || lower.includes('stop') ||
+             lower.includes('apagar') || lower.includes('reiniciar') || lower.includes('confidencial');
+    }
+
+    function updateQueueUI() {
+      const critCount = offlineQueue.filter(q => q.priority === 1).length;
+      queueBtn.innerText = `⚡ COLA (${offlineQueue.length})`;
+      queueBtn.className = `queue-badge ${critCount > 0 ? 'has-critical' : ''}`;
+
+      queueItemsList.innerHTML = offlineQueue.length === 0 ?
+        '<div style="opacity:0.5;">No hay comandos pendientes en cola.</div>' :
+        offlineQueue.map((q, idx) => `
+          <div class="queue-item ${q.priority === 1 ? 'critico' : ''}">
+            <span><b>[${q.priority === 1 ? '🔴 CRÍTICO' : '🔵 NORMAL'}]</b> ${q.text}</span>
+            <button onclick="removeQueueItem(${idx})" style="background:none; border:none; color:var(--red); cursor:pointer;">✕</button>
+          </div>
+        `).join('');
+    }
+
+    function saveQueue() {
+      localStorage.setItem('alberth_offline_queue', JSON.stringify(offlineQueue));
+      updateQueueUI();
+    }
+
+    window.removeQueueItem = function(idx) {
+      offlineQueue.splice(idx, 1);
+      saveQueue();
+    };
+
+    window.clearOfflineQueue = function() {
+      offlineQueue = [];
+      saveQueue();
+    };
+
+    queueBtn.addEventListener('click', () => {
+      qaHistoryDrawer.classList.remove('active');
+      queueDrawer.classList.toggle('active');
     });
 
-    // Focus Mode Toggle (Cmd+Shift+F)
+    function flushQueue() {
+      if (offlineQueue.length === 0) return;
+      // Priority sorting: critical (priority 1) first, then older timestamp
+      offlineQueue.sort((a, b) => a.priority - b.priority || a.id - b.id);
+      while (offlineQueue.length > 0 && ws.readyState === WebSocket.OPEN) {
+        const item = offlineQueue.shift();
+        ws.send(JSON.stringify({ type: 'text', text: item.text }));
+      }
+      saveQueue();
+    }
+
+    window.addEventListener('online', flushQueue);
+
+    // ── DND Timer ("No Molestar") ──
+    let dndUntil = parseInt(localStorage.getItem('alberth_dnd_until') || '0', 10);
+
+    function updateDNDUI() {
+      const now = Date.now();
+      if (now < dndUntil) {
+        const remMin = Math.ceil((dndUntil - now) / 60000);
+        dndBtn.innerText = `🔕 DND (${remMin}m)`;
+        dndBtn.classList.add('active');
+      } else {
+        dndBtn.innerText = `🔔 DND: OFF`;
+        dndBtn.classList.remove('active');
+      }
+    }
+    setInterval(updateDNDUI, 10000);
+    updateDNDUI();
+
+    dndBtn.addEventListener('click', () => {
+      const now = Date.now();
+      if (now >= dndUntil) dndUntil = now + 3600000; // +1 hora
+      else if (dndUntil - now <= 3600000) dndUntil = now + 14400000; // +4 horas
+      else if (dndUntil - now <= 14400000) dndUntil = now + 28800000; // +8 horas
+      else dndUntil = 0; // OFF
+      localStorage.setItem('alberth_dnd_until', dndUntil.toString());
+      updateDNDUI();
+    });
+
+    // ── Focus Mode Toggle (Cmd+Shift+F) ──
     let isFocusMode = false;
     focusBtn.addEventListener('click', toggleFocusMode);
     function toggleFocusMode() {
@@ -395,24 +558,57 @@
       focusBtn.innerText = isFocusMode ? 'FOCUS ON' : 'FOCUS';
     }
 
-    // QA History Log (Last 20)
+    // ── QA History & Export ──
     let qaHistory = JSON.parse(localStorage.getItem('alberth_qa_history') || '[]');
+    let activeQATab = 'all';
+
+    function renderQAItems() {
+      const filtered = activeQATab === 'all' ? qaHistory : qaHistory.filter(q => q.severity === activeQATab);
+      qaItemsList.innerHTML = filtered.length === 0 ?
+        '<div style="opacity:0.5;">Sin eventos registrados.</div>' :
+        filtered.map(q => `
+          <div class="qa-item ${q.severity}">
+            <span>[${q.severity.toUpperCase()}] ${q.text}</span>
+            <span style="opacity:0.5">${q.time}</span>
+          </div>
+        `).join('');
+    }
+
     function updateQAHistoryUI() {
       qaHistoryBtn.innerText = `QA (${qaHistory.length})`;
-      qaHistoryDrawer.innerHTML = qaHistory.map(q => `
-        <div class="qa-item ${q.severity}">
-          <span>[${q.severity.toUpperCase()}] ${q.text}</span>
-          <span style="opacity:0.5">${q.time}</span>
-        </div>
-      `).join('');
+      renderQAItems();
     }
     updateQAHistoryUI();
 
+    window.filterQATab = function(tab, btn) {
+      activeQATab = tab;
+      document.querySelectorAll('.filter-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderQAItems();
+    };
+
     qaHistoryBtn.addEventListener('click', () => {
+      queueDrawer.classList.remove('active');
       qaHistoryDrawer.classList.toggle('active');
     });
 
-    // Spotlight Autocomplete Handler with Frequency Sorting
+    window.exportQAJSON = function() {
+      const blob = new Blob([JSON.stringify(qaHistory, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `alberth_qa_history_${Date.now()}.json`;
+      a.click(); URL.revokeObjectURL(url);
+    };
+
+    window.exportQACSV = function() {
+      const rows = ["Timestamp,Severidad,Mensaje"];
+      qaHistory.forEach(q => rows.push(`"${q.time}","${q.severity}","${q.text.replace(/"/g, '""')}"`));
+      const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `alberth_qa_history_${Date.now()}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+    };
+
+    // ── Spotlight Autocomplete Handler ──
     barInput.addEventListener('input', () => {
       const val = barInput.value.toLowerCase().trim();
       if (!val) { autoDropdown.classList.remove('visible'); return; }
@@ -438,20 +634,61 @@
       barInput.focus();
     };
 
-    // Audio Haptics
+    // ── Customized WebAudio Sound Haptics per Severity ──
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq = 440, type = 'sine', duration = 0.08) {
+
+    function playSeveritySound(sev) {
+      if (Date.now() < dndUntil) return; // Suppress sound if DND is active
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
+
+      if (sev === 'critico') {
+        // High-intensity dual alarm (880Hz + 1046Hz square)
+        [880, 1046].forEach((f, idx) => {
+          setTimeout(() => {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.value = f;
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+          }, idx * 100);
+        });
+      } else if (sev === 'advertencia') {
+        // Double warning beep (587Hz + 698Hz triangle)
+        [587, 698].forEach((f, idx) => {
+          setTimeout(() => {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'triangle'; osc.frequency.value = f;
+            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+          }, idx * 90);
+        });
+      } else {
+        // Soft major triad chime C5-E5-G5 (523Hz, 659Hz, 784Hz sine)
+        [523, 659, 784].forEach((f, idx) => {
+          setTimeout(() => {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.value = f;
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.18);
+          }, idx * 70);
+        });
+      }
+    }
+
+    function playBeep(freq = 440, type = 'sine', duration = 0.08) {
+      if (Date.now() < dndUntil) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+      osc.type = type; osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
     function appendBubble(role, text) {
@@ -465,6 +702,7 @@
     ws.onopen = () => {
       statusDot.className = 'dot';
       statusText.innerText = 'Alberth Conectado';
+      flushQueue();
     };
 
     ws.onmessage = (evt) => {
@@ -478,23 +716,24 @@
         appendBubble('alberth', data.message.content);
         playBeep(520, 'sine', 0.12);
 
-        // Send Desktop Push Notification if backgrounded
-        if (document.hidden && Notification.permission === 'granted') {
+        if (document.hidden && Notification.permission === 'granted' && Date.now() >= dndUntil) {
           new Notification('Alberth NEXUS', { body: data.message.content });
         }
       } else if (data.type === 'qa_alert') {
         const sev = data.severity || 'advertencia';
         const item = { severity: sev, text: data.text, time: new Date().toLocaleTimeString().slice(0,5) };
         qaHistory.unshift(item);
-        if (qaHistory.length > 20) qaHistory.pop();
+        if (qaHistory.length > 30) qaHistory.pop();
         localStorage.setItem('alberth_qa_history', JSON.stringify(qaHistory));
         updateQAHistoryUI();
 
-        qaToast.className = `qa-toast visible ${sev}`;
-        qaSevTag.innerText = sev === 'critico' ? '🔴 QA CRÍTICO:' : (sev === 'sugerencia' ? '🔵 QA SUGERENCIA:' : '⚠️ QA ADVERTENCIA:');
-        qaMsg.innerText = data.text;
-        playBeep(sev === 'critico' ? 300 : 500, 'sawtooth', 0.2);
-        setTimeout(() => qaToast.classList.remove('visible'), 8000);
+        if (Date.now() >= dndUntil) {
+          qaToast.className = `qa-toast visible ${sev}`;
+          qaSevTag.innerText = sev === 'critico' ? '🔴 QA CRÍTICO:' : (sev === 'sugerencia' ? '🔵 QA SUGERENCIA:' : '⚠️ QA ADVERTENCIA:');
+          qaMsg.innerText = data.text;
+          playSeveritySound(sev);
+          setTimeout(() => qaToast.classList.remove('visible'), 8000);
+        }
       }
     };
 
@@ -503,9 +742,14 @@
       if (!text) return;
       autoDropdown.classList.remove('visible');
 
-      // Record Frequency
+      // Record Frequency & Sync Cloud
       FREQ[text] = (FREQ[text] || 0) + 1;
       localStorage.setItem('alberth_cmd_freq', JSON.stringify(FREQ));
+      fetch('/api/autocomplete/freq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: text })
+      }).catch(()=>{});
 
       if (text.toLowerCase().includes("modo confidencial")) {
         privacyBadge.classList.add('visible');
@@ -521,8 +765,10 @@
       if (navigator.onLine && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'text', text }));
       } else {
-        offlineQueue.push(text);
-        appendBubble('alberth', '🌐 Sin conexión: Consulta encolada para sincronizar al reconectar.');
+        const qItem = { id: Date.now(), text, priority: isCriticalCmd(text) ? 1 : 2, time: new Date().toLocaleTimeString().slice(0,5) };
+        offlineQueue.push(qItem);
+        saveQueue();
+        appendBubble('alberth', `🌐 Sin conexión: Consulta ${qItem.priority === 1 ? '🔴 CRÍTICA' : '🔵 NORMAL'} encolada.`);
       }
       barInput.value = '';
     }
@@ -558,6 +804,9 @@
         toggleFocusMode();
       }
     });
+
+    updateQueueUI();
   </script>
 </body>
 </html>
+

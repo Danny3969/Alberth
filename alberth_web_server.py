@@ -456,6 +456,64 @@ async def get_status():
     except: pass
     return JSONResponse(status)
 
+# ── Autocompletado Adaptativo & Frecuencias ─────────────────────────────────────
+class FreqReq(BaseModel):
+    command: Optional[str] = None
+    freq_map: Optional[dict] = None
+
+@app.get("/api/autocomplete/freq")
+async def get_autocomplete_freq():
+    """Retorna las frecuencias de comandos registradas en la DB de memoria."""
+    try:
+        if str(WORKSPACE) not in sys.path: sys.path.insert(0, str(WORKSPACE))
+        import alberth_memory
+        freqs = alberth_memory.get_cmd_frequencies()
+        return JSONResponse({"ok": True, "frequencies": freqs})
+    except Exception as e:
+        return JSONResponse({"ok": False, "detail": str(e), "frequencies": {}})
+
+@app.post("/api/autocomplete/freq")
+async def sync_autocomplete_freq(req: FreqReq):
+    """Sincroniza/Registra frecuencia de uso de comandos en SQLite."""
+    try:
+        if str(WORKSPACE) not in sys.path: sys.path.insert(0, str(WORKSPACE))
+        import alberth_memory
+        if req.command:
+            alberth_memory.record_cmd_frequency(req.command)
+        if req.freq_map:
+            for cmd in req.freq_map:
+                alberth_memory.record_cmd_frequency(cmd)
+        freqs = alberth_memory.get_cmd_frequencies()
+        return JSONResponse({"ok": True, "frequencies": freqs})
+    except Exception as e:
+        return JSONResponse({"ok": False, "detail": str(e)})
+
+# ── Exportar Historial QA ──────────────────────────────────────────────────────
+@app.get("/api/qa/export")
+async def export_qa_logs(format: str = "json"):
+    """Exporta el historial de auditoría y alertas QA en formato JSON o CSV."""
+    from fastapi.responses import Response
+    try:
+        logs_file = WORKSPACE / "logs" / "audit_logs.jsonl"
+        items = []
+        if logs_file.exists():
+            with open(logs_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        try: items.append(json.loads(line))
+                        except: pass
+
+        if format.lower() == "csv":
+            csv_lines = ["timestamp,modo,agente,modelo,latencia_ms,status,query"]
+            for it in items:
+                q = str(it.get("query", "")).replace('"', '""')
+                csv_lines.append(f'"{it.get("timestamp")}","{it.get("modo")}","{it.get("agente")}","{it.get("modelo")}",{it.get("latencia_ms",0)},"{it.get("status")}","{q}"')
+            return Response(content="\n".join(csv_lines), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=alberth_qa_export.csv"})
+        else:
+            return JSONResponse({"ok": True, "total": len(items), "items": items})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ── Canal Bidireccional Mac → APK ─────────────────────────────────────────────
 class PhoneCommand(BaseModel):
     action: str          # e.g. "call", "sms", "notification", "volume", "camera"
