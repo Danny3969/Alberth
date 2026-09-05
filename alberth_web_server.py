@@ -138,10 +138,17 @@ def run_alberth(text: str) -> str:
     if len(_conv_history) > 20:
         _conv_history.pop(0)
 
+    soul_file = WORKSPACE / "SOUL.md"
+    soul_content = ""
+    if soul_file.exists():
+        try:
+            soul_content = soul_file.read_text(encoding="utf-8")
+        except Exception:
+            pass
+
     system_prompt = (
-        "Eres Alberth, el asistente personal de IA del señor Daniel. "
-        "Eres eficiente, directo y amigable. Respondes siempre en el idioma del usuario. "
-        "Mantienes las respuestas concisas a menos que se te pida más detalle."
+        f"INSTRUCCIONES DE PERSONALIDAD Y COMPORTAMIENTO (SOUL.md):\n{soul_content}\n\n"
+        "Eres Alberth, la mano derecha analítica, directa y profesional del Señor Daniel."
     )
     messages = [{"role": "system", "content": system_prompt}] + _conv_history[-10:]
 
@@ -240,6 +247,32 @@ def run_alberth(text: str) -> str:
 async def run_alberth_async(text: str) -> str:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, run_alberth, text)
+
+
+# ── Live Canvas (A2UI - Interfaces Dinámicas del Agente) ──────────────────────
+class CanvasPayload(BaseModel):
+    title: str = "Live Canvas UI"
+    html: str
+    js: Optional[str] = ""
+    css: Optional[str] = ""
+
+active_canvas = {
+    "title": "Live Canvas UI",
+    "html": "<div style='padding:20px;text-align:center;'><h3>🎨 Alberth Live Canvas</h3><p>Esperando componentes dinámicos generados por Alberth...</p></div>",
+    "js": "",
+    "css": ""
+}
+
+@app.post("/api/canvas")
+async def update_canvas(payload: CanvasPayload, _: None = Depends(require_token)):
+    global active_canvas
+    active_canvas = payload.model_dump()
+    await manager.broadcast({"type": "canvas_update", "canvas": active_canvas})
+    return {"status": "ok", "canvas": active_canvas}
+
+@app.get("/api/canvas")
+async def get_canvas():
+    return active_canvas
 
 
 def run_sys_cmd(command: str, args: dict) -> dict:

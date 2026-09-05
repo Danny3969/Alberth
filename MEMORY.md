@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-04 21:18 GMT-5_
+_Última actualización: 2026-09-04 21:53 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,7 +7,7 @@ _Última actualización: 2026-09-04 21:18 GMT-5_
 
 ---
 
-## 🏗️ Arquitectura del Sistema (Alberth NEXUS v3.1)
+## 🏗️ Arquitectura del Sistema (Alberth NEXUS v3.2)
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── agents/
@@ -18,7 +18,7 @@ _Última actualización: 2026-09-04 21:18 GMT-5_
 ├── alberth-android/    → Aplicación Móvil Nativa (React Native / Expo SDK 56)
 ├── panel/              → Panel Web UI interactivo (HTML5/CSS3/WebSockets)
 ├── pipeline_refactor/  → Pipeline moderno en Python nativo con Circuit Breaker
-├── alberth_web_server.py    → Panel Web FastAPI + WebSockets (Puerto 8080)
+├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI (Puerto 8080)
 ├── alberth_voice_server.py  → Servidor STT de audio y escucha continua con VAD
 ├── alberth_qa_watcher.py    → Demonio de supervisión proactiva (filtro 2 horas)
 ├── alberth_reminders_daemon.py → Demonio de recordatorios sobre SQLite
@@ -28,17 +28,28 @@ _Última actualización: 2026-09-04 21:18 GMT-5_
 ├── alberth_memory_sync.py   → Sincronizador de memoria híbrida
 ├── alberth_learn.py         → CLI de aprendizaje continuo e in-context feedback
 ├── ecosystem.config.js      → Orquestador de procesos PM2 portable
+├── SOUL.md                  → Definición estricta de personalidad y comportamiento
 └── MEMORY.md                → Memoria técnica y continuativa del proyecto
 ```
 
 ---
 
 ## ⚙️ Configuración y Puertos Activos
-- **Panel Web Interactive:** `http://localhost:8080` (FastAPI / WebSockets)
+- **Panel Web & Live Canvas A2UI:** `http://localhost:8080` (FastAPI / WebSockets / `/api/canvas`)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
+- **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
 - **Túnel Seguro Cloudflare:** `alberth_tunnel.sh`
 - **Audit Logs:** `~/.openclaw/workspace/logs/audit_logs.jsonl`
 - **Modo de Contexto Activo:** `~/.openclaw/workspace/.context_mode` (`laboral` | `personal`)
+
+---
+
+## 🎨 CARACTERÍSTICAS DIFERENCIALES INTEGRADAS
+
+1. **Live Canvas (A2UI):** Renderizado de interfaces dinámicas generadas por el agente en tiempo real en `/api/canvas`.
+2. **Personalidad `SOUL.md` Inyectada:** Inyección automática del alma de Alberth (mano derecha analítica, semiformal, directa y no condescendiente) en cada prompt.
+3. **ClawHub Registry (+5,000 Skills):** Registro de componentes y habilidades remotas activado en `openclaw.json`.
+4. **Blindaje RCE & Sanitización STT:** Filtro de caracteres de escape y sanitización de entrada activados en el orquestador de voz.
 
 ---
 
@@ -68,17 +79,10 @@ _Última actualización: 2026-09-04 21:18 GMT-5_
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
-### 2026-09-04 (Implementación de Mejoras de Arquitectura & Trazabilidad)
-- **Agente de Código Actualizado:** Se cambió el modelo primario de `codigo` en `openclaw.json` a `nvidia/Qwen/Qwen2.5-Coder-32B-Instruct` en Nvidia NIM para máximo rendimiento en desarrollo.
-- **Separación de Contextos:** Implementado control de modo `laboral` / `personal` guardado en `.context_mode` y soportado en `alberth_memory.py`.
-- **Feedback Loop por Voz & CLI:** Creado `alberth_learn.py` para inyectar correcciones directamente a la memoria sin necesidad de UI web.
-- **Auditoría y Trazabilidad:** Implementado registro estructurado JSONL en `logs/audit_logs.jsonl` con seguimiento de agente, query, modo, modelo y latencia.
-
-### 2026-09-04 (Lanzamiento Alberth NEXUS & GitHub Sync)
-- **Semana 1:** Instalación del plugin de orquestación Nexus `@houchenyang/nexus` y registro de los 4 agentes especializados (`orquestador`, `codigo`, `vision`, `qa_proactivo`).
-- **Semana 2:** Demonio de supervisión proactiva `alberth_qa_watcher.py` con síntesis de voz en tiempo real (`es-MX-JorgeNeural` / `afplay`) y filtro regulador de 2 horas en `qa_state.json`.
-- **Semana 3:** Memoria Híbrida activada (`openclaw-mem0` + `active-memory` con `autoRecall` y `autoCapture`), script de sincronización `alberth_memory_sync.py` e integración con GitHub CLI `alberth_github_helper.py`.
-- **GitHub:** Inicialización y sincronización con el repositorio oficial [Danny3969/Alberth](https://github.com/Danny3969/Alberth).
+### 2026-09-04 (Activación de Live Canvas A2UI, SOUL.md & ClawHub)
+- **Live Canvas A2UI:** Endpoint `/api/canvas` y transmisión WebSocket agregada para renderizado visual dinámico en el Panel Web.
+- **Personalidad Integrada:** Inyección obligatoria de `SOUL.md` en `alberth_master.sh` y `alberth_web_server.py`.
+- **ClawHub Registry:** Conexión a la biblioteca oficial de skills registrada en `openclaw.json`.
 
 ---
 

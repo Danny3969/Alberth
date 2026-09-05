@@ -469,17 +469,14 @@ Usa esta información de forma analítica para responder al Señor con precisió
         fi
     fi
 
-    # ── Rama 7: Memoria Persistente — Contexto de sesiones anteriores ───
-    local memory_context=""
-    log "Recuperando contexto de memoria persistente..."
-    memory_context=$(python3 "$WORKSPACE_DIR/alberth_memory.py" --context "$query" 2>/dev/null)
-    if [[ -n "$memory_context" ]]; then
-        log "Memoria OK → Contexto recuperado (${#memory_context} chars)"
-    else
-        log "Memoria: Sin contexto previo relevante (primera sesión o sin historial)."
+    local soul_context=""
+    if [[ -f "$WORKSPACE_DIR/SOUL.md" ]]; then
+        soul_context="[INSTRUCCIONES DE PERSONALIDAD Y REGLAS DE COMPORTAMIENTO (SOUL.md):
+$(cat "$WORKSPACE_DIR/SOUL.md")
+] "
     fi
 
-    local agent_message="${memory_context}${visual_context}${file_context}${youtube_context}${system_context}${search_context}${query}"
+    local agent_message="${soul_context}${memory_context}${visual_context}${file_context}${youtube_context}${system_context}${search_context}${query}"
     local start_ts=$(date +%s%3N 2>/dev/null || echo $(date +%s)000)
     local model_used="nvidia/z-ai/glm-5.1"
     local agent_success=false
