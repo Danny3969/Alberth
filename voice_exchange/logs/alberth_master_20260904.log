@@ -442,3 +442,35 @@
 [2026-09-04 21:50:40] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_215038.wav
 [2026-09-04 21:50:51] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_215051.wav
 [2026-09-04 21:50:53] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_215051.wav
+[2026-09-04 21:56:38] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_215637.wav
+[2026-09-04 21:56:39] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_215637.wav
+[2026-09-04 21:59:18] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_215917.wav
+[2026-09-04 21:59:19] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_215917.wav
+[2026-09-04 22:00:04] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220003.wav
+[2026-09-04 22:00:05] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_220003.wav
+[2026-09-04 22:00:46] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220044.wav
+[2026-09-04 22:00:47] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_220044.wav
+[2026-09-04 22:01:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220119.wav
+[2026-09-04 22:01:21] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_220119.wav
+[2026-09-04 22:01:26] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220126.wav
+[2026-09-04 22:01:27] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_220126.wav
+[2026-09-04 22:02:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220232.wav
+[2026-09-04 22:02:35] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_220232.wav
+[2026-09-04 22:02:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220239.wav
+[2026-09-04 22:02:40] Pipeline ocupado (PID 55421). Omitiendo: alberth_voice_20260904_220239.wav
+[2026-09-04 22:04:14] ============================================
+[2026-09-04 22:04:14] Alberth Master v3.0 iniciado (PID: 77439)
+[2026-09-04 22:04:14] Monitoreando: /Users/digitalspace/.openclaw/workspace/voice_exchange/input
+[2026-09-04 22:04:14] ============================================
+[2026-09-04 22:04:14] Iniciando warmup del Tálamo (gemma:2b)...
+[2026-09-04 22:04:15] Pipeline ocupado (PID 55421). Esperando liberación...
+[Tálamo] Pre-calentando gemma:2b en Ollama...
+[Tálamo] Warmup falló (no crítico): <urlopen error [Errno 61] Connection refused>
+[2026-09-04 22:04:21] Pipeline sigue ocupado tras esperar. Procediendo de todos modos para consulta de texto.
+[2026-09-04 22:04:21] --- PIPELINE INICIADO (TEXTO): qué hora es ---
+[2026-09-04 22:04:21] PASO 1.5: Consultando Tálamo para clasificación semántica...
+[Tálamo] Ollama no disponible (URLError). Activando fallback.
+[Tálamo] Intentando fallback cloud (openclaw)...
+[Tálamo] Todos los métodos fallaron. Retornando GENERAL_TALK.
+[2026-09-04 22:04:28] Tálamo → Tipo: GENERAL_TALK
+[2026-09-04 22:04:28] PASO 2: Consultando al Agente Alberth...

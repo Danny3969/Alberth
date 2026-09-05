@@ -255,6 +255,22 @@ run_pipeline() {
         echo "$query" > "$txt_file"
     fi
 
+    # ── Fast-Cache: Consultas instantáneas de Hora y Fecha (<15ms) ───────
+    local query_clean
+    query_clean=$(echo "$query" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]//g' | tr '[:upper:]' '[:lower:]' | sed -E 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    if [[ "$query_clean" =~ ^(qu|que)\ (hora\ es|fecha\ es\ hoy|da\ es\ hoy)|^(dame\ la\ (hora|fecha))|^(hora|fecha)\ actual$ ]]; then
+        local now_str
+        now_str=$(date '+%A, %d de %B de %Y a las %H:%M')
+        local response="Señor, hoy es ${now_str}."
+        log "FAST-CACHE OK → $response"
+        echo "$response" > "$response_txt"
+        python3 "$WORKSPACE_DIR/alberth_tts_premium.py" "$response" "$response_mp3" >>"$LOGFILE" 2>&1
+        afplay "$response_mp3" 2>/dev/null &
+        [ "$is_text_only" = true ] && echo "$response"
+        rm -f "$LOCK_FILE"
+        return
+    fi
+
     # ── PASO 1.5: TÁLAMO — Pre-enrutamiento inteligente ──────────────────
     # El Tálamo clasifica semánticamente la query para detectar habilidades
     # especializadas ANTES del despacho a la IA principal.

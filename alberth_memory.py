@@ -86,11 +86,16 @@ def set_current_mode(mode: str) -> str:
 
 
 def audit_log(agente: str, query: str, modelo: str, latencia_ms: int = 0, status: str = "ok"):
-    """Registra eventos de auditoría y trazabilidad en logs/audit_logs.jsonl."""
+    """Registra eventos de auditoría y trazabilidad con hash de query y rotación diaria."""
     try:
         os.makedirs(LOGS_DIR, exist_ok=True)
+        q_hash = hashlib.md5(query.lower().strip().encode("utf-8")).hexdigest()
+        date_str = datetime.now().strftime("%Y%m%d")
+        daily_log_file = os.path.join(LOGS_DIR, f"audit_{date_str}.jsonl")
+
         record = {
             "timestamp": datetime.now().isoformat(),
+            "query_hash": q_hash,
             "modo": get_current_mode(),
             "agente": agente,
             "query": query[:300],
@@ -98,10 +103,57 @@ def audit_log(agente: str, query: str, modelo: str, latencia_ms: int = 0, status
             "latencia_ms": latencia_ms,
             "status": status
         }
+        json_line = json.dumps(record, ensure_ascii=False) + "\n"
         with open(AUDIT_LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            f.write(json_line)
+        with open(daily_log_file, "a", encoding="utf-8") as f:
+            f.write(json_line)
     except Exception as e:
         log(f"Error registrando auditoría: {e}")
+
+
+def search_audit_logs(keyword: str) -> list:
+    """Busca eventos de auditoría coincidentes con la palabra clave en los logs."""
+    results = []
+    if not os.path.exists(AUDIT_LOG_FILE):
+        return results
+    try:
+        kw = keyword.lower().strip()
+        with open(AUDIT_LOG_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        if kw in json.dumps(data).lower():
+                            results.append(data)
+                    except Exception:
+                        pass
+    except Exception as e:
+        log(f"Error buscando en audit logs: {e}")
+    return results
+
+
+def get_weekly_learning_summary() -> dict:
+    """Genera un resumen semanal del aprendizaje automático e in-context facts."""
+    conn = get_db()
+    try:
+        rows = conn.execute("""
+            SELECT category, fact, first_seen, mode, frequency
+            FROM user_facts
+            WHERE first_seen >= datetime('now', '-7 days', 'localtime')
+            ORDER BY first_seen DESC
+        """).fetchall()
+        facts = [dict(r) for r in rows]
+        return {
+            "periodo": "Últimos 7 días",
+            "total_aprendizajes": len(facts),
+            "hechos": facts
+        }
+    except Exception as e:
+        log(f"Error al obtener resumen semanal: {e}")
+        return {"periodo": "Últimos 7 días", "total_aprendizajes": 0, "hechos": []}
+    finally:
+        conn.close()
 
 
 def _init_schema(conn: sqlite3.Connection):
@@ -146,6 +198,16 @@ def _init_schema(conn: sqlite3.Connection):
         CREATE INDEX IF NOT EXISTS idx_conv_hash      ON conversations(query_hash);
         CREATE INDEX IF NOT EXISTS idx_rem_trigger    ON reminders(trigger_at) WHERE status = 'pending';
     """)
+    # Migraciones seguras para columnas añadidas
+    for alter_stmt in [
+        "ALTER TABLE conversations ADD COLUMN mode TEXT DEFAULT 'laboral'",
+        "ALTER TABLE user_facts ADD COLUMN mode TEXT DEFAULT 'laboral'",
+        "ALTER TABLE conversations ADD COLUMN query_hash TEXT",
+    ]:
+        try:
+            conn.execute(alter_stmt)
+        except Exception:
+            pass
     conn.commit()
 
 
@@ -412,19 +474,30 @@ def main():
                         help="Lista recordatorios pendientes listos para disparar")
     parser.add_argument("--mark-reminder-done", type=int, metavar="ID",
                         help="Marca un recordatorio como completado por su ID")
-    parser.add_argument("--get-mode", action="store_true",
-                        help="Muestra el modo de contexto activo (laboral/personal)")
-    parser.add_argument("--set-mode", choices=["personal", "laboral"],
-                        help="Cambia el modo de contexto activo (personal/laboral)")
-    parser.add_argument("--audit", nargs=4, metavar=("AGENTE", "QUERY", "MODELO", "LATENCIA_MS"),
-                        help="Registra una entrada de auditoría")
+    parser.add_argument("--search-audit", metavar="KEYWORD",
+                        help="Busca eventos coincidentes en los audit logs")
+    parser.add_argument("--weekly-summary", action="store_true",
+                        help="Muestra un resumen del aprendizaje semanal")
     parser.add_argument("--tags",    default="",
                         help="Tags para categorizar la entrada (con --save)")
     parser.add_argument("--importance", type=int, default=1,
                         help="Importancia 1-5 de la conversación (con --save)")
     args = parser.parse_args()
 
-    if args.get_mode:
+    if args.search_audit:
+        results = search_audit_logs(args.search_audit)
+        print(json.dumps(results, ensure_ascii=False, indent=2))
+
+    elif args.weekly_summary:
+        summary = get_weekly_learning_summary()
+        print(f"\n🧠 RESUMEN DE APRENDIZAJE SEMANAL — Alberth NEXUS")
+        print(f"  Periodo            : {summary['periodo']}")
+        print(f"  Aprendizajes nuevos: {summary['total_aprendizajes']}")
+        for f in summary['hechos']:
+            print(f"  - [{f.get('mode','laboral').upper()}] ({f.get('category','gen')}) {f.get('fact')}")
+        print()
+
+    elif args.get_mode:
         print(get_current_mode())
 
     elif args.set_mode:
