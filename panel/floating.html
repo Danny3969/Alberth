@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alberth Floating Bar</title>
+  <title>Alberth Floating Bar v4.1</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --cyan: #00d4ff;
       --cyan-glow: rgba(0, 212, 255, 0.25);
-      --bg-glass: rgba(10, 18, 32, 0.88);
+      --orange: #f97316;
+      --orange-glow: rgba(249, 115, 22, 0.35);
+      --bg-glass: rgba(10, 18, 32, 0.90);
       --border-glass: rgba(0, 212, 255, 0.2);
       --text: #f0f6fc;
       --text-dim: #8b949e;
@@ -34,8 +36,8 @@
 
     /* Floating Bar Overlay Container */
     .floating-bar {
-      width: 540px;
-      max-width: 92vw;
+      width: 560px;
+      max-width: 94vw;
       background: var(--bg-glass);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
@@ -48,6 +50,16 @@
       gap: 10px;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       animation: floatIn 0.3s ease-out;
+    }
+
+    .floating-bar.listening-mode {
+      border-color: var(--orange);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 30px var(--orange-glow);
+    }
+
+    .floating-bar.privacy-mode {
+      border-color: var(--red);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 30px rgba(239, 68, 68, 0.4);
     }
 
     @keyframes floatIn {
@@ -79,14 +91,23 @@
       border-radius: 50%;
       background: var(--cyan);
       box-shadow: 0 0 8px var(--cyan);
+      transition: all 0.2s ease;
     }
-    .dot.listening { background: var(--purple); box-shadow: 0 0 10px var(--purple); animation: pulse 1s infinite; }
+    .dot.listening { background: var(--orange); box-shadow: 0 0 12px var(--orange); animation: pulse 0.8s infinite; }
+    .dot.thinking { background: var(--purple); box-shadow: 0 0 10px var(--purple); animation: pulse 1s infinite; }
     .dot.speaking { background: var(--green); box-shadow: 0 0 10px var(--green); }
-    .dot.alert { background: var(--red); box-shadow: 0 0 10px var(--red); }
+    .dot.offline { background: #64748b; box-shadow: 0 0 6px #64748b; }
+    .dot.alert { background: var(--red); box-shadow: 0 0 12px var(--red); }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
+      50% { opacity: 0.4; transform: scale(1.25); }
+    }
+
+    .badge-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .mode-badge {
@@ -101,11 +122,44 @@
       border: 1px solid rgba(0, 212, 255, 0.3);
     }
 
-    /* Main Input Form */
+    .privacy-badge {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 10px;
+      display: none;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .privacy-badge.visible { display: inline-block; }
+
+    /* QA Alert Banner Toast */
+    .qa-toast {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: slideDown 0.25s ease;
+    }
+    .qa-toast.visible { display: flex; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Main Input Form & Audio Waveform */
     .input-row {
       display: flex;
       align-items: center;
       gap: 10px;
+      position: relative;
     }
 
     .mic-btn {
@@ -129,23 +183,42 @@
     }
 
     .mic-btn.active {
-      background: rgba(168, 85, 247, 0.25);
-      border-color: var(--purple);
-      color: var(--purple);
+      background: rgba(249, 115, 22, 0.25);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
     }
 
     .bar-input {
-      flex: 1;
+      width: 100%;
       background: transparent;
       border: none;
       outline: none;
       color: var(--text);
       font-size: 14px;
       font-weight: 400;
+      z-index: 2;
     }
 
     .bar-input::placeholder {
       color: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Waveform Canvas inside input */
+    #waveformCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.65;
     }
 
     .send-btn {
@@ -158,6 +231,7 @@
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
+      flex-shrink: 0;
     }
 
     .send-btn:hover {
@@ -165,37 +239,47 @@
       box-shadow: 0 0 12px var(--cyan-glow);
     }
 
-    /* Response Container */
-    .response-area {
-      max-height: 240px;
+    /* Scrollable History List */
+    .history-list {
+      max-height: 220px;
       overflow-y: auto;
-      font-size: 13px;
-      line-height: 1.5;
-      color: rgba(255, 255, 255, 0.9);
-      background: rgba(0, 0, 0, 0.25);
-      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+
+    .chat-bubble {
+      padding: 8px 12px;
       border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.45;
+      max-width: 90%;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: rgba(0, 212, 255, 0.12);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      color: var(--text);
+    }
+
+    .chat-bubble.alberth {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.05);
       border-left: 3px solid var(--cyan);
-      display: none;
+      color: rgba(255, 255, 255, 0.92);
     }
 
-    .response-area.visible {
-      display: block;
-    }
-
-    /* Slide-Over Live Canvas Card */
+    /* Canvas Drawer */
     .canvas-drawer {
-      margin-top: 6px;
       background: rgba(0, 212, 255, 0.05);
       border: 1px dashed var(--border-glass);
       border-radius: 10px;
       padding: 12px;
       display: none;
     }
-
-    .canvas-drawer.active {
-      display: block;
-    }
+    .canvas-drawer.active { display: block; }
   </style>
 </head>
 <body>
@@ -206,31 +290,79 @@
         <div class="dot" id="statusDot"></div>
         <span id="statusText">Alberth Conectado</span>
       </div>
-      <span class="mode-badge" id="modeBadge">LABORAL</span>
+      <div class="badge-group">
+        <span class="privacy-badge" id="privacyBadge">🛡️ CONFIDENCIAL</span>
+        <span class="mode-badge" id="modeBadge">LABORAL</span>
+      </div>
+    </div>
+
+    <!-- QA Alert Toast -->
+    <div class="qa-toast" id="qaToast">
+      <span>⚠️ <b>Agente QA:</b> <span id="qaMsg">Se ha detectado una sugerencia de optimización.</span></span>
     </div>
 
     <div class="input-row">
       <button class="mic-btn" id="micBtn" title="Hablar con Alberth">🎙️</button>
-      <input type="text" class="bar-input" id="barInput" placeholder="Pregunta a Alberth (Cmd+Shift+A)..." autofocus />
+      <div class="input-wrapper">
+        <canvas id="waveformCanvas"></canvas>
+        <input type="text" class="bar-input" id="barInput" placeholder="Pregunta a Alberth (Cmd+Shift+A)..." autofocus />
+      </div>
       <button class="send-btn" id="sendBtn">Enviar</button>
     </div>
 
-    <div class="response-area" id="responseArea"></div>
+    <div class="history-list" id="historyList"></div>
     <div class="canvas-drawer" id="canvasDrawer"></div>
   </div>
 
   <script>
+    const bar = document.getElementById('bar');
     const ws = new WebSocket(`ws://${location.host}/ws`);
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const modeBadge = document.getElementById('modeBadge');
+    const privacyBadge = document.getElementById('privacyBadge');
+    const qaToast = document.getElementById('qaToast');
+    const qaMsg = document.getElementById('qaMsg');
     const barInput = document.getElementById('barInput');
     const sendBtn = document.getElementById('sendBtn');
     const micBtn = document.getElementById('micBtn');
-    const responseArea = document.getElementById('responseArea');
+    const historyList = document.getElementById('historyList');
     const canvasDrawer = document.getElementById('canvasDrawer');
 
-    // UI Sound Effects via WebAudio API (Zero-Asset Audio)
+    // Waveform Canvas Setup
+    const canvas = document.getElementById('waveformCanvas');
+    const ctx = canvas.getContext('2d');
+    let isListening = false;
+    let animFrame = null;
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawWaveform() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!isListening) return;
+
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#f97316';
+      const width = canvas.width;
+      const height = canvas.height;
+      const time = Date.now() * 0.005;
+
+      ctx.moveTo(0, height / 2);
+      for (let x = 0; x < width; x += 5) {
+        const y = height / 2 + Math.sin(x * 0.05 + time) * 6 * Math.sin(x * 0.01 + time);
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      animFrame = requestAnimationFrame(drawWaveform);
+    }
+
+    // Audio Haptics Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq = 440, type = 'sine', duration = 0.08) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -246,6 +378,14 @@
       osc.stop(audioCtx.currentTime + duration);
     }
 
+    function appendBubble(role, text) {
+      const b = document.createElement('div');
+      b.className = `chat-bubble ${role}`;
+      b.innerText = text;
+      historyList.appendChild(b);
+      historyList.scrollTop = historyList.scrollHeight;
+    }
+
     ws.onopen = () => {
       statusDot.className = 'dot';
       statusText.innerText = 'Alberth Conectado';
@@ -256,18 +396,25 @@
       const data = JSON.parse(evt.data);
       if (data.type === 'thinking') {
         if (data.active) {
-          statusDot.className = 'dot listening';
-          statusText.innerText = 'Pensando...';
+          statusDot.className = 'dot thinking';
+          statusText.innerText = 'Pensando (Agente Código)...';
         } else {
           statusDot.className = 'dot speaking';
           statusText.innerText = 'Respondiendo...';
         }
-      } else if (data.type === 'message' && data.message.role === 'alberth') {
-        statusDot.className = 'dot';
-        statusText.innerText = 'Alberth Listo';
-        responseArea.innerText = data.message.content;
-        responseArea.classList.add('visible');
-        playBeep(520, 'sine', 0.12);
+      } else if (data.type === 'message') {
+        if (data.message.role === 'alberth') {
+          statusDot.className = 'dot';
+          statusText.innerText = 'Alberth Listo';
+          appendBubble('alberth', data.message.content);
+          playBeep(520, 'sine', 0.12);
+        }
+      } else if (data.type === 'qa_alert') {
+        qaMsg.innerText = data.text;
+        qaToast.classList.add('visible');
+        statusDot.className = 'dot alert';
+        playBeep(350, 'sawtooth', 0.2);
+        setTimeout(() => qaToast.classList.remove('visible'), 8000);
       } else if (data.type === 'canvas_update') {
         canvasDrawer.innerHTML = data.canvas.html;
         canvasDrawer.classList.add('active');
@@ -277,6 +424,17 @@
     function sendQuery() {
       const text = barInput.value.trim();
       if (!text) return;
+
+      // Smart Privacy Mode Trigger Check ("modo confidencial")
+      if (text.toLowerCase().includes("modo confidencial") || text.toLowerCase().includes("modo privacidad")) {
+        privacyBadge.classList.add('visible');
+        bar.classList.add('privacy-mode');
+        appendBubble('alberth', '🛡️ Modo Confidencial Activado. Auditoría pausada y datos sensibles encriptados.');
+        barInput.value = '';
+        return;
+      }
+
+      appendBubble('user', text);
       playBeep(660, 'triangle', 0.06);
       ws.send(JSON.stringify({ type: 'text', text }));
       barInput.value = '';
@@ -287,22 +445,24 @@
       if (e.key === 'Enter') sendQuery();
     });
 
-    // Voice Mic STT Activation
-    let isMicActive = false;
+    // Voice Mic STT Activation with Orange Theme Waveform
     micBtn.addEventListener('click', () => {
-      isMicActive = !isMicActive;
-      micBtn.classList.toggle('active', isMicActive);
-      if (isMicActive) {
+      isListening = !isListening;
+      micBtn.classList.toggle('active', isListening);
+      bar.classList.toggle('listening-mode', isListening);
+      if (isListening) {
         playBeep(700, 'sine', 0.1);
-        statusText.innerText = 'Escuchando voz...';
+        statusText.innerText = 'Escuchando STT (Naranja)...';
         statusDot.className = 'dot listening';
+        drawWaveform();
       } else {
         statusText.innerText = 'Alberth Conectado';
         statusDot.className = 'dot';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     });
 
-    // Global Hotkey (Cmd+Shift+A) handler inside panel
+    // Global Hotkey (Cmd+Shift+A)
     window.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyA') {
         e.preventDefault();

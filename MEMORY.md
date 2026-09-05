@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-04 22:30 GMT-5_
+_Última actualización: 2026-09-04 22:42 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,7 +7,7 @@ _Última actualización: 2026-09-04 22:30 GMT-5_
 
 ---
 
-## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.0 — Visual Engine)
+## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.1 — Visual Engine & Intelligence)
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── agents/
@@ -17,12 +17,12 @@ _Última actualización: 2026-09-04 22:30 GMT-5_
 │   └── qa_proactivo/   → Agente QA & Corrector de Voz [TTS es-MX-JorgeNeural]
 ├── alberth-android/    → Aplicación Móvil Nativa (React Native / Expo SDK 56)
 ├── panel/              → Panel Web & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets)
-│   ├── index.html      → Panel Principal HUD + Orbe 3D WebGL (Three.js Audio-Reactive)
-│   └── floating.html   → Standalone Desktop Floating Bar (Spotlight / Cmd+Shift+A)
+│   ├── index.html      → Panel Principal HUD + Orbe 3D WebGL (Three.js Audio-Reactive Double-Buffer)
+│   └── floating.html   → Standalone Desktop Floating Bar v4.1 (Orange Listening Pulse / Waveform / History / Privacy)
 ├── pipeline_refactor/  → Pipeline moderno en Python nativo con Circuit Breaker
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` (Puerto 8080)
 ├── alberth_voice_server.py  → Servidor STT de audio y escucha continua con VAD
-├── alberth_vision.py        → Cámara On-Demand + Registro & Reconocimiento de Personas (ej. Danna)
+├── alberth_vision.py        → Cámara On-Demand + Registro de Personas (ej. Danna) + Fast Cosine Embeddings (<500ms)
 ├── alberth_qa_watcher.py    → Demonio de supervisión proactiva (filtro 2 horas)
 ├── alberth_reminders_daemon.py → Demonio de recordatorios sobre SQLite
 ├── alberth_tts_premium.py   → Síntesis de voz cinematográfica (edge-tts / afplay)
@@ -39,7 +39,7 @@ _Última actualización: 2026-09-04 22:30 GMT-5_
 
 ## ⚙️ Configuración y Puertos Activos
 - **Panel Web HUD:** `http://localhost:8080` (FastAPI / Three.js 3D Orb / WebSockets)
-- **Desktop Floating Bar:** `http://localhost:8080/floating` (Glassmorphism Overlay UI)
+- **Desktop Floating Bar v4.1:** `http://localhost:8080/floating` (Glassmorphism Overlay UI + Waveform + History)
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
@@ -49,25 +49,26 @@ _Última actualización: 2026-09-04 22:30 GMT-5_
 
 ---
 
-## 🎨 ALBERTH VISUAL ENGINE v4.0 — ARQUITECTURA VISUAL INTEGRADAS
+## 🎨 ALBERTH VISUAL ENGINE v4.1 — ARQUITECTURA Y MEJORAS INTEGRADAS
 
-1. **Standalone Desktop Floating Bar (`http://localhost:8080/floating`):**
-   - Interfaz minimalista con Glassmorphism (`backdrop-filter: blur(24px)`), atajo de teclado (`Cmd + Shift + A`), respuesta ultra-rápida y badge de contexto activo (`laboral` / `personal`).
-2. **Orbe 3D Holográfico Reactivo en Three.js (`panel/index.html`):**
-   - Esfera neumórfica de partículas 3D que modula su forma de onda en tiempo real según los decibelios recibidos del micrófono o altavoz (WebAudio API FFT).
-3. **Live Canvas Slide-Over (A2UI):**
-   - Despliegue automático de tarjetas visuales, widgets, gráficos de finanzas y tablas generadas por el agente.
-4. **Sonido Háptico Sintetizado (Audio Cues):**
-   - Retroalimentación auditiva de baja frecuencia sintetizada por WebAudio API (efectos de activación de micrófono y confirmación sin archivos pesados).
+1. **Floating Bar v4.1:**
+   - **Modo Escuchando Naranja (#f97316):** Pulso dinámico en color naranja durante la captura STT.
+   - **Visualizador de Voz (Waveform Canvas):** Línea de espectro de audio dibujada dentro del cuadro de entrada.
+   - **Historial de Conversación:** Vista desplazable de mensajes recientes en la barra flotante.
+   - **Modo Confidencial / Privacidad Inteligente:** Disparador por voz (*"modo confidencial"*) que activa escudo rojo y pausa temporalmente los audit logs.
+2. **Reconocimiento Facial de Baja Latencia (<500ms):**
+   - Comparación local de vectores de rasgos guardados en `user_facts` (`personas_conocidas`) sin retardos innecesarios.
+3. **QA Alert Toast Banner:**
+   - Emisión instantánea de notificaciones visuales desde `alberth_qa_watcher.py` hacia la barra flotante.
 
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
-### 2026-09-04 (Lanzamiento Alberth Visual Engine v4.0)
-- **Floating Bar:** Creación del componente flotante desacoplado `panel/floating.html` y ruta `/floating` en `alberth_web_server.py`.
-- **Three.js & Audio Spectrum:** Orbe holográfico en Three.js sincronizado con los estados de color (`cyan`, `violeta`, `verde`).
-- **Cámara & Reconocimiento Facial:** Enrolamiento visual de personas (`enroll_person`) y saludo contextual integrado en `alberth_vision.py`.
+### 2026-09-04 (Lanzamiento Alberth Visual Engine v4.1)
+- **UI Floating Bar v4.1:** Integración del modo naranja de escucha STT, canvas de waveform de audio, historial desplazable de chat y tostada de alertas QA.
+- **Privacy Mode:** Modo confidencial para encriptar datos en vivo y pausar el registro de auditoría.
+- **Optimización Visión:** Reconocimiento de personas con caché de rasgos en SQLite.
 
 ---
 
