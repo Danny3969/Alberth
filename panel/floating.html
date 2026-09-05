@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alberth Floating Bar v4.4</title>
+  <title>Alberth Floating Bar v4.5</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -37,7 +37,7 @@
 
     /* Floating Bar Overlay Container */
     .floating-bar {
-      width: 600px;
+      width: 620px;
       max-width: 95vw;
       background: var(--bg-glass);
       backdrop-filter: blur(24px);
@@ -147,7 +147,7 @@
     }
     .privacy-badge.visible { display: inline-block; }
 
-    /* QA Alert Toast & Severity Levels */
+    /* Enriched QA Alert Toast */
     .qa-toast {
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.4);
@@ -165,6 +165,18 @@
     .qa-toast.advertencia { background: rgba(245, 158, 11, 0.15); border-color: var(--yellow); color: var(--yellow); }
     .qa-toast.critico { background: rgba(239, 68, 68, 0.2); border-color: var(--red); color: #fca5a5; }
 
+    .toast-actions { display: flex; gap: 4px; align-items: center; }
+    .toast-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: inherit;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     /* Spotlight Autocomplete Dropdown */
     .autocomplete-dropdown {
       position: absolute;
@@ -174,7 +186,7 @@
       background: #0f172a;
       border: 1px solid var(--border-glass);
       border-radius: 10px;
-      max-height: 180px;
+      max-height: 190px;
       overflow-y: auto;
       z-index: 10;
       display: none;
@@ -196,7 +208,7 @@
       color: var(--text);
     }
     .autocomplete-tag { font-size: 10px; color: var(--cyan); font-weight: 600; }
-    .freq-tag { font-size: 9px; opacity: 0.6; margin-left: 6px; }
+    .freq-tag { font-size: 9px; opacity: 0.65; margin-left: 6px; }
 
     /* Main Input Form & Audio Waveform */
     .input-row {
@@ -285,7 +297,7 @@
 
     /* Drawers & Controls (QA History & Offline Queue) */
     .drawer-container {
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.92);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 10px;
       padding: 10px;
@@ -293,7 +305,7 @@
       display: none;
       flex-direction: column;
       gap: 8px;
-      max-height: 180px;
+      max-height: 200px;
       overflow-y: auto;
     }
     .drawer-container.active { display: flex; }
@@ -304,9 +316,10 @@
       align-items: center;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       padding-bottom: 6px;
+      gap: 6px;
     }
 
-    .filter-tabs { display: flex; gap: 4px; }
+    .filter-tabs { display: flex; gap: 4px; align-items: center; }
     .tab-btn {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.1);
@@ -360,18 +373,17 @@
         <span class="dnd-badge" id="dndBtn" title="Modo No Molestar">🔔 DND: OFF</span>
         <span class="qa-toggle-btn" id="qaHistoryBtn" title="Historial QA">QA (0)</span>
         <span class="focus-badge" id="focusBtn" title="Atajo: Cmd+Shift+F">FOCUS</span>
-        <span class="mode-badge" id="modeBadge">LABORAL</span>
+        <span class="mode-badge" id="modeBadge" onclick="toggleContextMode()">LABORAL</span>
       </div>
     </div>
 
-    <!-- QA Alert Toast Banner -->
+    <!-- Enriched QA Alert Toast Banner -->
     <div class="qa-toast" id="qaToast">
       <span><b id="qaSevTag">⚠️ QA:</b> <span id="qaMsg">Alerta proactiva.</span></span>
-      <select id="qaMuteSelect" style="background:transparent; border:none; color:inherit; font-size:10px;">
-        <option value="all">Ver todas</option>
-        <option value="no_sug">Sin sugerencias</option>
-        <option value="only_crit">Solo críticas</option>
-      </select>
+      <div class="toast-actions">
+        <button class="toast-btn" onclick="setDND(60)">🔕 Mute 1h</button>
+        <button class="toast-btn" onclick="qaToast.classList.remove('visible')">✕</button>
+      </div>
     </div>
 
     <div class="input-row">
@@ -386,7 +398,7 @@
 
     <div class="history-list" id="historyList"></div>
 
-    <!-- QA History Drawer -->
+    <!-- QA History Drawer with Search & Canvas Chart -->
     <div class="drawer-container" id="qaHistoryDrawer">
       <div class="drawer-header">
         <div class="filter-tabs">
@@ -395,20 +407,35 @@
           <button class="tab-btn" onclick="filterQATab('advertencia', this)">🟡 Adv</button>
           <button class="tab-btn" onclick="filterQATab('sugerencia', this)">🔵 Sug</button>
         </div>
+        <input type="text" id="qaSearchInput" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:var(--text); width:110px;" placeholder="🔍 Buscar..." oninput="renderQAItems()" />
         <div class="export-btns">
           <button class="exp-btn" onclick="exportQAJSON()">📥 JSON</button>
           <button class="exp-btn" onclick="exportQACSV()">📥 CSV</button>
         </div>
       </div>
+      <!-- Severity Distribution Canvas Chart -->
+      <canvas id="qaChartCanvas" width="580" height="12" style="border-radius:4px; width:100%; height:12px;"></canvas>
       <div id="qaItemsList" style="display:flex; flex-direction:column; gap:6px;"></div>
     </div>
 
-    <!-- Offline Queue Drawer -->
+    <!-- Offline Queue Drawer with Progress Bar -->
     <div class="drawer-container" id="queueDrawer">
       <div class="drawer-header">
-        <span><b>⚡ Cola de Comandos Offline</b> (Prioridad Crítica Primero)</span>
-        <button class="exp-btn" style="background:rgba(239,68,68,0.2); color:var(--red);" onclick="clearOfflineQueue()">Limpiar Cola</button>
+        <span><b>⚡ Cola Offline</b> (Backoff Retries Activos)</span>
+        <button class="exp-btn" style="background:rgba(239,68,68,0.2); color:var(--red);" onclick="clearOfflineQueue()">Limpiar</button>
       </div>
+
+      <!-- Queue Processing Progress Bar -->
+      <div id="queueProgressWrapper" style="display:none; flex-direction:column; gap:3px;">
+        <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--cyan);">
+          <span id="queueProgressText">Enviando cola...</span>
+          <span id="queueProgressPercent">0%</span>
+        </div>
+        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+          <div id="queueProgressBar" style="width:0%; height:100%; background:var(--cyan); transition:width 0.2s;"></div>
+        </div>
+      </div>
+
       <div id="queueItemsList" style="display:flex; flex-direction:column; gap:6px;"></div>
     </div>
   </div>
@@ -438,12 +465,34 @@
     const qaHistoryDrawer = document.getElementById('qaHistoryDrawer');
     const queueDrawer = document.getElementById('queueDrawer');
     const qaItemsList = document.getElementById('qaItemsList');
+    const qaSearchInput = document.getElementById('qaSearchInput');
+    const qaChartCanvas = document.getElementById('qaChartCanvas');
     const queueItemsList = document.getElementById('queueItemsList');
+    const queueProgressWrapper = document.getElementById('queueProgressWrapper');
+    const queueProgressBar = document.getElementById('queueProgressBar');
+    const queueProgressText = document.getElementById('queueProgressText');
+    const queueProgressPercent = document.getElementById('queueProgressPercent');
     const barInput = document.getElementById('barInput');
     const sendBtn = document.getElementById('sendBtn');
     const micBtn = document.getElementById('micBtn');
     const historyList = document.getElementById('historyList');
     const autoDropdown = document.getElementById('autoDropdown');
+
+    // ── Mode Toggle (Laboral vs Personal) ──
+    let currentMode = localStorage.getItem('alberth_context_mode') || 'laboral';
+    function updateModeUI() {
+      modeBadge.innerText = currentMode.toUpperCase();
+      modeBadge.style.color = currentMode === 'personal' ? 'var(--orange)' : 'var(--cyan)';
+      modeBadge.style.borderColor = currentMode === 'personal' ? 'var(--orange)' : 'rgba(0,212,255,0.3)';
+    }
+    updateModeUI();
+
+    window.toggleContextMode = function() {
+      currentMode = currentMode === 'laboral' ? 'personal' : 'laboral';
+      localStorage.setItem('alberth_context_mode', currentMode);
+      updateModeUI();
+      appendBubble('alberth', `🔄 Modo cambiado a: ${currentMode.toUpperCase()}`);
+    };
 
     // ── Frequency Counter & Cloud Sync ──
     const FREQ = JSON.parse(localStorage.getItem('alberth_cmd_freq') || '{}');
@@ -455,18 +504,22 @@
     }).catch(()=>{});
 
     const BASE_SUGGESTIONS = [
-      { cmd: 'qué hora es', tag: 'CACHE', mode: 'all' },
-      { cmd: 'activa la cámara', tag: 'VISIÓN', mode: 'personal' },
-      { cmd: 'te presento a mi hija Danna', tag: 'ENROLL', mode: 'personal' },
-      { cmd: 'modo personal', tag: 'CONTEXTO', mode: 'all' },
-      { cmd: 'modo laboral', tag: 'CONTEXTO', mode: 'all' },
-      { cmd: 'modo confidencial', tag: 'PRIVACIDAD', mode: 'all' },
-      { cmd: 'activa el copiloto de pantalla', tag: 'SCREEN', mode: 'laboral' },
-      { cmd: 'alberth aprende que...', tag: 'LEARN', mode: 'laboral' }
+      { cmd: 'qué hora es', tag: 'CACHE', mode: 'all', time: 'all' },
+      { cmd: 'alberth_briefing.sh', tag: 'BRIEFING', mode: 'laboral', time: 'morning' },
+      { cmd: 'activa la cámara', tag: 'VISIÓN', mode: 'personal', time: 'all' },
+      { cmd: 'te presento a mi hija Danna', tag: 'ENROLL', mode: 'personal', time: 'all' },
+      { cmd: 'modo personal', tag: 'CONTEXTO', mode: 'all', time: 'all' },
+      { cmd: 'modo laboral', tag: 'CONTEXTO', mode: 'all', time: 'all' },
+      { cmd: 'modo confidencial', tag: 'PRIVACIDAD', mode: 'all', time: 'night' },
+      { cmd: 'activa el copiloto de pantalla', tag: 'SCREEN', mode: 'laboral', time: 'afternoon' },
+      { cmd: 'alberth aprende que...', tag: 'LEARN', mode: 'laboral', time: 'all' },
+      { cmd: 'resumen de aprendizaje semanal', tag: 'AUDIT', mode: 'laboral', time: 'night' }
     ];
 
-    // ── Offline Priority Queue ──
+    // ── Offline Queue & Exponential Backoff ──
     let offlineQueue = JSON.parse(localStorage.getItem('alberth_offline_queue') || '[]');
+    let retryAttempt = 0;
+    let isFlushing = false;
 
     function isCriticalCmd(cmd) {
       const lower = cmd.toLowerCase();
@@ -509,27 +562,60 @@
       queueDrawer.classList.toggle('active');
     });
 
-    function flushQueue() {
-      if (offlineQueue.length === 0) return;
-      // Priority sorting: critical (priority 1) first, then older timestamp
+    async function flushQueue() {
+      if (offlineQueue.length === 0 || isFlushing) return;
+      if (!navigator.onLine || ws.readyState !== WebSocket.OPEN) {
+        // Exponential Backoff Retry calculation: min(2000 * 2^attempt, 30000)
+        retryAttempt++;
+        const backoffMs = Math.min(2000 * Math.pow(2, retryAttempt), 30000);
+        statusText.innerText = `Reintentando cola en ${Math.round(backoffMs/1000)}s...`;
+        setTimeout(flushQueue, backoffMs);
+        return;
+      }
+
+      isFlushing = true;
+      retryAttempt = 0;
+      queueProgressWrapper.style.display = 'flex';
       offlineQueue.sort((a, b) => a.priority - b.priority || a.id - b.id);
+
+      const total = offlineQueue.length;
+      let processed = 0;
+
       while (offlineQueue.length > 0 && ws.readyState === WebSocket.OPEN) {
         const item = offlineQueue.shift();
         ws.send(JSON.stringify({ type: 'text', text: item.text }));
+        processed++;
+        const pct = Math.round((processed / total) * 100);
+        queueProgressBar.style.width = `${pct}%`;
+        queueProgressPercent.innerText = `${pct}%`;
+        queueProgressText.innerText = `Enviando ${processed} de ${total}...`;
+        saveQueue();
+        await new Promise(r => setTimeout(r, 250));
       }
-      saveQueue();
+
+      queueProgressWrapper.style.display = 'none';
+      isFlushing = false;
     }
 
     window.addEventListener('online', flushQueue);
 
-    // ── DND Timer ("No Molestar") ──
+    // ── DND Timer & Auto-DND (Night Mode) ──
     let dndUntil = parseInt(localStorage.getItem('alberth_dnd_until') || '0', 10);
+
+    function checkAutoDND() {
+      const h = new Date().getHours();
+      // Auto-DND in night hours (23:00 - 07:00)
+      return (h >= 23 || h < 7);
+    }
 
     function updateDNDUI() {
       const now = Date.now();
       if (now < dndUntil) {
         const remMin = Math.ceil((dndUntil - now) / 60000);
         dndBtn.innerText = `🔕 DND (${remMin}m)`;
+        dndBtn.classList.add('active');
+      } else if (checkAutoDND()) {
+        dndBtn.innerText = `🔕 AUTO-DND (NOCHE)`;
         dndBtn.classList.add('active');
       } else {
         dndBtn.innerText = `🔔 DND: OFF`;
@@ -539,14 +625,19 @@
     setInterval(updateDNDUI, 10000);
     updateDNDUI();
 
-    dndBtn.addEventListener('click', () => {
-      const now = Date.now();
-      if (now >= dndUntil) dndUntil = now + 3600000; // +1 hora
-      else if (dndUntil - now <= 3600000) dndUntil = now + 14400000; // +4 horas
-      else if (dndUntil - now <= 14400000) dndUntil = now + 28800000; // +8 horas
-      else dndUntil = 0; // OFF
+    window.setDND = function(minutes) {
+      dndUntil = Date.now() + minutes * 60000;
       localStorage.setItem('alberth_dnd_until', dndUntil.toString());
       updateDNDUI();
+      qaToast.classList.remove('visible');
+    };
+
+    dndBtn.addEventListener('click', () => {
+      const now = Date.now();
+      if (now >= dndUntil) setDND(60);
+      else if (dndUntil - now <= 3600000) setDND(240);
+      else if (dndUntil - now <= 14400000) setDND(480);
+      else { dndUntil = 0; localStorage.setItem('alberth_dnd_until', '0'); updateDNDUI(); }
     });
 
     // ── Focus Mode Toggle (Cmd+Shift+F) ──
@@ -558,20 +649,58 @@
       focusBtn.innerText = isFocusMode ? 'FOCUS ON' : 'FOCUS';
     }
 
-    // ── QA History & Export ──
+    // ── QA History, Search & Canvas Trend Chart ──
     let qaHistory = JSON.parse(localStorage.getItem('alberth_qa_history') || '[]');
     let activeQATab = 'all';
 
+    function drawQAChart() {
+      const ctx = qaChartCanvas.getContext('2d');
+      const w = qaChartCanvas.width;
+      const h = qaChartCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (qaHistory.length === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(0, 0, w, h);
+        return;
+      }
+
+      const counts = { critico: 0, advertencia: 0, sugerencia: 0 };
+      qaHistory.forEach(q => { counts[q.severity = q.severity || 'advertencia']++; });
+      const total = qaHistory.length;
+
+      let x = 0;
+      const drawSeg = (cnt, color) => {
+        if (cnt === 0) return;
+        const segW = (cnt / total) * w;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, 0, segW, h);
+        x += segW;
+      };
+
+      drawSeg(counts.critico, '#ef4444');
+      drawSeg(counts.advertencia, '#f59e0b');
+      drawSeg(counts.sugerencia, '#00d4ff');
+    }
+
     function renderQAItems() {
-      const filtered = activeQATab === 'all' ? qaHistory : qaHistory.filter(q => q.severity === activeQATab);
+      const query = (qaSearchInput ? qaSearchInput.value.toLowerCase().trim() : '');
+      const filtered = qaHistory.filter(q => {
+        const matchesTab = activeQATab === 'all' || q.severity === activeQATab;
+        const matchesQuery = !query || q.text.toLowerCase().includes(query) || q.severity.toLowerCase().includes(query);
+        return matchesTab && matchesQuery;
+      });
+
       qaItemsList.innerHTML = filtered.length === 0 ?
-        '<div style="opacity:0.5;">Sin eventos registrados.</div>' :
+        '<div style="opacity:0.5;">Sin eventos coincidentes.</div>' :
         filtered.map(q => `
           <div class="qa-item ${q.severity}">
             <span>[${q.severity.toUpperCase()}] ${q.text}</span>
             <span style="opacity:0.5">${q.time}</span>
           </div>
         `).join('');
+
+      drawQAChart();
     }
 
     function updateQAHistoryUI() {
@@ -608,20 +737,29 @@
       a.click(); URL.revokeObjectURL(url);
     };
 
-    // ── Spotlight Autocomplete Handler ──
+    // ── Contextual & Time-Aware Autocomplete Handler ──
     barInput.addEventListener('input', () => {
       const val = barInput.value.toLowerCase().trim();
       if (!val) { autoDropdown.classList.remove('visible'); return; }
 
+      const hour = new Date().getHours();
+      const timeSlot = (hour >= 6 && hour < 12) ? 'morning' : ((hour >= 12 && hour < 19) ? 'afternoon' : 'night');
+
       const matches = BASE_SUGGESTIONS
         .filter(s => s.cmd.toLowerCase().includes(val))
-        .sort((a, b) => (FREQ[b.cmd] || 0) - (FREQ[a.cmd] || 0));
+        .map(s => {
+          let score = FREQ[s.cmd] || 0;
+          if (s.mode === currentMode || s.mode === 'all') score += 10;
+          if (s.time === timeSlot || s.time === 'all') score += 5;
+          return { ...s, score };
+        })
+        .sort((a, b) => b.score - a.score);
 
       if (matches.length === 0) { autoDropdown.classList.remove('visible'); return; }
 
       autoDropdown.innerHTML = matches.map(m => `
         <div class="autocomplete-item" onclick="selectSuggestion('${m.cmd}')">
-          <span>${m.cmd} <span class="freq-tag">(${FREQ[m.cmd] || 0}×)</span></span>
+          <span>${m.cmd} <span class="freq-tag">(${FREQ[m.cmd] || 0}× · ${m.mode.toUpperCase()})</span></span>
           <span class="autocomplete-tag">${m.tag}</span>
         </div>
       `).join('');
@@ -638,11 +776,10 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playSeveritySound(sev) {
-      if (Date.now() < dndUntil) return; // Suppress sound if DND is active
+      if (Date.now() < dndUntil || checkAutoDND()) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
 
       if (sev === 'critico') {
-        // High-intensity dual alarm (880Hz + 1046Hz square)
         [880, 1046].forEach((f, idx) => {
           setTimeout(() => {
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -654,7 +791,6 @@
           }, idx * 100);
         });
       } else if (sev === 'advertencia') {
-        // Double warning beep (587Hz + 698Hz triangle)
         [587, 698].forEach((f, idx) => {
           setTimeout(() => {
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -666,7 +802,6 @@
           }, idx * 90);
         });
       } else {
-        // Soft major triad chime C5-E5-G5 (523Hz, 659Hz, 784Hz sine)
         [523, 659, 784].forEach((f, idx) => {
           setTimeout(() => {
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -681,7 +816,7 @@
     }
 
     function playBeep(freq = 440, type = 'sine', duration = 0.08) {
-      if (Date.now() < dndUntil) return;
+      if (Date.now() < dndUntil || checkAutoDND()) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
       osc.type = type; osc.frequency.value = freq;
@@ -716,7 +851,7 @@
         appendBubble('alberth', data.message.content);
         playBeep(520, 'sine', 0.12);
 
-        if (document.hidden && Notification.permission === 'granted' && Date.now() >= dndUntil) {
+        if (document.hidden && Notification.permission === 'granted' && Date.now() >= dndUntil && !checkAutoDND()) {
           new Notification('Alberth NEXUS', { body: data.message.content });
         }
       } else if (data.type === 'qa_alert') {
@@ -727,7 +862,7 @@
         localStorage.setItem('alberth_qa_history', JSON.stringify(qaHistory));
         updateQAHistoryUI();
 
-        if (Date.now() >= dndUntil) {
+        if (Date.now() >= dndUntil && !checkAutoDND()) {
           qaToast.className = `qa-toast visible ${sev}`;
           qaSevTag.innerText = sev === 'critico' ? '🔴 QA CRÍTICO:' : (sev === 'sugerencia' ? '🔵 QA SUGERENCIA:' : '⚠️ QA ADVERTENCIA:');
           qaMsg.innerText = data.text;
@@ -742,7 +877,6 @@
       if (!text) return;
       autoDropdown.classList.remove('visible');
 
-      // Record Frequency & Sync Cloud
       FREQ[text] = (FREQ[text] || 0) + 1;
       localStorage.setItem('alberth_cmd_freq', JSON.stringify(FREQ));
       fetch('/api/autocomplete/freq', {
@@ -809,4 +943,5 @@
   </script>
 </body>
 </html>
+
 
