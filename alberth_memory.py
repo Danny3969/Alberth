@@ -51,6 +51,59 @@ def get_db() -> sqlite3.Connection:
     return conn
 
 
+# ── Gestión de Modo de Contexto (Personal / Laboral) ─────────────────────────
+MODE_FILE = os.path.join(WORKSPACE_DIR, ".context_mode")
+LOGS_DIR  = os.path.join(WORKSPACE_DIR, "logs")
+AUDIT_LOG_FILE = os.path.join(LOGS_DIR, "audit_logs.jsonl")
+
+
+def get_current_mode() -> str:
+    """Retorna el modo de contexto activo ('laboral' o 'personal')."""
+    if os.path.exists(MODE_FILE):
+        try:
+            with open(MODE_FILE, "r") as f:
+                mode = f.read().strip().lower()
+                if mode in ["personal", "laboral"]:
+                    return mode
+        except Exception:
+            pass
+    return "laboral"
+
+
+def set_current_mode(mode: str) -> str:
+    """Establece el modo de contexto activo ('laboral' o 'personal')."""
+    mode = mode.lower().strip()
+    if mode not in ["personal", "laboral"]:
+        mode = "laboral"
+    try:
+        os.makedirs(os.path.dirname(MODE_FILE), exist_ok=True)
+        with open(MODE_FILE, "w") as f:
+            f.write(mode)
+        log(f"🔄 Modo de contexto cambiado a: {mode.upper()}")
+    except Exception as e:
+        log(f"Error al cambiar modo: {e}")
+    return mode
+
+
+def audit_log(agente: str, query: str, modelo: str, latencia_ms: int = 0, status: str = "ok"):
+    """Registra eventos de auditoría y trazabilidad en logs/audit_logs.jsonl."""
+    try:
+        os.makedirs(LOGS_DIR, exist_ok=True)
+        record = {
+            "timestamp": datetime.now().isoformat(),
+            "modo": get_current_mode(),
+            "agente": agente,
+            "query": query[:300],
+            "modelo": modelo,
+            "latencia_ms": latencia_ms,
+            "status": status
+        }
+        with open(AUDIT_LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception as e:
+        log(f"Error registrando auditoría: {e}")
+
+
 def _init_schema(conn: sqlite3.Connection):
     """Crea las tablas si no existen."""
     conn.executescript("""
@@ -61,7 +114,8 @@ def _init_schema(conn: sqlite3.Connection):
             response    TEXT    NOT NULL,
             query_hash  TEXT,
             tags        TEXT    DEFAULT '',
-            importance  INTEGER DEFAULT 1
+            importance  INTEGER DEFAULT 1,
+            mode        TEXT    DEFAULT 'laboral'
         );
 
         CREATE TABLE IF NOT EXISTS user_facts (
@@ -70,7 +124,8 @@ def _init_schema(conn: sqlite3.Connection):
             fact        TEXT    NOT NULL UNIQUE,
             first_seen  TEXT    DEFAULT (datetime('now', 'localtime')),
             last_seen   TEXT    DEFAULT (datetime('now', 'localtime')),
-            frequency   INTEGER DEFAULT 1
+            frequency   INTEGER DEFAULT 1,
+            mode        TEXT    DEFAULT 'laboral'
         );
 
         CREATE TABLE IF NOT EXISTS daily_summaries (
@@ -357,13 +412,31 @@ def main():
                         help="Lista recordatorios pendientes listos para disparar")
     parser.add_argument("--mark-reminder-done", type=int, metavar="ID",
                         help="Marca un recordatorio como completado por su ID")
+    parser.add_argument("--get-mode", action="store_true",
+                        help="Muestra el modo de contexto activo (laboral/personal)")
+    parser.add_argument("--set-mode", choices=["personal", "laboral"],
+                        help="Cambia el modo de contexto activo (personal/laboral)")
+    parser.add_argument("--audit", nargs=4, metavar=("AGENTE", "QUERY", "MODELO", "LATENCIA_MS"),
+                        help="Registra una entrada de auditoría")
     parser.add_argument("--tags",    default="",
                         help="Tags para categorizar la entrada (con --save)")
     parser.add_argument("--importance", type=int, default=1,
                         help="Importancia 1-5 de la conversación (con --save)")
     args = parser.parse_args()
 
-    if args.save:
+    if args.get_mode:
+        print(get_current_mode())
+
+    elif args.set_mode:
+        m = set_current_mode(args.set_mode)
+        print(f"Modo cambiado a {m}")
+
+    elif args.audit:
+        agente, query, modelo, latencia = args.audit
+        audit_log(agente, query, modelo, int(latencia))
+        print("OK")
+
+    elif args.save:
         query, response = args.save
         save_conversation(query, response, args.tags, args.importance)
         print("OK")
@@ -375,6 +448,7 @@ def main():
     elif args.summary:
         stats = get_stats()
         print(f"\n📊 MEMORIA DE ALBERTH")
+        print(f"  Modo Activo            : {get_current_mode().upper()}")
         print(f"  Conversaciones totales : {stats['total_conversaciones']}")
         print(f"  Hechos del usuario     : {stats['total_hechos']}")
         print(f"  Conversaciones hoy     : {stats['conversaciones_hoy']}")
@@ -384,7 +458,9 @@ def main():
         print(f"  Ruta                   : {stats['db_path']}\n")
 
     elif args.stats:
-        print(json.dumps(get_stats(), ensure_ascii=False, indent=2))
+        res = get_stats()
+        res["modo_activo"] = get_current_mode()
+        print(json.dumps(res, ensure_ascii=False, indent=2))
 
     elif args.clear_old is not None:
         deleted = clear_old_entries(args.clear_old)
@@ -413,3 +489,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
