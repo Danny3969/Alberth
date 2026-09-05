@@ -87,6 +87,13 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 app.mount("/output", StaticFiles(directory=str(VOICE_OUTPUT)), name="output")
 app.mount("/assets", StaticFiles(directory=str(WORKSPACE)), name="assets")
 
+@app.get("/floating", response_class=FileResponse)
+async def get_floating_bar():
+    floating_file = PANEL_DIR / "floating.html"
+    if floating_file.exists():
+        return FileResponse(str(floating_file))
+    raise HTTPException(status_code=404, detail="floating.html no encontrado")
+
 
 # ── WebSocket Manager ──────────────────────────────────────────────────────────
 class ConnectionManager:

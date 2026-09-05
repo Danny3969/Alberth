@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alberth Floating Bar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan: #00d4ff;
+      --cyan-glow: rgba(0, 212, 255, 0.25);
+      --bg-glass: rgba(10, 18, 32, 0.88);
+      --border-glass: rgba(0, 212, 255, 0.2);
+      --text: #f0f6fc;
+      --text-dim: #8b949e;
+      --green: #10b981;
+      --red: #ef4444;
+      --purple: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: transparent;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 20px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Floating Bar Overlay Container */
+    .floating-bar {
+      width: 540px;
+      max-width: 92vw;
+      background: var(--bg-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 30px var(--cyan-glow);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: floatIn 0.3s ease-out;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Header Bar: Status Dots & Mode Badge */
+    .bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 6px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .dot.listening { background: var(--purple); box-shadow: 0 0 10px var(--purple); animation: pulse 1s infinite; }
+    .dot.speaking { background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .dot.alert { background: var(--red); box-shadow: 0 0 10px var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .mode-badge {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    /* Main Input Form */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mic-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .mic-btn:hover {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--cyan);
+    }
+
+    .mic-btn.active {
+      background: rgba(168, 85, 247, 0.25);
+      border-color: var(--purple);
+      color: var(--purple);
+    }
+
+    .bar-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .bar-input::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .send-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: var(--cyan);
+      color: #060a14;
+      font-weight: 600;
+      font-size: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .send-btn:hover {
+      background: #38bdf8;
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    /* Response Container */
+    .response-area {
+      max-height: 240px;
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border-left: 3px solid var(--cyan);
+      display: none;
+    }
+
+    .response-area.visible {
+      display: block;
+    }
+
+    /* Slide-Over Live Canvas Card */
+    .canvas-drawer {
+      margin-top: 6px;
+      background: rgba(0, 212, 255, 0.05);
+      border: 1px dashed var(--border-glass);
+      border-radius: 10px;
+      padding: 12px;
+      display: none;
+    }
+
+    .canvas-drawer.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="floating-bar" id="bar">
+    <div class="bar-header">
+      <div class="status-indicator">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">Alberth Conectado</span>
+      </div>
+      <span class="mode-badge" id="modeBadge">LABORAL</span>
+    </div>
+
+    <div class="input-row">
+      <button class="mic-btn" id="micBtn" title="Hablar con Alberth">🎙️</button>
+      <input type="text" class="bar-input" id="barInput" placeholder="Pregunta a Alberth (Cmd+Shift+A)..." autofocus />
+      <button class="send-btn" id="sendBtn">Enviar</button>
+    </div>
+
+    <div class="response-area" id="responseArea"></div>
+    <div class="canvas-drawer" id="canvasDrawer"></div>
+  </div>
+
+  <script>
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const modeBadge = document.getElementById('modeBadge');
+    const barInput = document.getElementById('barInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const micBtn = document.getElementById('micBtn');
+    const responseArea = document.getElementById('responseArea');
+    const canvasDrawer = document.getElementById('canvasDrawer');
+
+    // UI Sound Effects via WebAudio API (Zero-Asset Audio)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 440, type = 'sine', duration = 0.08) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    ws.onopen = () => {
+      statusDot.className = 'dot';
+      statusText.innerText = 'Alberth Conectado';
+      playBeep(880, 'sine', 0.1);
+    };
+
+    ws.onmessage = (evt) => {
+      const data = JSON.parse(evt.data);
+      if (data.type === 'thinking') {
+        if (data.active) {
+          statusDot.className = 'dot listening';
+          statusText.innerText = 'Pensando...';
+        } else {
+          statusDot.className = 'dot speaking';
+          statusText.innerText = 'Respondiendo...';
+        }
+      } else if (data.type === 'message' && data.message.role === 'alberth') {
+        statusDot.className = 'dot';
+        statusText.innerText = 'Alberth Listo';
+        responseArea.innerText = data.message.content;
+        responseArea.classList.add('visible');
+        playBeep(520, 'sine', 0.12);
+      } else if (data.type === 'canvas_update') {
+        canvasDrawer.innerHTML = data.canvas.html;
+        canvasDrawer.classList.add('active');
+      }
+    };
+
+    function sendQuery() {
+      const text = barInput.value.trim();
+      if (!text) return;
+      playBeep(660, 'triangle', 0.06);
+      ws.send(JSON.stringify({ type: 'text', text }));
+      barInput.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendQuery);
+    barInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendQuery();
+    });
+
+    // Voice Mic STT Activation
+    let isMicActive = false;
+    micBtn.addEventListener('click', () => {
+      isMicActive = !isMicActive;
+      micBtn.classList.toggle('active', isMicActive);
+      if (isMicActive) {
+        playBeep(700, 'sine', 0.1);
+        statusText.innerText = 'Escuchando voz...';
+        statusDot.className = 'dot listening';
+      } else {
+        statusText.innerText = 'Alberth Conectado';
+        statusDot.className = 'dot';
+      }
+    });
+
+    // Global Hotkey (Cmd+Shift+A) handler inside panel
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyA') {
+        e.preventDefault();
+        barInput.focus();
+        playBeep(800, 'sine', 0.05);
+      }
+    });
+  </script>
+</body>
+</html>
