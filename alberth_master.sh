@@ -23,6 +23,17 @@ LOCK_FILE="$VOICE_DIR/.alberth.lock"
 mkdir -p "$INPUT_DIR" "$OUTPUT_DIR" "$LOG_DIR"
 LOGFILE="$LOG_DIR/alberth_master_$(date +%Y%m%d).log"
 
+# --- Functions: Security, Sanitization & Connectivity (Fase 1) ---
+is_online() {
+    curl -s --connect-timeout 1.5 -I http://1.1.1.1 >/dev/null 2>&1
+}
+
+sanitize_input() {
+    local input="$1"
+    # Eliminar metacaracteres peligrosos para evitar RCE (Command Injection)
+    echo "$input" | tr -d '`$&|<>\' | head -c 2000
+}
+
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOGFILE"
 }
@@ -469,38 +480,58 @@ Usa esta información de forma analítica para responder al Señor con precisió
     fi
 
     local agent_message="${memory_context}${visual_context}${file_context}${youtube_context}${system_context}${search_context}${query}"
+    local start_ts=$(date +%s%3N 2>/dev/null || echo $(date +%s)000)
+    local model_used="nvidia/z-ai/glm-5.1"
+    local agent_success=false
 
+    # Sanitizar query de entrada (Anti-RCE)
+    query=$(sanitize_input "$query")
 
-    if openclaw agent \
-        --agent main \
-        --message "$agent_message" \
-        --json > "$temp_agent_json" 2>&1; then
+    if is_online; then
+        if openclaw agent \
+            --agent main \
+            --message "$agent_message" \
+            --json > "$temp_agent_json" 2>&1; then
 
-        local response
-        response=$(jq -r '.result.payloads[0].text // ""' "$temp_agent_json" 2>/dev/null)
-        rm -f "$temp_agent_json"
+            response=$(jq -r '.result.payloads[0].text // ""' "$temp_agent_json" 2>/dev/null)
+            rm -f "$temp_agent_json"
 
-        # ── Limpiar prefijos de error de openclaw ──────────────────────────
-        # Cuando una herramienta falla, openclaw antepone este texto al mensaje.
-        # Lo eliminamos para que el usuario solo reciba la respuesta del asistente.
-        response=$(echo "$response" | sed 's/^\[assistant turn failed before producing content\]//g' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            # Limpiar prefijos de error de openclaw
+            response=$(echo "$response" | sed 's/^\[assistant turn failed before producing content\]//g' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+            if [[ -n "$response" && "$response" != "null" ]]; then
+                agent_success=true
+                log "AGENT CLOUD OK → Respuesta (${#response} chars)"
+            fi
+        fi
+    else
+        log "🌐 MODO OFFLINE DETECTADO (Sin Internet) — Conmutando a Ollama Local (qwen2.5:3b)..."
+    fi
+
+    # Fallback local con Ollama si falló la nube o estamos offline
+    if [[ "$agent_success" == false ]]; then
+        log "OFFLINE FALLBACK → Generando respuesta local con Ollama (qwen2.5:3b)..."
+        model_used="ollama/qwen2.5:3b-local"
+        local payload
+        payload=$(jq -n --arg prompt "$agent_message" '{model: "qwen2.5:3b", prompt: $prompt, stream: false}')
+        response=$(curl -s -X POST http://localhost:11434/api/generate -H "Content-Type: application/json" -d "$payload" | jq -r '.response // ""' 2>/dev/null)
 
         if [[ -z "$response" || "$response" == "null" ]]; then
-            log "WARN: Respuesta vacía del agente. Usando fallback."
-            response="Señor, no pude procesar la solicitud en este momento. ¿Podría repetirla?"
+            log "WARN: Ollama local no disponible o sin respuesta. Usando mensaje de resiliencia."
+            response="Señor, estoy operando en modo offline. Los servicios en la nube no están disponibles y Ollama está inactivo."
+        else
+            log "OFFLINE OLLAMA OK → Respuesta local (${#response} chars)"
         fi
-
-        log "AGENT OK → Respuesta (${#response} chars)"
-        echo "$response" > "$response_txt"
-
-        # ── Guardar en memoria persistente ────────────────────────────
-        python3 "$WORKSPACE_DIR/alberth_memory.py" --save "$query" "$response" >> "$LOGFILE" 2>&1 &
-    else
-        log "ERROR: Falló conexión con el agente. Usando fallback."
-        response="Señor, hubo un problema de conectividad con el servidor. Verifique que el gateway esté activo."
-        echo "$response" > "$response_txt"
-        rm -f "$temp_agent_json"
     fi
+
+    local end_ts=$(date +%s%3N 2>/dev/null || echo $(date +%s)000)
+    local latency_ms=$((end_ts - start_ts))
+
+    echo "$response" > "$response_txt"
+
+    # Auditoría y Trazabilidad Estructurada + Guardado en Memoria
+    python3 "$WORKSPACE_DIR/alberth_memory.py" --audit "orquestador" "$query" "$model_used" "$latency_ms" >> "$LOGFILE" 2>&1 &
+    python3 "$WORKSPACE_DIR/alberth_memory.py" --save "$query" "$response" >> "$LOGFILE" 2>&1 &
 
     # ── PASO 3: TTS — Síntesis de voz ────────────────────────────────────
     # Prioridad 1: edge-tts Premium (Microsoft, alta calidad, sin costo)
