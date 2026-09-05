@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-04 22:42 GMT-5_
+_Última actualización: 2026-09-04 22:48 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,7 +7,7 @@ _Última actualización: 2026-09-04 22:42 GMT-5_
 
 ---
 
-## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.1 — Visual Engine & Intelligence)
+## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.2 — Spotlight, Focus & PWA)
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── agents/
@@ -16,9 +16,10 @@ _Última actualización: 2026-09-04 22:42 GMT-5_
 │   ├── vision/         → Agente Multimodal & Reconocimiento Facial [Nvidia NIM / Llama-3.2-Vision]
 │   └── qa_proactivo/   → Agente QA & Corrector de Voz [TTS es-MX-JorgeNeural]
 ├── alberth-android/    → Aplicación Móvil Nativa (React Native / Expo SDK 56)
-├── panel/              → Panel Web & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets)
+├── panel/              → Panel Web & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
 │   ├── index.html      → Panel Principal HUD + Orbe 3D WebGL (Three.js Audio-Reactive Double-Buffer)
-│   └── floating.html   → Standalone Desktop Floating Bar v4.1 (Orange Listening Pulse / Waveform / History / Privacy)
+│   ├── floating.html   → Desktop Floating Bar v4.2 (Spotlight Autocomplete / Focus Mode / QA Severities)
+│   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
 ├── pipeline_refactor/  → Pipeline moderno en Python nativo con Circuit Breaker
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` (Puerto 8080)
 ├── alberth_voice_server.py  → Servidor STT de audio y escucha continua con VAD
@@ -39,7 +40,7 @@ _Última actualización: 2026-09-04 22:42 GMT-5_
 
 ## ⚙️ Configuración y Puertos Activos
 - **Panel Web HUD:** `http://localhost:8080` (FastAPI / Three.js 3D Orb / WebSockets)
-- **Desktop Floating Bar v4.1:** `http://localhost:8080/floating` (Glassmorphism Overlay UI + Waveform + History)
+- **Desktop Floating Bar v4.2:** `http://localhost:8080/floating` (Spotlight Autocomplete + Focus Mode + PWA)
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
@@ -49,26 +50,21 @@ _Última actualización: 2026-09-04 22:42 GMT-5_
 
 ---
 
-## 🎨 ALBERTH VISUAL ENGINE v4.1 — ARQUITECTURA Y MEJORAS INTEGRADAS
+## 🎨 NOVEDADES DE ALBERTH NEXUS v4.2
 
-1. **Floating Bar v4.1:**
-   - **Modo Escuchando Naranja (#f97316):** Pulso dinámico en color naranja durante la captura STT.
-   - **Visualizador de Voz (Waveform Canvas):** Línea de espectro de audio dibujada dentro del cuadro de entrada.
-   - **Historial de Conversación:** Vista desplazable de mensajes recientes en la barra flotante.
-   - **Modo Confidencial / Privacidad Inteligente:** Disparador por voz (*"modo confidencial"*) que activa escudo rojo y pausa temporalmente los audit logs.
-2. **Reconocimiento Facial de Baja Latencia (<500ms):**
-   - Comparación local de vectores de rasgos guardados en `user_facts` (`personas_conocidas`) sin retardos innecesarios.
-3. **QA Alert Toast Banner:**
-   - Emisión instantánea de notificaciones visuales desde `alberth_qa_watcher.py` hacia la barra flotante.
+1. **Spotlight Autocomplete en la Floating Bar:** Despliegue automático de comandos frecuentes (`/modo personal`, `/modo laboral`, `/confidencial`, `/camara`, `qué hora es`) al escribir.
+2. **Modo "Focus" (`Cmd + Shift + F`):** Colapso instantáneo de paneles secundarios a una barra minimalista limpia para concentrarse al máximo.
+3. **Severidades QA & Historial de Alertas:** Clasificación por colores de alertas QA (`sugerencia`: cian, `advertencia`: amarillo, `critico`: rojo).
+4. **PWA & Offline Service Worker (`sw.js`):** Cacheo de la interfaz gráfica para que funcione 100% offline sin servidor de red externo.
 
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
-### 2026-09-04 (Lanzamiento Alberth Visual Engine v4.1)
-- **UI Floating Bar v4.1:** Integración del modo naranja de escucha STT, canvas de waveform de audio, historial desplazable de chat y tostada de alertas QA.
-- **Privacy Mode:** Modo confidencial para encriptar datos en vivo y pausar el registro de auditoría.
-- **Optimización Visión:** Reconocimiento de personas con caché de rasgos en SQLite.
+### 2026-09-04 (Lanzamiento Alberth NEXUS v4.2)
+- **UI PWA & Offline:** Implementación del Service Worker `panel/sw.js` y autocompletado estilo Spotlight.
+- **Focus Mode:** Modo concentración accesible con `Cmd + Shift + F`.
+- **QA Severities:** Clasificación por niveles de severidad en notificaciones.
 
 ---
 

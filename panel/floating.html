@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alberth Floating Bar v4.1</title>
+  <title>Alberth Floating Bar v4.2</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -11,11 +11,12 @@
       --cyan-glow: rgba(0, 212, 255, 0.25);
       --orange: #f97316;
       --orange-glow: rgba(249, 115, 22, 0.35);
-      --bg-glass: rgba(10, 18, 32, 0.90);
+      --bg-glass: rgba(10, 18, 32, 0.92);
       --border-glass: rgba(0, 212, 255, 0.2);
       --text: #f0f6fc;
       --text-dim: #8b949e;
       --green: #10b981;
+      --yellow: #f59e0b;
       --red: #ef4444;
       --purple: #a855f7;
     }
@@ -36,8 +37,8 @@
 
     /* Floating Bar Overlay Container */
     .floating-bar {
-      width: 560px;
-      max-width: 94vw;
+      width: 580px;
+      max-width: 95vw;
       background: var(--bg-glass);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
@@ -50,6 +51,12 @@
       gap: 10px;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       animation: floatIn 0.3s ease-out;
+    }
+
+    .floating-bar.focus-mode .bar-header,
+    .floating-bar.focus-mode .history-list,
+    .floating-bar.focus-mode .qa-history-drawer {
+      display: none !important;
     }
 
     .floating-bar.listening-mode {
@@ -67,7 +74,7 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Header Bar: Status Dots & Mode Badge */
+    /* Header Bar */
     .bar-header {
       display: flex;
       justify-content: space-between;
@@ -96,7 +103,6 @@
     .dot.listening { background: var(--orange); box-shadow: 0 0 12px var(--orange); animation: pulse 0.8s infinite; }
     .dot.thinking { background: var(--purple); box-shadow: 0 0 10px var(--purple); animation: pulse 1s infinite; }
     .dot.speaking { background: var(--green); box-shadow: 0 0 10px var(--green); }
-    .dot.offline { background: #64748b; box-shadow: 0 0 6px #64748b; }
     .dot.alert { background: var(--red); box-shadow: 0 0 12px var(--red); }
 
     @keyframes pulse {
@@ -110,7 +116,7 @@
       gap: 6px;
     }
 
-    .mode-badge {
+    .mode-badge, .focus-badge {
       background: rgba(0, 212, 255, 0.1);
       color: var(--cyan);
       padding: 2px 8px;
@@ -120,6 +126,7 @@
       font-size: 10px;
       letter-spacing: 0.5px;
       border: 1px solid rgba(0, 212, 255, 0.3);
+      cursor: pointer;
     }
 
     .privacy-badge {
@@ -134,7 +141,7 @@
     }
     .privacy-badge.visible { display: inline-block; }
 
-    /* QA Alert Banner Toast */
+    /* QA Alert Toast & Severity Levels */
     .qa-toast {
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.4);
@@ -145,13 +152,45 @@
       display: none;
       align-items: center;
       gap: 8px;
-      animation: slideDown 0.25s ease;
     }
     .qa-toast.visible { display: flex; }
+    .qa-toast.sugerencia { background: rgba(0, 212, 255, 0.15); border-color: var(--cyan); color: var(--cyan); }
+    .qa-toast.advertencia { background: rgba(245, 158, 11, 0.15); border-color: var(--yellow); color: var(--yellow); }
+    .qa-toast.critico { background: rgba(239, 68, 68, 0.2); border-color: var(--red); color: #fca5a5; }
 
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Spotlight Autocomplete Dropdown */
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 105%;
+      left: 0;
+      right: 0;
+      background: #0f172a;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 10;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .autocomplete-dropdown.visible { display: block; }
+    .autocomplete-item {
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text-dim);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      justify-content: space-between;
+    }
+    .autocomplete-item:hover, .autocomplete-item.selected {
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--text);
+    }
+    .autocomplete-tag {
+      font-size: 10px;
+      color: var(--cyan);
+      font-weight: 600;
     }
 
     /* Main Input Form & Audio Waveform */
@@ -176,17 +215,7 @@
       transition: all 0.2s ease;
       flex-shrink: 0;
     }
-
-    .mic-btn:hover {
-      background: rgba(0, 212, 255, 0.15);
-      border-color: var(--cyan);
-    }
-
-    .mic-btn.active {
-      background: rgba(249, 115, 22, 0.25);
-      border-color: var(--orange);
-      color: var(--orange);
-    }
+    .mic-btn.active { background: rgba(249, 115, 22, 0.25); border-color: var(--orange); color: var(--orange); }
 
     .input-wrapper {
       flex: 1;
@@ -205,12 +234,8 @@
       font-weight: 400;
       z-index: 2;
     }
+    .bar-input::placeholder { color: rgba(255, 255, 255, 0.35); }
 
-    .bar-input::placeholder {
-      color: rgba(255, 255, 255, 0.35);
-    }
-
-    /* Waveform Canvas inside input */
     #waveformCanvas {
       position: absolute;
       inset: 0;
@@ -234,12 +259,6 @@
       flex-shrink: 0;
     }
 
-    .send-btn:hover {
-      background: #38bdf8;
-      box-shadow: 0 0 12px var(--cyan-glow);
-    }
-
-    /* Scrollable History List */
     .history-list {
       max-height: 220px;
       overflow-y: auto;
@@ -256,30 +275,24 @@
       line-height: 1.45;
       max-width: 90%;
     }
+    .chat-bubble.user { align-self: flex-end; background: rgba(0, 212, 255, 0.12); border: 1px solid rgba(0, 212, 255, 0.25); }
+    .chat-bubble.alberth { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--cyan); }
 
-    .chat-bubble.user {
-      align-self: flex-end;
-      background: rgba(0, 212, 255, 0.12);
-      border: 1px solid rgba(0, 212, 255, 0.25);
-      color: var(--text);
-    }
-
-    .chat-bubble.alberth {
-      align-self: flex-start;
-      background: rgba(255, 255, 255, 0.05);
-      border-left: 3px solid var(--cyan);
-      color: rgba(255, 255, 255, 0.92);
-    }
-
-    /* Canvas Drawer */
-    .canvas-drawer {
-      background: rgba(0, 212, 255, 0.05);
-      border: 1px dashed var(--border-glass);
+    /* QA Alert History Drawer (Last 10 Events) */
+    .qa-history-drawer {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 10px;
-      padding: 12px;
+      padding: 8px 12px;
+      font-size: 11px;
       display: none;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
     }
-    .canvas-drawer.active { display: block; }
+    .qa-history-drawer.active { display: flex; }
+    .qa-item { display: flex; justify-content: space-between; color: var(--text-dim); }
   </style>
 </head>
 <body>
@@ -292,75 +305,94 @@
       </div>
       <div class="badge-group">
         <span class="privacy-badge" id="privacyBadge">🛡️ CONFIDENCIAL</span>
+        <span class="focus-badge" id="focusBtn" title="Atajo: Cmd+Shift+F">FOCUS</span>
         <span class="mode-badge" id="modeBadge">LABORAL</span>
       </div>
     </div>
 
-    <!-- QA Alert Toast -->
+    <!-- QA Alert Toast Banner -->
     <div class="qa-toast" id="qaToast">
-      <span>⚠️ <b>Agente QA:</b> <span id="qaMsg">Se ha detectado una sugerencia de optimización.</span></span>
+      <span><b id="qaSevTag">⚠️ Agente QA:</b> <span id="qaMsg">Sugerencia de optimización disponible.</span></span>
     </div>
 
     <div class="input-row">
       <button class="mic-btn" id="micBtn" title="Hablar con Alberth">🎙️</button>
       <div class="input-wrapper">
         <canvas id="waveformCanvas"></canvas>
-        <input type="text" class="bar-input" id="barInput" placeholder="Pregunta a Alberth (Cmd+Shift+A)..." autofocus />
+        <input type="text" class="bar-input" id="barInput" placeholder="Escribe o habla (Cmd+Shift+A)..." autofocus />
+        <div class="autocomplete-dropdown" id="autoDropdown"></div>
       </div>
       <button class="send-btn" id="sendBtn">Enviar</button>
     </div>
 
     <div class="history-list" id="historyList"></div>
-    <div class="canvas-drawer" id="canvasDrawer"></div>
+    <div class="qa-history-drawer" id="qaHistoryDrawer"></div>
   </div>
 
   <script>
+    // Service Worker Registration for PWA Offline UI
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/assets/panel/sw.js').catch(() => {});
+    }
+
     const bar = document.getElementById('bar');
     const ws = new WebSocket(`ws://${location.host}/ws`);
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const modeBadge = document.getElementById('modeBadge');
+    const focusBtn = document.getElementById('focusBtn');
     const privacyBadge = document.getElementById('privacyBadge');
     const qaToast = document.getElementById('qaToast');
+    const qaSevTag = document.getElementById('qaSevTag');
     const qaMsg = document.getElementById('qaMsg');
     const barInput = document.getElementById('barInput');
     const sendBtn = document.getElementById('sendBtn');
     const micBtn = document.getElementById('micBtn');
     const historyList = document.getElementById('historyList');
-    const canvasDrawer = document.getElementById('canvasDrawer');
+    const autoDropdown = document.getElementById('autoDropdown');
 
-    // Waveform Canvas Setup
-    const canvas = document.getElementById('waveformCanvas');
-    const ctx = canvas.getContext('2d');
-    let isListening = false;
-    let animFrame = null;
+    // Autocomplete Suggestions List
+    const SUGGESTIONS = [
+      { cmd: 'qué hora es', tag: 'CACHE' },
+      { cmd: 'activa la cámara', tag: 'VISIÓN' },
+      { cmd: 'te presento a mi hija Danna', tag: 'ENROLL' },
+      { cmd: 'modo personal', tag: 'CONTEXTO' },
+      { cmd: 'modo laboral', tag: 'CONTEXTO' },
+      { cmd: 'modo confidencial', tag: 'PRIVACIDAD' },
+      { cmd: 'activa el copiloto de pantalla', tag: 'SCREEN' },
+      { cmd: 'alberth aprende que...', tag: 'LEARN' }
+    ];
 
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
+    // Focus Mode Toggle (Cmd+Shift+F)
+    let isFocusMode = false;
+    focusBtn.addEventListener('click', toggleFocusMode);
+    function toggleFocusMode() {
+      isFocusMode = !isFocusMode;
+      bar.classList.toggle('focus-mode', isFocusMode);
+      focusBtn.innerText = isFocusMode ? 'FOCUS ON' : 'FOCUS';
     }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
 
-    function drawWaveform() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (!isListening) return;
+    // Spotlight Autocomplete Handler
+    barInput.addEventListener('input', () => {
+      const val = barInput.value.toLowerCase().trim();
+      if (!val) { autoDropdown.classList.remove('visible'); return; }
+      const matches = SUGGESTIONS.filter(s => s.cmd.toLowerCase().includes(val));
+      if (matches.length === 0) { autoDropdown.classList.remove('visible'); return; }
 
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#f97316';
-      const width = canvas.width;
-      const height = canvas.height;
-      const time = Date.now() * 0.005;
+      autoDropdown.innerHTML = matches.map(m => `
+        <div class="autocomplete-item" onclick="selectSuggestion('${m.cmd}')">
+          <span>${m.cmd}</span>
+          <span class="autocomplete-tag">${m.tag}</span>
+        </div>
+      `).join('');
+      autoDropdown.classList.add('visible');
+    });
 
-      ctx.moveTo(0, height / 2);
-      for (let x = 0; x < width; x += 5) {
-        const y = height / 2 + Math.sin(x * 0.05 + time) * 6 * Math.sin(x * 0.01 + time);
-        ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      animFrame = requestAnimationFrame(drawWaveform);
-    }
+    window.selectSuggestion = function(cmd) {
+      barInput.value = cmd;
+      autoDropdown.classList.remove('visible');
+      barInput.focus();
+    };
 
     // Audio Haptics Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -389,47 +421,37 @@
     ws.onopen = () => {
       statusDot.className = 'dot';
       statusText.innerText = 'Alberth Conectado';
-      playBeep(880, 'sine', 0.1);
     };
 
     ws.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
       if (data.type === 'thinking') {
-        if (data.active) {
-          statusDot.className = 'dot thinking';
-          statusText.innerText = 'Pensando (Agente Código)...';
-        } else {
-          statusDot.className = 'dot speaking';
-          statusText.innerText = 'Respondiendo...';
-        }
-      } else if (data.type === 'message') {
-        if (data.message.role === 'alberth') {
-          statusDot.className = 'dot';
-          statusText.innerText = 'Alberth Listo';
-          appendBubble('alberth', data.message.content);
-          playBeep(520, 'sine', 0.12);
-        }
+        statusDot.className = data.active ? 'dot thinking' : 'dot speaking';
+        statusText.innerText = data.active ? 'Pensando (NEXUS)...' : 'Respondiendo...';
+      } else if (data.type === 'message' && data.message.role === 'alberth') {
+        statusDot.className = 'dot';
+        statusText.innerText = 'Alberth Listo';
+        appendBubble('alberth', data.message.content);
+        playBeep(520, 'sine', 0.12);
       } else if (data.type === 'qa_alert') {
+        const sev = data.severity || 'advertencia';
+        qaToast.className = `qa-toast visible ${sev}`;
+        qaSevTag.innerText = sev === 'critico' ? '🔴 QA CRÍTICO:' : (sev === 'sugerencia' ? '🔵 QA SUGERENCIA:' : '⚠️ QA ADVERTENCIA:');
         qaMsg.innerText = data.text;
-        qaToast.classList.add('visible');
-        statusDot.className = 'dot alert';
-        playBeep(350, 'sawtooth', 0.2);
+        playBeep(sev === 'critico' ? 300 : 500, 'sawtooth', 0.2);
         setTimeout(() => qaToast.classList.remove('visible'), 8000);
-      } else if (data.type === 'canvas_update') {
-        canvasDrawer.innerHTML = data.canvas.html;
-        canvasDrawer.classList.add('active');
       }
     };
 
     function sendQuery() {
       const text = barInput.value.trim();
       if (!text) return;
+      autoDropdown.classList.remove('visible');
 
-      // Smart Privacy Mode Trigger Check ("modo confidencial")
-      if (text.toLowerCase().includes("modo confidencial") || text.toLowerCase().includes("modo privacidad")) {
+      if (text.toLowerCase().includes("modo confidencial")) {
         privacyBadge.classList.add('visible');
         bar.classList.add('privacy-mode');
-        appendBubble('alberth', '🛡️ Modo Confidencial Activado. Auditoría pausada y datos sensibles encriptados.');
+        appendBubble('alberth', '🛡️ Modo Confidencial Activado. Auditoría pausada.');
         barInput.value = '';
         return;
       }
@@ -445,7 +467,8 @@
       if (e.key === 'Enter') sendQuery();
     });
 
-    // Voice Mic STT Activation with Orange Theme Waveform
+    // Voice STT Activation
+    let isListening = false;
     micBtn.addEventListener('click', () => {
       isListening = !isListening;
       micBtn.classList.toggle('active', isListening);
@@ -454,20 +477,21 @@
         playBeep(700, 'sine', 0.1);
         statusText.innerText = 'Escuchando STT (Naranja)...';
         statusDot.className = 'dot listening';
-        drawWaveform();
       } else {
         statusText.innerText = 'Alberth Conectado';
         statusDot.className = 'dot';
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     });
 
-    // Global Hotkey (Cmd+Shift+A)
+    // Global Hotkeys: Cmd+Shift+A (Focus Input), Cmd+Shift+F (Focus Mode)
     window.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyA') {
         e.preventDefault();
         barInput.focus();
         playBeep(800, 'sine', 0.05);
+      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyF') {
+        e.preventDefault();
+        toggleFocusMode();
       }
     });
   </script>
