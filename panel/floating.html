@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alberth Floating Bar v4.2</title>
+  <title>Alberth Floating Bar v4.3</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -116,7 +116,7 @@
       gap: 6px;
     }
 
-    .mode-badge, .focus-badge {
+    .mode-badge, .focus-badge, .qa-toggle-btn {
       background: rgba(0, 212, 255, 0.1);
       color: var(--cyan);
       padding: 2px 8px;
@@ -151,6 +151,7 @@
       font-size: 12px;
       display: none;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
     .qa-toast.visible { display: flex; }
@@ -167,7 +168,7 @@
       background: #0f172a;
       border: 1px solid var(--border-glass);
       border-radius: 10px;
-      max-height: 160px;
+      max-height: 180px;
       overflow-y: auto;
       z-index: 10;
       display: none;
@@ -182,16 +183,14 @@
       border-bottom: 1px solid rgba(255,255,255,0.04);
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
     .autocomplete-item:hover, .autocomplete-item.selected {
       background: rgba(0, 212, 255, 0.15);
       color: var(--text);
     }
-    .autocomplete-tag {
-      font-size: 10px;
-      color: var(--cyan);
-      font-weight: 600;
-    }
+    .autocomplete-tag { font-size: 10px; color: var(--cyan); font-weight: 600; }
+    .freq-tag { font-size: 9px; opacity: 0.6; margin-left: 6px; }
 
     /* Main Input Form & Audio Waveform */
     .input-row {
@@ -278,21 +277,23 @@
     .chat-bubble.user { align-self: flex-end; background: rgba(0, 212, 255, 0.12); border: 1px solid rgba(0, 212, 255, 0.25); }
     .chat-bubble.alberth { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--cyan); }
 
-    /* QA Alert History Drawer (Last 10 Events) */
+    /* QA History Drawer (Last 20 Events) */
     .qa-history-drawer {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 10px;
       padding: 8px 12px;
       font-size: 11px;
       display: none;
       flex-direction: column;
       gap: 6px;
-      max-height: 120px;
+      max-height: 150px;
       overflow-y: auto;
     }
     .qa-history-drawer.active { display: flex; }
-    .qa-item { display: flex; justify-content: space-between; color: var(--text-dim); }
+    .qa-item { display: flex; justify-content: space-between; gap: 8px; color: var(--text-dim); }
+    .qa-item.critico { color: #fca5a5; }
+    .qa-item.sugerencia { color: #7dd3fc; }
   </style>
 </head>
 <body>
@@ -305,6 +306,7 @@
       </div>
       <div class="badge-group">
         <span class="privacy-badge" id="privacyBadge">🛡️ CONFIDENCIAL</span>
+        <span class="qa-toggle-btn" id="qaHistoryBtn" title="Historial QA (20)">QA (0)</span>
         <span class="focus-badge" id="focusBtn" title="Atajo: Cmd+Shift+F">FOCUS</span>
         <span class="mode-badge" id="modeBadge">LABORAL</span>
       </div>
@@ -312,7 +314,12 @@
 
     <!-- QA Alert Toast Banner -->
     <div class="qa-toast" id="qaToast">
-      <span><b id="qaSevTag">⚠️ Agente QA:</b> <span id="qaMsg">Sugerencia de optimización disponible.</span></span>
+      <span><b id="qaSevTag">⚠️ QA:</b> <span id="qaMsg">Alerta proactiva.</span></span>
+      <select id="qaMuteSelect" style="background:transparent; border:none; color:inherit; font-size:10px;">
+        <option value="all">Ver todas</option>
+        <option value="no_sug">Sin sugerencias</option>
+        <option value="only_crit">Solo críticas</option>
+      </select>
     </div>
 
     <div class="input-row">
@@ -330,9 +337,12 @@
   </div>
 
   <script>
-    // Service Worker Registration for PWA Offline UI
+    // Register Service Worker & Request Push Notifications Permission
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/assets/panel/sw.js').catch(() => {});
+    }
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
     }
 
     const bar = document.getElementById('bar');
@@ -345,23 +355,36 @@
     const qaToast = document.getElementById('qaToast');
     const qaSevTag = document.getElementById('qaSevTag');
     const qaMsg = document.getElementById('qaMsg');
+    const qaHistoryBtn = document.getElementById('qaHistoryBtn');
+    const qaHistoryDrawer = document.getElementById('qaHistoryDrawer');
     const barInput = document.getElementById('barInput');
     const sendBtn = document.getElementById('sendBtn');
     const micBtn = document.getElementById('micBtn');
     const historyList = document.getElementById('historyList');
     const autoDropdown = document.getElementById('autoDropdown');
 
-    // Autocomplete Suggestions List
-    const SUGGESTIONS = [
-      { cmd: 'qué hora es', tag: 'CACHE' },
-      { cmd: 'activa la cámara', tag: 'VISIÓN' },
-      { cmd: 'te presento a mi hija Danna', tag: 'ENROLL' },
-      { cmd: 'modo personal', tag: 'CONTEXTO' },
-      { cmd: 'modo laboral', tag: 'CONTEXTO' },
-      { cmd: 'modo confidencial', tag: 'PRIVACIDAD' },
-      { cmd: 'activa el copiloto de pantalla', tag: 'SCREEN' },
-      { cmd: 'alberth aprende que...', tag: 'LEARN' }
+    // Frequency Counter & Contextual Suggestions
+    const FREQ = JSON.parse(localStorage.getItem('alberth_cmd_freq') || '{}');
+
+    const BASE_SUGGESTIONS = [
+      { cmd: 'qué hora es', tag: 'CACHE', mode: 'all' },
+      { cmd: 'activa la cámara', tag: 'VISIÓN', mode: 'personal' },
+      { cmd: 'te presento a mi hija Danna', tag: 'ENROLL', mode: 'personal' },
+      { cmd: 'modo personal', tag: 'CONTEXTO', mode: 'all' },
+      { cmd: 'modo laboral', tag: 'CONTEXTO', mode: 'all' },
+      { cmd: 'modo confidencial', tag: 'PRIVACIDAD', mode: 'all' },
+      { cmd: 'activa el copiloto de pantalla', tag: 'SCREEN', mode: 'laboral' },
+      { cmd: 'alberth aprende que...', tag: 'LEARN', mode: 'laboral' }
     ];
+
+    // Offline Queue
+    const offlineQueue = [];
+    window.addEventListener('online', () => {
+      while (offlineQueue.length > 0) {
+        const q = offlineQueue.shift();
+        ws.send(JSON.stringify({ type: 'text', text: q }));
+      }
+    });
 
     // Focus Mode Toggle (Cmd+Shift+F)
     let isFocusMode = false;
@@ -372,16 +395,37 @@
       focusBtn.innerText = isFocusMode ? 'FOCUS ON' : 'FOCUS';
     }
 
-    // Spotlight Autocomplete Handler
+    // QA History Log (Last 20)
+    let qaHistory = JSON.parse(localStorage.getItem('alberth_qa_history') || '[]');
+    function updateQAHistoryUI() {
+      qaHistoryBtn.innerText = `QA (${qaHistory.length})`;
+      qaHistoryDrawer.innerHTML = qaHistory.map(q => `
+        <div class="qa-item ${q.severity}">
+          <span>[${q.severity.toUpperCase()}] ${q.text}</span>
+          <span style="opacity:0.5">${q.time}</span>
+        </div>
+      `).join('');
+    }
+    updateQAHistoryUI();
+
+    qaHistoryBtn.addEventListener('click', () => {
+      qaHistoryDrawer.classList.toggle('active');
+    });
+
+    // Spotlight Autocomplete Handler with Frequency Sorting
     barInput.addEventListener('input', () => {
       const val = barInput.value.toLowerCase().trim();
       if (!val) { autoDropdown.classList.remove('visible'); return; }
-      const matches = SUGGESTIONS.filter(s => s.cmd.toLowerCase().includes(val));
+
+      const matches = BASE_SUGGESTIONS
+        .filter(s => s.cmd.toLowerCase().includes(val))
+        .sort((a, b) => (FREQ[b.cmd] || 0) - (FREQ[a.cmd] || 0));
+
       if (matches.length === 0) { autoDropdown.classList.remove('visible'); return; }
 
       autoDropdown.innerHTML = matches.map(m => `
         <div class="autocomplete-item" onclick="selectSuggestion('${m.cmd}')">
-          <span>${m.cmd}</span>
+          <span>${m.cmd} <span class="freq-tag">(${FREQ[m.cmd] || 0}×)</span></span>
           <span class="autocomplete-tag">${m.tag}</span>
         </div>
       `).join('');
@@ -394,7 +438,7 @@
       barInput.focus();
     };
 
-    // Audio Haptics Synthesizer
+    // Audio Haptics
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq = 440, type = 'sine', duration = 0.08) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -433,8 +477,19 @@
         statusText.innerText = 'Alberth Listo';
         appendBubble('alberth', data.message.content);
         playBeep(520, 'sine', 0.12);
+
+        // Send Desktop Push Notification if backgrounded
+        if (document.hidden && Notification.permission === 'granted') {
+          new Notification('Alberth NEXUS', { body: data.message.content });
+        }
       } else if (data.type === 'qa_alert') {
         const sev = data.severity || 'advertencia';
+        const item = { severity: sev, text: data.text, time: new Date().toLocaleTimeString().slice(0,5) };
+        qaHistory.unshift(item);
+        if (qaHistory.length > 20) qaHistory.pop();
+        localStorage.setItem('alberth_qa_history', JSON.stringify(qaHistory));
+        updateQAHistoryUI();
+
         qaToast.className = `qa-toast visible ${sev}`;
         qaSevTag.innerText = sev === 'critico' ? '🔴 QA CRÍTICO:' : (sev === 'sugerencia' ? '🔵 QA SUGERENCIA:' : '⚠️ QA ADVERTENCIA:');
         qaMsg.innerText = data.text;
@@ -448,6 +503,10 @@
       if (!text) return;
       autoDropdown.classList.remove('visible');
 
+      // Record Frequency
+      FREQ[text] = (FREQ[text] || 0) + 1;
+      localStorage.setItem('alberth_cmd_freq', JSON.stringify(FREQ));
+
       if (text.toLowerCase().includes("modo confidencial")) {
         privacyBadge.classList.add('visible');
         bar.classList.add('privacy-mode');
@@ -458,7 +517,13 @@
 
       appendBubble('user', text);
       playBeep(660, 'triangle', 0.06);
-      ws.send(JSON.stringify({ type: 'text', text }));
+
+      if (navigator.onLine && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'text', text }));
+      } else {
+        offlineQueue.push(text);
+        appendBubble('alberth', '🌐 Sin conexión: Consulta encolada para sincronizar al reconectar.');
+      }
       barInput.value = '';
     }
 
@@ -467,7 +532,6 @@
       if (e.key === 'Enter') sendQuery();
     });
 
-    // Voice STT Activation
     let isListening = false;
     micBtn.addEventListener('click', () => {
       isListening = !isListening;

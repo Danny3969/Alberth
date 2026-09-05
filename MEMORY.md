@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-04 22:48 GMT-5_
+_Última actualización: 2026-09-04 22:54 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,7 +7,7 @@ _Última actualización: 2026-09-04 22:48 GMT-5_
 
 ---
 
-## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.2 — Spotlight, Focus & PWA)
+## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.3 — Adaptive Frequency, QA Log & Push PWA)
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── agents/
@@ -18,7 +18,7 @@ _Última actualización: 2026-09-04 22:48 GMT-5_
 ├── alberth-android/    → Aplicación Móvil Nativa (React Native / Expo SDK 56)
 ├── panel/              → Panel Web & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
 │   ├── index.html      → Panel Principal HUD + Orbe 3D WebGL (Three.js Audio-Reactive Double-Buffer)
-│   ├── floating.html   → Desktop Floating Bar v4.2 (Spotlight Autocomplete / Focus Mode / QA Severities)
+│   ├── floating.html   → Desktop Floating Bar v4.3 (Adaptive Frequency Autocomplete / Focus Mode / QA Log / Push)
 │   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
 ├── pipeline_refactor/  → Pipeline moderno en Python nativo con Circuit Breaker
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` (Puerto 8080)
@@ -40,7 +40,7 @@ _Última actualización: 2026-09-04 22:48 GMT-5_
 
 ## ⚙️ Configuración y Puertos Activos
 - **Panel Web HUD:** `http://localhost:8080` (FastAPI / Three.js 3D Orb / WebSockets)
-- **Desktop Floating Bar v4.2:** `http://localhost:8080/floating` (Spotlight Autocomplete + Focus Mode + PWA)
+- **Desktop Floating Bar v4.3:** `http://localhost:8080/floating` (Adaptive Autocomplete + QA History 20 + Push PWA)
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
@@ -50,21 +50,21 @@ _Última actualización: 2026-09-04 22:48 GMT-5_
 
 ---
 
-## 🎨 NOVEDADES DE ALBERTH NEXUS v4.2
+## 🎨 NOVEDADES DE ALBERTH NEXUS v4.3
 
-1. **Spotlight Autocomplete en la Floating Bar:** Despliegue automático de comandos frecuentes (`/modo personal`, `/modo laboral`, `/confidencial`, `/camara`, `qué hora es`) al escribir.
-2. **Modo "Focus" (`Cmd + Shift + F`):** Colapso instantáneo de paneles secundarios a una barra minimalista limpia para concentrarse al máximo.
-3. **Severidades QA & Historial de Alertas:** Clasificación por colores de alertas QA (`sugerencia`: cian, `advertencia`: amarillo, `critico`: rojo).
-4. **PWA & Offline Service Worker (`sw.js`):** Cacheo de la interfaz gráfica para que funcione 100% offline sin servidor de red externo.
+1. **Autocompletado Adaptativo por Frecuencia:** Aprendizaje automático de los comandos más utilizados para priorizarlos en la lista emergente.
+2. **Historial de Alertas QA (20 Ítems):** Cajón desplegable en la interfaz con las últimas 20 notificaciones del Agente QA organizadas por severidad.
+3. **Notificaciones Push de Escritorio:** Envío de avisos emergentes del navegador cuando la ventana de Alberth está minimizada o en segundo plano.
+4. **Encolamiento Offline Resiliente:** Encolamiento automático de comandos en ausencia de red (`!navigator.onLine`), procesándolos en secuencia al reconectar.
 
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
-### 2026-09-04 (Lanzamiento Alberth NEXUS v4.2)
-- **UI PWA & Offline:** Implementación del Service Worker `panel/sw.js` y autocompletado estilo Spotlight.
-- **Focus Mode:** Modo concentración accesible con `Cmd + Shift + F`.
-- **QA Severities:** Clasificación por niveles de severidad en notificaciones.
+### 2026-09-04 (Lanzamiento Alberth NEXUS v4.3)
+- **UI PWA & Notifications:** Notificaciones push de escritorio activadas y encolamiento offline automático.
+- **QA Drawer:** Cajón persistente con historial de 20 eventos de supervisión.
+- **Command Frequency:** Sistema de priorización de atajos por frecuencia de uso.
 
 ---
 
