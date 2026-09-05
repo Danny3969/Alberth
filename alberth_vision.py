@@ -197,15 +197,102 @@ def describe_image(api_key, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY):
         return None
 
 
+def enroll_person(name: str, api_key: str) -> bool:
+    """Captura un frame y registra visualmente a una persona conocida en la memoria de Alberth."""
+    log(f"Iniciando registro visual para: '{name}'...")
+    if not capture_image():
+        log("Error al capturar frame para registro.")
+        return False
+
+    prompt = (
+        f"Describe detalladamente el rostro, peinado, características físicas clave y ropa de la persona "
+        f"que está frente a la cámara. Esta persona es '{name}'. Resume en 2 oraciones sus rasgos únicos."
+    )
+    desc = describe_image(api_key, custom_prompt=prompt)
+    if not desc:
+        return False
+
+    # Guardar en memoria persistente de hechos
+    try:
+        sys.path.insert(0, WORKSPACE_DIR)
+        from alberth_memory import save_conversation, get_db
+        conn = get_db()
+        fact_text = f"Persona conocida: {name} | Rasgos visuales: {desc}"
+        conn.execute(
+            "INSERT OR REPLACE INTO user_facts (category, fact, mode) VALUES (?, ?, ?)",
+            ("personas_conocidas", fact_text, "personal")
+        )
+        conn.commit()
+        conn.close()
+        log(f"✅ Persona '{name}' registrada exitosamente en memoria visual.")
+        return True
+    except Exception as e:
+        log(f"Error al guardar hecho visual: {e}")
+        return False
+
+
+def recognize_known_people(api_key: str, custom_query: str = "") -> str:
+    """Captura un frame y verifica si hay personas conocidas registradas en user_facts."""
+    if not capture_image():
+        return ""
+
+    # Cargar personas conocidas de la memoria
+    known_facts = []
+    try:
+        sys.path.insert(0, WORKSPACE_DIR)
+        from alberth_memory import get_db
+        conn = get_db()
+        rows = conn.execute("SELECT fact FROM user_facts WHERE category = 'personas_conocidas'").fetchall()
+        known_facts = [r["fact"] for r in rows]
+        conn.close()
+    except Exception:
+        pass
+
+    known_context = ""
+    if known_facts:
+        known_context = "\nPersona(s) conocida(s) registrada(s) previamente:\n" + "\n".join(f"- {f}" for f in known_facts)
+
+    prompt = (
+        f"Analiza la imagen actual de la cámara. {known_context}\n"
+        f"1. Identifica si alguna de las personas en la imagen coincide con las personas conocidas registradas.\n"
+        f"2. {custom_query or 'Describe la escena, qué hace la persona y si debes saludarla por su nombre.'}\n"
+        f"Sé conciso y responde en español."
+    )
+    return describe_image(api_key, custom_prompt=prompt) or ""
+
+
 def main():
     api_key = get_nvidia_api_key()
     if not api_key:
         print("Error: NVIDIA_API_KEY no disponible.")
         sys.exit(1)
 
-    custom_prompt = None
-    if len(sys.argv) > 1:
-        custom_prompt = " ".join(sys.argv[1:])
+    import argparse
+    parser = argparse.ArgumentParser(description="Alberth Vision & Face Recognition")
+    parser.add_argument("--enroll", metavar="NOMBRE", help="Registra a una persona frente a la cámara")
+    parser.add_argument("--recognize", action="store_true", help="Reconoce personas conocidas frente a la cámara")
+    parser.add_argument("query", nargs="*", help="Query visual personalizada")
+    args = parser.parse_args()
+
+    if args.enroll:
+        ok = enroll_person(args.enroll, api_key)
+        if ok:
+            print(f"Señor, he registrado visualmente a {args.enroll} en mi memoria.")
+        else:
+            print(f"No pude registrar visualmente a {args.enroll}. Revisa la cámara.")
+        sys.exit(0 if ok else 1)
+
+    if args.recognize:
+        query_text = " ".join(args.query) if args.query else ""
+        desc = recognize_known_people(api_key, query_text)
+        if desc:
+            print(desc)
+            sys.exit(0)
+        else:
+            print("No se pudo reconocer la escena visual.")
+            sys.exit(1)
+
+    custom_prompt = " ".join(args.query) if args.query else None
 
     # Si la imagen existe y tiene menos de 25s, usarla directamente
     use_existing = False

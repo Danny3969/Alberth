@@ -474,3 +474,982 @@
 [Tálamo] Todos los métodos fallaron. Retornando GENERAL_TALK.
 [2026-09-04 22:04:28] Tálamo → Tipo: GENERAL_TALK
 [2026-09-04 22:04:28] PASO 2: Consultando al Agente Alberth...
+[2026-09-04 22:04:32] OFFLINE FALLBACK → Generando respuesta local con Ollama (qwen2.5:3b)...
+[2026-09-04 22:04:33] WARN: Ollama local no disponible o sin respuesta. Usando mensaje de resiliencia.
+[2026-09-04 22:04:33] Procesando archivos existentes en input/...
+[2026-09-04 22:04:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_214856.wav
+[2026-09-04 22:04:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215332.wav
+[2026-09-04 22:04:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215430.wav
+[2026-09-04 22:04:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215450.wav
+[2026-09-04 22:04:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215506.wav
+[2026-09-04 22:04:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215535.wav
+[2026-09-04 22:04:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215544.wav
+[2026-09-04 22:04:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215604.wav
+[2026-09-04 22:04:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215624.wav
+[2026-09-04 22:04:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_215634.wav
+[2026-09-04 22:04:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260813_220538.wav
+[2026-09-04 22:04:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260818_225820.wav
+[2026-09-04 22:04:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260818_230544.wav
+[2026-09-04 22:04:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260818_231332.wav
+[2026-09-04 22:04:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_234542.wav
+[2026-09-04 22:04:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_234617.wav
+[2026-09-04 22:04:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_234640.wav
+[2026-09-04 22:04:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_234652.wav
+[2026-09-04 22:04:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_235127.wav
+[2026-09-04 22:04:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_235557.wav
+[2026-09-04 22:04:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260825_235933.wav
+[2026-09-04 22:04:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260826_001606.wav
+[2026-09-04 22:04:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193643.wav
+[2026-09-04 22:04:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193648.wav
+[2026-09-04 22:04:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193701.wav
+[2026-09-04 22:04:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193755.wav
+[2026-09-04 22:04:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193826.wav
+[2026-09-04 22:04:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193839.wav
+[2026-09-04 22:04:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193927.wav
+[2026-09-04 22:04:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_193931.wav
+[2026-09-04 22:04:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194001.wav
+[2026-09-04 22:04:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194019.wav
+[2026-09-04 22:04:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194025.wav
+[2026-09-04 22:04:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194123.wav
+[2026-09-04 22:04:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194130.wav
+[2026-09-04 22:04:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194138.wav
+[2026-09-04 22:04:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194143.wav
+[2026-09-04 22:04:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194153.wav
+[2026-09-04 22:04:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194209.wav
+[2026-09-04 22:04:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194226.wav
+[2026-09-04 22:04:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194232.wav
+[2026-09-04 22:04:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194253.wav
+[2026-09-04 22:04:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194324.wav
+[2026-09-04 22:04:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194334.wav
+[2026-09-04 22:04:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194357.wav
+[2026-09-04 22:04:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194400.wav
+[2026-09-04 22:04:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194411.wav
+[2026-09-04 22:04:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194420.wav
+[2026-09-04 22:04:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194448.wav
+[2026-09-04 22:04:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194513.wav
+[2026-09-04 22:04:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194523.wav
+[2026-09-04 22:04:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194526.wav
+[2026-09-04 22:04:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194545.wav
+[2026-09-04 22:04:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194638.wav
+[2026-09-04 22:04:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194643.wav
+[2026-09-04 22:04:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194653.wav
+[2026-09-04 22:04:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194707.wav
+[2026-09-04 22:04:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194742.wav
+[2026-09-04 22:04:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194753.wav
+[2026-09-04 22:04:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194758.wav
+[2026-09-04 22:04:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_194813.wav
+[2026-09-04 22:04:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195156.wav
+[2026-09-04 22:04:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195249.wav
+[2026-09-04 22:04:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195313.wav
+[2026-09-04 22:04:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195319.wav
+[2026-09-04 22:04:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195444.wav
+[2026-09-04 22:04:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195506.wav
+[2026-09-04 22:04:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195524.wav
+[2026-09-04 22:04:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195549.wav
+[2026-09-04 22:04:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195613.wav
+[2026-09-04 22:04:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195626.wav
+[2026-09-04 22:04:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195703.wav
+[2026-09-04 22:04:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195710.wav
+[2026-09-04 22:04:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195729.wav
+[2026-09-04 22:04:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195739.wav
+[2026-09-04 22:04:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195753.wav
+[2026-09-04 22:04:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195935.wav
+[2026-09-04 22:04:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_195949.wav
+[2026-09-04 22:04:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_200118.wav
+[2026-09-04 22:04:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_200144.wav
+[2026-09-04 22:04:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_200247.wav
+[2026-09-04 22:04:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_200623.wav
+[2026-09-04 22:04:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_200626.wav
+[2026-09-04 22:04:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_200935.wav
+[2026-09-04 22:04:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_201558.wav
+[2026-09-04 22:04:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_201613.wav
+[2026-09-04 22:04:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_201930.wav
+[2026-09-04 22:04:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202231.wav
+[2026-09-04 22:04:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202307.wav
+[2026-09-04 22:04:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202341.wav
+[2026-09-04 22:04:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202420.wav
+[2026-09-04 22:04:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202431.wav
+[2026-09-04 22:04:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202502.wav
+[2026-09-04 22:04:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202510.wav
+[2026-09-04 22:04:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202540.wav
+[2026-09-04 22:04:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202549.wav
+[2026-09-04 22:04:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202602.wav
+[2026-09-04 22:04:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202904.wav
+[2026-09-04 22:04:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202909.wav
+[2026-09-04 22:04:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_202955.wav
+[2026-09-04 22:04:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203015.wav
+[2026-09-04 22:04:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203055.wav
+[2026-09-04 22:04:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203058.wav
+[2026-09-04 22:04:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203101.wav
+[2026-09-04 22:04:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203208.wav
+[2026-09-04 22:04:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203219.wav
+[2026-09-04 22:04:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203222.wav
+[2026-09-04 22:04:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203227.wav
+[2026-09-04 22:04:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203236.wav
+[2026-09-04 22:04:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203239.wav
+[2026-09-04 22:04:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203248.wav
+[2026-09-04 22:04:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203348.wav
+[2026-09-04 22:04:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203417.wav
+[2026-09-04 22:04:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203434.wav
+[2026-09-04 22:04:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203453.wav
+[2026-09-04 22:04:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203500.wav
+[2026-09-04 22:05:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203503.wav
+[2026-09-04 22:05:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203554.wav
+[2026-09-04 22:05:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203612.wav
+[2026-09-04 22:05:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203620.wav
+[2026-09-04 22:05:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203628.wav
+[2026-09-04 22:05:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203642.wav
+[2026-09-04 22:05:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203658.wav
+[2026-09-04 22:05:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203702.wav
+[2026-09-04 22:05:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203720.wav
+[2026-09-04 22:05:02] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203735.wav
+[2026-09-04 22:05:02] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203739.wav
+[2026-09-04 22:05:02] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203757.wav
+[2026-09-04 22:05:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203815.wav
+[2026-09-04 22:05:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203818.wav
+[2026-09-04 22:05:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203821.wav
+[2026-09-04 22:05:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203838.wav
+[2026-09-04 22:05:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203842.wav
+[2026-09-04 22:05:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203858.wav
+[2026-09-04 22:05:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_203921.wav
+[2026-09-04 22:05:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204017.wav
+[2026-09-04 22:05:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204108.wav
+[2026-09-04 22:05:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204114.wav
+[2026-09-04 22:05:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204155.wav
+[2026-09-04 22:05:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204214.wav
+[2026-09-04 22:05:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204300.wav
+[2026-09-04 22:05:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204311.wav
+[2026-09-04 22:05:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204334.wav
+[2026-09-04 22:05:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204427.wav
+[2026-09-04 22:05:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204436.wav
+[2026-09-04 22:05:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204529.wav
+[2026-09-04 22:05:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204533.wav
+[2026-09-04 22:05:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204551.wav
+[2026-09-04 22:05:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204617.wav
+[2026-09-04 22:05:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204630.wav
+[2026-09-04 22:05:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204716.wav
+[2026-09-04 22:05:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204743.wav
+[2026-09-04 22:05:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204847.wav
+[2026-09-04 22:05:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_204943.wav
+[2026-09-04 22:05:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205102.wav
+[2026-09-04 22:05:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205119.wav
+[2026-09-04 22:05:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205143.wav
+[2026-09-04 22:05:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205200.wav
+[2026-09-04 22:05:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205213.wav
+[2026-09-04 22:05:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205219.wav
+[2026-09-04 22:05:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205227.wav
+[2026-09-04 22:05:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205303.wav
+[2026-09-04 22:05:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205355.wav
+[2026-09-04 22:05:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205506.wav
+[2026-09-04 22:05:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205622.wav
+[2026-09-04 22:05:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205640.wav
+[2026-09-04 22:05:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205704.wav
+[2026-09-04 22:05:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205707.wav
+[2026-09-04 22:05:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_205923.wav
+[2026-09-04 22:05:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210113.wav
+[2026-09-04 22:05:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210225.wav
+[2026-09-04 22:05:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210229.wav
+[2026-09-04 22:05:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210407.wav
+[2026-09-04 22:05:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210634.wav
+[2026-09-04 22:05:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210921.wav
+[2026-09-04 22:05:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_210927.wav
+[2026-09-04 22:05:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211003.wav
+[2026-09-04 22:05:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211043.wav
+[2026-09-04 22:05:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211100.wav
+[2026-09-04 22:05:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211309.wav
+[2026-09-04 22:05:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211334.wav
+[2026-09-04 22:05:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211340.wav
+[2026-09-04 22:05:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211348.wav
+[2026-09-04 22:05:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211352.wav
+[2026-09-04 22:05:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211405.wav
+[2026-09-04 22:05:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211423.wav
+[2026-09-04 22:05:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211429.wav
+[2026-09-04 22:05:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211434.wav
+[2026-09-04 22:05:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211809.wav
+[2026-09-04 22:05:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211900.wav
+[2026-09-04 22:05:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_211904.wav
+[2026-09-04 22:05:16] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212210.wav
+[2026-09-04 22:05:16] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212226.wav
+[2026-09-04 22:05:16] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212333.wav
+[2026-09-04 22:05:16] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212511.wav
+[2026-09-04 22:05:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212552.wav
+[2026-09-04 22:05:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212901.wav
+[2026-09-04 22:05:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_212906.wav
+[2026-09-04 22:05:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213038.wav
+[2026-09-04 22:05:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213107.wav
+[2026-09-04 22:05:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213116.wav
+[2026-09-04 22:05:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213135.wav
+[2026-09-04 22:05:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213233.wav
+[2026-09-04 22:05:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213246.wav
+[2026-09-04 22:05:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213259.wav
+[2026-09-04 22:05:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213307.wav
+[2026-09-04 22:05:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213332.wav
+[2026-09-04 22:05:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213339.wav
+[2026-09-04 22:05:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213416.wav
+[2026-09-04 22:05:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213421.wav
+[2026-09-04 22:05:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213433.wav
+[2026-09-04 22:05:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213441.wav
+[2026-09-04 22:05:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213442.wav
+[2026-09-04 22:05:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213452.wav
+[2026-09-04 22:05:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213651.wav
+[2026-09-04 22:05:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213817.wav
+[2026-09-04 22:05:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213831.wav
+[2026-09-04 22:05:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_213956.wav
+[2026-09-04 22:05:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214010.wav
+[2026-09-04 22:05:22] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214015.wav
+[2026-09-04 22:05:22] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214018.wav
+[2026-09-04 22:05:22] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214116.wav
+[2026-09-04 22:05:22] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214121.wav
+[2026-09-04 22:05:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214124.wav
+[2026-09-04 22:05:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214130.wav
+[2026-09-04 22:05:23] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220522.wav
+[2026-09-04 22:05:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214144.wav
+[2026-09-04 22:05:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214202.wav
+[2026-09-04 22:05:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214407.wav
+[2026-09-04 22:05:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214422.wav
+[2026-09-04 22:05:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214435.wav
+[2026-09-04 22:05:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214454.wav
+[2026-09-04 22:05:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220522.wav
+[2026-09-04 22:05:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214601.wav
+[2026-09-04 22:05:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214617.wav
+[2026-09-04 22:05:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214631.wav
+[2026-09-04 22:05:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214718.wav
+[2026-09-04 22:05:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214723.wav
+[2026-09-04 22:05:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214732.wav
+[2026-09-04 22:05:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214738.wav
+[2026-09-04 22:05:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214759.wav
+[2026-09-04 22:05:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214804.wav
+[2026-09-04 22:05:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214828.wav
+[2026-09-04 22:05:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_214958.wav
+[2026-09-04 22:05:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_215050.wav
+[2026-09-04 22:05:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_215121.wav
+[2026-09-04 22:05:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_215428.wav
+[2026-09-04 22:05:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220044.wav
+[2026-09-04 22:05:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220051.wav
+[2026-09-04 22:05:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220058.wav
+[2026-09-04 22:05:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220111.wav
+[2026-09-04 22:05:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220154.wav
+[2026-09-04 22:05:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220209.wav
+[2026-09-04 22:05:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220213.wav
+[2026-09-04 22:05:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220736.wav
+[2026-09-04 22:05:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220741.wav
+[2026-09-04 22:05:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220759.wav
+[2026-09-04 22:05:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220836.wav
+[2026-09-04 22:05:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_220906.wav
+[2026-09-04 22:05:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221047.wav
+[2026-09-04 22:05:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221254.wav
+[2026-09-04 22:05:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221647.wav
+[2026-09-04 22:05:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221652.wav
+[2026-09-04 22:05:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221707.wav
+[2026-09-04 22:05:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221723.wav
+[2026-09-04 22:05:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221741.wav
+[2026-09-04 22:05:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221754.wav
+[2026-09-04 22:05:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221808.wav
+[2026-09-04 22:05:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_221957.wav
+[2026-09-04 22:05:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222048.wav
+[2026-09-04 22:05:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222058.wav
+[2026-09-04 22:05:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222123.wav
+[2026-09-04 22:05:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222213.wav
+[2026-09-04 22:05:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222231.wav
+[2026-09-04 22:05:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222721.wav
+[2026-09-04 22:05:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_222729.wav
+[2026-09-04 22:05:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_223304.wav
+[2026-09-04 22:05:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_223327.wav
+[2026-09-04 22:05:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_223351.wav
+[2026-09-04 22:05:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_223539.wav
+[2026-09-04 22:05:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_223607.wav
+[2026-09-04 22:05:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_223624.wav
+[2026-09-04 22:05:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_224220.wav
+[2026-09-04 22:05:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_224256.wav
+[2026-09-04 22:05:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260831_224326.wav
+[2026-09-04 22:05:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_220950.wav
+[2026-09-04 22:05:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221009.wav
+[2026-09-04 22:05:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221138.wav
+[2026-09-04 22:05:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221206.wav
+[2026-09-04 22:05:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221233.wav
+[2026-09-04 22:05:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221325.wav
+[2026-09-04 22:05:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221355.wav
+[2026-09-04 22:05:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221402.wav
+[2026-09-04 22:05:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221844.wav
+[2026-09-04 22:05:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_221937.wav
+[2026-09-04 22:05:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_222109.wav
+[2026-09-04 22:05:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_222247.wav
+[2026-09-04 22:05:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_223137.wav
+[2026-09-04 22:05:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_223939.wav
+[2026-09-04 22:05:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224000.wav
+[2026-09-04 22:05:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224019.wav
+[2026-09-04 22:05:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224025.wav
+[2026-09-04 22:05:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224148.wav
+[2026-09-04 22:05:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224228.wav
+[2026-09-04 22:05:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224312.wav
+[2026-09-04 22:05:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224321.wav
+[2026-09-04 22:05:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224333.wav
+[2026-09-04 22:05:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224507.wav
+[2026-09-04 22:05:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224607.wav
+[2026-09-04 22:05:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224644.wav
+[2026-09-04 22:05:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_224705.wav
+[2026-09-04 22:05:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_225133.wav
+[2026-09-04 22:05:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_225321.wav
+[2026-09-04 22:05:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_225405.wav
+[2026-09-04 22:05:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_225550.wav
+[2026-09-04 22:05:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_225639.wav
+[2026-09-04 22:05:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_225808.wav
+[2026-09-04 22:05:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230202.wav
+[2026-09-04 22:05:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230219.wav
+[2026-09-04 22:05:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230227.wav
+[2026-09-04 22:05:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230254.wav
+[2026-09-04 22:05:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230341.wav
+[2026-09-04 22:05:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230355.wav
+[2026-09-04 22:05:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230421.wav
+[2026-09-04 22:05:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230610.wav
+[2026-09-04 22:05:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230856.wav
+[2026-09-04 22:05:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230903.wav
+[2026-09-04 22:05:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230914.wav
+[2026-09-04 22:05:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230920.wav
+[2026-09-04 22:05:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_230930.wav
+[2026-09-04 22:05:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231014.wav
+[2026-09-04 22:05:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231038.wav
+[2026-09-04 22:05:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231050.wav
+[2026-09-04 22:05:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231054.wav
+[2026-09-04 22:05:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231102.wav
+[2026-09-04 22:05:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231227.wav
+[2026-09-04 22:05:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231606.wav
+[2026-09-04 22:05:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231612.wav
+[2026-09-04 22:05:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231616.wav
+[2026-09-04 22:05:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231629.wav
+[2026-09-04 22:05:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231743.wav
+[2026-09-04 22:05:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_231815.wav
+[2026-09-04 22:05:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260902_235104.wav
+[2026-09-04 22:05:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260903_233108.wav
+[2026-09-04 22:05:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260903_233438.wav
+[2026-09-04 22:05:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260903_234703.wav
+[2026-09-04 22:05:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260903_235519.wav
+[2026-09-04 22:05:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260903_235536.wav
+[2026-09-04 22:05:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_001204.wav
+[2026-09-04 22:05:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_001217.wav
+[2026-09-04 22:05:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_001246.wav
+[2026-09-04 22:05:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_002211.wav
+[2026-09-04 22:05:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_002229.wav
+[2026-09-04 22:05:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_002922.wav
+[2026-09-04 22:05:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_003126.wav
+[2026-09-04 22:05:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_003303.wav
+[2026-09-04 22:05:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_003438.wav
+[2026-09-04 22:05:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_003751.wav
+[2026-09-04 22:05:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_004636.wav
+[2026-09-04 22:05:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_205859.wav
+[2026-09-04 22:05:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210151.wav
+[2026-09-04 22:05:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210234.wav
+[2026-09-04 22:05:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210241.wav
+[2026-09-04 22:05:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210246.wav
+[2026-09-04 22:05:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210310.wav
+[2026-09-04 22:05:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210317.wav
+[2026-09-04 22:05:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210359.wav
+[2026-09-04 22:05:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210406.wav
+[2026-09-04 22:05:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210521.wav
+[2026-09-04 22:05:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210526.wav
+[2026-09-04 22:05:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210537.wav
+[2026-09-04 22:05:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210638.wav
+[2026-09-04 22:05:52] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210647.wav
+[2026-09-04 22:05:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_210925.wav
+[2026-09-04 22:05:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211014.wav
+[2026-09-04 22:05:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211307.wav
+[2026-09-04 22:05:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211311.wav
+[2026-09-04 22:05:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211316.wav
+[2026-09-04 22:05:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211325.wav
+[2026-09-04 22:05:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211331.wav
+[2026-09-04 22:05:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211356.wav
+[2026-09-04 22:05:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211407.wav
+[2026-09-04 22:05:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211411.wav
+[2026-09-04 22:05:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211533.wav
+[2026-09-04 22:05:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_211616.wav
+[2026-09-04 22:05:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_212335.wav
+[2026-09-04 22:05:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_212459.wav
+[2026-09-04 22:05:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_212803.wav
+[2026-09-04 22:05:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_212836.wav
+[2026-09-04 22:05:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_212856.wav
+[2026-09-04 22:05:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_212915.wav
+[2026-09-04 22:05:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213139.wav
+[2026-09-04 22:05:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213148.wav
+[2026-09-04 22:05:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213152.wav
+[2026-09-04 22:05:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213241.wav
+[2026-09-04 22:05:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213425.wav
+[2026-09-04 22:05:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213443.wav
+[2026-09-04 22:05:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_213515.wav
+[2026-09-04 22:05:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214022.wav
+[2026-09-04 22:05:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214145.wav
+[2026-09-04 22:05:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214418.wav
+[2026-09-04 22:05:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214429.wav
+[2026-09-04 22:05:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214458.wav
+[2026-09-04 22:05:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214512.wav
+[2026-09-04 22:05:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214713.wav
+[2026-09-04 22:05:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214731.wav
+[2026-09-04 22:05:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214757.wav
+[2026-09-04 22:05:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214850.wav
+[2026-09-04 22:06:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_214926.wav
+[2026-09-04 22:06:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_215038.wav
+[2026-09-04 22:06:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_215051.wav
+[2026-09-04 22:06:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_215637.wav
+[2026-09-04 22:06:00] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_215917.wav
+[2026-09-04 22:06:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220003.wav
+[2026-09-04 22:06:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220044.wav
+[2026-09-04 22:06:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220119.wav
+[2026-09-04 22:06:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220126.wav
+[2026-09-04 22:06:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220232.wav
+[2026-09-04 22:06:02] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220239.wav
+[2026-09-04 22:06:02] Iniciando watcher fswatch en modo continuo...
+[2026-09-04 22:07:44] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220743.wav
+[2026-09-04 22:07:44] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220743.wav
+[2026-09-04 22:07:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220743.wav
+[2026-09-04 22:07:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220743.wav
+[2026-09-04 22:07:48] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:48] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:49] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:49] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:49] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220748.wav
+[2026-09-04 22:07:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220748.wav
+[2026-09-04 22:09:23] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220922.wav
+[2026-09-04 22:09:23] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_220922.wav
+[2026-09-04 22:09:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220922.wav
+[2026-09-04 22:09:24] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_220922.wav
+[2026-09-04 22:16:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221639.wav
+[2026-09-04 22:16:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221639.wav
+[2026-09-04 22:16:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221639.wav
+[2026-09-04 22:16:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221639.wav
+[2026-09-04 22:17:05] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221704.wav
+[2026-09-04 22:17:05] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221704.wav
+[2026-09-04 22:17:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221704.wav
+[2026-09-04 22:17:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221704.wav
+[2026-09-04 22:17:08] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221708.wav
+[2026-09-04 22:17:08] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221708.wav
+[2026-09-04 22:17:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221708.wav
+[2026-09-04 22:17:10] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221708.wav
+[2026-09-04 22:17:14] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221714.wav
+[2026-09-04 22:17:14] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221714.wav
+[2026-09-04 22:17:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221714.wav
+[2026-09-04 22:17:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221714.wav
+[2026-09-04 22:17:28] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221728.wav
+[2026-09-04 22:17:28] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221728.wav
+[2026-09-04 22:17:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221728.wav
+[2026-09-04 22:17:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221728.wav
+[2026-09-04 22:18:02] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221801.wav
+[2026-09-04 22:18:02] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221801.wav
+[2026-09-04 22:18:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221801.wav
+[2026-09-04 22:18:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221801.wav
+[2026-09-04 22:18:05] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221805.wav
+[2026-09-04 22:18:05] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221805.wav
+[2026-09-04 22:18:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221805.wav
+[2026-09-04 22:18:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221805.wav
+[2026-09-04 22:19:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221910.wav
+[2026-09-04 22:19:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221910.wav
+[2026-09-04 22:19:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221910.wav
+[2026-09-04 22:19:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221910.wav
+[2026-09-04 22:19:18] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221917.wav
+[2026-09-04 22:19:18] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_221917.wav
+[2026-09-04 22:19:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221917.wav
+[2026-09-04 22:19:19] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_221917.wav
+[2026-09-04 22:20:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222028.wav
+[2026-09-04 22:20:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222028.wav
+[2026-09-04 22:20:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222028.wav
+[2026-09-04 22:20:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222028.wav
+[2026-09-04 22:20:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222034.wav
+[2026-09-04 22:20:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222034.wav
+[2026-09-04 22:20:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222034.wav
+[2026-09-04 22:20:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222034.wav
+[2026-09-04 22:21:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222111.wav
+[2026-09-04 22:21:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222111.wav
+[2026-09-04 22:21:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222111.wav
+[2026-09-04 22:21:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222111.wav
+[2026-09-04 22:23:22] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222321.wav
+[2026-09-04 22:23:22] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222321.wav
+[2026-09-04 22:23:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222321.wav
+[2026-09-04 22:23:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222321.wav
+[2026-09-04 22:25:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222502.wav
+[2026-09-04 22:25:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222502.wav
+[2026-09-04 22:25:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222502.wav
+[2026-09-04 22:25:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222502.wav
+[2026-09-04 22:25:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222513.wav
+[2026-09-04 22:25:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222513.wav
+[2026-09-04 22:25:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222513.wav
+[2026-09-04 22:25:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222513.wav
+[2026-09-04 22:25:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222520.wav
+[2026-09-04 22:25:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222520.wav
+[2026-09-04 22:25:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222520.wav
+[2026-09-04 22:25:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222520.wav
+[2026-09-04 22:25:27] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222527.wav
+[2026-09-04 22:25:27] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222527.wav
+[2026-09-04 22:25:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222527.wav
+[2026-09-04 22:25:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222527.wav
+[2026-09-04 22:25:32] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222532.wav
+[2026-09-04 22:25:32] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222532.wav
+[2026-09-04 22:25:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222532.wav
+[2026-09-04 22:25:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222532.wav
+[2026-09-04 22:25:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222540.wav
+[2026-09-04 22:25:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222540.wav
+[2026-09-04 22:25:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222540.wav
+[2026-09-04 22:25:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222540.wav
+[2026-09-04 22:25:44] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222544.wav
+[2026-09-04 22:25:44] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222544.wav
+[2026-09-04 22:25:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222544.wav
+[2026-09-04 22:25:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222544.wav
+[2026-09-04 22:25:51] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222551.wav
+[2026-09-04 22:25:51] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222551.wav
+[2026-09-04 22:25:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222551.wav
+[2026-09-04 22:25:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222551.wav
+[2026-09-04 22:26:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222612.wav
+[2026-09-04 22:26:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222612.wav
+[2026-09-04 22:26:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222612.wav
+[2026-09-04 22:26:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222612.wav
+[2026-09-04 22:26:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222616.wav
+[2026-09-04 22:26:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222616.wav
+[2026-09-04 22:26:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222616.wav
+[2026-09-04 22:26:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222616.wav
+[2026-09-04 22:26:36] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222635.wav
+[2026-09-04 22:26:36] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222635.wav
+[2026-09-04 22:26:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222635.wav
+[2026-09-04 22:26:37] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222635.wav
+[2026-09-04 22:27:10] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222709.wav
+[2026-09-04 22:27:10] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222709.wav
+[2026-09-04 22:27:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222709.wav
+[2026-09-04 22:27:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222709.wav
+[2026-09-04 22:27:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222737.wav
+[2026-09-04 22:27:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222737.wav
+[2026-09-04 22:27:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222737.wav
+[2026-09-04 22:27:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222737.wav
+[2026-09-04 22:27:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222743.wav
+[2026-09-04 22:27:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222743.wav
+[2026-09-04 22:27:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222743.wav
+[2026-09-04 22:27:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222743.wav
+[2026-09-04 22:27:54] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222754.wav
+[2026-09-04 22:27:54] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222754.wav
+[2026-09-04 22:27:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222754.wav
+[2026-09-04 22:27:55] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222754.wav
+[2026-09-04 22:28:14] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222813.wav
+[2026-09-04 22:28:14] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222813.wav
+[2026-09-04 22:28:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222813.wav
+[2026-09-04 22:28:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222813.wav
+[2026-09-04 22:28:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222842.wav
+[2026-09-04 22:28:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_222842.wav
+[2026-09-04 22:28:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222842.wav
+[2026-09-04 22:28:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_222842.wav
+[2026-09-04 22:30:08] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223007.wav
+[2026-09-04 22:30:08] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223007.wav
+[2026-09-04 22:30:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223007.wav
+[2026-09-04 22:30:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223007.wav
+[2026-09-04 22:30:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223013.wav
+[2026-09-04 22:30:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223013.wav
+[2026-09-04 22:30:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223013.wav
+[2026-09-04 22:30:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223013.wav
+[2026-09-04 22:30:38] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223037.wav
+[2026-09-04 22:30:38] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223037.wav
+[2026-09-04 22:30:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223037.wav
+[2026-09-04 22:30:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223037.wav
+[2026-09-04 22:30:44] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223044.wav
+[2026-09-04 22:30:44] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223044.wav
+[2026-09-04 22:30:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223044.wav
+[2026-09-04 22:30:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223044.wav
+[2026-09-04 22:31:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223102.wav
+[2026-09-04 22:31:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223102.wav
+[2026-09-04 22:31:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223102.wav
+[2026-09-04 22:31:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223102.wav
+[2026-09-04 22:31:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223116.wav
+[2026-09-04 22:31:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223116.wav
+[2026-09-04 22:31:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223116.wav
+[2026-09-04 22:31:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223116.wav
+[2026-09-04 22:32:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223210.wav
+[2026-09-04 22:32:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223210.wav
+[2026-09-04 22:32:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223210.wav
+[2026-09-04 22:32:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223210.wav
+[2026-09-04 22:32:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223239.wav
+[2026-09-04 22:32:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223239.wav
+[2026-09-04 22:32:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223239.wav
+[2026-09-04 22:32:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223239.wav
+[2026-09-04 22:32:42] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223242.wav
+[2026-09-04 22:32:42] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223242.wav
+[2026-09-04 22:32:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223242.wav
+[2026-09-04 22:32:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223242.wav
+[2026-09-04 22:32:50] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223250.wav
+[2026-09-04 22:32:50] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223250.wav
+[2026-09-04 22:32:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223250.wav
+[2026-09-04 22:32:51] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223250.wav
+[2026-09-04 22:33:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223303.wav
+[2026-09-04 22:33:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223303.wav
+[2026-09-04 22:33:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223303.wav
+[2026-09-04 22:33:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223303.wav
+[2026-09-04 22:33:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223317.wav
+[2026-09-04 22:33:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223317.wav
+[2026-09-04 22:33:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223317.wav
+[2026-09-04 22:33:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223317.wav
+[2026-09-04 22:35:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223516.wav
+[2026-09-04 22:35:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223516.wav
+[2026-09-04 22:35:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223516.wav
+[2026-09-04 22:35:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223516.wav
+[2026-09-04 22:35:31] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223531.wav
+[2026-09-04 22:35:31] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223531.wav
+[2026-09-04 22:35:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223531.wav
+[2026-09-04 22:35:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223531.wav
+[2026-09-04 22:36:08] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223606.wav
+[2026-09-04 22:36:08] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223606.wav
+[2026-09-04 22:36:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223606.wav
+[2026-09-04 22:36:09] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223606.wav
+[2026-09-04 22:36:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223611.wav
+[2026-09-04 22:36:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223611.wav
+[2026-09-04 22:36:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223611.wav
+[2026-09-04 22:36:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223611.wav
+[2026-09-04 22:36:22] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223622.wav
+[2026-09-04 22:36:22] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223622.wav
+[2026-09-04 22:36:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223622.wav
+[2026-09-04 22:36:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223622.wav
+[2026-09-04 22:36:30] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223630.wav
+[2026-09-04 22:36:30] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223630.wav
+[2026-09-04 22:36:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223630.wav
+[2026-09-04 22:36:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223630.wav
+[2026-09-04 22:36:49] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223648.wav
+[2026-09-04 22:36:49] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223648.wav
+[2026-09-04 22:36:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223648.wav
+[2026-09-04 22:36:50] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223648.wav
+[2026-09-04 22:37:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223703.wav
+[2026-09-04 22:37:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223703.wav
+[2026-09-04 22:37:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223703.wav
+[2026-09-04 22:37:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223703.wav
+[2026-09-04 22:38:19] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223817.wav
+[2026-09-04 22:38:19] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223817.wav
+[2026-09-04 22:38:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223817.wav
+[2026-09-04 22:38:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223817.wav
+[2026-09-04 22:38:59] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223858.wav
+[2026-09-04 22:38:59] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223858.wav
+[2026-09-04 22:39:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223858.wav
+[2026-09-04 22:39:01] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223858.wav
+[2026-09-04 22:39:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223910.wav
+[2026-09-04 22:39:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223910.wav
+[2026-09-04 22:39:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223910.wav
+[2026-09-04 22:39:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223910.wav
+[2026-09-04 22:39:35] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223934.wav
+[2026-09-04 22:39:35] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223934.wav
+[2026-09-04 22:39:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223934.wav
+[2026-09-04 22:39:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223934.wav
+[2026-09-04 22:39:51] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223950.wav
+[2026-09-04 22:39:51] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223950.wav
+[2026-09-04 22:39:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223950.wav
+[2026-09-04 22:39:53] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223950.wav
+[2026-09-04 22:39:53] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223953.wav
+[2026-09-04 22:39:53] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223953.wav
+[2026-09-04 22:39:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223953.wav
+[2026-09-04 22:39:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223953.wav
+[2026-09-04 22:39:57] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223957.wav
+[2026-09-04 22:39:57] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_223957.wav
+[2026-09-04 22:39:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223957.wav
+[2026-09-04 22:39:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_223957.wav
+[2026-09-04 22:40:09] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224009.wav
+[2026-09-04 22:40:09] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224009.wav
+[2026-09-04 22:40:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224009.wav
+[2026-09-04 22:40:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224009.wav
+[2026-09-04 22:40:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224011.wav
+[2026-09-04 22:40:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224011.wav
+[2026-09-04 22:40:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224011.wav
+[2026-09-04 22:40:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224011.wav
+[2026-09-04 22:40:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224038.wav
+[2026-09-04 22:40:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224038.wav
+[2026-09-04 22:40:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224038.wav
+[2026-09-04 22:40:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224038.wav
+[2026-09-04 22:40:45] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224045.wav
+[2026-09-04 22:40:45] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224045.wav
+[2026-09-04 22:40:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224045.wav
+[2026-09-04 22:40:46] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224045.wav
+[2026-09-04 22:41:55] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224154.wav
+[2026-09-04 22:41:55] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224154.wav
+[2026-09-04 22:41:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224154.wav
+[2026-09-04 22:41:56] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224154.wav
+[2026-09-04 22:42:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224212.wav
+[2026-09-04 22:42:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224212.wav
+[2026-09-04 22:42:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224212.wav
+[2026-09-04 22:42:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224212.wav
+[2026-09-04 22:42:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224232.wav
+[2026-09-04 22:42:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224232.wav
+[2026-09-04 22:42:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224232.wav
+[2026-09-04 22:42:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224232.wav
+[2026-09-04 22:42:42] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224242.wav
+[2026-09-04 22:42:42] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224242.wav
+[2026-09-04 22:42:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224242.wav
+[2026-09-04 22:42:43] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224242.wav
+[2026-09-04 22:43:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224312.wav
+[2026-09-04 22:43:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224312.wav
+[2026-09-04 22:43:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224312.wav
+[2026-09-04 22:43:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224312.wav
+[2026-09-04 22:43:15] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224315.wav
+[2026-09-04 22:43:15] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224315.wav
+[2026-09-04 22:43:16] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224315.wav
+[2026-09-04 22:43:16] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224315.wav
+[2026-09-04 22:43:19] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224319.wav
+[2026-09-04 22:43:19] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224319.wav
+[2026-09-04 22:43:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224319.wav
+[2026-09-04 22:43:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224319.wav
+[2026-09-04 22:43:25] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224325.wav
+[2026-09-04 22:43:25] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224325.wav
+[2026-09-04 22:43:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224325.wav
+[2026-09-04 22:43:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224325.wav
+[2026-09-04 22:43:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224329.wav
+[2026-09-04 22:43:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224329.wav
+[2026-09-04 22:43:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224329.wav
+[2026-09-04 22:43:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224329.wav
+[2026-09-04 22:43:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224334.wav
+[2026-09-04 22:43:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224334.wav
+[2026-09-04 22:43:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224334.wav
+[2026-09-04 22:43:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224334.wav
+[2026-09-04 22:45:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224512.wav
+[2026-09-04 22:45:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224512.wav
+[2026-09-04 22:45:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224512.wav
+[2026-09-04 22:45:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224512.wav
+[2026-09-04 22:49:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224918.wav
+[2026-09-04 22:49:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224918.wav
+[2026-09-04 22:49:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224918.wav
+[2026-09-04 22:49:21] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224918.wav
+[2026-09-04 22:49:25] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224925.wav
+[2026-09-04 22:49:25] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224925.wav
+[2026-09-04 22:49:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224925.wav
+[2026-09-04 22:49:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224925.wav
+[2026-09-04 22:49:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224942.wav
+[2026-09-04 22:49:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_224942.wav
+[2026-09-04 22:49:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224942.wav
+[2026-09-04 22:49:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_224942.wav
+[2026-09-04 22:50:06] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225005.wav
+[2026-09-04 22:50:06] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225005.wav
+[2026-09-04 22:50:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225005.wav
+[2026-09-04 22:50:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225005.wav
+[2026-09-04 22:50:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225028.wav
+[2026-09-04 22:50:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225028.wav
+[2026-09-04 22:50:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225028.wav
+[2026-09-04 22:50:31] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225028.wav
+[2026-09-04 22:50:46] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225045.wav
+[2026-09-04 22:50:46] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225045.wav
+[2026-09-04 22:50:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225045.wav
+[2026-09-04 22:50:47] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225045.wav
+[2026-09-04 22:51:06] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225105.wav
+[2026-09-04 22:51:06] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225105.wav
+[2026-09-04 22:51:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225105.wav
+[2026-09-04 22:51:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225105.wav
+[2026-09-04 22:52:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225212.wav
+[2026-09-04 22:52:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225212.wav
+[2026-09-04 22:52:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225212.wav
+[2026-09-04 22:52:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225212.wav
+[2026-09-04 22:53:07] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225306.wav
+[2026-09-04 22:53:07] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225306.wav
+[2026-09-04 22:53:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225306.wav
+[2026-09-04 22:53:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225306.wav
+[2026-09-04 22:56:31] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225630.wav
+[2026-09-04 22:56:31] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225630.wav
+[2026-09-04 22:56:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225630.wav
+[2026-09-04 22:56:33] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225630.wav
+[2026-09-04 22:56:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225639.wav
+[2026-09-04 22:56:39] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225639.wav
+[2026-09-04 22:56:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225639.wav
+[2026-09-04 22:56:40] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225639.wav
+[2026-09-04 22:56:47] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225647.wav
+[2026-09-04 22:56:47] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225647.wav
+[2026-09-04 22:56:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225647.wav
+[2026-09-04 22:56:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225647.wav
+[2026-09-04 22:57:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225711.wav
+[2026-09-04 22:57:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225711.wav
+[2026-09-04 22:57:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225711.wav
+[2026-09-04 22:57:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225711.wav
+[2026-09-04 22:57:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225717.wav
+[2026-09-04 22:57:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225717.wav
+[2026-09-04 22:57:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225717.wav
+[2026-09-04 22:57:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225717.wav
+[2026-09-04 22:57:23] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225723.wav
+[2026-09-04 22:57:23] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225723.wav
+[2026-09-04 22:57:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225723.wav
+[2026-09-04 22:57:25] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225723.wav
+[2026-09-04 22:57:27] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225727.wav
+[2026-09-04 22:57:27] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225727.wav
+[2026-09-04 22:57:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225727.wav
+[2026-09-04 22:57:28] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225727.wav
+[2026-09-04 22:57:58] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225757.wav
+[2026-09-04 22:57:58] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225757.wav
+[2026-09-04 22:57:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225757.wav
+[2026-09-04 22:57:59] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225757.wav
+[2026-09-04 22:58:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225842.wav
+[2026-09-04 22:58:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225842.wav
+[2026-09-04 22:58:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225842.wav
+[2026-09-04 22:58:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225842.wav
+[2026-09-04 22:59:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225911.wav
+[2026-09-04 22:59:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225911.wav
+[2026-09-04 22:59:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225911.wav
+[2026-09-04 22:59:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225911.wav
+[2026-09-04 22:59:30] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225929.wav
+[2026-09-04 22:59:30] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_225929.wav
+[2026-09-04 22:59:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225929.wav
+[2026-09-04 22:59:32] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_225929.wav
+[2026-09-04 23:00:10] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230009.wav
+[2026-09-04 23:00:10] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230009.wav
+[2026-09-04 23:00:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230009.wav
+[2026-09-04 23:00:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230009.wav
+[2026-09-04 23:00:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230013.wav
+[2026-09-04 23:00:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230013.wav
+[2026-09-04 23:00:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230013.wav
+[2026-09-04 23:00:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230013.wav
+[2026-09-04 23:01:02] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230101.wav
+[2026-09-04 23:01:02] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230101.wav
+[2026-09-04 23:01:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230101.wav
+[2026-09-04 23:01:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230101.wav
+[2026-09-04 23:01:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230110.wav
+[2026-09-04 23:01:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230110.wav
+[2026-09-04 23:01:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230110.wav
+[2026-09-04 23:01:12] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230110.wav
+[2026-09-04 23:01:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230117.wav
+[2026-09-04 23:01:17] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230117.wav
+[2026-09-04 23:01:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230117.wav
+[2026-09-04 23:01:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230117.wav
+[2026-09-04 23:01:35] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230134.wav
+[2026-09-04 23:01:35] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230134.wav
+[2026-09-04 23:01:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230134.wav
+[2026-09-04 23:01:36] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230134.wav
+[2026-09-04 23:01:42] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230142.wav
+[2026-09-04 23:01:42] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230142.wav
+[2026-09-04 23:01:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230142.wav
+[2026-09-04 23:01:44] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230142.wav
+[2026-09-04 23:01:56] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230156.wav
+[2026-09-04 23:01:56] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230156.wav
+[2026-09-04 23:01:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230156.wav
+[2026-09-04 23:01:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230156.wav
+[2026-09-04 23:02:01] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230201.wav
+[2026-09-04 23:02:01] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230201.wav
+[2026-09-04 23:02:02] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230201.wav
+[2026-09-04 23:02:02] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230201.wav
+[2026-09-04 23:02:05] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230205.wav
+[2026-09-04 23:02:05] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230205.wav
+[2026-09-04 23:02:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230205.wav
+[2026-09-04 23:02:06] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230205.wav
+[2026-09-04 23:03:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230339.wav
+[2026-09-04 23:03:40] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230339.wav
+[2026-09-04 23:03:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230339.wav
+[2026-09-04 23:03:41] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230339.wav
+[2026-09-04 23:06:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230610.wav
+[2026-09-04 23:06:12] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230610.wav
+[2026-09-04 23:06:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230610.wav
+[2026-09-04 23:06:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230610.wav
+[2026-09-04 23:06:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230616.wav
+[2026-09-04 23:06:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230616.wav
+[2026-09-04 23:06:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230616.wav
+[2026-09-04 23:06:18] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230616.wav
+[2026-09-04 23:06:22] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230622.wav
+[2026-09-04 23:06:22] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230622.wav
+[2026-09-04 23:06:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230622.wav
+[2026-09-04 23:06:23] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230622.wav
+[2026-09-04 23:06:28] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230628.wav
+[2026-09-04 23:06:28] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230628.wav
+[2026-09-04 23:06:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230628.wav
+[2026-09-04 23:06:29] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230628.wav
+[2026-09-04 23:06:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230634.wav
+[2026-09-04 23:06:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230634.wav
+[2026-09-04 23:06:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230634.wav
+[2026-09-04 23:06:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230634.wav
+[2026-09-04 23:06:47] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230646.wav
+[2026-09-04 23:06:47] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230646.wav
+[2026-09-04 23:06:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230646.wav
+[2026-09-04 23:06:48] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230646.wav
+[2026-09-04 23:06:56] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230656.wav
+[2026-09-04 23:06:56] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230656.wav
+[2026-09-04 23:06:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230656.wav
+[2026-09-04 23:06:57] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230656.wav
+[2026-09-04 23:07:06] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230706.wav
+[2026-09-04 23:07:06] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230706.wav
+[2026-09-04 23:07:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230706.wav
+[2026-09-04 23:07:07] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230706.wav
+[2026-09-04 23:07:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230716.wav
+[2026-09-04 23:07:16] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230716.wav
+[2026-09-04 23:07:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230716.wav
+[2026-09-04 23:07:17] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230716.wav
+[2026-09-04 23:07:24] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230724.wav
+[2026-09-04 23:07:24] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230724.wav
+[2026-09-04 23:07:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230724.wav
+[2026-09-04 23:07:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230724.wav
+[2026-09-04 23:07:57] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230756.wav
+[2026-09-04 23:07:57] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230756.wav
+[2026-09-04 23:07:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230756.wav
+[2026-09-04 23:07:58] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230756.wav
+[2026-09-04 23:08:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230812.wav
+[2026-09-04 23:08:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230812.wav
+[2026-09-04 23:08:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230812.wav
+[2026-09-04 23:08:15] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230812.wav
+[2026-09-04 23:08:18] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230818.wav
+[2026-09-04 23:08:18] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230818.wav
+[2026-09-04 23:08:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230818.wav
+[2026-09-04 23:08:20] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230818.wav
+[2026-09-04 23:08:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230828.wav
+[2026-09-04 23:08:29] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230828.wav
+[2026-09-04 23:08:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230828.wav
+[2026-09-04 23:08:30] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230828.wav
+[2026-09-04 23:08:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230833.wav
+[2026-09-04 23:08:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230833.wav
+[2026-09-04 23:08:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230833.wav
+[2026-09-04 23:08:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230833.wav
+[2026-09-04 23:09:53] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230952.wav
+[2026-09-04 23:09:53] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_230952.wav
+[2026-09-04 23:09:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230952.wav
+[2026-09-04 23:09:54] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_230952.wav
+[2026-09-04 23:10:01] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231001.wav
+[2026-09-04 23:10:01] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231001.wav
+[2026-09-04 23:10:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231001.wav
+[2026-09-04 23:10:03] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231001.wav
+[2026-09-04 23:12:41] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231240.wav
+[2026-09-04 23:12:41] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231240.wav
+[2026-09-04 23:12:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231240.wav
+[2026-09-04 23:12:42] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231240.wav
+[2026-09-04 23:13:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231310.wav
+[2026-09-04 23:13:11] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231310.wav
+[2026-09-04 23:13:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231310.wav
+[2026-09-04 23:13:13] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231310.wav
+[2026-09-04 23:13:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231313.wav
+[2026-09-04 23:13:13] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231313.wav
+[2026-09-04 23:13:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231313.wav
+[2026-09-04 23:13:14] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231313.wav
+[2026-09-04 23:13:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231320.wav
+[2026-09-04 23:13:20] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231320.wav
+[2026-09-04 23:13:22] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231320.wav
+[2026-09-04 23:13:22] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231320.wav
+[2026-09-04 23:14:26] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231425.wav
+[2026-09-04 23:14:26] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231425.wav
+[2026-09-04 23:14:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231425.wav
+[2026-09-04 23:14:27] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231425.wav
+[2026-09-04 23:14:38] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231438.wav
+[2026-09-04 23:14:38] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231438.wav
+[2026-09-04 23:14:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231438.wav
+[2026-09-04 23:14:39] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231438.wav
+[2026-09-04 23:15:10] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231509.wav
+[2026-09-04 23:15:10] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231509.wav
+[2026-09-04 23:15:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231509.wav
+[2026-09-04 23:15:11] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231509.wav
+[2026-09-04 23:15:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231532.wav
+[2026-09-04 23:15:33] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231532.wav
+[2026-09-04 23:15:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231532.wav
+[2026-09-04 23:15:34] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231532.wav
+[2026-09-04 23:15:37] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231536.wav
+[2026-09-04 23:15:37] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231536.wav
+[2026-09-04 23:15:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231536.wav
+[2026-09-04 23:15:38] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231536.wav
+[2026-09-04 23:16:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231602.wav
+[2026-09-04 23:16:03] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231602.wav
+[2026-09-04 23:16:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231602.wav
+[2026-09-04 23:16:04] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231602.wav
+[2026-09-04 23:16:25] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231624.wav
+[2026-09-04 23:16:25] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231624.wav
+[2026-09-04 23:16:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231624.wav
+[2026-09-04 23:16:26] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231624.wav
+[2026-09-04 23:17:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231742.wav
+[2026-09-04 23:17:43] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231742.wav
+[2026-09-04 23:17:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231742.wav
+[2026-09-04 23:17:45] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231742.wav
+[2026-09-04 23:18:07] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231806.wav
+[2026-09-04 23:18:07] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231806.wav
+[2026-09-04 23:18:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231806.wav
+[2026-09-04 23:18:08] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231806.wav
+[2026-09-04 23:18:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231833.wav
+[2026-09-04 23:18:34] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231833.wav
+[2026-09-04 23:18:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231833.wav
+[2026-09-04 23:18:35] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231833.wav
+[2026-09-04 23:19:04] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231903.wav
+[2026-09-04 23:19:04] fswatch detectó nuevo archivo: /Users/digitalspace/.openclaw/workspace/voice_exchange/input/alberth_voice_20260904_231903.wav
+[2026-09-04 23:19:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231903.wav
+[2026-09-04 23:19:05] Pipeline ocupado (PID 77439). Omitiendo: alberth_voice_20260904_231903.wav

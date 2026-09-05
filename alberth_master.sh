@@ -399,16 +399,26 @@ run_pipeline() {
             fi
         fi
 
-    elif [[ "$talamo_tipo" == "VISION_CAMERA" ]]; then
+    elif [[ "$talamo_tipo" == "VISION_CAMERA" ]] || [[ "$query_lower" =~ (te\ presento\ a|mira\ a|quién\ está\ frente|activa\ la\ cámara|quien\ esta\ frente) ]]; then
         is_talamo_routed=true
-        log "Tálamo → Enrutando a VISION_CAMERA..."
-        local vision_desc
-        vision_desc=$(python3 "$WORKSPACE_DIR/alberth_vision.py" 2>/dev/null)
+        log "Tálamo → Enrutando a VISION_CAMERA (Reconocimiento Visual)..."
+        local vision_desc=""
+
+        # Detección de frase de presentación/registro ("te presento a mi hija Danna", "te presento a Juan")
+        if [[ "$query_lower" =~ (te\ presento\ a|ella\ es|él\ es)\ ([a-zA-ZáéíóúñÁÉÍÓÚÑ ]+) ]]; then
+            local person_name="${BASH_REMATCH[2]}"
+            log "Detector de presentación visual → Registrando a: '$person_name'"
+            vision_desc=$(python3 "$WORKSPACE_DIR/alberth_vision.py" --enroll "$person_name" 2>/dev/null)
+        else
+            log "Detección y reconocimiento visual de escena..."
+            vision_desc=$(python3 "$WORKSPACE_DIR/alberth_vision.py" --recognize "$query" 2>/dev/null)
+        fi
+
         if [[ -n "$vision_desc" ]]; then
             log "Análisis visual completado con éxito."
-            visual_context="[CONTEXTO VISUAL: El usuario te ha pedido que mires/analices su entorno. Tu cámara capturó un cuadro y el servicio de visión describe lo siguiente: ${vision_desc}] "
+            visual_context="[CONTEXTO VISUAL: Capturaste la cámara FaceTime del usuario. Resultado del análisis visual: ${vision_desc}. Si identificaste a una persona conocida (ej. Danna), salúdala por su nombre de forma cálida y profesional.] "
         else
-            log "WARN: No se pudo obtener descripción visual."
+            log "WARN: No se pudo obtener descripción visual de la cámara."
         fi
 
     elif [[ "$talamo_tipo" == "READ_PDF" ]]; then
