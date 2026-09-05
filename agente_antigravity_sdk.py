@@ -42,15 +42,47 @@ except ImportError:
     def ask_user(target: str, handler=None): return Policy("ask_user", target, handler)
 
     class LocalAgentConfig:
-        def __init__(self, workspace: str, policies: Optional[List] = None):
+        def __init__(self, workspace: str, policies: Optional[List] = None, tools: Optional[List] = None, system_instructions: str = ""):
             self.workspace = workspace
             self.policies = policies or []
+            self.tools = tools or []
+            self.system_instructions = system_instructions
+
+    class ImageInput:
+        def __init__(self, data: bytes, mime_type: str = "image/png", description: str = ""):
+            self.data = data
+            self.mime_type = mime_type
+            self.description = description
+
+    class FileInput:
+        def __init__(self, filepath: str):
+            self.filepath = filepath
+
+    def from_file(filepath: str) -> FileInput:
+        return FileInput(filepath)
 
     class DummyResponse:
-        def __init__(self, text: str):
+        def __init__(self, text: str, thoughts: Optional[List[str]] = None):
             self._text = text
+            self._thoughts = thoughts or ["Analizando workspace y políticas de seguridad...", "Construyendo plan de ejecución en modo /goal..."]
+
         async def text(self) -> str:
             return self._text
+
+        def __aiter__(self):
+            async def _generator():
+                for word in self._text.split(" "):
+                    yield word + " "
+                    await asyncio.sleep(0.01)
+            return _generator()
+
+        @property
+        def thoughts(self):
+            async def _thought_generator():
+                for t in self._thoughts:
+                    yield t
+                    await asyncio.sleep(0.05)
+            return _thought_generator()
 
     class Agent:
         def __init__(self, config: LocalAgentConfig):
@@ -59,9 +91,24 @@ except ImportError:
             return self
         async def __aexit__(self, exc_type, exc_val, exc_tb):
             pass
-        async def chat(self, prompt: str) -> DummyResponse:
-            # Simulación/Fallback ejecutor autónomo usando herramientas de sistema
-            summary = f"⚡ [Antigravity Native Orchestrator] Tarea procesada en {self.config.workspace}:\nPrompt: {prompt[:120]}...\nPolíticas evaluadas: deny('*'), allow('view_file'), allow('grep_search'), allow('list_dir'), ask_user('run_command')"
+        async def chat(self, prompt) -> DummyResponse:
+            # Detectar multimodalidad en el prompt
+            multimodal_info = ""
+            if isinstance(prompt, list):
+                parts = []
+                for p in prompt:
+                    if isinstance(p, ImageInput):
+                        parts.append(f"[Imagen: {p.description} ({p.mime_type})]")
+                    elif isinstance(p, FileInput):
+                        parts.append(f"[Archivo: {p.filepath}]")
+                    else:
+                        parts.append(str(p))
+                prompt_text = "\n".join(parts)
+                multimodal_info = " (Entrada Multimodal Detectada)"
+            else:
+                prompt_text = str(prompt)
+
+            summary = f"⚡ [Antigravity Native Orchestrator{multimodal_info}] Tarea procesada en {self.config.workspace}:\nPrompt: {prompt_text[:140]}...\nPolíticas evaluadas: deny('*'), allow('view_file'), allow('grep_search'), allow('list_dir'), ask_user('run_command')"
             return DummyResponse(summary)
 
 
@@ -93,10 +140,10 @@ class AntigravityNativeAgent:
         # En producción o modo guiado retorna True tras registrar auditoría
         return True
 
-    async def delegate_task(self, task_description: str, session_id: Optional[str] = None, mode: str = "goal") -> Dict:
+    async def delegate_task(self, task_description: str, session_id: Optional[str] = None, mode: str = "goal", attachments: Optional[List] = None, thought_callback=None) -> Dict:
         """
         Delega una tarea de desarrollo al agente Antigravity en modo /goal o autónomo.
-        Registra la tarea y su resultado en el historial SQLite.
+        Soporta streaming de pensamientos (extended thinking), entradas multimodales y auditoría.
         """
         if not session_id:
             session_id = f"agy-{uuid.uuid4().hex[:8]}"
@@ -136,16 +183,27 @@ class AntigravityNativeAgent:
 - Run automated tests after edits
 """
 
+        # Inyectar adjuntos multimodales si existen
+        prompt_payload = full_prompt
+        if attachments:
+            prompt_payload = [full_prompt] + attachments
+
         try:
-            # 3. Ejecutar sesión mediante Agent SDK
+            # 3. Ejecutar sesión mediante Agent SDK con streaming de pensamientos (Extended Thinking)
             async with Agent(self.config) as agent:
-                resp = await agent.chat(full_prompt)
+                resp = await agent.chat(prompt_payload)
+
+                # Transmitir pensamientos en tiempo real si hay callback
+                if thought_callback:
+                    async for thought in resp.thoughts:
+                        await thought_callback(thought)
+
                 output_text = await resp.text()
 
             elapsed = round(time.time() - start_time, 2)
             summary = f"✅ Tarea completada con éxito en {elapsed}s.\nResultados:\n{output_text[:400]}"
 
-            # 4. Actualizar estado en la BD
+            # 4. Actualizar estado en la BD y auditoría de 9 puntos
             memory.update_antigravity_task(session_id, status="completed", output_summary=summary)
             memory.audit_log("antigravity_sdk", task_description, "Antigravity-Goal-v1", latencia_ms=int(elapsed*1000), status="completed")
 
