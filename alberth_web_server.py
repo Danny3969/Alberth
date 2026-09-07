@@ -236,32 +236,37 @@ def run_alberth(text: str) -> str:
         if _conv_history:
             _conv_history.pop()
 
-    # ── Ruta 3: openclaw agent CLI (fallback, más lento pero con memoria completa) ──
-    try:
-        env = os.environ.copy()
-        env["ALBERTH_WEB_MODE"] = "1"
-        existing_path = env.get("PATH", "")
-        extra_paths = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
-        env["PATH"] = f"{extra_paths}:{existing_path}" if existing_path else extra_paths
-        r = subprocess.run(
-            ["/usr/local/bin/openclaw", "agent", "--agent", "main", "--message", text],
-            capture_output=True, text=True, timeout=90, env=env, cwd=str(WORKSPACE)
-        )
-        out = r.stdout.strip()
-        if out:
-            FAIL_PREFIX = "[assistant turn failed before producing content]"
-            if FAIL_PREFIX in out:
-                out = out.replace(FAIL_PREFIX, "").strip()
-            return out if out else "Entendido."
-        err = r.stderr.strip() if r.stderr else ""
-        useful = [l for l in err.splitlines() if l.strip() and not any(x in l for x in ["INFO", "DEBUG", "[plugins]", "[agent/"])]
-        if useful:
-            return " ".join(useful[-3:])
-        return "Entendido."
-    except subprocess.TimeoutExpired:
-        return "Lo siento, el procesamiento tardó demasiado. Por favor, intente de nuevo."
-    except Exception as e:
-        return f"❌ Error: {e}"
+    # ── Ruta 3: openclaw agent CLI (si está instalado en este equipo) ──
+    import shutil
+    openclaw_bin = shutil.which("openclaw") or ("/usr/local/bin/openclaw" if os.path.exists("/usr/local/bin/openclaw") else None)
+    if openclaw_bin:
+        try:
+            env = os.environ.copy()
+            env["ALBERTH_WEB_MODE"] = "1"
+            existing_path = env.get("PATH", "")
+            extra_paths = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
+            env["PATH"] = f"{extra_paths}:{existing_path}" if existing_path else extra_paths
+            r = subprocess.run(
+                [openclaw_bin, "agent", "--agent", "main", "--message", text],
+                capture_output=True, text=True, timeout=90, env=env, cwd=str(WORKSPACE)
+            )
+            out = r.stdout.strip()
+            if out:
+                FAIL_PREFIX = "[assistant turn failed before producing content]"
+                if FAIL_PREFIX in out:
+                    out = out.replace(FAIL_PREFIX, "").strip()
+                return out if out else "Entendido."
+            err = r.stderr.strip() if r.stderr else ""
+            useful = [l for l in err.splitlines() if l.strip() and not any(x in l for x in ["INFO", "DEBUG", "[plugins]", "[agent/"])]
+            if useful:
+                return " ".join(useful[-3:])
+            return "Entendido."
+        except subprocess.TimeoutExpired:
+            return "Lo siento, el procesamiento tardó demasiado. Por favor, intente de nuevo."
+        except Exception as e:
+            return f"❌ Error: {e}"
+    else:
+        return "Comando recibido. Alberth está operando en modo local para control de Mac (Apps, Finder, Batería, Volumen, Spotify, Capturas)."
 
 async def run_alberth_async(text: str) -> str:
     loop = asyncio.get_event_loop()

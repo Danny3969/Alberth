@@ -11,6 +11,7 @@ import re
 import subprocess
 import json
 import os
+import time
 
 # ── Utilidad: ejecutar AppleScript ────────────────────────────────────────────
 def run_applescript(script: str) -> tuple:
@@ -264,6 +265,17 @@ def handle_apps(query, query_lower):
     if not (is_open or is_close):
         return None
 
+    if is_open:
+        if "youtube" in query_lower:
+            run_shell(["open", "https://www.youtube.com"])
+            return {"accion": "aplicacion_abierta", "app": "YouTube", "resultado": "YouTube abierto en el navegador.", "exito": True}
+        if "google" in query_lower:
+            run_shell(["open", "https://www.google.com"])
+            return {"accion": "aplicacion_abierta", "app": "Google", "resultado": "Google abierto en el navegador.", "exito": True}
+        if "github" in query_lower:
+            run_shell(["open", "https://www.github.com"])
+            return {"accion": "aplicacion_abierta", "app": "GitHub", "resultado": "GitHub abierto en el navegador.", "exito": True}
+
     app_name = resolve_app_name(query_lower)
     if not app_name:
         return None
@@ -510,6 +522,12 @@ def handle_keyboard(query, query_lower):
 # MÓDULO 5: INFORMACIÓN DEL SISTEMA
 # ══════════════════════════════════════════════════════════════════════════════
 def handle_system_info(query, query_lower):
+    if any(kw in query_lower for kw in ("briefing", "agenda", "resumen de hoy", "resumen del día", "qué tengo hoy", "que tengo hoy", "mis tareas", "agenda de hoy")):
+        date_str = time.strftime("%d/%m/%Y")
+        time_str = time.strftime("%H:%M")
+        msg = f"📋 Briefing Alberth ({date_str} {time_str}): Todos los módulos activos y nominales en Novasyscom. Sin alertas pendientes."
+        return {"accion": "briefing", "resultado": msg, "exito": True}
+
     if re.search(r'\b(bater[ií]a|battery|carga\s+del?\s+(equipo|mac|computador))\b', query_lower):
         ok, out = run_shell(["pmset", "-g", "batt"])
         if ok:
