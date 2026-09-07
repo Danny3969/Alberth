@@ -129,26 +129,32 @@ def add_history(role: str, content: str) -> dict:
 _conv_history: list[dict] = []
 
 # Modelos Ollama disponibles localmente (en orden de preferencia)
+# Modelos Ollama disponibles localmente (en orden de preferencia)
 OLLAMA_MODELS = [
     "gemma:2b",          # Rápido, ~3B params
     "llama3:latest",     # Más capaz, ~8B params
     "gemma4:latest",     # Más nuevo, ~8B params
 ]
 
+# Marca de tiempo de la última interacción visual (para contexto de seguimiento)
+_last_vision_time: float = 0.0
+
 def run_alberth_full(text: str) -> dict:
     """Pipeline maestro de Alberth v3.0:
     1. Sentido Visual:
-       - Cámara FaceTime HD: 'verme', 'mírame', 'qué ves', 'foto', 'quién está frente', etc.
+       - Cámara FaceTime HD: 'verme', 'mírame', 'qué ves', 'qué sostengo en mi mano', 'qué objeto', etc.
        - Pantalla Mac: 'pantalla', 'captura la pantalla', 'analiza mi pantalla', etc.
     2. Sentido Operativo (macOS):
        - Spotify, Volumen, Finder, Carpetas ('crea carpeta X'), Apps, Batería.
     3. Sentido Intelectual (Cerebro IA):
-       - NVIDIA NIM (meta/llama-3.2-11b-vision-instruct / mistralai/mistral-large-2-instruct).
-       - Fallback: Groq (qwen/qwen3.6-27b).
+       - Google Gemini Pro (si GEMINI_API_KEY está configurada).
+       - Groq ultra rápido (openai/gpt-oss-120b).
+       - NVIDIA NIM (meta/llama-3.2-11b-vision-instruct).
        - Fallback: Ollama local.
     4. Sentido Vocal (Edge-TTS):
        - Síntesis de voz cinematográfica para que Alberth responda por audio.
     """
+    global _last_vision_time
     import requests as _req
     import urllib.request as _urlreq
     load_env()
@@ -167,29 +173,58 @@ def run_alberth_full(text: str) -> dict:
         "analiza mi pantalla", "visión mac", "vision mac", "screenshot"
     ])
 
-    # ── 2. Detección de Visión: Cámara Web (Verme) ────────────────────────────
-    is_camera_query = not is_screen_query and any(k in q_lower for k in [
+    # ── 2. Detección de Visión: Cámara Web (Verme, Objetos, Manos, etc.) ──────
+    camera_keywords = [
+        # Ver y mirar
         "verme", "mírame", "mirame", "qué ves", "que ves", "mira la cámara",
-        "mira la camara", "quién está frente", "quien esta frente",
-        "qué tengo puesto", "que tengo puesto", "activa la cámara",
-        "activa la camara", "mira por la cámara", "mira por la camara",
-        "puedes verme", "me puedes ver", "ves algo", "foto de la cámara",
-        "rostro", "cara", "cómo me veo", "como me veo"
-    ])
+        "mira la camara", "quién está frente", "quien esta frente", "quién está aquí",
+        "quien esta aqui", "activa la cámara", "activa la camara", "mira por la cámara",
+        "mira por la camara", "puedes verme", "me puedes ver", "ves algo",
+        "foto de la cámara", "rostro", "cara", "cómo me veo", "como me veo",
+        "mira de nuevo", "mírame otra vez", "mirame otra vez", "vuelve a mirar",
+        "mira ahora", "mírame ahora",
+
+        # Objetos, manos y lo que sostiene o muestra
+        "mano", "manos", "sostengo", "sosteniendo", "agarrando", "tengo en la mano",
+        "tengo en las manos", "qué tengo aquí", "que tengo aqui", "qué es esto",
+        "que es esto", "mira esto", "observa esto", "qué objeto", "que objeto",
+        "mostrando", "te muestro", "mira lo que tengo", "mira lo que sostengo",
+        "qué tengo agarrado", "objeto tengo", "ves lo que tengo", "qué tengo en",
+        "que tengo en", "qué hay en mi", "que hay en mi", "qué sostengo", "que sostengo",
+        "qué tengo enfrente", "que tengo enfrente", "lo que tengo",
+
+        # Vestimenta, accesorios y gestos
+        "tengo puesto", "traigo puesto", "qué ropa", "que ropa", "color de mi",
+        "lentes", "gafas", "sombrero", "gorra", "cuántos dedos", "cuantos dedos",
+        "qué gesto", "que gesto", "qué hago", "que hago"
+    ]
+
+    is_direct_camera = any(k in q_lower for k in camera_keywords)
+
+    # Preguntas de seguimiento visual en contexto reciente (< 90 segundos)
+    is_followup_vision = (
+        (time.time() - _last_vision_time < 90) and
+        any(k in q_lower for k in ["y ahora", "ahora qué", "ahora que", "lo ves", "qué tal", "que tal", "ves", "esto", "sostengo", "tengo"])
+    )
+
+    is_camera_query = not is_screen_query and (is_direct_camera or is_followup_vision)
 
     # ── Ejecutar Visión si corresponde ────────────────────────────────────────
     if is_camera_query or is_screen_query:
         try:
+            _last_vision_time = time.time()
             import sys
             if str(WORKSPACE) not in sys.path:
                 sys.path.insert(0, str(WORKSPACE))
             import alberth_vision
 
             nv_key = os.environ.get("NVIDIA_API_KEY") or alberth_vision.get_nvidia_api_key()
+            gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+
             if is_screen_query:
                 ok = alberth_vision.capture_screen()
                 target_img = alberth_vision.SCREEN_PATH
-                img_relative = f"/assets/voice_exchange/alberth_screen.jpg?t={int(time.time())}"
+                img_relative = f"/assets/voice_exchange/alberth_screen.jpg?t={int(time.time() * 1000)}"
                 prompt_vision = (
                     f"Eres Alberth, el asistente técnico de élite del Señor Daniel. "
                     f"El Señor Daniel te pregunta sobre su pantalla: '{q_clean}'. "
@@ -198,15 +233,27 @@ def run_alberth_full(text: str) -> dict:
             else:
                 ok = alberth_vision.capture_image()
                 target_img = alberth_vision.IMAGE_PATH
-                img_relative = f"/assets/voice_exchange/alberth_vision.jpg?t={int(time.time())}"
-                prompt_vision = (
-                    f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor Daniel. "
-                    f"El Señor Daniel te pregunta: '{q_clean}'. "
-                    f"Míralo a través de la cámara de su Mac y descríbele detalladamente con respeto, calidez y precisión "
-                    f"lo que ves frente a la cámara (su vestimenta, entorno, postura y lo que observas)."
-                )
+                img_relative = f"/assets/voice_exchange/alberth_vision.jpg?t={int(time.time() * 1000)}"
+                
+                # Prompt especializado si pregunta por objetos o manos
+                is_hand_query = any(w in q_lower for w in ["mano", "sostengo", "sosteniendo", "agarrando", "objeto", "qué es esto", "que es esto", "qué tengo"])
+                if is_hand_query:
+                    prompt_vision = (
+                        f"Eres Alberth, el asistente personal y mano derecha de élite del Señor Daniel. "
+                        f"El Señor Daniel te pregunta mirando a la cámara web: '{q_clean}'. "
+                        f"Inspecciona minuciosamente sus manos y el objeto que sostiene o te está mostrando frente a la cámara. "
+                        f"Identifica y describe con máxima precisión el objeto exacto, qué es, su color, forma y qué está haciendo con él. "
+                        f"Responde con respeto, calidez y estilo analítico dirigiéndote al Señor Daniel."
+                    )
+                else:
+                    prompt_vision = (
+                        f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor Daniel. "
+                        f"El Señor Daniel te pregunta mirando a la cámara web: '{q_clean}'. "
+                        f"Míralo a través de la cámara de su Mac y descríbele detalladamente con respeto, calidez y precisión "
+                        f"lo que ves frente a la cámara (su vestimenta, entorno, postura y lo que observas)."
+                    )
 
-            if ok and nv_key:
+            if ok and (nv_key or gemini_key):
                 desc = alberth_vision.describe_image(nv_key, custom_prompt=prompt_vision, target_image=target_img)
                 if desc:
                     resp_text = desc.strip()
@@ -241,32 +288,49 @@ def run_alberth_full(text: str) -> dict:
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
+        # Ruta 0: Google Gemini Pro (si GEMINI_API_KEY o GOOGLE_API_KEY está configurada)
+        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if gemini_key:
+            try:
+                g_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={gemini_key}"
+                g_payload = {
+                    "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor Daniel: {q_clean}"}]}],
+                    "generationConfig": {"temperature": 0.5, "maxOutputTokens": 600}
+                }
+                g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
+                with _urlreq.urlopen(g_req, timeout=20) as resp:
+                    g_res = json.loads(resp.read().decode("utf-8"))
+                    resp_text = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
+            except Exception as e:
+                print(f"[Gemini Chat Error] {e}")
+
         # Ruta A: Groq API (Ultra rápido, ~1s de latencia con gpt-oss-120b)
-        groq_key = os.environ.get("GROQ_API_KEY")
-        if groq_key:
-            for g_model in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"]:
-                try:
-                    payload = {
-                        "model": g_model,
-                        "messages": messages,
-                        "max_tokens": 600,
-                        "temperature": 0.6
-                    }
-                    req = _urlreq.Request(
-                        "https://api.groq.com/openai/v1/chat/completions",
-                        data=json.dumps(payload).encode("utf-8"),
-                        headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
-                    )
-                    with _urlreq.urlopen(req, timeout=12) as resp:
-                        res_json = json.loads(resp.read().decode("utf-8"))
-                        txt_out = res_json["choices"][0]["message"]["content"].strip()
-                        if "<think>" in txt_out and "</think>" in txt_out:
-                            txt_out = txt_out.split("</think>")[-1].strip()
-                        if txt_out:
-                            resp_text = txt_out
-                            break
-                except Exception as e:
-                    print(f"[Groq Chat Error {g_model}] {e}")
+        if not resp_text:
+            groq_key = os.environ.get("GROQ_API_KEY")
+            if groq_key:
+                for g_model in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"]:
+                    try:
+                        payload = {
+                            "model": g_model,
+                            "messages": messages,
+                            "max_tokens": 600,
+                            "temperature": 0.6
+                        }
+                        req = _urlreq.Request(
+                            "https://api.groq.com/openai/v1/chat/completions",
+                            data=json.dumps(payload).encode("utf-8"),
+                            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
+                        )
+                        with _urlreq.urlopen(req, timeout=12) as resp:
+                            res_json = json.loads(resp.read().decode("utf-8"))
+                            txt_out = res_json["choices"][0]["message"]["content"].strip()
+                            if "<think>" in txt_out and "</think>" in txt_out:
+                                txt_out = txt_out.split("</think>")[-1].strip()
+                            if txt_out:
+                                resp_text = txt_out
+                                break
+                    except Exception as e:
+                        print(f"[Groq Chat Error {g_model}] {e}")
 
         # Ruta B: NVIDIA NIM (Secondary)
         if not resp_text:

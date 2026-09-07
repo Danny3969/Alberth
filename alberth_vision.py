@@ -80,6 +80,51 @@ def get_nvidia_api_key():
     return None
 
 
+def get_gemini_api_key():
+    """Lee GEMINI_API_KEY o GOOGLE_API_KEY desde entorno o ~/.openclaw/.env"""
+    _source_env()
+    return os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
+
+
+def describe_image_gemini(api_key, prompt, image_path, model="gemini-1.5-pro"):
+    """Envía la imagen a Google Gemini API (AI Studio)."""
+    if not os.path.exists(image_path):
+        return None
+    try:
+        with open(image_path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode("utf-8")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt},
+                        {"inline_data": {"mime_type": "image/jpeg", "data": encoded}}
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.3,
+                "maxOutputTokens": 600
+            }
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception as e:
+        log(f"Error en Gemini Vision ({model}): {e}")
+        # Fallback automático a gemini-2.0-flash
+        if "flash" not in model.lower():
+            log("Intentando fallback con gemini-2.0-flash...")
+            return describe_image_gemini(api_key, prompt, image_path, model="gemini-2.0-flash")
+        return None
+
+
 def capture_image():
     """Captura un frame de la cámara integrada con ffmpeg."""
     os.makedirs(os.path.dirname(IMAGE_PATH), exist_ok=True)
@@ -148,18 +193,11 @@ def capture_screen():
     return False
 
 
-def describe_image(api_key, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY, target_image=None):
-    """Envía la imagen a NVIDIA NIM y devuelve la descripción."""
+def describe_image(api_key=None, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY, target_image=None):
+    """Envía la imagen a Google Gemini Pro (si está configurado) o a NVIDIA NIM."""
     img_file = target_image or IMAGE_PATH
     if not os.path.exists(img_file):
         log(f"Error: Archivo de imagen no encontrado ({img_file}).")
-        return None
-
-    try:
-        with open(img_file, "rb") as f:
-            encoded_image = base64.b64encode(f.read()).decode("utf-8")
-    except Exception as e:
-        log(f"Error al codificar imagen: {e}")
         return None
 
     prompt = (
@@ -168,6 +206,27 @@ def describe_image(api_key, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY, targ
         "Describe detalladamente, con respeto, precisión y estilo profesional lo que ves en esta imagen. "
         "Dirígete al Señor Daniel. Responde en español."
     )
+
+    # Prioridad 1: Google Gemini Pro (si el usuario ha configurado GEMINI_API_KEY)
+    gemini_key = get_gemini_api_key()
+    if gemini_key:
+        log("Analizando imagen con Google Gemini...")
+        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-1.5-pro")
+        if desc_gem:
+            return desc_gem
+
+    # Prioridad 2: NVIDIA NIM
+    api_key = api_key or get_nvidia_api_key()
+    if not api_key:
+        log("Error: No se encontró clave para análisis visual (NVIDIA_API_KEY o GEMINI_API_KEY).")
+        return None
+
+    try:
+        with open(img_file, "rb") as f:
+            encoded_image = base64.b64encode(f.read()).decode("utf-8")
+    except Exception as e:
+        log(f"Error al codificar imagen: {e}")
+        return None
 
     # NVIDIA NIM acepta image_url con data URI
     payload = {
