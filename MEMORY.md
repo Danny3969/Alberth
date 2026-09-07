@@ -64,6 +64,12 @@ _Última actualización: 2026-09-07 15:30 GMT-5_
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
+### 2026-09-07 (Integración Google Gemini AI Studio & Visión Dinámica de Manos/Objetos)
+- **Integración Nativa Google Gemini:** Incorporación de modelos Google Gemini (`gemini-2.5-flash-lite`, `gemini-flash-latest`, `gemini-pro-latest`) con clave API segura en `~/.openclaw/.env` (`GEMINI_API_KEY`). Configurado como Ruta 0 prioritaria para razonamiento conversacional y visión multimodal, con cascada de fallback automático hacia Groq (LLaMA 3.3 70B) y NVIDIA NIM.
+- **Inspección en Tiempo Real de Manos y Objetos:** Detección semántica de intenciones sobre lo que el Señor Daniel sostiene o muestra frente a la cámara web (`"mano"`, `"manos"`, `"sostengo"`, `"agarrando"`, `"qué es esto"`, `"mira esto"`, etc.).
+- **Memoria de Contexto Visual Continuo:** Ventana activa de 90 segundos donde preguntas consecutivas de seguimiento disparan capturas frescas instantáneas desde la cámara FaceTime HD en lugar de responder sobre imágenes viejas archivadas.
+- **Rediseño Estético Quantum HUD:** HUD depurado estilo JARVIS/Iron Man con orbe Three.js interactivo, eliminación de botones superfluos y controles optimizados por voz/texto.
+
 ### 2026-09-07 (Lanzamiento Fase 5 & Arquitectura Servidor Central Cloudflare)
 - **Lanzamiento de Servicios (Fase 5):** Puesta en marcha limpia de los 4 procesos en PM2 (`alberth-web`, `alberth-voice`, `alberth-reminders`, `alberth-qa-watcher`).
 - **Arquitectura Servidor Central vs Cliente:** Despliegue de topología con Servidor Central 24/7 (`MacBook-Pro-de-digitalspace`) exponiendo Alberth vía Cloudflare Tunnel seguro, permitiendo conexión como cliente ligero desde cualquier máquina sin clonar credenciales ni duplicar procesos.
