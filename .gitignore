@@ -8,3 +8,8 @@ logs/*
 __pycache__/
 *.pyc
 .DS_Store
+
+# Entornos virtuales y credenciales
+venv/
+.venv/
+.env
