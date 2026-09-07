@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-07 09:35 GMT-5_
+_Última actualización: 2026-09-07 15:30 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,22 +7,16 @@ _Última actualización: 2026-09-07 09:35 GMT-5_
 
 ---
 
-## 🏗️ Arquitectura del Sistema (Alberth NEXUS v4.5+ & Antigravity Native SDK)
+## 🏗️ Arquitectura del Sistema (Alberth NEXUS v5.2 Quantum HUD & Antigravity SDK)
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
-├── agents/
-│   ├── orquestador/    → Agente Orquestador Core [Nvidia NIM GLM-5.1]
-│   ├── codigo/         → Agente de Desarrollo & Antigravity SDK [Qwen2.5-Coder-32B / Antigravity Agent]
-│   ├── vision/         → Agente Multimodal & Reconocimiento Facial [Nvidia NIM / Llama-3.2-Vision / Gemini]
-│   └── qa_proactivo/   → Agente QA & Corrector de Voz [TTS es-MX-JorgeNeural]
-├── alberth-android/    → Aplicación Móvil Nativa (React Native / Expo SDK 56)
-├── panel/              → Panel Web & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
-│   ├── index.html      → Panel Principal HUD + Orbe 3D WebGL (Three.js Audio-Reactive Double-Buffer)
-│   ├── floating.html   → Desktop Floating Bar v4.5+ (Context Autocomplete / Focus / QA Chart 7D / Push / DND)
+├── panel/              → Panel Web Quantum HUD & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
+│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Spotify Player + Action Banner
+│   ├── floating.html   → Desktop Floating Bar (Quantum Theme / Orbitron / Rajdhani / DND / QA Alerts)
+│   ├── assets/         → Assets multimedia (highway_to_hell.jpg álbum cover cyberpunk)
 │   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
-├── pipeline_refactor/  → Pipeline moderno en Python nativo con Circuit Breaker
-├── agente_antigravity_sdk.py → Integración Nativa Antigravity (Capa 2 / Hub Paralelo / Aprendizaje de Patrones)
-├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` (Puerto 8080)
+├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` + `/panel/assets` (Puerto 8080)
+├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Spotify AppleScript, Volumen, Apps)
 ├── alberth_voice_server.py  → Servidor STT de audio y escucha continua con VAD
 ├── alberth_vision.py        → Cámara On-Demand + Registro de Personas (ej. Danna) + Fast Cosine Embeddings (<500ms)
 ├── alberth_qa_watcher.py    → Demonio de supervisión proactiva (filtro 2 horas)

@@ -87,6 +87,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 # Montar directorios estáticos para audio y assets
 app.mount("/output", StaticFiles(directory=str(VOICE_OUTPUT)), name="output")
 app.mount("/assets", StaticFiles(directory=str(WORKSPACE)), name="assets")
+if (PANEL_DIR / "assets").exists():
+    app.mount("/panel/assets", StaticFiles(directory=str(PANEL_DIR / "assets")), name="panel_assets")
 
 @app.get("/floating", response_class=FileResponse)
 async def get_floating_bar():
@@ -141,10 +143,19 @@ def run_alberth(text: str) -> str:
     """
     import requests as _req
 
-    # Mantener historial de conversación (últimas 10 interacciones)
-    _conv_history.append({"role": "user", "content": text})
-    if len(_conv_history) > 20:
-        _conv_history.pop(0)
+    # ── Ruta 0: Acciones nativas del sistema (carpetas, spotify, volumen, apps) ──
+    try:
+        import sys
+        if str(WORKSPACE) not in sys.path:
+            sys.path.insert(0, str(WORKSPACE))
+        import alberth_system_helper
+        sys_res = alberth_system_helper.dispatch(text)
+        if sys_res and sys_res.get("exito"):
+            res_txt = sys_res.get("resultado", "Acción completada.")
+            _conv_history.append({"role": "assistant", "content": res_txt})
+            return res_txt
+    except Exception:
+        pass
 
     soul_file = WORKSPACE / "SOUL.md"
     soul_content = ""

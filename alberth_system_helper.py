@@ -89,6 +89,13 @@ def handle_music(query, query_lower):
         if ok:
             return {"accion": action, "resultado": msg, "exito": True}
 
+        # Spotify nativo vía AppleScript
+        sp_action = "play" if is_play else ("pause" if is_pause else ("next track" if is_next else "previous track"))
+        sp_script = f'tell application "Spotify" to {sp_action}'
+        sp_ok, _ = run_applescript(sp_script)
+        if sp_ok:
+            return {"accion": action, "resultado": f"Spotify: {msg}", "exito": True}
+
         # Fallback a AppleScript para navegadores si nowplaying-cli no lo logra directamente
         act_str = "play" if is_play else ("pause" if is_pause else ("next" if is_next else "previous"))
         browser_script = """
@@ -703,6 +710,43 @@ def handle_files(query, query_lower):
                 "resultado": f"Archivos en {dir_path}:\n" + "\n".join(f"  • {e}" for e in preview) + extra,
                 "exito": True
             }
+
+    # ── CREAR carpeta ─────────────────────────────────────────────────────
+    create_folder_match = re.search(
+        r'\b(?:crea|crear|nuevo|nueva|haz|hacer)\s+(?:una\s+)?(?:carpeta|folder|directorio)\s+(?:llamada|llamado|con\s+nombre|que\s+se\s+llame\s+)?["\']?([^"\']+?)["\']?(?:\s+(?:en|del?)\s+(?:el\s+)?(escritorio|desktop|downloads|descargas|documentos|documents))?$',
+        query, re.IGNORECASE
+    )
+    if create_folder_match or ("carpeta" in query_lower and any(w in query_lower for w in ["crea", "crear", "haz", "nueva"])):
+        target_name = None
+        target_loc = "escritorio"
+        if create_folder_match:
+            target_name = create_folder_match.group(1).strip()
+            if create_folder_match.group(2):
+                target_loc = create_folder_match.group(2).lower()
+        else:
+            parts = re.split(r'\b(?:carpeta|folder|directorio)\s+(?:llamada|llamado|con\s+nombre\s+)?["\']?', query, flags=re.IGNORECASE)
+            if len(parts) > 1:
+                target_name = parts[1].split()[0].replace('"', '').replace("'", '').strip()
+        
+        if target_name:
+            base_dir = os.path.expanduser("~/Desktop")
+            if "descarga" in target_loc or "download" in target_loc:
+                base_dir = os.path.expanduser("~/Downloads")
+            elif "document" in target_loc:
+                base_dir = os.path.expanduser("~/Documents")
+            
+            folder_path = os.path.join(base_dir, target_name)
+            try:
+                os.makedirs(folder_path, exist_ok=True)
+                loc_name = "el escritorio" if base_dir.endswith("Desktop") else os.path.basename(base_dir)
+                return {
+                    "accion": "carpeta_creada",
+                    "resultado": f"Carpeta '{target_name}' creada en {loc_name}.",
+                    "exito": True,
+                    "ruta": folder_path
+                }
+            except Exception as e:
+                return {"accion": "carpeta_creada", "resultado": f"Error al crear la carpeta: {e}", "exito": False}
 
     # ── CREAR archivo ─────────────────────────────────────────────────────
     create_match = re.search(
