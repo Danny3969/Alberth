@@ -288,21 +288,25 @@ def run_alberth_full(text: str) -> dict:
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
-        # Ruta 0: Google Gemini Pro (si GEMINI_API_KEY o GOOGLE_API_KEY está configurada)
+        # Ruta 0: Google Gemini (si GEMINI_API_KEY o GOOGLE_API_KEY está configurada)
         gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
         if gemini_key:
-            try:
-                g_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={gemini_key}"
-                g_payload = {
-                    "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor Daniel: {q_clean}"}]}],
-                    "generationConfig": {"temperature": 0.5, "maxOutputTokens": 600}
-                }
-                g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-                with _urlreq.urlopen(g_req, timeout=20) as resp:
-                    g_res = json.loads(resp.read().decode("utf-8"))
-                    resp_text = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
-            except Exception as e:
-                print(f"[Gemini Chat Error] {e}")
+            for gm in ["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-pro-latest"]:
+                try:
+                    g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
+                    g_payload = {
+                        "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor Daniel: {q_clean}"}]}],
+                        "generationConfig": {"temperature": 0.5, "maxOutputTokens": 600}
+                    }
+                    g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
+                    with _urlreq.urlopen(g_req, timeout=12) as resp:
+                        g_res = json.loads(resp.read().decode("utf-8"))
+                        txt = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
+                        if txt:
+                            resp_text = txt
+                            break
+                except Exception as e:
+                    print(f"[Gemini Chat Error {gm}] {e}")
 
         # Ruta A: Groq API (Ultra rápido, ~1s de latencia con gpt-oss-120b)
         if not resp_text:

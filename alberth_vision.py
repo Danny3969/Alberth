@@ -86,43 +86,50 @@ def get_gemini_api_key():
     return os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
 
 
-def describe_image_gemini(api_key, prompt, image_path, model="gemini-1.5-pro"):
-    """Envía la imagen a Google Gemini API (AI Studio)."""
+def describe_image_gemini(api_key, prompt, image_path, model="gemini-2.5-flash-lite"):
+    """Envía la imagen a Google Gemini API (AI Studio) con fallback automático."""
     if not os.path.exists(image_path):
         return None
     try:
         with open(image_path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
-                        {"inline_data": {"mime_type": "image/jpeg", "data": encoded}}
-                    ]
+        
+        models_to_try = [model, "gemini-flash-latest", "gemini-pro-latest"] if model else ["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-pro-latest"]
+        
+        for m in models_to_try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt},
+                            {"inlineData": {"mimeType": "image/jpeg", "data": encoded}}
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.3,
+                    "maxOutputTokens": 600
                 }
-            ],
-            "generationConfig": {
-                "temperature": 0.3,
-                "maxOutputTokens": 600
             }
-        }
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    if text:
+                        log(f"Respuesta visual obtenida de Google Gemini ({m})")
+                        return text
+            except Exception as em:
+                log(f"Gemini {m} error: {em}")
+                continue
     except Exception as e:
-        log(f"Error en Gemini Vision ({model}): {e}")
-        # Fallback automático a gemini-2.0-flash
-        if "flash" not in model.lower():
-            log("Intentando fallback con gemini-2.0-flash...")
-            return describe_image_gemini(api_key, prompt, image_path, model="gemini-2.0-flash")
-        return None
+        log(f"Error general en Gemini Vision: {e}")
+    return None
 
 
 def capture_image():
@@ -211,7 +218,7 @@ def describe_image(api_key=None, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY,
     gemini_key = get_gemini_api_key()
     if gemini_key:
         log("Analizando imagen con Google Gemini...")
-        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-1.5-pro")
+        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-2.5-flash-lite")
         if desc_gem:
             return desc_gem
 
