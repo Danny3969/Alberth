@@ -18,6 +18,10 @@ import time
 # ── Rutas ────────────────────────────────────────────────────────────────────
 WORKSPACE_DIR = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 IMAGE_PATH    = os.path.join(WORKSPACE_DIR, "voice_exchange", "alberth_vision.jpg")
+PANEL_IMAGE_PATH = os.path.join(WORKSPACE_DIR, "panel", "assets", "voice_exchange", "alberth_vision.jpg")
+SCREEN_PATH   = os.path.join(WORKSPACE_DIR, "voice_exchange", "alberth_screen.jpg")
+PANEL_SCREEN_PATH = os.path.join(WORKSPACE_DIR, "panel", "assets", "voice_exchange", "alberth_screen.jpg")
+
 CONFIG_PATH   = os.path.expanduser("~/.openclaw/openclaw.json")
 ENV_PATH      = os.path.expanduser("~/.openclaw/.env")
 
@@ -79,6 +83,7 @@ def get_nvidia_api_key():
 def capture_image():
     """Captura un frame de la cámara integrada con ffmpeg."""
     os.makedirs(os.path.dirname(IMAGE_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(PANEL_IMAGE_PATH), exist_ok=True)
 
     if os.path.exists(IMAGE_PATH):
         try:
@@ -90,7 +95,7 @@ def capture_image():
     cmd = [
         "ffmpeg", "-y",
         "-f", "avfoundation",
-        "-framerate", "30",
+        "-framerate", "29.97",
         "-video_size", "1280x720",
         "-i", "0",
         "-vframes", "1",
@@ -102,6 +107,11 @@ def capture_image():
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=12
         )
         if os.path.exists(IMAGE_PATH) and os.path.getsize(IMAGE_PATH) > 0:
+            import shutil
+            try:
+                shutil.copyfile(IMAGE_PATH, PANEL_IMAGE_PATH)
+            except Exception:
+                pass
             log("Captura realizada exitosamente.")
             return True
         else:
@@ -116,14 +126,37 @@ def capture_image():
         return False
 
 
-def describe_image(api_key, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY):
+def capture_screen():
+    """Captura la pantalla completa de la Mac."""
+    os.makedirs(os.path.dirname(SCREEN_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(PANEL_SCREEN_PATH), exist_ok=True)
+    log("Capturando pantalla con screencapture...")
+    try:
+        res = subprocess.run(["/usr/sbin/screencapture", "-x", SCREEN_PATH], timeout=8)
+        if res.returncode == 0 and os.path.exists(SCREEN_PATH) and os.path.getsize(SCREEN_PATH) > 0:
+            # Optimizar tamaño para subida ultra rápida a NVIDIA NIM
+            subprocess.run(["/usr/bin/sips", "-Z", "1280", SCREEN_PATH], capture_output=True, timeout=5)
+            import shutil
+            try:
+                shutil.copyfile(SCREEN_PATH, PANEL_SCREEN_PATH)
+            except Exception:
+                pass
+            log("Captura de pantalla realizada exitosamente.")
+            return True
+    except Exception as e:
+        log(f"Error al capturar pantalla: {e}")
+    return False
+
+
+def describe_image(api_key, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY, target_image=None):
     """Envía la imagen a NVIDIA NIM y devuelve la descripción."""
-    if not os.path.exists(IMAGE_PATH):
-        log("Error: Archivo de imagen no encontrado.")
+    img_file = target_image or IMAGE_PATH
+    if not os.path.exists(img_file):
+        log(f"Error: Archivo de imagen no encontrado ({img_file}).")
         return None
 
     try:
-        with open(IMAGE_PATH, "rb") as f:
+        with open(img_file, "rb") as f:
             encoded_image = base64.b64encode(f.read()).decode("utf-8")
     except Exception as e:
         log(f"Error al codificar imagen: {e}")
@@ -131,8 +164,9 @@ def describe_image(api_key, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY):
 
     prompt = (
         custom_prompt or
-        "Identifica objetos, personas, paisajes y todo lo que está alrededor "
-        "en esta imagen. Sé descriptivo pero conciso. Responde en español."
+        "Eres Alberth, el asistente personal de élite del Señor Daniel. "
+        "Describe detalladamente, con respeto, precisión y estilo profesional lo que ves en esta imagen. "
+        "Dirígete al Señor Daniel. Responde en español."
     )
 
     # NVIDIA NIM acepta image_url con data URI
@@ -271,6 +305,8 @@ def main():
     parser = argparse.ArgumentParser(description="Alberth Vision & Face Recognition")
     parser.add_argument("--enroll", metavar="NOMBRE", help="Registra a una persona frente a la cámara")
     parser.add_argument("--recognize", action="store_true", help="Reconoce personas conocidas frente a la cámara")
+    parser.add_argument("--screen", action="store_true", help="Captura y analiza la pantalla en vez de la cámara")
+    parser.add_argument("--force", action="store_true", help="Fuerza una captura fresca ignorando el caché")
     parser.add_argument("query", nargs="*", help="Query visual personalizada")
     args = parser.parse_args()
 
@@ -294,16 +330,30 @@ def main():
 
     custom_prompt = " ".join(args.query) if args.query else None
 
-    # Si la imagen existe y tiene menos de 25s, usarla directamente
+    if args.screen:
+        if capture_screen():
+            prompt = custom_prompt or (
+                "Eres Alberth, el asistente personal de élite del Señor Daniel. "
+                "Analiza la captura de pantalla de su Mac y descríbele detalladamente qué aplicaciones, "
+                "ventanas, código o contenido tiene abierto. Responde en español y dirígete al Señor Daniel."
+            )
+            description = describe_image(api_key, custom_prompt=prompt, target_image=SCREEN_PATH)
+            if description:
+                print(description)
+                sys.exit(0)
+        print("Error: No se pudo capturar la pantalla.")
+        sys.exit(1)
+
+    # Si la imagen existe y tiene menos de 10s y no se forzó fresh capture, usarla
     use_existing = False
-    if os.path.exists(IMAGE_PATH) and os.path.getsize(IMAGE_PATH) > 0:
+    if not args.force and os.path.exists(IMAGE_PATH) and os.path.getsize(IMAGE_PATH) > 0:
         age = time.time() - os.path.getmtime(IMAGE_PATH)
-        if age < 25:
-            log(f"Utilizando imagen existente (antigüedad: {age:.1f}s)")
+        if age < 10:
+            log(f"Utilizando imagen reciente (antigüedad: {age:.1f}s)")
             use_existing = True
 
     if use_existing or capture_image():
-        description = describe_image(api_key, custom_prompt)
+        description = describe_image(api_key, custom_prompt, target_image=IMAGE_PATH)
         if description:
             print(description)
             sys.exit(0)

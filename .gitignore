@@ -17,3 +17,7 @@ venv/
 .env
 *.backup*
 *.clean
+test_*
+voice_exchange/*.jpg
+panel/output/*
+panel/assets/voice_exchange/*

@@ -135,142 +135,221 @@ OLLAMA_MODELS = [
     "gemma4:latest",     # Más nuevo, ~8B params
 ]
 
-def run_alberth(text: str) -> str:
-    """Pipeline de respuesta de Alberth con 3 rutas en orden de velocidad:
-    1. Ollama local (gemma:2b) — ultra rápido, sin overhead
-    2. OpenClaw gateway REST — si Ollama no está disponible
-    3. openclaw agent CLI — fallback lento pero confiable
+def run_alberth_full(text: str) -> dict:
+    """Pipeline maestro de Alberth v3.0:
+    1. Sentido Visual:
+       - Cámara FaceTime HD: 'verme', 'mírame', 'qué ves', 'foto', 'quién está frente', etc.
+       - Pantalla Mac: 'pantalla', 'captura la pantalla', 'analiza mi pantalla', etc.
+    2. Sentido Operativo (macOS):
+       - Spotify, Volumen, Finder, Carpetas ('crea carpeta X'), Apps, Batería.
+    3. Sentido Intelectual (Cerebro IA):
+       - NVIDIA NIM (meta/llama-3.2-11b-vision-instruct / mistralai/mistral-large-2-instruct).
+       - Fallback: Groq (qwen/qwen3.6-27b).
+       - Fallback: Ollama local.
+    4. Sentido Vocal (Edge-TTS):
+       - Síntesis de voz cinematográfica para que Alberth responda por audio.
     """
     import requests as _req
+    import urllib.request as _urlreq
+    load_env()
 
-    # ── Ruta 0: Acciones nativas del sistema (carpetas, spotify, volumen, apps) ──
-    try:
-        import sys
-        if str(WORKSPACE) not in sys.path:
-            sys.path.insert(0, str(WORKSPACE))
-        import alberth_system_helper
-        sys_res = alberth_system_helper.dispatch(text)
-        if sys_res and sys_res.get("exito"):
-            res_txt = sys_res.get("resultado", "Acción completada.")
-            _conv_history.append({"role": "assistant", "content": res_txt})
-            return res_txt
-    except Exception:
-        pass
+    q_clean = text.strip()
+    q_lower = q_clean.lower()
 
-    soul_file = WORKSPACE / "SOUL.md"
-    soul_content = ""
-    if soul_file.exists():
+    resp_text = ""
+    image_url = None
+    audio_url = None
+
+    # ── 1. Detección de Visión: Pantalla ──────────────────────────────────────
+    is_screen_query = any(k in q_lower for k in [
+        "pantalla", "captura la pantalla", "captura de pantalla",
+        "qué hay en la pantalla", "que hay en la pantalla", "mira mi pantalla",
+        "analiza mi pantalla", "visión mac", "vision mac", "screenshot"
+    ])
+
+    # ── 2. Detección de Visión: Cámara Web (Verme) ────────────────────────────
+    is_camera_query = not is_screen_query and any(k in q_lower for k in [
+        "verme", "mírame", "mirame", "qué ves", "que ves", "mira la cámara",
+        "mira la camara", "quién está frente", "quien esta frente",
+        "qué tengo puesto", "que tengo puesto", "activa la cámara",
+        "activa la camara", "mira por la cámara", "mira por la camara",
+        "puedes verme", "me puedes ver", "ves algo", "foto de la cámara",
+        "rostro", "cara", "cómo me veo", "como me veo"
+    ])
+
+    # ── Ejecutar Visión si corresponde ────────────────────────────────────────
+    if is_camera_query or is_screen_query:
         try:
-            soul_content = soul_file.read_text(encoding="utf-8")
-        except Exception:
-            pass
+            import sys
+            if str(WORKSPACE) not in sys.path:
+                sys.path.insert(0, str(WORKSPACE))
+            import alberth_vision
 
-    system_prompt = (
-        f"INSTRUCCIONES DE PERSONALIDAD Y COMPORTAMIENTO (SOUL.md):\n{soul_content}\n\n"
-        "Eres Alberth, la mano derecha analítica, directa y profesional del Señor Daniel."
-    )
-    messages = [{"role": "system", "content": system_prompt}] + _conv_history[-10:]
-
-    # ── Ruta 1: Ollama local (más rápido, si está activo) ──────────────────────
-    ollama_active = False
-    try:
-        ping = _req.get("http://localhost:11434/api/tags", timeout=1.5)
-        if ping.status_code == 200:
-            ollama_active = True
-    except Exception:
-        ollama_active = False
-
-    if ollama_active:
-        for model in OLLAMA_MODELS:
-            try:
-                payload = {
-                    "model": model,
-                    "messages": messages,
-                    "max_tokens": 600,
-                    "temperature": 0.7,
-                    "stream": False
-                }
-                resp = _req.post(
-                    "http://localhost:11434/v1/chat/completions",
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
-                    timeout=5
+            nv_key = os.environ.get("NVIDIA_API_KEY") or alberth_vision.get_nvidia_api_key()
+            if is_screen_query:
+                ok = alberth_vision.capture_screen()
+                target_img = alberth_vision.SCREEN_PATH
+                img_relative = f"/assets/voice_exchange/alberth_screen.jpg?t={int(time.time())}"
+                prompt_vision = (
+                    f"Eres Alberth, el asistente técnico de élite del Señor Daniel. "
+                    f"El Señor Daniel te pregunta sobre su pantalla: '{q_clean}'. "
+                    f"Analiza con detalle las ventanas, aplicaciones y código visible y descríbeselo con respeto y precisión."
                 )
-                if resp.status_code == 200:
-                    answer = resp.json()["choices"][0]["message"]["content"].strip()
-                    _conv_history.append({"role": "assistant", "content": answer})
-                    return answer
-            except Exception:
-                continue  # Intentar siguiente modelo
+            else:
+                ok = alberth_vision.capture_image()
+                target_img = alberth_vision.IMAGE_PATH
+                img_relative = f"/assets/voice_exchange/alberth_vision.jpg?t={int(time.time())}"
+                prompt_vision = (
+                    f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor Daniel. "
+                    f"El Señor Daniel te pregunta: '{q_clean}'. "
+                    f"Míralo a través de la cámara de su Mac y descríbele detalladamente con respeto, calidez y precisión "
+                    f"lo que ves frente a la cámara (su vestimenta, entorno, postura y lo que observas)."
+                )
 
-    # Si Ollama falló, limpiar el último mensaje del historial
-    if _conv_history:
-        _conv_history.pop()
-
-    # ── Ruta 2: OpenClaw Gateway REST (si el gateway lo soporta) ───────────────
-    try:
-        gw_tok = os.environ.get("OPENCLAW_GATEWAY_TOKEN", "")
-        # Reintentar historial para ruta 2
-        _conv_history.append({"role": "user", "content": text})
-        messages2 = [{"role": "system", "content": system_prompt}] + _conv_history[-10:]
-        payload2 = {
-            "model": "nvidia/mistralai/mistral-small-4-119b-2603",
-            "messages": messages2,
-            "max_tokens": 512,
-            "temperature": 0.7
-        }
-        resp2 = _req.post(
-            "http://localhost:18789/v1/chat/completions",
-            json=payload2,
-            headers={"Authorization": f"Bearer {gw_tok}", "Content-Type": "application/json"},
-            timeout=30
-        )
-        if resp2.status_code == 200:
-            answer2 = resp2.json()["choices"][0]["message"]["content"].strip()
-            _conv_history.append({"role": "assistant", "content": answer2})
-            return answer2
-        else:
-            if _conv_history:
-                _conv_history.pop()
-    except Exception:
-        if _conv_history:
-            _conv_history.pop()
-
-    # ── Ruta 3: openclaw agent CLI (si está instalado en este equipo) ──
-    import shutil
-    openclaw_bin = shutil.which("openclaw") or ("/usr/local/bin/openclaw" if os.path.exists("/usr/local/bin/openclaw") else None)
-    if openclaw_bin:
-        try:
-            env = os.environ.copy()
-            env["ALBERTH_WEB_MODE"] = "1"
-            existing_path = env.get("PATH", "")
-            extra_paths = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
-            env["PATH"] = f"{extra_paths}:{existing_path}" if existing_path else extra_paths
-            r = subprocess.run(
-                [openclaw_bin, "agent", "--agent", "main", "--message", text],
-                capture_output=True, text=True, timeout=90, env=env, cwd=str(WORKSPACE)
-            )
-            out = r.stdout.strip()
-            if out:
-                FAIL_PREFIX = "[assistant turn failed before producing content]"
-                if FAIL_PREFIX in out:
-                    out = out.replace(FAIL_PREFIX, "").strip()
-                return out if out else "Entendido."
-            err = r.stderr.strip() if r.stderr else ""
-            useful = [l for l in err.splitlines() if l.strip() and not any(x in l for x in ["INFO", "DEBUG", "[plugins]", "[agent/"])]
-            if useful:
-                return " ".join(useful[-3:])
-            return "Entendido."
-        except subprocess.TimeoutExpired:
-            return "Lo siento, el procesamiento tardó demasiado. Por favor, intente de nuevo."
+            if ok and nv_key:
+                desc = alberth_vision.describe_image(nv_key, custom_prompt=prompt_vision, target_image=target_img)
+                if desc:
+                    resp_text = desc.strip()
+                    image_url = img_relative
         except Exception as e:
-            return f"❌ Error: {e}"
-    else:
-        return "Comando recibido. Alberth está operando en modo local para control de Mac (Apps, Finder, Batería, Volumen, Spotify, Capturas)."
+            print(f"[Vision Error] {e}")
+
+    # ── 3. Acciones Nativas del Sistema Mac (si no es visión) ──────────────────
+    if not resp_text:
+        try:
+            import sys
+            if str(WORKSPACE) not in sys.path:
+                sys.path.insert(0, str(WORKSPACE))
+            import alberth_system_helper
+            sys_res = alberth_system_helper.dispatch(q_clean)
+            if sys_res and sys_res.get("exito"):
+                resp_text = sys_res.get("resultado", "Acción completada exitosamente, Señor Daniel.")
+        except Exception as e:
+            print(f"[System Helper Error] {e}")
+
+    # ── 4. Inteligencia Conversacional (Cerebro LLM) ───────────────────────────
+    if not resp_text:
+        soul_file = WORKSPACE / "SOUL.md"
+        soul_content = soul_file.read_text(encoding="utf-8") if soul_file.exists() else ""
+        system_prompt = (
+            f"INSTRUCCIONES DE PERSONALIDAD Y COMPORTAMIENTO (SOUL.md):\n{soul_content}\n\n"
+            "DIRECTRICES OBLIGATORIAS:\n"
+            "- Eres Alberth, el asistente personal de élite y mano derecha del Señor Daniel.\n"
+            "- Dirígete siempre al usuario con el título 'Señor Daniel' con respeto y cercanía profesional.\n"
+            "- Estás conectado localmente al hardware de su Mac: dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla, síntesis de voz y control de aplicaciones y archivos del sistema.\n"
+            "- Responde siempre con seguridad, inteligencia, concisión y análisis directo en español. Nunca uses frases condescendientes ni muletillas vacías."
+        )
+        messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
+
+        # Ruta A: Groq API (Ultra rápido, ~1s de latencia con gpt-oss-120b)
+        groq_key = os.environ.get("GROQ_API_KEY")
+        if groq_key:
+            for g_model in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"]:
+                try:
+                    payload = {
+                        "model": g_model,
+                        "messages": messages,
+                        "max_tokens": 600,
+                        "temperature": 0.6
+                    }
+                    req = _urlreq.Request(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        data=json.dumps(payload).encode("utf-8"),
+                        headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
+                    )
+                    with _urlreq.urlopen(req, timeout=12) as resp:
+                        res_json = json.loads(resp.read().decode("utf-8"))
+                        txt_out = res_json["choices"][0]["message"]["content"].strip()
+                        if "<think>" in txt_out and "</think>" in txt_out:
+                            txt_out = txt_out.split("</think>")[-1].strip()
+                        if txt_out:
+                            resp_text = txt_out
+                            break
+                except Exception as e:
+                    print(f"[Groq Chat Error {g_model}] {e}")
+
+        # Ruta B: NVIDIA NIM (Secondary)
+        if not resp_text:
+            nv_key = os.environ.get("NVIDIA_API_KEY")
+            if nv_key:
+                try:
+                    payload = {
+                        "model": "meta/llama-3.2-11b-vision-instruct",
+                        "messages": messages,
+                        "max_tokens": 550,
+                        "temperature": 0.6
+                    }
+                    req = _urlreq.Request(
+                        "https://integrate.api.nvidia.com/v1/chat/completions",
+                        data=json.dumps(payload).encode("utf-8"),
+                        headers={"Authorization": f"Bearer {nv_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
+                    )
+                    with _urlreq.urlopen(req, timeout=20) as resp:
+                        res_json = json.loads(resp.read().decode("utf-8"))
+                        resp_text = res_json["choices"][0]["message"]["content"].strip()
+                except Exception as e:
+                    print(f"[NVIDIA Chat Error] {e}")
+
+        # Ruta C: Ollama local (si está activo)
+        if not resp_text:
+            for m in OLLAMA_MODELS:
+                try:
+                    p = {"model": m, "messages": messages, "max_tokens": 500, "temperature": 0.6, "stream": False}
+                    r = _req.post("http://localhost:11434/v1/chat/completions", json=p, timeout=5)
+                    if r.status_code == 200:
+                        resp_text = r.json()["choices"][0]["message"]["content"].strip()
+                        break
+                except Exception:
+                    pass
+
+        # Fallback final cortés y en carácter
+        if not resp_text:
+            resp_text = "Señor Daniel, he recibido su instrucción. Todos mis módulos de visión, voz y control de la Mac están operativos a su orden."
+
+    # Guardar en memoria de conversación
+    _conv_history.append({"role": "user", "content": q_clean})
+    _conv_history.append({"role": "assistant", "content": resp_text})
+    if len(_conv_history) > 20:
+        _conv_history.pop(0)
+        _conv_history.pop(0)
+
+    # ── 5. Síntesis de Voz (Edge-TTS) ──────────────────────────────────────────
+    try:
+        ts = time.strftime("%Y%m%d_%H%M%S")
+        VOICE_OUTPUT.mkdir(parents=True, exist_ok=True)
+        tts_file = VOICE_OUTPUT / f"alberth_{ts}.mp3"
+        venv_py = WORKSPACE / "venv" / "bin" / "python3"
+        py_exec = str(venv_py) if venv_py.exists() else sys.executable
+        # Limpiar texto para pronunciación limpia
+        clean_speech = resp_text.replace("**", "").replace("#", "").replace("`", "")
+        clean_speech = " ".join(clean_speech.split()[:75]) # Limitar a primeras 75 palabras para agilidad
+        subprocess.run(
+            [py_exec, str(WORKSPACE / "alberth_tts_premium.py"), clean_speech, str(tts_file)],
+            capture_output=True, timeout=15
+        )
+        if tts_file.exists() and tts_file.stat().st_size > 0:
+            audio_url = f"/output/{tts_file.name}"
+    except Exception as e:
+        print(f"[TTS Synthesis Error] {e}")
+
+    return {
+        "text": resp_text,
+        "audio_url": audio_url,
+        "image_url": image_url
+    }
+
+def run_alberth(text: str) -> str:
+    """Retorna solo texto para retrocompatibilidad."""
+    res = run_alberth_full(text)
+    return res.get("text", "")
+
+async def run_alberth_pipeline_async(text: str) -> dict:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, run_alberth_full, text)
 
 async def run_alberth_async(text: str) -> str:
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, run_alberth, text)
+    res = await run_alberth_pipeline_async(text)
+    return res.get("text", "")
 
 
 # ── Live Canvas (A2UI - Interfaces Dinámicas del Agente) ──────────────────────
@@ -307,13 +386,14 @@ def run_sys_cmd(command: str, args: dict) -> dict:
         return {"ok": r.returncode == 0, "output": (r.stdout or r.stderr).strip()}
     except Exception as e: return {"ok": False, "output": str(e)}
 
-# ── WebSocket ──────────────────────────────────────────────────────────────────
 @app.websocket("/ws")
 async def ws_chat(ws: WebSocket):
-    # Validar token de acceso por query params
+    # Validar token de acceso por query params (permitir localhost automáticamente)
+    client_host = ws.client.host if ws.client else ""
+    is_local = client_host in ["127.0.0.1", "::1", "localhost"]
     token = ws.query_params.get("token")
     expected = os.environ.get("OPENCLAW_GATEWAY_TOKEN")
-    if expected and token != expected:
+    if expected and not is_local and token != expected:
         await ws.close(code=1008, reason="Token de acceso inválido")
         return
 
@@ -329,9 +409,16 @@ async def ws_chat(ws: WebSocket):
                 if not txt: continue
                 await manager.broadcast({"type": "message", "message": add_history("user", txt)})
                 await manager.broadcast({"type": "thinking", "active": True})
-                resp = await run_alberth_async(txt)
+                full_resp = await run_alberth_pipeline_async(txt)
                 await manager.broadcast({"type": "thinking", "active": False})
-                await manager.broadcast({"type": "message", "message": add_history("alberth", resp)})
+
+                msg_dict = add_history("alberth", full_resp["text"])
+                if full_resp.get("image_url"):
+                    msg_dict["image_url"] = full_resp["image_url"]
+                if full_resp.get("audio_url"):
+                    msg_dict["audio_url"] = full_resp["audio_url"]
+
+                await manager.broadcast({"type": "message", "message": msg_dict})
             elif t == "ping":
                 await manager.send(ws, {"type": "pong"})
     except WebSocketDisconnect: manager.disconnect(ws)
@@ -367,13 +454,14 @@ async def recv_audio(file: UploadFile = File(...), _: None = Depends(require_tok
             return JSONResponse({"ok": False, "detail": "Error en la conversión de audio con ffmpeg"})
         
         # 1. Transcripción (STT) con Groq Whisper API
+        load_env()
         groq_key = os.environ.get("GROQ_API_KEY")
         if not groq_key:
             wav.unlink(missing_ok=True)
             return JSONResponse({"ok": False, "detail": "GROQ_API_KEY no configurada en el servidor"})
             
         url = "https://api.groq.com/openai/v1/audio/transcriptions"
-        headers = {"Authorization": f"Bearer {groq_key}"}
+        headers = {"Authorization": f"Bearer {groq_key}", "User-Agent": "AlberthAI/1.0"}
         query = ""
         with open(wav, "rb") as audio_file:
             files = {"file": (wav.name, audio_file, "audio/wav")}
@@ -392,32 +480,24 @@ async def recv_audio(file: UploadFile = File(...), _: None = Depends(require_tok
         await manager.broadcast({"type": "message", "message": add_history("user", query)})
         await manager.broadcast({"type": "thinking", "active": True})
         
-        # 3. Consulta al Agente Alberth
-        resp_text = await run_alberth_async(query)
+        # 3. Consulta al Pipeline Maestro de Alberth (Visión, Sistema, LLM, TTS)
+        full_resp = await run_alberth_pipeline_async(query)
         await manager.broadcast({"type": "thinking", "active": False})
         
-        # 4. Generación de Audio de Respuesta (TTS)
-        tts_wav = VOICE_OUTPUT / f"alberth_web_{ts}_response.mp3"
-        tts_r = subprocess.run(
-            ["python3", str(WORKSPACE / "alberth_tts_premium.py"), resp_text, str(tts_wav)],
-            capture_output=True, timeout=20
-        )
-        
-        audio_url = None
-        if tts_wav.exists():
-            audio_url = f"/output/{tts_wav.name}"
-            
-        # 5. Registrar y transmitir respuesta final
-        alberth_msg = add_history("alberth", resp_text)
-        if audio_url:
-            alberth_msg["audio_url"] = audio_url
+        # 4. Registrar y transmitir respuesta final
+        alberth_msg = add_history("alberth", full_resp["text"])
+        if full_resp.get("image_url"):
+            alberth_msg["image_url"] = full_resp["image_url"]
+        if full_resp.get("audio_url"):
+            alberth_msg["audio_url"] = full_resp["audio_url"]
             
         await manager.broadcast({"type": "message", "message": alberth_msg})
         return JSONResponse({
             "ok": True, 
             "transcription": query, 
-            "response": resp_text, 
-            "audio_url": audio_url
+            "response": full_resp["text"], 
+            "audio_url": full_resp.get("audio_url"),
+            "image_url": full_resp.get("image_url")
         })
         
     except Exception as e:

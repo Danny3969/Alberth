@@ -51,7 +51,9 @@ async def synthesize(text: str, output_path: str, voice: str = DEFAULT_VOICE) ->
         return False
 
     # Asegurar directorio de salida
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    out_dir = os.path.dirname(os.path.abspath(output_path))
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
 
     try:
         communicate = edge_tts.Communicate(
