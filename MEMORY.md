@@ -70,6 +70,13 @@ _Última actualización: 2026-09-07 09:35 GMT-5_
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
+### 2026-09-07 (Lanzamiento Fase 5 & Arquitectura Servidor Central Cloudflare)
+- **Lanzamiento de Servicios (Fase 5):** Puesta en marcha limpia de los 4 procesos en PM2 (`alberth-web`, `alberth-voice`, `alberth-reminders`, `alberth-qa-watcher`).
+- **Arquitectura Servidor Central vs Cliente:** Despliegue de topología con Servidor Central 24/7 (`MacBook-Pro-de-digitalspace`) exponiendo Alberth vía Cloudflare Tunnel seguro, permitiendo conexión como cliente ligero desde cualquier máquina sin clonar credenciales ni duplicar procesos.
+- **Portabilidad Universal:** Rutas de workspace refactorizadas a variables dinámicas (`OPENCLAW_WORKSPACE` / `ALBERTH_WORKSPACE` / ruta local) en servidor web, visión, pantalla y helpers de sistema.
+- **Hotfixes & Dependencias:** `python-multipart` añadido a `requirements.txt`; `from __future__ import annotations` en servidor de voz; corrección de argumentos CLI (`--get-mode`, `--set-mode`, `--audit`) en `alberth_memory.py`.
+- **Verificación Remota:** Conexión pública validada en endpoint `/status` y `/floating` con código HTTP 200.
+
 ### 2026-09-07 (Sincronización Local, Compatibilidad Python 3.9 & Antigravity SDK)
 - **Git Fast-Forward:** Incorporación local de 15 commits desde GitHub con el stack completo de NEXUS v4.5+ y Antigravity SDK.
 - **Hotfix de Compatibilidad:** Corrección en `alberth_memory.py` agregando `from __future__ import annotations` para soportar sintaxis `str | None` en Python 3.9.6 local.
