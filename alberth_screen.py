@@ -14,7 +14,7 @@ import urllib.request
 import urllib.error
 
 # Rutas
-WORKSPACE_DIR = "/Users/digitalspace/.openclaw/workspace"
+WORKSPACE_DIR = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 IMAGE_PATH = os.path.join(WORKSPACE_DIR, "voice_exchange", "alberth_screen.jpg")
 CONFIG_PATH = os.path.expanduser("~/.openclaw/openclaw.json")
 

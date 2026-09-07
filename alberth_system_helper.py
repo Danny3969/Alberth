@@ -594,7 +594,7 @@ def handle_terminal(query, query_lower):
 
     # Menciones específicas de directorio
     if re.search(r'\b(en\s+workspace|workspace|en\s+el\s+proyecto)', query_lower):
-        cwd = "/Users/digitalspace/.openclaw/workspace"
+        cwd = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
     elif re.search(r'\b(en\s+desktop|desktop|escritorio)', query_lower):
         cwd = os.path.expanduser("~/Desktop")
     elif re.search(r'\b(en\s+downloads|downloads|descargas)', query_lower):
@@ -835,7 +835,7 @@ def handle_system_utils(query, query_lower):
 
     # ── MODO WAKE WORD (MANOS LIBRES / ACTIVACION POR VOZ) ─────────────────
     if re.search(r'\b(activa|desactiva|pon|apaga|enciende)\b.*\b(wake\s*word|activación\s*por\s*voz|modo\s*manos\s*libres|activacion\s*por\s*voz)\b', query_lower):
-        ww_mode_file = "/Users/digitalspace/.openclaw/workspace/.wakeword_mode"
+        ww_mode_file = os.path.join(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__)), ".wakeword_mode")
         if re.search(r'\b(activa|enciende|pon)\b', query_lower):
             with open(ww_mode_file, "w") as f:
                 f.write("true")

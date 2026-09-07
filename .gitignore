@@ -1,8 +1,10 @@
 # Ignorar archivos temporales de audio, cache y logs
 voice_exchange/input/*
 voice_exchange/output/*
+voice_exchange/logs/*
 !voice_exchange/input/.gitkeep
 !voice_exchange/output/.gitkeep
+!voice_exchange/logs/.gitkeep
 logs/*
 !logs/.gitkeep
 __pycache__/

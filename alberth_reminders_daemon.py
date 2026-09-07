@@ -35,7 +35,7 @@ def check_reminders():
     try:
         # 1. Obtener recordatorios pendientes listos para disparar
         proc = subprocess.run(
-            ["python3", MEMORY_SCRIPT, "--pending-reminders"],
+            [sys.executable, MEMORY_SCRIPT, "--pending-reminders"],
             capture_output=True, text=True, check=True
         )
         reminders = json.loads(proc.stdout.strip())
@@ -60,7 +60,7 @@ def check_reminders():
             tts_ok = False
             try:
                 # Usar edge-tts premium
-                subprocess.run(["python3", TTS_SCRIPT, spoken_text, temp_mp3], check=True, capture_output=True)
+                subprocess.run([sys.executable, TTS_SCRIPT, spoken_text, temp_mp3], check=True, capture_output=True)
                 tts_ok = os.path.exists(temp_mp3)
             except Exception as e:
                 log(f"WARN: Error en TTS Premium para recordatorio: {e}")
@@ -77,7 +77,7 @@ def check_reminders():
                 subprocess.run(["say", "-v", "Diego", spoken_text])
 
             # 5. Marcar como completado
-            subprocess.run(["python3", MEMORY_SCRIPT, "--mark-reminder-done", str(r_id)], check=True)
+            subprocess.run([sys.executable, MEMORY_SCRIPT, "--mark-reminder-done", str(r_id)], check=True)
 
     except Exception as e:
         log(f"ERROR: {e}")

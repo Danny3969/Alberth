@@ -8,10 +8,11 @@
 # Puerto: 8080
 # =============================================================================
 
+from __future__ import annotations
 import os, sys, json, time, asyncio, subprocess, threading, socket
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException, Header, Depends
@@ -52,7 +53,7 @@ def require_token(authorization: Optional[str] = Header(None)):
     verify_token_helper(authorization)
 
 # ── Configuración ──────────────────────────────────────────────────────────────
-WORKSPACE     = Path("/Users/digitalspace/.openclaw/workspace")
+WORKSPACE     = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or Path(__file__).resolve().parent)
 PANEL_DIR     = WORKSPACE / "panel"
 VOICE_INPUT   = WORKSPACE / "voice_exchange" / "input"
 VOICE_OUTPUT  = WORKSPACE / "voice_exchange" / "output"

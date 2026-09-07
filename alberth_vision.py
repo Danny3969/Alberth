@@ -16,7 +16,7 @@ import urllib.error
 import time
 
 # ── Rutas ────────────────────────────────────────────────────────────────────
-WORKSPACE_DIR = "/Users/digitalspace/.openclaw/workspace"
+WORKSPACE_DIR = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 IMAGE_PATH    = os.path.join(WORKSPACE_DIR, "voice_exchange", "alberth_vision.jpg")
 CONFIG_PATH   = os.path.expanduser("~/.openclaw/openclaw.json")
 ENV_PATH      = os.path.expanduser("~/.openclaw/.env")

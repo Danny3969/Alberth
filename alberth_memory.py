@@ -732,6 +732,12 @@ def main():
                         help="Tags para categorizar la entrada (con --save)")
     parser.add_argument("--importance", type=int, default=1,
                         help="Importancia 1-5 de la conversación (con --save)")
+    parser.add_argument("--get-mode", action="store_true",
+                        help="Obtiene el modo de contexto actual (laboral/personal)")
+    parser.add_argument("--set-mode", metavar="MODE",
+                        help="Establece el modo de contexto actual (laboral/personal)")
+    parser.add_argument("--audit", nargs=4, metavar=("AGENTE", "QUERY", "MODELO", "LATENCIA"),
+                        help="Registra un evento de auditoría")
     args = parser.parse_args()
 
     if args.record_cmd_freq:

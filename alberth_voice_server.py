@@ -9,6 +9,7 @@
 # Uso: python3 alberth_voice_server.py
 # =============================================================================
 
+from __future__ import annotations
 import os
 import sys
 import time

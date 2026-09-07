@@ -73,9 +73,20 @@ def check_system_and_evaluate():
     # Ejemplo de verificación proactiva de salud del sistema
     print(f"[QA-Watcher] Evaluando estado del sistema...")
 
+def main():
+    print("[QA-Watcher] Alberth QA Watcher Daemon iniciado (supervisión continua cada 60s)")
+    while True:
+        try:
+            check_system_and_evaluate()
+        except Exception as e:
+            print(f"[QA-Watcher] Error en evaluación: {e}", file=sys.stderr)
+        time.sleep(60)
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--test-speak":
         test_msg = "Atención Señor Daniel. El agente de control de calidad ha verificado la red y los servicios de Alberth de manera correcta."
         speak_proactive_suggestion(test_msg)
-    else:
+    elif len(sys.argv) > 1 and sys.argv[1] == "--once":
         check_system_and_evaluate()
+    else:
+        main()
