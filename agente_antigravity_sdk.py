@@ -21,7 +21,7 @@ from datetime import datetime
 # Importar funciones de memoria persistente
 import alberth_memory as memory
 
-WORKSPACE_PATH = os.path.expanduser("~/.openclaw/workspace")
+WORKSPACE_PATH = os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or os.path.dirname(os.path.abspath(__file__))
 
 # ── Intentar importar SDK oficial google-antigravity o usar Native Wrapper ─────
 HAS_NATIVE_SDK = False

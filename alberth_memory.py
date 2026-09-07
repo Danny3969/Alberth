@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 # =============================================================================
 # ALBERTH MEMORY ENGINE — Sistema de Memoria Persistente con SQLite
 # 
