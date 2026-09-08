@@ -15,9 +15,10 @@ _Última actualización: 2026-09-08 09:18 GMT-5_
 │   ├── floating.html   → Desktop Floating Bar (Quantum Theme / Orbitron / Rajdhani / DND / QA Alerts)
 │   ├── assets/         → Assets multimedia (highway_to_hell.jpg álbum cover cyberpunk)
 │   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
-├── alberth-android/    → Aplicación Android Nativa Expo / React Native (Alberth Quantum HUD v3.2.0)
-│   ├── App.tsx         → Visor 3D Three.js WebGL (1,800 partículas Fibonacci + Orbe flotante + Chat futurista + Voz `expo-av`)
-│   ├── app.json        → Configuración de compilación (versionCode 6, versionName 3.2.0)
+├── alberth-android/    → Aplicación Android Nativa Expo / React Native (Alberth Quantum HUD v3.2.1 Crash-Proof Shield)
+│   ├── App.tsx         → Visor 3D Three.js WebGL con fallback nativo 60fps (NativeQuantumCoreOrb) + Chat + Voz `expo-av` + Visión segura
+│   ├── app.json        → Configuración de compilación (versionCode 7, versionName 3.2.1, permisos CAMERA)
+│   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` + `/panel/assets` (Puerto 8080)
 ├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Spotify AppleScript, Volumen, Apps)
@@ -87,6 +88,14 @@ _Última actualización: 2026-09-08 09:18 GMT-5_
 - **Portabilidad Universal:** Rutas de workspace refactorizadas a variables dinámicas (`OPENCLAW_WORKSPACE` / `ALBERTH_WORKSPACE` / ruta local) en servidor web, visión, pantalla y helpers de sistema.
 - **Hotfixes & Dependencias:** `python-multipart` añadido a `requirements.txt`; `from __future__ import annotations` en servidor de voz; corrección de argumentos CLI (`--get-mode`, `--set-mode`, `--audit`) en `alberth_memory.py`.
 - **Verificación Remota:** Conexión pública validada en endpoint `/status` y `/floating` con código HTTP 200.
+
+### 2026-09-08 (APK v3.2.1 — Blindaje Total Anti-Crashes & Native Fallbacks)
+- **Diagnóstico del Error «Alberth se ha detenido»:** Detectado que el APK se cerraba inmediatamente al abrir porque el bundle invocaba componentes nativos no vinculados en los DEX (`RNCWebView` de `react-native-webview` y el hook síncrono `useCameraPermissions` de `expo-camera`).
+- **Doble Blindaje de Resiliencia:**
+  1. `alberth-android/index.tsx`: Implementado `GlobalErrorBoundary` con pantalla de recuperación Cyberpunk HUD y captura de excepciones globales con `ErrorUtils` para evitar que Android muestre el diálogo de cierre forzado.
+  2. `alberth-android/App.tsx`: Reemplazo de importación directa de `react-native-webview` por verificación dinámica en `UIManager` (`isNativeWebViewAvailable`) con componente de respaldo nativo animado a 60 FPS (`NativeQuantumCoreOrb`) reactivo a estados de voz (escuchando, procesando, hablando, en línea).
+  3. Visión Segura: Eliminación del hook síncrono `useCameraPermissions()` y aislamiento del modal de cámara en `LocalComponentBoundary` para prevenir excepciones por módulos nativos ausentes.
+- **Configuración APK:** Permiso `CAMERA` y plugin `expo-camera` en `app.json`, bump a versión 3.2.1 (versionCode 7).
 
 ### 2026-09-07 (Sincronización Local, Compatibilidad Python 3.9 & Antigravity SDK)
 - **Git Fast-Forward:** Incorporación local de 15 commits desde GitHub con el stack completo de NEXUS v4.5+ y Antigravity SDK.

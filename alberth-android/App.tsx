@@ -12,6 +12,9 @@ import {
   Platform,
   Alert,
   Image,
+  Animated,
+  Easing,
+  UIManager,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -19,8 +22,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { WebView } from 'react-native-webview';
+
+// Dynamic safe loaders to guarantee 0 fatal crashes if native libraries are unlinked in APK
+let WebViewComponent: any = null;
+try {
+  WebViewComponent = require('react-native-webview').WebView;
+} catch (e) {
+  WebViewComponent = null;
+}
+
+let ExpoCameraModule: any = null;
+try {
+  ExpoCameraModule = require('expo-camera');
+} catch (e) {
+  ExpoCameraModule = null;
+}
 import {
   Mic,
   Send,
@@ -260,6 +276,260 @@ const THREE_HTML = `
 </html>
 `;
 
+// ─── Local Component Error Boundary ─────────────────────────────────────────
+interface LocalBoundaryProps {
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}
+interface LocalBoundaryState {
+  hasError: boolean;
+}
+class LocalComponentBoundary extends React.Component<LocalBoundaryProps, LocalBoundaryState> {
+  state: LocalBoundaryState = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(err: any) {
+    console.warn('[Alberth Safe Fallback Triggered]:', err?.message);
+  }
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+// Check if native RNCWebView view manager is registered in Android UIManager
+const isNativeWebViewAvailable = (): boolean => {
+  try {
+    if (!WebViewComponent) return false;
+    if (Platform.OS !== 'android') return true;
+    const hasConfig =
+      (UIManager.getViewManagerConfig && !!UIManager.getViewManagerConfig('RNCWebView')) ||
+      ((UIManager as any).hasViewManagerConfig && (UIManager as any).hasViewManagerConfig('RNCWebView'));
+    return Boolean(hasConfig);
+  } catch (e) {
+    return false;
+  }
+};
+
+// Check if native CameraView view manager is registered in Android UIManager
+const isNativeCameraAvailable = (): boolean => {
+  try {
+    if (!ExpoCameraModule?.CameraView) return false;
+    if (Platform.OS !== 'android') return true;
+    const hasConfig =
+      (UIManager.getViewManagerConfig && (!!UIManager.getViewManagerConfig('ExpoCameraView') || !!UIManager.getViewManagerConfig('CameraView'))) ||
+      ((UIManager as any).hasViewManagerConfig && ((UIManager as any).hasViewManagerConfig('ExpoCameraView') || (UIManager as any).hasViewManagerConfig('CameraView')));
+    return Boolean(hasConfig);
+  } catch (e) {
+    return false;
+  }
+};
+
+// ─── 60fps Native Quantum Core Holographic Orb ───────────────────────────────
+const NativeQuantumCoreOrb = ({ hudState }: { hudState: 'idle' | 'listening' | 'thinking' | 'speaking' }) => {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const ringRotateAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: hudState === 'listening' ? 1.25 : hudState === 'thinking' ? 1.15 : hudState === 'speaking' ? 1.2 : 1.06,
+          duration: hudState === 'thinking' ? 350 : hudState === 'listening' ? 550 : 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.95,
+          duration: hudState === 'thinking' ? 350 : hudState === 'listening' ? 550 : 1200,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+
+    const rotate = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: hudState === 'thinking' ? 2500 : 8000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    rotate.start();
+
+    const ringRotate = Animated.loop(
+      Animated.timing(ringRotateAnim, {
+        toValue: 1,
+        duration: hudState === 'thinking' ? 1800 : 6000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    ringRotate.start();
+
+    return () => {
+      pulse.stop();
+      rotate.stop();
+      ringRotate.stop();
+    };
+  }, [hudState]);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const counterSpin = ringRotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['360deg', '0deg'],
+  });
+
+  const coreColor =
+    hudState === 'listening'
+      ? '#ff2a5f'
+      : hudState === 'thinking'
+      ? '#f0c060'
+      : hudState === 'speaking'
+      ? '#00ffaa'
+      : '#00f0ff';
+
+  return (
+    <View style={orbStyles.container}>
+      <View style={orbStyles.ambientGlow} />
+
+      {/* Outer Rotating Cybernetic Orbit Ring */}
+      <Animated.View style={[orbStyles.outerRing, { transform: [{ rotate: spin }], borderColor: `${coreColor}55` }]}>
+        <View style={[orbStyles.orbitNode, { top: -4, backgroundColor: coreColor }]} />
+        <View style={[orbStyles.orbitNode, { bottom: -4, backgroundColor: coreColor }]} />
+        <View style={[orbStyles.orbitNode, { left: -4, backgroundColor: coreColor }]} />
+        <View style={[orbStyles.orbitNode, { right: -4, backgroundColor: coreColor }]} />
+      </Animated.View>
+
+      {/* Middle Counter-Rotating Ring */}
+      <Animated.View style={[orbStyles.middleRing, { transform: [{ rotate: counterSpin }] }]}>
+        <View style={[orbStyles.middleNode, { borderColor: `${coreColor}44` }]} />
+      </Animated.View>
+
+      {/* Inner Pulsating Quantum Core */}
+      <Animated.View
+        style={[
+          orbStyles.coreCircle,
+          {
+            transform: [{ scale: pulseAnim }],
+            shadowColor: coreColor,
+            borderColor: coreColor,
+          },
+        ]}
+      >
+        <View style={[orbStyles.coreCenter, { backgroundColor: coreColor }]} />
+      </Animated.View>
+
+      {/* Futuristic Telemetry Badge */}
+      <View style={orbStyles.telemetryBadge}>
+        <Text style={[orbStyles.telemetryText, { color: coreColor }]}>
+          {hudState === 'listening'
+            ? '● RECEPTOR NEURAL ACTIVO'
+            : hudState === 'thinking'
+            ? '⚡ NÚCLEO CUÁNTICO PROCESANDO'
+            : hudState === 'speaking'
+            ? '▲ SÍNTESIS DE VOZ TRANSMITIENDO'
+            : '◆ ALBERTH QUANTUM HUD · EN LÍNEA'}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+const orbStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    backgroundColor: '#040711',
+  },
+  ambientGlow: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(0, 240, 255, 0.06)',
+  },
+  outerRing: {
+    position: 'absolute',
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 240, 255, 0.35)',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orbitNode: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+  },
+  middleRing: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  middleNode: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    borderWidth: 1,
+    borderStyle: 'dotted',
+  },
+  coreCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    borderWidth: 2,
+    backgroundColor: 'rgba(6, 12, 26, 0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  coreCenter: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    opacity: 0.9,
+  },
+  telemetryBadge: {
+    position: 'absolute',
+    top: 14,
+    backgroundColor: 'rgba(6, 12, 26, 0.85)',
+    borderColor: 'rgba(0, 240, 255, 0.25)',
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  telemetryText: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+});
+
 export default function App() {
   const insets = useSafeAreaInsets();
 
@@ -282,10 +552,10 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  // Cámara / Visión
+  // Cámara / Visión (Protegida)
   const [showCamera, setShowCamera] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const cameraRef = useRef<any>(null);
   const webViewRef = useRef<any>(null);
 
@@ -602,13 +872,6 @@ export default function App() {
 
   // ─── Camera Vision ────────────────────────────────────────────────────────
   const takePictureAndUpload = async () => {
-    if (!cameraPermission?.granted) {
-      const perm = await requestCameraPermission();
-      if (!perm.granted) {
-        Alert.alert('Sin Permiso', 'Se requiere acceso a la cámara.');
-        return;
-      }
-    }
     if (!cameraRef.current) return;
 
     try {
@@ -724,16 +987,23 @@ export default function App() {
         style={{ flex: 1 }}
       >
         {/* ─── 3D Holographic Model Viewer (Three.js WebGL WebView) ─────── */}
+        {/* ─── 3D Holographic Model Viewer (Three.js WebGL WebView o Fallback Nativo) ─────── */}
         <View style={styles.modelContainer}>
-          <WebView
-            ref={webViewRef}
-            originWhitelist={['*']}
-            source={{ html: THREE_HTML }}
-            style={styles.webView}
-            scrollEnabled={false}
-            overScrollMode="never"
-            bounces={false}
-          />
+          {isNativeWebViewAvailable() ? (
+            <LocalComponentBoundary fallback={<NativeQuantumCoreOrb hudState={hudState} />}>
+              <WebViewComponent
+                ref={webViewRef}
+                originWhitelist={['*']}
+                source={{ html: THREE_HTML }}
+                style={styles.webView}
+                scrollEnabled={false}
+                overScrollMode="never"
+                bounces={false}
+              />
+            </LocalComponentBoundary>
+          ) : (
+            <NativeQuantumCoreOrb hudState={hudState} />
+          )}
           <View style={styles.modelOverlay}>
             <View style={styles.statePill}>
               <View style={[styles.stateDot, isRecording && styles.dotRecording, isThinking && styles.dotThinking]} />
@@ -793,11 +1063,37 @@ export default function App() {
         <View style={styles.toolbar}>
           <TouchableOpacity
             style={styles.quickBtn}
-            onPress={() => {
-              if (cameraPermission?.granted) {
-                setShowCamera(true);
-              } else {
-                requestCameraPermission();
+            onPress={async () => {
+              if (!isNativeCameraAvailable()) {
+                Alert.alert(
+                  'Cámara de Visión',
+                  'El módulo nativo de cámara se está preparando en la compilación. Puede interactuar con Alberth por voz, texto y comandos de forma 100% operativa.',
+                  [{ text: 'Entendido' }]
+                );
+                return;
+              }
+              try {
+                if (ExpoCameraModule?.Camera?.requestCameraPermissionsAsync) {
+                  const { status } = await ExpoCameraModule.Camera.requestCameraPermissionsAsync();
+                  if (status === 'granted') {
+                    setHasCameraPermission(true);
+                    setShowCamera(true);
+                  } else {
+                    Alert.alert('Sin Permiso', 'Se requiere acceso a la cámara para la visión de Alberth.');
+                  }
+                } else if (ExpoCameraModule?.requestCameraPermissionsAsync) {
+                  const { status } = await ExpoCameraModule.requestCameraPermissionsAsync();
+                  if (status === 'granted') {
+                    setHasCameraPermission(true);
+                    setShowCamera(true);
+                  } else {
+                    Alert.alert('Sin Permiso', 'Se requiere acceso a la cámara para la visión de Alberth.');
+                  }
+                } else {
+                  setShowCamera(true);
+                }
+              } catch (e: any) {
+                Alert.alert('Aviso', 'No se pudo iniciar el servicio de cámara: ' + (e?.message || 'Error nativo'));
               }
             }}
           >
@@ -877,27 +1173,47 @@ export default function App() {
       {/* ─── Camera Modal for Vision ──────────────────────────────────────── */}
       <Modal visible={showCamera} animationType="fade" transparent={false}>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-          {cameraPermission?.granted ? (
-            <CameraView style={{ flex: 1 }} facing="front" ref={cameraRef}>
-              <View style={styles.cameraOverlay}>
+          <LocalComponentBoundary
+            fallback={
+              <View style={styles.centerContainer}>
+                <Text style={{ color: '#00f0ff', fontSize: 16, fontWeight: '700', marginBottom: 12 }}>
+                  Módulo de Cámara Protegido
+                </Text>
+                <Text style={{ color: '#8b9bb4', fontSize: 13, textAlign: 'center', marginHorizontal: 20, marginBottom: 20 }}>
+                  El visor nativo de cámara no pudo inicializarse en este dispositivo. Alberth sigue funcionando normalmente.
+                </Text>
                 <TouchableOpacity style={styles.closeCamBtn} onPress={() => setShowCamera(false)}>
-                  <Text style={styles.closeCamText}>CERRAR</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.captureBtn} onPress={takePictureAndUpload}>
-                  <View style={styles.captureInner} />
+                  <Text style={styles.closeCamText}>REGRESAR AL HUD</Text>
                 </TouchableOpacity>
               </View>
-            </CameraView>
-          ) : (
-            <View style={styles.centerContainer}>
-              <Text style={{ color: '#fff', marginBottom: 12 }}>Se requiere permiso de cámara</Text>
+            }
+          >
+            {isNativeCameraAvailable() && ExpoCameraModule?.CameraView ? (
+              <ExpoCameraModule.CameraView style={{ flex: 1 }} facing="front" ref={cameraRef}>
+                <View style={styles.cameraOverlay}>
+                  <TouchableOpacity style={styles.closeCamBtn} onPress={() => setShowCamera(false)}>
+                    <Text style={styles.closeCamText}>CERRAR</Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity style={styles.saveBtn} onPress={requestCameraPermission}>
-                <Text style={styles.saveBtnText}>Conceder Permiso</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+                  <TouchableOpacity style={styles.captureBtn} onPress={takePictureAndUpload}>
+                    <View style={styles.captureInner} />
+                  </TouchableOpacity>
+                </View>
+              </ExpoCameraModule.CameraView>
+            ) : (
+              <View style={styles.centerContainer}>
+                <Text style={{ color: '#00f0ff', fontSize: 16, fontWeight: '700', marginBottom: 12 }}>
+                  Cámara no disponible
+                </Text>
+                <Text style={{ color: '#8b9bb4', fontSize: 13, textAlign: 'center', marginHorizontal: 20, marginBottom: 20 }}>
+                  Para utilizar la visión por cámara en tiempo real, asegúrese de compilar la APK con el módulo expo-camera enlazado.
+                </Text>
+                <TouchableOpacity style={styles.saveBtn} onPress={() => setShowCamera(false)}>
+                  <Text style={styles.saveBtnText}>CERRAR</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </LocalComponentBoundary>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
