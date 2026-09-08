@@ -10,33 +10,15 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Switch,
   Alert,
-  Image,
-  Animated,
-  Easing,
-  UIManager,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
-import { Audio } from 'expo-av';
-
-// Dynamic safe loaders to guarantee 0 fatal crashes if native libraries are unlinked in APK
-let WebViewComponent: any = null;
-try {
-  WebViewComponent = require('react-native-webview').WebView;
-} catch (e) {
-  WebViewComponent = null;
-}
-
-let ExpoCameraModule: any = null;
-try {
-  ExpoCameraModule = require('expo-camera');
-} catch (e) {
-  ExpoCameraModule = null;
-}
+import { useAudioRecorder, AudioModule, RecordingPresets } from 'expo-audio';
 import {
   Mic,
   Send,
@@ -50,499 +32,32 @@ import {
   MessageSquare,
   User,
   Laptop,
-  Camera,
-  MapPin,
-  Circle,
 } from 'lucide-react-native';
+import { androidSystemHelper } from './android_system_helper';
 
 interface Message {
   id: string;
   role: 'user' | 'alberth' | 'system';
   content: string;
   ts: string;
-  audio_url?: string;
-  image_url?: string;
 }
 
-// ─── Default Configuration & Tunnels ───────────────────────────────────────
-const DEFAULT_SERVER_URL = 'https://af3d1d560697b0.lhr.life';
-const DEFAULT_TOKEN = 'token-seguro-1781561473';
-
-// ─── HTML5 / Three.js 3D Quantum Core Particle Sphere HTML ───────────────
-const THREE_HTML = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; overflow:hidden; }
-  body, html { width:100%; height:100%; background-color:#040711; }
-  #canvas-container { width:100%; height:100%; position:relative; }
-  canvas { width:100%; height:100%; display:block; }
-  
-  .blueprint-grid {
-    position: fixed; inset: 0;
-    background-image: 
-      linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
-    background-size: 24px 24px;
-    pointer-events: none; z-index: 1;
-  }
-  .ambient-flare {
-    position: fixed; left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(0, 100, 255, 0.08) 50%, transparent 75%);
-    pointer-events: none; z-index: 1; filter: blur(20px);
-  }
-</style>
-</head>
-<body>
-<div class="blueprint-grid"></div>
-<div class="ambient-flare"></div>
-<div id="canvas-container"></div>
-
-<script>
-  let scene, camera, renderer, particlesMesh, ringMesh1, ringMesh2, coreMesh;
-  const PARTICLE_COUNT = 1800;
-  let particlePositions, particleBasePos, particleColors;
-  let animState = "idle"; // idle, listening, thinking, speaking
-
-  function init() {
-    const container = document.getElementById("canvas-container");
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
-
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.z = 210;
-
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-
-    // 1. Fibonacci Sphere Particles
-    const geometry = new THREE.BufferGeometry();
-    particlePositions = new Float32Array(PARTICLE_COUNT * 3);
-    particleBasePos = new Float32Array(PARTICLE_COUNT * 3);
-    particleColors = new Float32Array(PARTICLE_COUNT * 3);
-
-    const radius = 58;
-    const phi = Math.PI * (3 - Math.sqrt(5));
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const y = 1 - (i / (PARTICLE_COUNT - 1)) * 2;
-      const rad = Math.sqrt(1 - y * y);
-      const theta = phi * i;
-
-      const rNoise = radius * (0.88 + Math.random() * 0.24);
-      const x = Math.cos(theta) * rad * rNoise;
-      const posY = y * rNoise;
-      const z = Math.sin(theta) * rad * rNoise;
-
-      const idx = i * 3;
-      particlePositions[idx] = x;
-      particlePositions[idx + 1] = posY;
-      particlePositions[idx + 2] = z;
-
-      particleBasePos[idx] = x;
-      particleBasePos[idx + 1] = posY;
-      particleBasePos[idx + 2] = z;
-
-      const isBright = Math.random() > 0.85;
-      particleColors[idx] = isBright ? 0.9 : 0.0;
-      particleColors[idx + 1] = isBright ? 1.0 : 0.94;
-      particleColors[idx + 2] = 1.0;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
-
-    // Particle Texture
-    const pTexCanvas = document.createElement('canvas');
-    pTexCanvas.width = 64; pTexCanvas.height = 64;
-    const pCtx = pTexCanvas.getContext('2d');
-    const pGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    pGrad.addColorStop(0, 'rgba(255,255,255,1)');
-    pGrad.addColorStop(0.3, 'rgba(0,240,255,0.85)');
-    pGrad.addColorStop(0.7, 'rgba(0,180,255,0.25)');
-    pGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    pCtx.fillStyle = pGrad; pCtx.fillRect(0, 0, 64, 64);
-
-    const particleTexture = new THREE.CanvasTexture(pTexCanvas);
-
-    const material = new THREE.PointsMaterial({
-      size: 4.2,
-      map: particleTexture,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.88,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-    particlesMesh = new THREE.Points(geometry, material);
-    scene.add(particlesMesh);
-
-    // 2. Gimbal Rings
-    const ringGeo1 = new THREE.RingGeometry(76, 78, 64);
-    const ringMat1 = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.35, wireframe: true
-    });
-    ringMesh1 = new THREE.Mesh(ringGeo1, ringMat1);
-    ringMesh1.rotation.x = Math.PI / 4;
-    scene.add(ringMesh1);
-
-    const ringGeo2 = new THREE.RingGeometry(86, 87.5, 48);
-    const ringMat2 = new THREE.MeshBasicMaterial({
-      color: 0x00b4d8, side: THREE.DoubleSide, transparent: true, opacity: 0.25, wireframe: true
-    });
-    ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
-    ringMesh2.rotation.y = Math.PI / 3;
-    scene.add(ringMesh2);
-
-    // 3. Inner Core Sphere
-    const coreGeo = new THREE.SphereGeometry(24, 32, 32);
-    const coreMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff, transparent: true, opacity: 0.55, wireframe: true
-    });
-    coreMesh = new THREE.Mesh(coreGeo, coreMat);
-    scene.add(coreMesh);
-
-    window.addEventListener('resize', onWindowResize);
-    animate(0);
-  }
-
-  function onWindowResize() {
-    const container = document.getElementById("canvas-container");
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-  }
-
-  function animate(time) {
-    requestAnimationFrame(animate);
-    const t = time * 0.001;
-
-    let rotSpeed = 0.004;
-    let pulseScale = 1.0;
-
-    if (animState === "listening") {
-      rotSpeed = 0.015;
-      pulseScale = 1.0 + Math.sin(t * 8) * 0.12;
-    } else if (animState === "thinking") {
-      rotSpeed = 0.025;
-      pulseScale = 1.0 + Math.sin(t * 12) * 0.18;
-    } else if (animState === "speaking") {
-      rotSpeed = 0.012;
-      pulseScale = 1.0 + Math.sin(t * 6) * 0.15;
-    } else {
-      pulseScale = 1.0 + Math.sin(t * 2) * 0.04;
-    }
-
-    if (particlesMesh) {
-      particlesMesh.rotation.y += rotSpeed;
-      particlesMesh.rotation.x = Math.sin(t * 0.5) * 0.15;
-      particlesMesh.scale.set(pulseScale, pulseScale, pulseScale);
-    }
-    if (ringMesh1) {
-      ringMesh1.rotation.z += rotSpeed * 1.5;
-      ringMesh1.rotation.y += rotSpeed * 0.8;
-    }
-    if (ringMesh2) {
-      ringMesh2.rotation.z -= rotSpeed * 1.2;
-      ringMesh2.rotation.x += rotSpeed * 0.9;
-    }
-    if (coreMesh) {
-      coreMesh.rotation.y -= rotSpeed * 2.0;
-      coreMesh.scale.set(pulseScale, pulseScale, pulseScale);
-    }
-
-    renderer.render(scene, camera);
-  }
-
-  window.setState = function(state) {
-    animState = state;
-  };
-
-  init();
-</script>
-</body>
-</html>
-`;
-
-// ─── Local Component Error Boundary ─────────────────────────────────────────
-interface LocalBoundaryProps {
-  children: React.ReactNode;
-  fallback: React.ReactNode;
-}
-interface LocalBoundaryState {
-  hasError: boolean;
-}
-class LocalComponentBoundary extends React.Component<LocalBoundaryProps, LocalBoundaryState> {
-  state: LocalBoundaryState = { hasError: false };
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(err: any) {
-    console.warn('[Alberth Safe Fallback Triggered]:', err?.message);
-  }
-  render() {
-    if (this.state.hasError) return this.props.fallback;
-    return this.props.children;
-  }
-}
-
-// Check if native RNCWebView view manager is registered in Android UIManager
-const isNativeWebViewAvailable = (): boolean => {
-  try {
-    if (!WebViewComponent) return false;
-    if (Platform.OS !== 'android') return true;
-    const hasConfig =
-      (UIManager.getViewManagerConfig && !!UIManager.getViewManagerConfig('RNCWebView')) ||
-      ((UIManager as any).hasViewManagerConfig && (UIManager as any).hasViewManagerConfig('RNCWebView'));
-    return Boolean(hasConfig);
-  } catch (e) {
-    return false;
-  }
-};
-
-// Check if native CameraView view manager is registered in Android UIManager
-const isNativeCameraAvailable = (): boolean => {
-  try {
-    if (!ExpoCameraModule?.CameraView) return false;
-    if (Platform.OS !== 'android') return true;
-    const hasConfig =
-      (UIManager.getViewManagerConfig && (!!UIManager.getViewManagerConfig('ExpoCameraView') || !!UIManager.getViewManagerConfig('CameraView'))) ||
-      ((UIManager as any).hasViewManagerConfig && ((UIManager as any).hasViewManagerConfig('ExpoCameraView') || (UIManager as any).hasViewManagerConfig('CameraView')));
-    return Boolean(hasConfig);
-  } catch (e) {
-    return false;
-  }
-};
-
-// ─── 60fps Native Quantum Core Holographic Orb ───────────────────────────────
-const NativeQuantumCoreOrb = ({ hudState }: { hudState: 'idle' | 'listening' | 'thinking' | 'speaking' }) => {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const ringRotateAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: hudState === 'listening' ? 1.25 : hudState === 'thinking' ? 1.15 : hudState === 'speaking' ? 1.2 : 1.06,
-          duration: hudState === 'thinking' ? 350 : hudState === 'listening' ? 550 : 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.95,
-          duration: hudState === 'thinking' ? 350 : hudState === 'listening' ? 550 : 1200,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulse.start();
-
-    const rotate = Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: hudState === 'thinking' ? 2500 : 8000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    rotate.start();
-
-    const ringRotate = Animated.loop(
-      Animated.timing(ringRotateAnim, {
-        toValue: 1,
-        duration: hudState === 'thinking' ? 1800 : 6000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    ringRotate.start();
-
-    return () => {
-      pulse.stop();
-      rotate.stop();
-      ringRotate.stop();
-    };
-  }, [hudState]);
-
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const counterSpin = ringRotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['360deg', '0deg'],
-  });
-
-  const coreColor =
-    hudState === 'listening'
-      ? '#ff2a5f'
-      : hudState === 'thinking'
-      ? '#f0c060'
-      : hudState === 'speaking'
-      ? '#00ffaa'
-      : '#00f0ff';
-
-  return (
-    <View style={orbStyles.container}>
-      <View style={orbStyles.ambientGlow} />
-
-      {/* Outer Rotating Cybernetic Orbit Ring */}
-      <Animated.View style={[orbStyles.outerRing, { transform: [{ rotate: spin }], borderColor: `${coreColor}55` }]}>
-        <View style={[orbStyles.orbitNode, { top: -4, backgroundColor: coreColor }]} />
-        <View style={[orbStyles.orbitNode, { bottom: -4, backgroundColor: coreColor }]} />
-        <View style={[orbStyles.orbitNode, { left: -4, backgroundColor: coreColor }]} />
-        <View style={[orbStyles.orbitNode, { right: -4, backgroundColor: coreColor }]} />
-      </Animated.View>
-
-      {/* Middle Counter-Rotating Ring */}
-      <Animated.View style={[orbStyles.middleRing, { transform: [{ rotate: counterSpin }] }]}>
-        <View style={[orbStyles.middleNode, { borderColor: `${coreColor}44` }]} />
-      </Animated.View>
-
-      {/* Inner Pulsating Quantum Core */}
-      <Animated.View
-        style={[
-          orbStyles.coreCircle,
-          {
-            transform: [{ scale: pulseAnim }],
-            shadowColor: coreColor,
-            borderColor: coreColor,
-          },
-        ]}
-      >
-        <View style={[orbStyles.coreCenter, { backgroundColor: coreColor }]} />
-      </Animated.View>
-
-      {/* Futuristic Telemetry Badge */}
-      <View style={orbStyles.telemetryBadge}>
-        <Text style={[orbStyles.telemetryText, { color: coreColor }]}>
-          {hudState === 'listening'
-            ? '● RECEPTOR NEURAL ACTIVO'
-            : hudState === 'thinking'
-            ? '⚡ NÚCLEO CUÁNTICO PROCESANDO'
-            : hudState === 'speaking'
-            ? '▲ SÍNTESIS DE VOZ TRANSMITIENDO'
-            : '◆ ALBERTH QUANTUM HUD · EN LÍNEA'}
-        </Text>
-      </View>
-    </View>
-  );
-};
-
-const orbStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    backgroundColor: '#040711',
-  },
-  ambientGlow: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(0, 240, 255, 0.06)',
-  },
-  outerRing: {
-    position: 'absolute',
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    borderWidth: 1.5,
-    borderColor: 'rgba(0, 240, 255, 0.35)',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  orbitNode: {
-    position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-  },
-  middleRing: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  middleNode: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-    borderWidth: 1,
-    borderStyle: 'dotted',
-  },
-  coreCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 2,
-    backgroundColor: 'rgba(6, 12, 26, 0.95)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  coreCenter: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    opacity: 0.9,
-  },
-  telemetryBadge: {
-    position: 'absolute',
-    top: 14,
-    backgroundColor: 'rgba(6, 12, 26, 0.85)',
-    borderColor: 'rgba(0, 240, 255, 0.25)',
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  telemetryText: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-});
+// ─── Reconnect config ────────────────────────────────────────────────────────
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 3000;
 
 export default function App() {
   const insets = useSafeAreaInsets();
 
-  const [serverUrl, setServerUrl] = useState(DEFAULT_SERVER_URL);
-  const [accessToken, setAccessToken] = useState(DEFAULT_TOKEN);
+// Server URL is loaded from AsyncStorage; start empty so we can force the user to input it
+const [serverUrl, setServerUrl] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [statusMessage, setStatusMessage] = useState('Desconectado');
-  const [hudState, setHudState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       role: 'alberth',
-      content: '¡Hola Señor Danny! Soy Alberth. Su interfaz móvil Quantum HUD 3D está en línea. ¿En qué le puedo asistir hoy?',
+      content: '¡Hola Señor! Soy Alberth. Su interfaz móvil premium está lista. ¿En qué le puedo asistir hoy?',
       ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -552,36 +67,33 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  // Cámara / Visión (Protegida)
-  const [showCamera, setShowCamera] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [hasCameraPermission, setHasCameraPermission] = useState(false);
-  const cameraRef = useRef<any>(null);
-  const webViewRef = useRef<any>(null);
+  // Waveform animation helpers
+  const [waveHeights, setWaveHeights] = useState([20, 10, 15, 8, 22, 14, 18, 9]);
 
   const ws = useRef<WebSocket | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const recordingRef = useRef<Audio.Recording | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const currentUrl = useRef(DEFAULT_SERVER_URL);
-  const currentToken = useRef(DEFAULT_TOKEN);
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const waveTimer = useRef<any>(null);
+  const retryCount = useRef(0);
+  const retryTimer = useRef<any>(null);
+  const currentUrl = useRef(serverUrl);
+  // Timer to detect server response timeout
   const responseTimeout = useRef<any>(null);
+  // Keep the last user message to avoid echo duplicates
   const lastUserMessage = useRef<string>('');
 
-  // ─── Load Settings ────────────────────────────────────────────────────────
+  // ─── Load settings ─────────────────────────────────────────────────────────
+  // Load persisted settings (URL and mute) on mount. If the URL is missing we open the Settings modal.
   useEffect(() => {
     async function loadSettings() {
       try {
         const storedUrl = await AsyncStorage.getItem('@alberth_server_url');
-        const initialUrl = storedUrl && storedUrl.trim() ? storedUrl.trim() : DEFAULT_SERVER_URL;
-        setServerUrl(initialUrl);
-        currentUrl.current = initialUrl;
-
-        const storedToken = await AsyncStorage.getItem('@alberth_token');
-        const initialToken = storedToken && storedToken.trim() ? storedToken.trim() : DEFAULT_TOKEN;
-        setAccessToken(initialToken);
-        currentToken.current = initialToken;
-
+        if (storedUrl) {
+          setServerUrl(storedUrl);
+        } else {
+          // No URL stored – force user to configure it
+          setShowSettings(true);
+        }
         const storedMute = await AsyncStorage.getItem('@alberth_mute');
         if (storedMute !== null) setIsMuted(storedMute === 'true');
       } catch (e) {
@@ -591,76 +103,76 @@ export default function App() {
     loadSettings();
   }, []);
 
-  // ─── Audio Setup ──────────────────────────────────────────────────────────
+  // ─── Audio permission ───────────────────────────────────────────────────────
   useEffect(() => {
-    async function setupAudio() {
-      try {
-        const status = await Audio.requestPermissionsAsync();
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-        });
-        if (!status.granted) {
-          Alert.alert('Permiso Requerido', 'Alberth necesita acceso al micrófono para interactuar por voz.');
-        }
-      } catch (e) {
-        console.warn('[Audio setup error]', e);
+    async function getPermission() {
+      const status = await AudioModule.requestRecordingPermissionsAsync();
+      if (!status.granted) {
+        Alert.alert(
+          'Permiso Requerido',
+          'Alberth necesita acceso al micrófono para interactuar por voz.'
+        );
       }
     }
-    setupAudio();
+    getPermission();
   }, []);
 
-  // Update 3D WebView state
-  const update3DState = (stateName: string) => {
-    if (webViewRef.current) {
-      webViewRef.current.injectJavaScript(`if(window.setState) window.setState('${stateName}'); true;`);
-    }
-  };
-
+  // ─── Waveform animation ─────────────────────────────────────────────────────
   useEffect(() => {
-    if (isRecording) {
-      setHudState('listening');
-      update3DState('listening');
-    } else if (isThinking) {
-      setHudState('thinking');
-      update3DState('thinking');
+    if (isRecording || isThinking) {
+      waveTimer.current = setInterval(() => {
+        setWaveHeights(prev =>
+          prev.map(() => {
+            const min = isRecording ? 15 : 8;
+            const max = isRecording ? 80 : 35;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+          })
+        );
+      }, 100);
     } else {
-      setHudState('idle');
-      update3DState('idle');
+      if (waveTimer.current) clearInterval(waveTimer.current);
+      setWaveHeights([8, 8, 8, 8, 8, 8, 8, 8]);
     }
+    return () => { if (waveTimer.current) clearInterval(waveTimer.current); };
   }, [isRecording, isThinking]);
 
-  // ─── WebSocket Connection ────────────────────────────────────────────────
+  // ─── WebSocket ──────────────────────────────────────────────────────────────
   const connectWebSocket = useCallback((url?: string) => {
     const targetUrl = url ?? currentUrl.current;
     if (!targetUrl) return;
 
+    // Clear any pending retry
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
+
+    // Close existing connection
     if (ws.current) {
-      ws.current.onclose = null;
+      ws.current.onclose = null; // prevent retry loop on manual reconnect
       ws.current.close();
       ws.current = null;
     }
 
     setStatusMessage('Conectando...');
 
+    // Build WS URL
     let wsProto = 'ws://';
     let cleanUrl = targetUrl.replace(/^(https?:\/\/)/, '');
     if (targetUrl.startsWith('https://')) wsProto = 'wss://';
     cleanUrl = cleanUrl.replace(/\/$/, '');
-    const token = currentToken.current;
 
     try {
-      const socketUrl = `${wsProto}${cleanUrl}/ws?token=${encodeURIComponent(token)}`;
+      const socketUrl = `${wsProto}${cleanUrl}/ws`;
       console.log('[WS] Connecting to:', socketUrl);
       const socket = new WebSocket(socketUrl);
       ws.current = socket;
 
       socket.onopen = () => {
-        console.log('[WS] Connected successfully');
+        console.log('[WS] Connected');
+        retryCount.current = 0;
         setIsConnected(true);
-        setStatusMessage('🟢 EN LÍNEA');
+        setStatusMessage('🟢 En línea');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       };
 
@@ -668,142 +180,212 @@ export default function App() {
         try {
           const data = JSON.parse(e.data);
           if (data.type === 'message') {
+            // Clear any pending timeout when a message arrives
             if (responseTimeout.current) {
               clearTimeout(responseTimeout.current);
               responseTimeout.current = null;
             }
             const incoming = data.message;
             const content = incoming.content;
-
+            // Avoid echoing the user's own message back (some servers repeat it)
             if (incoming.role === 'user' && content === lastUserMessage.current) {
+              // Reset the stored last message and ignore
               lastUserMessage.current = '';
               return;
             }
-
             const msg: Message = {
               id: Math.random().toString(),
               role: incoming.role === 'user' ? 'user' : 'alberth',
               content,
               ts: incoming.ts || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              audio_url: incoming.audio_url,
-              image_url: incoming.image_url,
             };
             setMessages(prev => [...prev, msg]);
             setIsThinking(false);
-
-            if (msg.role === 'alberth') {
-              setHudState('speaking');
-              update3DState('speaking');
-              setTimeout(() => { setHudState('idle'); update3DState('idle'); }, 4000);
-
-              if (msg.audio_url && !isMuted) {
-                try {
-                  if (soundRef.current) {
-                    await soundRef.current.unloadAsync();
-                    soundRef.current = null;
-                  }
-                  const { sound } = await Audio.Sound.createAsync(
-                    { uri: msg.audio_url },
-                    { shouldPlay: true }
-                  );
-                  soundRef.current = sound;
-                } catch (audioErr) {
-                  console.warn('[Audio] Remote playback fallback to TTS:', audioErr);
-                  await handleVoiceAndCommands(msg.content);
-                }
-              } else {
-                await handleVoiceAndCommands(msg.content);
-              }
-            }
+            if (msg.role === 'alberth') await handleVoiceAndCommands(msg.content);
           } else if (data.type === 'thinking') {
             setIsThinking(data.active);
+          } else if (data.type === 'history') {
+            if (data.messages?.length > 0) {
+              const loadedHistory = data.messages.map((m: any, idx: number) => ({
+                id: `hist_${idx}`,
+                role: m.role,
+                content: m.content,
+                ts: m.ts || '',
+              }));
+              setMessages(loadedHistory);
+            }
           }
         } catch (err) {
           console.error('[WS] Parse error:', err);
         }
       };
 
-      socket.onerror = (err) => {
-        console.warn('[WS] Connection error');
+      socket.onerror = (e) => {
+        console.error('[WS] Error:', e);
         setIsConnected(false);
-        setStatusMessage('🔴 Error de Conexión');
+        setStatusMessage('🔴 Error de conexión');
       };
 
-      socket.onclose = () => {
-        console.log('[WS] Closed');
+      socket.onclose = (e) => {
+        console.log('[WS] Closed. Code:', e.code);
         setIsConnected(false);
-        setStatusMessage('🔴 Desconectado');
+
+        // Auto-reconnect with exponential backoff
+        if (retryCount.current < MAX_RETRIES) {
+          retryCount.current += 1;
+          const delay = RETRY_DELAY_MS * retryCount.current;
+          setStatusMessage(`🟡 Reconectando (${retryCount.current}/${MAX_RETRIES})...`);
+          retryTimer.current = setTimeout(() => {
+            connectWebSocket();
+          }, delay);
+        } else {
+          setStatusMessage('🔴 Sin conexión — abra Ajustes para reconectar');
+        }
       };
     } catch (err) {
-      console.error('[WS] Error initializing WebSocket:', err);
+      console.error('[WS] Connection error:', err);
       setIsConnected(false);
-      setStatusMessage('🔴 Error en URL');
+      setStatusMessage('🔴 Desconectado');
     }
   }, []);
 
+  // Connect on URL change
+  // Establish WebSocket connection only when we have a non‑empty server URL.
   useEffect(() => {
-    connectWebSocket();
+    if (!serverUrl) {
+      // No URL – we stay disconnected and wait for the user to provide one.
+      setIsConnected(false);
+      setStatusMessage('URL del servidor no configurada');
+      return;
+    }
+    currentUrl.current = serverUrl;
+    retryCount.current = 0;
+    connectWebSocket(serverUrl);
     return () => {
-      if (ws.current) ws.current.close();
+      if (retryTimer.current) clearTimeout(retryTimer.current);
+      if (ws.current) {
+        ws.current.onclose = null;
+        ws.current.close();
+      }
     };
-  }, [connectWebSocket]);
+  }, [serverUrl]);
 
-  // ─── Voice & Text Execution ──────────────────────────────────────────────
-  const handleVoiceAndCommands = async (text: string) => {
-    if (isMuted) return;
-    Speech.stop();
-    Speech.speak(text, { language: 'es-ES', rate: 1.0, pitch: 1.0 });
+  const disconnectWebSocket = () => {
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+    retryCount.current = MAX_RETRIES; // stop retries
+    if (ws.current) {
+      ws.current.onclose = null;
+      ws.current.close();
+      ws.current = null;
+    }
+    setIsConnected(false);
+    setStatusMessage('Desconectado');
   };
 
-  const handleSendText = () => {
+  // ─── Handlers ───────────────────────────────────────────────────────────────
+  const handleVoiceAndCommands = async (content: string) => {
+    const cmdRegex = /\[PHONE_CMD:\s*(\{.*?\})\]/;
+    const match = content.match(cmdRegex);
+    let speechText = content.replace(cmdRegex, '').trim();
+
+    if (match) {
+      try {
+        const cmdData = JSON.parse(match[1]);
+        appendSystemMessage(`Ejecutando en teléfono: ${cmdData.action.toUpperCase()}...`);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        let result;
+        if (cmdData.action === 'call') result = await androidSystemHelper.makeCall(cmdData.phoneNumber);
+        else if (cmdData.action === 'sms') result = await androidSystemHelper.sendSMS(cmdData.phoneNumber, cmdData.message);
+        else if (cmdData.action === 'search_contact') {
+          result = await androidSystemHelper.searchContact(cmdData.contactName);
+          if (result.ok && result.data) {
+            speechText += `. Encontré el contacto ${result.data.name}.`;
+            appendSystemMessage(`Contacto encontrado: ${result.data.name}`);
+          } else {
+            speechText += `. No pude encontrar el contacto.`;
+            appendSystemMessage(`Búsqueda fallida: ${result.output}`);
+          }
+        } else if (cmdData.action === 'volume') result = await androidSystemHelper.controlPhoneVolume(cmdData.volumeAction);
+        if (result) appendSystemMessage(result.output);
+      } catch (e: any) {
+        appendSystemMessage(`Error de comando: ${e.message}`);
+      }
+    }
+
+    if (!isMuted && speechText) {
+      Speech.stop();
+      Speech.speak(speechText, { language: 'es-ES', rate: 0.95, pitch: 1.0 });
+    }
+  };
+
+  const appendSystemMessage = (text: string) => {
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(),
+        role: 'system',
+        content: text,
+        ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ]);
+  };
+
+  const saveSettings = async (url: string) => {
+    let clean = url.trim();
+    if (clean && !clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = 'https://' + clean;
+    }
+    try {
+      await AsyncStorage.setItem('@alberth_server_url', clean);
+    } catch (e) {}
+    retryCount.current = 0;
+    setServerUrl(clean);
+    setShowSettings(false);
+  };
+
+  const handleSendMessage = () => {
     if (!inputText.trim()) return;
+    if (!isConnected) {
+      Alert.alert('Desconectado', 'Espere la conexión o verifique la URL del servidor en Ajustes.');
+      return;
+    }
     const text = inputText.trim();
     setInputText('');
-    lastUserMessage.current = text;
-
     const userMsg: Message = {
       id: Math.random().toString(),
       role: 'user',
       content: text,
       ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
+    // Record the last user message to prevent echo when server repeats it
+    lastUserMessage.current = text;
     setMessages(prev => [...prev, userMsg]);
     setIsThinking(true);
-
+    // Start a timeout guard – if no reply within 12 s we show a warning
     if (responseTimeout.current) clearTimeout(responseTimeout.current);
     responseTimeout.current = setTimeout(() => {
       setIsThinking(false);
+      appendSystemMessage('⏱️ Tiempo de espera agotado. El servidor no respondió a tiempo.');
       setStatusMessage('⚠️ Sin respuesta');
     }, 12_000);
-
     ws.current?.send(JSON.stringify({ type: 'text', text }));
   };
 
-  // ─── Audio Recording (expo-av) ────────────────────────────────────────────
+  // ─── Audio recording ────────────────────────────────────────────────────────
   const startRecording = async () => {
     try {
       Speech.stop();
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-      const perm = await Audio.requestPermissionsAsync();
+      // Request permission again in case it was denied
+      const perm = await AudioModule.requestRecordingPermissionsAsync();
       if (!perm.granted) {
         Alert.alert('Sin permiso', 'Habilite el micrófono en Ajustes del sistema.');
         return;
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      recordingRef.current = recording;
+      await audioRecorder.prepareToRecordAsync(RecordingPresets.HIGH_QUALITY);
+      audioRecorder.record();
       setIsRecording(true);
       console.log('[Audio] Recording started');
     } catch (err: any) {
@@ -813,16 +395,13 @@ export default function App() {
   };
 
   const stopRecording = async () => {
-    if (!isRecording || !recordingRef.current) return;
+    if (!isRecording) return;
     setIsRecording(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      const recording = recordingRef.current;
-      recordingRef.current = null;
-      await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = recording.getURI();
+      await audioRecorder.stop();
+      const uri = audioRecorder.uri;
       console.log('[Audio] Saved at:', uri);
 
       if (!uri) {
@@ -838,746 +417,429 @@ export default function App() {
 
   const uploadAudio = async (fileUri: string) => {
     if (!isConnected) {
-      Alert.alert('Desconectado', 'No hay conexión al servidor para enviar audio.');
+      Alert.alert('Desconectado', 'No hay conexión al servidor para enviar el audio.');
       return;
     }
+    setIsThinking(true);
     try {
-      setIsThinking(true);
-      const cleanUrl = currentUrl.current.replace(/\/$/, '');
+      const cleanUrl = serverUrl.replace(/\/$/, '');
       const uploadUrl = `${cleanUrl}/audio`;
+      console.log('[Audio] Uploading to:', uploadUrl);
 
       const formData = new FormData();
+      // expo-audio recordings are typically .m4a on Android too
+      const filename = fileUri.split('/').pop() || 'voice.m4a';
+      const ext = filename.split('.').pop()?.toLowerCase() || 'm4a';
+      const mime = ext === 'wav' ? 'audio/wav' : ext === 'caf' ? 'audio/x-caf' : 'audio/m4a';
+
       formData.append('file', {
         uri: fileUri,
-        type: 'audio/m4a',
-        name: 'recording.m4a',
+        name: `alberth_voice.${ext}`,
+        type: mime,
       } as any);
 
-      const res = await fetch(uploadUrl, {
+      const response = await fetch(uploadUrl, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${currentToken.current}`,
-          'Accept': 'application/json',
-        },
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Error subiendo audio');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[Audio] Upload response:', data);
+
+      if (!data.ok) throw new Error('Server transcription failed');
+      appendSystemMessage('🎙️ Audio enviado. Procesando voz...');
     } catch (err: any) {
+      console.error('[Audio] Upload error:', err);
       setIsThinking(false);
-      Alert.alert('Error de Audio', err.message);
+      Alert.alert('Error de Envío', `No se pudo enviar el audio: ${err.message}`);
     }
   };
 
-  // ─── Camera Vision ────────────────────────────────────────────────────────
-  const takePictureAndUpload = async () => {
-    if (!cameraRef.current) return;
-
-    try {
-      setIsUploadingImage(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      const photo = await cameraRef.current.takePictureAsync({ quality: 0.7, base64: true });
-      setShowCamera(false);
-
-      const userMsg: Message = {
-        id: Math.random().toString(),
-        role: 'user',
-        content: '📷 [Captura de cámara enviada]',
-        ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        image_url: photo.uri,
-      };
-      setMessages(prev => [...prev, userMsg]);
-      setIsThinking(true);
-
-      const cleanUrl = currentUrl.current.replace(/\/$/, '');
-      const uploadUrl = `${cleanUrl}/upload-vision`;
-      const formData = new FormData();
-      formData.append('file', {
-        uri: photo.uri,
-        type: 'image/jpeg',
-        name: 'vision_capture.jpg',
-      } as any);
-
-      const res = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${currentToken.current}`,
-          'Accept': 'application/json',
-        },
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Error subiendo imagen');
-    } catch (err: any) {
-      setIsThinking(false);
-      Alert.alert('Error de Visión', err.message);
-    } finally {
-      setIsUploadingImage(false);
-    }
+  const toggleMute = () => {
+    const nextVal = !isMuted;
+    setIsMuted(nextVal);
+    AsyncStorage.setItem('@alberth_mute', nextVal ? 'true' : 'false');
+    if (nextVal) Speech.stop();
   };
 
-  // ─── Settings Modal ───────────────────────────────────────────────────────
-  const saveSettings = async () => {
-    try {
-      const cleanUrl = serverUrl.trim().replace(/\/$/, '');
-      const cleanToken = accessToken.trim();
-
-      await AsyncStorage.setItem('@alberth_server_url', cleanUrl);
-      await AsyncStorage.setItem('@alberth_token', cleanToken);
-      await AsyncStorage.setItem('@alberth_mute', String(isMuted));
-
-      currentUrl.current = cleanUrl;
-      currentToken.current = cleanToken;
-
-      setShowSettings(false);
-      connectWebSocket(cleanUrl);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (e) {
-      Alert.alert('Error', 'No se pudieron guardar los ajustes.');
-    }
+  const clearChat = () => {
+    setMessages([{
+      id: 'welcome',
+      role: 'alberth',
+      content: 'Chat reiniciado. ¿En qué le puedo asistir, Señor?',
+      ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }]);
   };
 
-  const resetDefaults = async () => {
-    setServerUrl(DEFAULT_SERVER_URL);
-    setAccessToken(DEFAULT_TOKEN);
-    currentUrl.current = DEFAULT_SERVER_URL;
-    currentToken.current = DEFAULT_TOKEN;
-    await AsyncStorage.setItem('@alberth_server_url', DEFAULT_SERVER_URL);
-    await AsyncStorage.setItem('@alberth_token', DEFAULT_TOKEN);
-    Alert.alert('Valores Restablecidos', 'Se han restaurado la URL y el Token predeterminados.');
-  };
-
-  useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages, isThinking]);
-
+  // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor="#040711" />
+    <View style={[styles.outerContainer, { paddingBottom: insets.bottom }]}>
+      <StatusBar style="light" />
 
-      {/* ─── Top Header Bar ───────────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <View style={styles.brandContainer}>
-          <Text style={styles.brandTitle}>ALBERTH</Text>
-          <Text style={styles.brandSub}>QUANTUM HUD 3D</Text>
+      {/* Background glowing decorations */}
+      <View style={styles.neonBlobBlue} />
+      <View style={styles.neonBlobPurple} />
+
+      {/* Main Glass Header — respects status bar */}
+      <View style={[styles.glassHeader, { paddingTop: insets.top + 10 }]}>
+        <View style={styles.headerTitleRow}>
+          <Text style={styles.headerTitle}>ALBERTH</Text>
+          <Text style={styles.headerSubtitle}>V3.0 MOBILE</Text>
         </View>
 
-        <View style={styles.headerRight}>
-          <TouchableOpacity
-            style={[styles.statusBadge, isConnected ? styles.statusOnline : styles.statusOffline]}
-            onPress={() => connectWebSocket()}
-          >
-            <Circle size={8} fill={isConnected ? '#00ffaa' : '#ff2a5f'} color={isConnected ? '#00ffaa' : '#ff2a5f'} />
-            <Text style={styles.statusBadgeText}>{statusMessage}</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity onPress={() => { retryCount.current = 0; connectWebSocket(); }} style={styles.headerButton}>
+            <RefreshCw size={18} color="#5BC0BE" />
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setIsMuted(!isMuted)}>
-            {isMuted ? <VolumeX size={20} color="#ff2a5f" /> : <Volume2 size={20} color="#00f0ff" />}
+          <TouchableOpacity onPress={toggleMute} style={styles.headerButton}>
+            {isMuted ? <VolumeX size={20} color="#ff4a4a" /> : <Volume2 size={20} color="#5BC0BE" />}
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setShowSettings(true)}>
-            <SettingsIcon size={20} color="#00f0ff" />
+          <TouchableOpacity onPress={() => setShowSettings(true)} style={styles.headerButton}>
+            <SettingsIcon size={20} color="#a0aec0" />
           </TouchableOpacity>
         </View>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+      {/* Status Bar */}
+      <View style={styles.statusBar}>
+        <View style={[styles.statusDot, { backgroundColor: isConnected ? '#5BC0BE' : '#ff4a4a' }]} />
+        <Text style={styles.statusText}>{statusMessage}</Text>
+        {serverUrl && <Text style={styles.serverHost} numberOfLines={1}>{serverUrl.replace(/https?:\/\//, '')}</Text>}
+      </View>
+
+      {/* Chat History */}
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.chatScroll}
+        contentContainerStyle={styles.chatContent}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
-        {/* ─── 3D Holographic Model Viewer (Three.js WebGL WebView) ─────── */}
-        {/* ─── 3D Holographic Model Viewer (Three.js WebGL WebView o Fallback Nativo) ─────── */}
-        <View style={styles.modelContainer}>
-          {isNativeWebViewAvailable() ? (
-            <LocalComponentBoundary fallback={<NativeQuantumCoreOrb hudState={hudState} />}>
-              <WebViewComponent
-                ref={webViewRef}
-                originWhitelist={['*']}
-                source={{ html: THREE_HTML }}
-                style={styles.webView}
-                scrollEnabled={false}
-                overScrollMode="never"
-                bounces={false}
-              />
-            </LocalComponentBoundary>
-          ) : (
-            <NativeQuantumCoreOrb hudState={hudState} />
-          )}
-          <View style={styles.modelOverlay}>
-            <View style={styles.statePill}>
-              <View style={[styles.stateDot, isRecording && styles.dotRecording, isThinking && styles.dotThinking]} />
-              <Text style={styles.stateText}>
-                {isRecording ? 'ESCUCHANDO ORDEN' : isThinking ? 'PROCESANDO RESPUESTA' : 'EN LÍNEA · ESPERANDO ORDEN'}
-              </Text>
+        {messages.map((m) => {
+          if (m.role === 'system') {
+            return (
+              <View key={m.id} style={styles.systemBubble}>
+                <AlertCircle size={12} color="#5BC0BE" style={{ marginRight: 6 }} />
+                <Text style={styles.systemText}>{m.content}</Text>
+              </View>
+            );
+          }
+          const isUser = m.role === 'user';
+          return (
+            <View key={m.id} style={[styles.messageContainer, isUser ? styles.userContainer : styles.alberthContainer]}>
+              <View style={styles.bubbleRoleRow}>
+                {isUser
+                  ? <User size={12} color="#a0aec0" style={{ marginRight: 4 }} />
+                  : <Laptop size={12} color="#9f7aea" style={{ marginRight: 4 }} />}
+                <Text style={styles.bubbleRoleText}>{isUser ? 'Señor' : 'Alberth'}</Text>
+                <Text style={styles.bubbleTime}>{m.ts}</Text>
+              </View>
+              <View style={[styles.bubble, isUser ? styles.userBubble : styles.alberthBubble]}>
+                <Text style={styles.bubbleText}>{m.content.replace(/\[PHONE_CMD:.*?\]/g, '')}</Text>
+              </View>
             </View>
+          );
+        })}
+        {isThinking && (
+          <View style={styles.thinkingContainer}>
+            <ActivityIndicator color="#9f7aea" size="small" style={{ marginRight: 8 }} />
+            <Text style={styles.thinkingText}>Alberth está pensando...</Text>
           </View>
+        )}
+      </ScrollView>
+
+      {/* Waveform */}
+      {(isRecording || isThinking) && (
+        <View style={styles.waveformContainer}>
+          {waveHeights.map((h, i) => (
+            <View key={i} style={[styles.waveBar, { height: h, backgroundColor: isRecording ? '#5BC0BE' : '#9f7aea' }]} />
+          ))}
         </View>
+      )}
 
-        {/* ─── Sci-Fi Chat Console ────────────────────────────────────────── */}
-        <View style={styles.consoleContainer}>
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={styles.messagesContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {messages.map(msg => (
-              <View
-                key={msg.id}
-                style={[
-                  styles.msgRow,
-                  msg.role === 'user' ? styles.userRow : styles.alberthRow,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.msgBubble,
-                    msg.role === 'user' ? styles.userBubble : styles.alberthBubble,
-                  ]}
-                >
-                  <Text style={styles.msgRoleText}>
-                    {msg.role === 'user' ? 'SEÑOR DANNY' : 'ALBERTH'} · {msg.ts}
-                  </Text>
-                  {msg.image_url ? (
-                    <Image source={{ uri: msg.image_url }} style={styles.msgImage} />
-                  ) : null}
-                  <Text style={styles.msgContentText}>{msg.content}</Text>
-                </View>
-              </View>
-            ))}
+      {/* Footer — stays above navigation bar */}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.glassFooter}>
+          <View style={styles.voiceSection}>
+            <TouchableOpacity
+              onPressIn={startRecording}
+              onPressOut={stopRecording}
+              style={[styles.micButton, isRecording && styles.micButtonActive]}
+            >
+              <Mic size={32} color={isRecording ? '#060a14' : '#5BC0BE'} />
+            </TouchableOpacity>
+            <Text style={styles.micHelpText}>
+              {isRecording ? 'Suelte para enviar' : 'Mantenga presionado para hablar'}
+            </Text>
+          </View>
 
-            {isThinking && (
-              <View style={[styles.msgRow, styles.alberthRow]}>
-                <View style={[styles.msgBubble, styles.alberthBubble, styles.thinkingBubble]}>
-                  <ActivityIndicator size="small" color="#00f0ff" />
-                  <Text style={[styles.msgContentText, { marginLeft: 8, color: '#00f0ff' }]}>
-                    Alberth procesando...
-                  </Text>
-                </View>
-              </View>
-            )}
-          </ScrollView>
-        </View>
-
-        {/* ─── Bottom Voice & Action Toolbar ─────────────────────────────── */}
-        <View style={styles.toolbar}>
-          <TouchableOpacity
-            style={styles.quickBtn}
-            onPress={async () => {
-              if (!isNativeCameraAvailable()) {
-                Alert.alert(
-                  'Cámara de Visión',
-                  'El módulo nativo de cámara se está preparando en la compilación. Puede interactuar con Alberth por voz, texto y comandos de forma 100% operativa.',
-                  [{ text: 'Entendido' }]
-                );
-                return;
-              }
-              try {
-                if (ExpoCameraModule?.Camera?.requestCameraPermissionsAsync) {
-                  const { status } = await ExpoCameraModule.Camera.requestCameraPermissionsAsync();
-                  if (status === 'granted') {
-                    setHasCameraPermission(true);
-                    setShowCamera(true);
-                  } else {
-                    Alert.alert('Sin Permiso', 'Se requiere acceso a la cámara para la visión de Alberth.');
-                  }
-                } else if (ExpoCameraModule?.requestCameraPermissionsAsync) {
-                  const { status } = await ExpoCameraModule.requestCameraPermissionsAsync();
-                  if (status === 'granted') {
-                    setHasCameraPermission(true);
-                    setShowCamera(true);
-                  } else {
-                    Alert.alert('Sin Permiso', 'Se requiere acceso a la cámara para la visión de Alberth.');
-                  }
-                } else {
-                  setShowCamera(true);
-                }
-              } catch (e: any) {
-                Alert.alert('Aviso', 'No se pudo iniciar el servicio de cámara: ' + (e?.message || 'Error nativo'));
-              }
-            }}
-          >
-            <Camera size={18} color="#00f0ff" />
-            <Text style={styles.quickBtnText}>VERME</Text>
-          </TouchableOpacity>
-
-          <View style={styles.inputBox}>
+          <View style={styles.inputRow}>
             <TextInput
               style={styles.textInput}
+              placeholder="Escriba un mensaje..."
+              placeholderTextColor="#718096"
               value={inputText}
               onChangeText={setInputText}
-              placeholder="Transmitir comando o hablar con Alberth..."
-              placeholderTextColor="#51627b"
-              onSubmitEditing={handleSendText}
-              returnKeyType="send"
+              onSubmitEditing={handleSendMessage}
             />
-            <TouchableOpacity style={styles.sendBtn} onPress={handleSendText}>
-              <Send size={18} color="#040711" />
+            <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
+              <Send size={18} color="#060a14" />
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            style={[styles.micBtn, isRecording && styles.micBtnRecording]}
-            onPressIn={startRecording}
-            onPressOut={stopRecording}
-          >
-            <Mic size={24} color={isRecording ? '#040711' : '#00f0ff'} />
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
 
-      {/* ─── Settings Modal ───────────────────────────────────────────────── */}
-      <Modal visible={showSettings} animationType="slide" transparent={true}>
-        <View style={styles.modalBg}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>CONFIGURACIÓN ALBERTH</Text>
-            <Text style={styles.modalSub}>Ajustes de Conexión y Gateway</Text>
+      {/* Settings Modal */}
+      <Modal visible={showSettings} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Configuración Alberth</Text>
 
-            <Text style={styles.inputLabel}>URL del Servidor / Túnel HTTPS</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={serverUrl}
-              onChangeText={setServerUrl}
-              autoCapitalize="none"
-              keyboardType="url"
-            />
+            <View style={styles.settingGroup}>
+              <Text style={styles.settingLabel}>URL del Servidor (Mac):</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="https://su-tunel.trycloudflare.com"
+                placeholderTextColor="#718096"
+                value={serverUrl}
+                onChangeText={setServerUrl}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
 
-            <Text style={styles.inputLabel}>Token de Acceso (Bearer)</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={accessToken}
-              onChangeText={setAccessToken}
-              autoCapitalize="none"
-              secureTextEntry={false}
-            />
-
-            <TouchableOpacity style={styles.resetBtn} onPress={resetDefaults}>
-              <RefreshCw size={16} color="#f0c060" />
-              <Text style={styles.resetBtnText}>Restablecer Valores Predeterminados</Text>
-            </TouchableOpacity>
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>Modo Silencioso (No hablar):</Text>
+              <Switch
+                value={isMuted}
+                onValueChange={toggleMute}
+                trackColor={{ false: '#4a5568', true: '#5BC0BE' }}
+                thumbColor={isMuted ? '#a0aec0' : '#060a14'}
+              />
+            </View>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSettings(false)}>
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              <TouchableOpacity onPress={clearChat} style={[styles.modalButton, styles.buttonDanger]}>
+                <Text style={styles.buttonText}>Limpiar Chat</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity style={styles.saveBtn} onPress={saveSettings}>
-                <Check size={18} color="#040711" />
-                <Text style={styles.saveBtnText}>Guardar y Conectar</Text>
+              <TouchableOpacity onPress={() => saveSettings(serverUrl)} style={[styles.modalButton, styles.buttonSuccess]}>
+                <Check size={18} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={styles.buttonText}>Conectar</Text>
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity onPress={() => setShowSettings(false)} style={styles.closeModalButton}>
+              <Text style={styles.closeModalText}>Cerrar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
-
-      {/* ─── Camera Modal for Vision ──────────────────────────────────────── */}
-      <Modal visible={showCamera} animationType="fade" transparent={false}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-          <LocalComponentBoundary
-            fallback={
-              <View style={styles.centerContainer}>
-                <Text style={{ color: '#00f0ff', fontSize: 16, fontWeight: '700', marginBottom: 12 }}>
-                  Módulo de Cámara Protegido
-                </Text>
-                <Text style={{ color: '#8b9bb4', fontSize: 13, textAlign: 'center', marginHorizontal: 20, marginBottom: 20 }}>
-                  El visor nativo de cámara no pudo inicializarse en este dispositivo. Alberth sigue funcionando normalmente.
-                </Text>
-                <TouchableOpacity style={styles.closeCamBtn} onPress={() => setShowCamera(false)}>
-                  <Text style={styles.closeCamText}>REGRESAR AL HUD</Text>
-                </TouchableOpacity>
-              </View>
-            }
-          >
-            {isNativeCameraAvailable() && ExpoCameraModule?.CameraView ? (
-              <ExpoCameraModule.CameraView style={{ flex: 1 }} facing="front" ref={cameraRef}>
-                <View style={styles.cameraOverlay}>
-                  <TouchableOpacity style={styles.closeCamBtn} onPress={() => setShowCamera(false)}>
-                    <Text style={styles.closeCamText}>CERRAR</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.captureBtn} onPress={takePictureAndUpload}>
-                    <View style={styles.captureInner} />
-                  </TouchableOpacity>
-                </View>
-              </ExpoCameraModule.CameraView>
-            ) : (
-              <View style={styles.centerContainer}>
-                <Text style={{ color: '#00f0ff', fontSize: 16, fontWeight: '700', marginBottom: 12 }}>
-                  Cámara no disponible
-                </Text>
-                <Text style={{ color: '#8b9bb4', fontSize: 13, textAlign: 'center', marginHorizontal: 20, marginBottom: 20 }}>
-                  Para utilizar la visión por cámara en tiempo real, asegúrese de compilar la APK con el módulo expo-camera enlazado.
-                </Text>
-                <TouchableOpacity style={styles.saveBtn} onPress={() => setShowCamera(false)}>
-                  <Text style={styles.saveBtnText}>CERRAR</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </LocalComponentBoundary>
-        </SafeAreaView>
-      </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
-// ─── Sci-Fi Quantum HUD Styles ───────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
+  outerContainer: {
     flex: 1,
-    backgroundColor: '#040711',
+    backgroundColor: '#060a14',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justify: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 240, 255, 0.2)',
-    backgroundColor: '#060c1a',
-  },
-  brandContainer: {
-    flexDirection: 'column',
-  },
-  brandTitle: {
-    fontFamily: Platform.OS === 'ios' ? 'Orbitron' : 'sans-serif-medium',
-    fontWeight: '900',
-    fontSize: 18,
-    color: '#00f0ff',
-    letterSpacing: 2,
-  },
-  brandSub: {
-    fontSize: 9,
-    color: '#8b9bb4',
-    letterSpacing: 1.5,
-    marginTop: -2,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 6,
-  },
-  statusOnline: {
-    borderColor: 'rgba(0, 255, 170, 0.4)',
-    backgroundColor: 'rgba(0, 255, 170, 0.08)',
-  },
-  statusOffline: {
-    borderColor: 'rgba(255, 42, 95, 0.4)',
-    backgroundColor: 'rgba(255, 42, 95, 0.08)',
-  },
-  statusBadgeText: {
-    fontSize: 11,
-    color: '#f0f6fc',
-    fontWeight: '600',
-  },
-  iconBtn: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0, 240, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.2)',
-  },
-
-  // 3D Model Container
-  modelContainer: {
-    height: 240,
-    width: '100%',
-    position: 'relative',
-    backgroundColor: '#040711',
-  },
-  webView: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  modelOverlay: {
+  neonBlobBlue: {
     position: 'absolute',
-    bottom: 8,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+    top: 50,
+    left: -50,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: '#00bfff',
+    opacity: 0.1,
   },
-  statePill: {
+  neonBlobPurple: {
+    position: 'absolute',
+    bottom: 100,
+    right: -50,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: '#8a2be2',
+    opacity: 0.1,
+  },
+  glassHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(10, 15, 30, 0.9)',
+  },
+  headerTitleRow: { flexDirection: 'column' },
+  headerTitle: { fontSize: 20, fontWeight: '900', color: '#fff', letterSpacing: 2 },
+  headerSubtitle: { fontSize: 9, fontWeight: '600', color: '#5BC0BE', letterSpacing: 1, marginTop: 2 },
+  headerActions: { flexDirection: 'row', alignItems: 'center' },
+  headerButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
     borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.4)',
-    backgroundColor: 'rgba(4, 7, 17, 0.85)',
-    gap: 8,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  stateDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#00f0ff',
-  },
-  dotRecording: {
-    backgroundColor: '#ff2a5f',
-  },
-  dotThinking: {
-    backgroundColor: '#f0c060',
-  },
-  stateText: {
-    fontSize: 11,
-    color: '#00f0ff',
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-
-  // Console Chat
-  consoleContainer: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-  },
-  messagesContainer: {
-    paddingBottom: 16,
-    gap: 10,
-  },
-  msgRow: {
-    width: '100%',
-    flexDirection: 'row',
-  },
-  userRow: {
-    justifyContent: 'flex-end',
-  },
-  alberthRow: {
-    justifyContent: 'flex-start',
-  },
-  msgBubble: {
-    maxWidth: '85%',
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  userBubble: {
-    backgroundColor: 'rgba(240, 192, 96, 0.1)',
-    borderColor: 'rgba(240, 192, 96, 0.4)',
-  },
-  alberthBubble: {
-    backgroundColor: 'rgba(6, 12, 26, 0.85)',
-    borderColor: 'rgba(0, 240, 255, 0.3)',
-  },
-  thinkingBubble: {
+  statusBar: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  msgRoleText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#8b9bb4',
-    marginBottom: 4,
-    letterSpacing: 1,
-  },
-  msgContentText: {
-    fontSize: 14,
-    color: '#f0f6fc',
-    lineHeight: 20,
-  },
-  msgImage: {
-    width: 200,
-    height: 140,
-    borderRadius: 8,
-    marginBottom: 6,
-  },
-
-  // Toolbar
-  toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
     paddingVertical: 8,
-    gap: 8,
-    backgroundColor: '#060c1a',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 240, 255, 0.2)',
+    backgroundColor: 'rgba(5, 8, 16, 0.8)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
   },
-  quickBtn: {
-    alignItems: 'center',
-    justify: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.3)',
-    backgroundColor: 'rgba(0, 240, 255, 0.06)',
-  },
-  quickBtnText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#00f0ff',
-    marginTop: 2,
-  },
-  inputBox: {
-    flex: 1,
+  statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
+  statusText: { fontSize: 12, color: '#e2e8f0', fontWeight: '500' },
+  serverHost: { fontSize: 10, color: '#718096', marginLeft: 'auto', maxWidth: '60%' },
+  chatScroll: { flex: 1, backgroundColor: 'transparent' },
+  chatContent: { padding: 16, paddingBottom: 30 },
+  messageContainer: { marginBottom: 16, maxWidth: '85%' },
+  userContainer: { alignSelf: 'flex-end' },
+  alberthContainer: { alignSelf: 'flex-start' },
+  bubbleRoleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, paddingHorizontal: 4 },
+  bubbleRoleText: { fontSize: 11, color: '#a0aec0', fontWeight: '600' },
+  bubbleTime: { fontSize: 10, color: '#718096', marginLeft: 6 },
+  bubble: { borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1 },
+  userBubble: { backgroundColor: 'rgba(28, 37, 65, 0.7)', borderColor: 'rgba(91, 192, 190, 0.3)', borderTopRightRadius: 2 },
+  alberthBubble: { backgroundColor: 'rgba(15, 23, 42, 0.85)', borderColor: 'rgba(159, 122, 234, 0.25)', borderTopLeftRadius: 2 },
+  bubbleText: { fontSize: 15, color: '#f7fafc', lineHeight: 22 },
+  systemBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(4, 7, 17, 0.9)',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(91, 192, 190, 0.1)',
     borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginVertical: 10,
     borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.3)',
-    paddingHorizontal: 12,
+    borderColor: 'rgba(91, 192, 190, 0.2)',
+    maxWidth: '90%',
   },
+  systemText: { fontSize: 11, color: '#5BC0BE', fontWeight: '500', textAlign: 'center' },
+  thinkingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  thinkingText: { fontSize: 13, color: '#a0aec0', fontStyle: 'italic' },
+  waveformContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 100,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(6, 10, 20, 0.5)',
+  },
+  waveBar: { width: 6, borderRadius: 3, marginHorizontal: 3 },
+  glassFooter: {
+    backgroundColor: 'rgba(10, 15, 30, 0.95)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    paddingTop: 15,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  voiceSection: { alignItems: 'center', marginBottom: 15 },
+  micButton: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: 'rgba(91, 192, 190, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#5BC0BE',
+    shadowColor: '#5BC0BE',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  micButtonActive: {
+    backgroundColor: '#5BC0BE',
+    borderColor: '#fff',
+    transform: [{ scale: 1.1 }],
+    shadowColor: '#fff',
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+  },
+  micHelpText: { fontSize: 11, color: '#a0aec0', marginTop: 6, fontWeight: '500' },
+  inputRow: { flexDirection: 'row', alignItems: 'center' },
   textInput: {
     flex: 1,
-    color: '#f0f6fc',
-    fontSize: 13,
-    paddingVertical: 8,
-  },
-  sendBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#00f0ff',
-    alignItems: 'center',
-    justify: 'center',
-    marginLeft: 6,
-  },
-  micBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 240, 255, 0.12)',
-    borderWidth: 1.5,
-    borderColor: '#00f0ff',
-    alignItems: 'center',
-    justify: 'center',
-  },
-  micBtnRecording: {
-    backgroundColor: '#ff2a5f',
-    borderColor: '#ff2a5f',
-  },
-
-  // Modal
-  modalBg: {
-    flex: 1,
-    backgroundColor: 'rgba(2, 4, 9, 0.85)',
-    justify: 'center',
-    paddingHorizontal: 20,
-  },
-  modalCard: {
-    backgroundColor: '#060c1a',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#00f0ff',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#00f0ff',
-    letterSpacing: 1.5,
-  },
-  modalSub: {
-    fontSize: 11,
-    color: '#8b9bb4',
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 11,
-    color: '#f0f6fc',
-    fontWeight: '600',
-    marginTop: 10,
-    marginBottom: 4,
-  },
-  modalInput: {
-    backgroundColor: '#040711',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.3)',
-    borderRadius: 8,
-    color: '#f0f6fc',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 13,
-  },
-  resetBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 14,
-    gap: 6,
-  },
-  resetBtnText: {
-    fontSize: 11,
-    color: '#f0c060',
-    fontWeight: '600',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justify: 'flex-end',
-    marginTop: 20,
-    gap: 10,
-  },
-  cancelBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  cancelBtnText: {
-    color: '#8b9bb4',
-    fontSize: 13,
-  },
-  saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#00f0ff',
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 6,
+    color: '#fff',
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  saveBtnText: {
-    color: '#040711',
-    fontWeight: '700',
-    fontSize: 13,
+  sendButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#5BC0BE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
-
-  // Camera Modal
-  cameraOverlay: {
+  modalOverlay: {
     flex: 1,
-    justify: 'space-between',
+    backgroundColor: 'rgba(2, 4, 8, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
-  closeCamBtn: {
-    alignSelf: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#0c1020',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: 24,
+    elevation: 20,
   },
-  closeCamText: {
-    color: '#00f0ff',
-    fontWeight: '700',
-    fontSize: 12,
+  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 20, textAlign: 'center', letterSpacing: 1 },
+  settingGroup: { marginBottom: 16 },
+  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingVertical: 8 },
+  settingLabel: { fontSize: 14, color: '#cbd5e0', marginBottom: 8 },
+  modalInput: {
+    height: 46,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    color: '#fff',
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  captureBtn: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 4,
-    borderColor: '#00f0ff',
-    alignSelf: 'center',
-    alignItems: 'center',
-    justify: 'center',
-  },
-  captureInner: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#00f0ff',
-  },
-  centerContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justify: 'center',
-  },
+  modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  modalButton: { flex: 1, height: 46, borderRadius: 12, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', marginHorizontal: 5 },
+  buttonSuccess: { backgroundColor: '#5BC0BE' },
+  buttonDanger: { backgroundColor: 'rgba(255, 74, 74, 0.1)', borderWidth: 1, borderColor: '#ff4a4a' },
+  buttonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  closeModalButton: { marginTop: 20, alignSelf: 'center' },
+  closeModalText: { fontSize: 13, color: '#718096', fontWeight: '500' },
 });

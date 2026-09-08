@@ -6,8 +6,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~56.0.12",
     "expo-asset": "~56.0.17",
-    "expo-av": "^16.0.8",
-    "expo-camera": "~56.0.8",
+    "expo-audio": "~56.0.12",
     "expo-contacts": "^56.0.9",
     "expo-haptics": "^56.0.3",
     "expo-location": "~56.0.19",
@@ -17,8 +16,7 @@
     "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-svg": "15.15.4",
-    "react-native-webview": "13.16.1"
+    "react-native-svg": "15.15.4"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
