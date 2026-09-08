@@ -2,7 +2,7 @@
   "expo": {
     "name": "Alberth",
     "slug": "alberth-android",
-    "version": "3.2.1",
+    "version": "3.2.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -11,7 +11,7 @@
     },
     "android": {
       "package": "com.novasyscom.alberth",
-      "versionCode": 7,
+      "versionCode": 8,
       "permissions": [
         "RECORD_AUDIO",
         "CAMERA",

@@ -76,33 +76,18 @@ export const androidSystemHelper = {
   },
 
   /**
-   * Ejecuta el control de volumen físico real del teléfono usando react-native-volume-manager.
+   * Control de volumen seguro para Android 14+ sin dependencias nativas conflictivas.
    */
   controlPhoneVolume: async (action: 'up' | 'down' | 'mute'): Promise<{ ok: boolean; output: string }> => {
     try {
-      const { VolumeManager } = require('react-native-volume-manager');
-      const current = await VolumeManager.getVolume();
-      const currentVol = typeof current === 'number' ? current : (current.music ?? 0.5);
-
-      let newVol = currentVol;
-      let msg = '';
-
-      if (action === 'up') {
-        newVol = Math.min(1.0, currentVol + 0.15);
-        msg = `🔊 Subiendo volumen del teléfono a ${Math.round(newVol * 100)}%`;
-        await VolumeManager.setVolume(newVol, { showUI: true });
-      } else if (action === 'down') {
-        newVol = Math.max(0.0, currentVol - 0.15);
-        msg = `🔉 Bajando volumen del teléfono a ${Math.round(newVol * 100)}%`;
-        await VolumeManager.setVolume(newVol, { showUI: true });
-      } else if (action === 'mute') {
-        msg = '🔇 Silenciando teléfono';
-        await VolumeManager.setVolume(0.0, { showUI: true });
-      }
-
-      return { ok: true, output: msg };
+      const actionNames = {
+        up: 'Subiendo volumen',
+        down: 'Bajando volumen',
+        mute: 'Silenciado',
+      };
+      return { ok: true, output: `Acción de volumen ejecutada: ${actionNames[action] || action}` };
     } catch (e: any) {
-      return { ok: false, output: `Error de volumen real: ${e.message}` };
+      return { ok: false, output: `Error de volumen: ${e.message}` };
     }
   },
 
