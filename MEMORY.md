@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-07 17:35 GMT-5_
+_Última actualización: 2026-09-08 00:36 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -11,10 +11,14 @@ _Última actualización: 2026-09-07 17:35 GMT-5_
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── panel/              → Panel Web Quantum HUD & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
-│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Spotify Player + Action Banner
+│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Spotify Player + Action Banner + Wake Word ("Alberth")
 │   ├── floating.html   → Desktop Floating Bar (Quantum Theme / Orbitron / Rajdhani / DND / QA Alerts)
 │   ├── assets/         → Assets multimedia (highway_to_hell.jpg álbum cover cyberpunk)
 │   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
+├── alberth-android/    → Aplicación Android Nativa Expo / React Native (Alberth Quantum HUD v3.2.0)
+│   ├── App.tsx         → Visor 3D Three.js WebGL (1,800 partículas Fibonacci + Orbe flotante + Chat futurista + Voz `expo-av`)
+│   ├── app.json        → Configuración de compilación (versionCode 6, versionName 3.2.0)
+│   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` + `/panel/assets` (Puerto 8080)
 ├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Spotify AppleScript, Volumen, Apps)
 ├── alberth_voice_server.py  → Servidor STT de audio y escucha continua con VAD
@@ -39,7 +43,7 @@ _Última actualización: 2026-09-07 17:35 GMT-5_
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer & Predictive QA Visualizer)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
-- **Túnel Seguro Cloudflare:** `alberth_tunnel.sh`
+- **Túnel Seguro Cloudflare / Localhost.run:** `https://af3d1d560697b0.lhr.life`
 - **Audit Logs:** `logs/audit_logs.jsonl`
 - **Modo de Contexto Activo:** `.context_mode` (`laboral` | `personal`)
 

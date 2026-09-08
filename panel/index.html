@@ -1458,6 +1458,21 @@ function sendWS(obj) {
 let audioCtx, micAnalyser, speakerAnalyser, micSource, audioSource;
 let micStream = null;
 let currentAudioVolume = 0;
+let currentAudio = null;
+
+function stopAudio() {
+  if (currentAudio) {
+    try {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    } catch(e){}
+    currentAudio = null;
+  }
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch(e){}
+  }
+  setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+}
 
 function initAudioContext() {
   if (!audioCtx) {
@@ -1475,9 +1490,11 @@ function initAudioContext() {
 
 function playAudioUrl(url) {
   try {
+    stopAudio(); // Detener cualquier audio anterior inmediatamente
     initAudioContext();
     const audio = new Audio(url);
     audio.crossOrigin = "anonymous";
+    currentAudio = audio;
     
     if (audioCtx) {
       if (audioSource) {
@@ -1497,6 +1514,7 @@ function playAudioUrl(url) {
     });
     
     audio.onended = () => {
+      if (currentAudio === audio) currentAudio = null;
       setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
     };
   } catch (e) {
@@ -1576,6 +1594,7 @@ function escHtml(t) {
 
 // ─── Input & Quick Commands ─────────────────────────────────
 function sendText() {
+  stopAudio(); // Interrumpir respuesta de Alberth inmediatamente si el usuario envía un texto
   const inp = document.getElementById("cmd-input");
   const txt = inp.value.trim();
   if (!txt) return;
@@ -1584,6 +1603,7 @@ function sendText() {
 }
 
 function sendQuick(txt) {
+  stopAudio(); // Interrumpir respuesta inmediatamente
   showToast(`⚡ ${txt}`, 2000);
   sendWS({ type: "text", text: txt });
 }
@@ -1595,10 +1615,74 @@ function handleKey(e) {
   }
 }
 
-// ─── Microphone Voice Recording ─────────────────────────────
+// ─── Microphone Voice Recording & Continuous Wake Word ─────
 let mediaRecorder, audioChunks = [], isRecording = false;
+let isHandsFreeEnabled = true;
+let wakeRecognition = null;
+
+function initWakeWordEngine() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    console.warn("Web Speech API no disponible para Wake Word en este navegador.");
+    return;
+  }
+  try {
+    wakeRecognition = new SpeechRecognition();
+    wakeRecognition.continuous = true;
+    wakeRecognition.interimResults = true;
+    wakeRecognition.lang = "es-ES";
+
+    wakeRecognition.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript.toLowerCase().trim();
+
+        // 1. Interrupción en tiempo real (Barge-in): Si Alberth está hablando y se detecta voz del usuario -> Cortar audio
+        if (currentAudio && transcript.length > 2) {
+          console.log("[Barge-in]: Interrumpiendo voz de Alberth por intervención del usuario...");
+          stopAudio();
+        }
+
+        // 2. Activación por Voz (Wake Word "Alberth" / "Albert")
+        if (transcript.includes("alberth") || transcript.includes("albert") || transcript.includes("alber")) {
+          stopAudio(); // Cortar habla de Alberth de inmediato
+
+          // Extraer comando directo si viene tras la palabra clave
+          let cmdText = "";
+          const matchIdx = Math.max(transcript.lastIndexOf("alberth"), transcript.lastIndexOf("albert"), transcript.lastIndexOf("alber"));
+          if (matchIdx !== -1) {
+            cmdText = transcript.substring(matchIdx).replace(/^(alberth|albert|alber)\s*/i, "").trim();
+          }
+
+          if (cmdText.length > 3 && event.results[i].isFinal) {
+            showToast(`🎙️ Activado por Voz: "${cmdText}"`, 3000);
+            sendWS({ type: "text", text: cmdText });
+          } else if (!isRecording) {
+            showToast("🎙️ ¡Alberth activado por voz! Escuchando...", 3000);
+            toggleRecording(); // Activar captura de voz
+          }
+        }
+      }
+    };
+
+    wakeRecognition.onerror = (e) => {
+      if (e.error !== "no-speech") console.warn("[WakeWord Error]:", e.error);
+    };
+
+    wakeRecognition.onend = () => {
+      if (isHandsFreeEnabled && !isRecording) {
+        setTimeout(() => { try { wakeRecognition.start(); } catch(e){} }, 400);
+      }
+    };
+
+    wakeRecognition.start();
+    console.log("✅ Motor de Activación por Voz 'Alberth' (Wake Word) iniciado.");
+  } catch (e) {
+    console.error("Error al iniciar WakeWord:", e);
+  }
+}
 
 async function toggleRecording() {
+  stopAudio(); // Interrumpir respuesta previa al tocar el mic
   const btn = document.getElementById("btn-mic");
 
   if (!isRecording) {
@@ -2060,6 +2144,7 @@ function animateHologram() {
 document.addEventListener("DOMContentLoaded", () => {
   connectWS();
   setTimeout(initThreeHologram, 100);
+  setTimeout(initWakeWordEngine, 1000);
 });
 </script>
 

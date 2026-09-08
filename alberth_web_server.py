@@ -182,7 +182,8 @@ def run_alberth_full(text: str) -> dict:
         "mira por la camara", "puedes verme", "me puedes ver", "ves algo",
         "foto de la cámara", "rostro", "cara", "cómo me veo", "como me veo",
         "mira de nuevo", "mírame otra vez", "mirame otra vez", "vuelve a mirar",
-        "mira ahora", "mírame ahora",
+        "mira ahora", "mírame ahora", "me ves", "me estás viendo", "me estas viendo",
+        "me estás mirando", "me estas mirando", "me ves?", "me ves ?",
 
         # Objetos, manos y lo que sostiene o muestra
         "mano", "manos", "sostengo", "sosteniendo", "agarrando", "tengo en la mano",
@@ -196,7 +197,9 @@ def run_alberth_full(text: str) -> dict:
         # Vestimenta, accesorios y gestos
         "tengo puesto", "traigo puesto", "qué ropa", "que ropa", "color de mi",
         "lentes", "gafas", "sombrero", "gorra", "cuántos dedos", "cuantos dedos",
-        "qué gesto", "que gesto", "qué hago", "que hago"
+        "qué gesto", "que gesto", "qué hago", "que hago", "cómo estoy vestido",
+        "como estoy vestido", "qué ropa llevo", "que ropa llevo", "cómo ando vestido",
+        "como ando vestido", "qué traigo", "que traigo"
     ]
 
     is_direct_camera = any(k in q_lower for k in camera_keywords)
@@ -226,8 +229,8 @@ def run_alberth_full(text: str) -> dict:
                 target_img = alberth_vision.SCREEN_PATH
                 img_relative = f"/assets/voice_exchange/alberth_screen.jpg?t={int(time.time() * 1000)}"
                 prompt_vision = (
-                    f"Eres Alberth, el asistente técnico de élite del Señor Daniel. "
-                    f"El Señor Daniel te pregunta sobre su pantalla: '{q_clean}'. "
+                    f"Eres Alberth, el asistente técnico de élite del Señor Danny. "
+                    f"El Señor Danny te pregunta sobre su pantalla: '{q_clean}'. "
                     f"Analiza con detalle las ventanas, aplicaciones y código visible y descríbeselo con respeto y precisión."
                 )
             else:
@@ -239,16 +242,16 @@ def run_alberth_full(text: str) -> dict:
                 is_hand_query = any(w in q_lower for w in ["mano", "sostengo", "sosteniendo", "agarrando", "objeto", "qué es esto", "que es esto", "qué tengo"])
                 if is_hand_query:
                     prompt_vision = (
-                        f"Eres Alberth, el asistente personal y mano derecha de élite del Señor Daniel. "
-                        f"El Señor Daniel te pregunta mirando a la cámara web: '{q_clean}'. "
+                        f"Eres Alberth, el asistente personal y mano derecha de élite del Señor Danny. "
+                        f"El Señor Danny te pregunta mirando a la cámara web: '{q_clean}'. "
                         f"Inspecciona minuciosamente sus manos y el objeto que sostiene o te está mostrando frente a la cámara. "
                         f"Identifica y describe con máxima precisión el objeto exacto, qué es, su color, forma y qué está haciendo con él. "
-                        f"Responde con respeto, calidez y estilo analítico dirigiéndote al Señor Daniel."
+                        f"Responde con respeto, calidez y estilo analítico dirigiéndote al Señor Danny."
                     )
                 else:
                     prompt_vision = (
-                        f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor Daniel. "
-                        f"El Señor Daniel te pregunta mirando a la cámara web: '{q_clean}'. "
+                        f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor Danny. "
+                        f"El Señor Danny te pregunta mirando a la cámara web: '{q_clean}'. "
                         f"Míralo a través de la cámara de su Mac y descríbele detalladamente con respeto, calidez y precisión "
                         f"lo que ves frente a la cámara (su vestimenta, entorno, postura y lo que observas)."
                     )
@@ -270,7 +273,7 @@ def run_alberth_full(text: str) -> dict:
             import alberth_system_helper
             sys_res = alberth_system_helper.dispatch(q_clean)
             if sys_res and sys_res.get("exito"):
-                resp_text = sys_res.get("resultado", "Acción completada exitosamente, Señor Daniel.")
+                resp_text = sys_res.get("resultado", "Acción completada exitosamente, Señor Danny.")
         except Exception as e:
             print(f"[System Helper Error] {e}")
 
@@ -278,87 +281,66 @@ def run_alberth_full(text: str) -> dict:
     if not resp_text:
         soul_file = WORKSPACE / "SOUL.md"
         soul_content = soul_file.read_text(encoding="utf-8") if soul_file.exists() else ""
+        orq_file = WORKSPACE / "agents" / "orquestador" / "PROMPT.md"
+        orq_prompt = orq_file.read_text(encoding="utf-8") if orq_file.exists() else ""
         system_prompt = (
-            f"INSTRUCCIONES DE PERSONALIDAD Y COMPORTAMIENTO (SOUL.md):\n{soul_content}\n\n"
+            f"AGENTE ORQUESTADOR CORE (OPENCLAW):\n{orq_prompt}\n\n"
+            f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
             "DIRECTRICES OBLIGATORIAS:\n"
-            "- Eres Alberth, el asistente personal de élite y mano derecha del Señor Daniel.\n"
-            "- Dirígete siempre al usuario con el título 'Señor Daniel' con respeto y cercanía profesional.\n"
+            "- Eres Alberth, el asistente personal de élite y mano derecha del Señor Danny.\n"
+            "- Dirígete siempre al usuario con el título 'Señor Danny' con respeto y cercanía profesional.\n"
             "- Estás conectado localmente al hardware de su Mac: dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla, síntesis de voz y control de aplicaciones y archivos del sistema.\n"
             "- Responde siempre con seguridad, inteligencia, concisión y análisis directo en español. Nunca uses frases condescendientes ni muletillas vacías."
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
-        # Ruta 0: Google Gemini (si GEMINI_API_KEY o GOOGLE_API_KEY está configurada)
-        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-        if gemini_key:
-            for gm in ["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-pro-latest"]:
-                try:
-                    g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
-                    g_payload = {
-                        "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor Daniel: {q_clean}"}]}],
-                        "generationConfig": {"temperature": 0.5, "maxOutputTokens": 600}
-                    }
-                    g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-                    with _urlreq.urlopen(g_req, timeout=12) as resp:
-                        g_res = json.loads(resp.read().decode("utf-8"))
-                        txt = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
-                        if txt:
-                            resp_text = txt
-                            break
-                except Exception as e:
-                    print(f"[Gemini Chat Error {gm}] {e}")
-
-        # Ruta A: Groq API (Ultra rápido, ~1s de latencia con gpt-oss-120b)
-        if not resp_text:
-            groq_key = os.environ.get("GROQ_API_KEY")
-            if groq_key:
-                for g_model in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"]:
-                    try:
-                        payload = {
-                            "model": g_model,
-                            "messages": messages,
-                            "max_tokens": 600,
-                            "temperature": 0.6
-                        }
-                        req = _urlreq.Request(
-                            "https://api.groq.com/openai/v1/chat/completions",
-                            data=json.dumps(payload).encode("utf-8"),
-                            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
-                        )
-                        with _urlreq.urlopen(req, timeout=12) as resp:
-                            res_json = json.loads(resp.read().decode("utf-8"))
-                            txt_out = res_json["choices"][0]["message"]["content"].strip()
-                            if "<think>" in txt_out and "</think>" in txt_out:
-                                txt_out = txt_out.split("</think>")[-1].strip()
-                            if txt_out:
-                                resp_text = txt_out
-                                break
-                    except Exception as e:
-                        print(f"[Groq Chat Error {g_model}] {e}")
-
-        # Ruta B: NVIDIA NIM (Secondary)
-        if not resp_text:
-            nv_key = os.environ.get("NVIDIA_API_KEY")
-            if nv_key:
+        # ── Ruta 0: NVIDIA NIM Fast-Path (Ultra rápido, ~0.85s con Llama 3.2 11B Vision) ─
+        nv_key = os.environ.get("NVIDIA_API_KEY")
+        if nv_key:
+            for nv_model in ["meta/llama-3.2-11b-vision-instruct", "meta/llama-3.1-8b-instruct"]:
                 try:
                     payload = {
-                        "model": "meta/llama-3.2-11b-vision-instruct",
+                        "model": nv_model,
                         "messages": messages,
-                        "max_tokens": 550,
-                        "temperature": 0.6
+                        "max_tokens": 500,
+                        "temperature": 0.5
                     }
                     req = _urlreq.Request(
                         "https://integrate.api.nvidia.com/v1/chat/completions",
                         data=json.dumps(payload).encode("utf-8"),
                         headers={"Authorization": f"Bearer {nv_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
                     )
-                    with _urlreq.urlopen(req, timeout=20) as resp:
+                    with _urlreq.urlopen(req, timeout=5) as resp:
                         res_json = json.loads(resp.read().decode("utf-8"))
-                        resp_text = res_json["choices"][0]["message"]["content"].strip()
+                        txt_out = res_json["choices"][0]["message"]["content"].strip()
+                        if txt_out:
+                            resp_text = txt_out
+                            break
                 except Exception as e:
-                    print(f"[NVIDIA Chat Error] {e}")
+                    print(f"[NVIDIA Fast-Path {nv_model}] {e}")
 
-        # Ruta C: Ollama local (si está activo)
+        # ── Ruta A: Google Gemini Direct Stream (Fast-Path secundario) ────────
+        if not resp_text:
+            gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+            if gemini_key:
+                for gm in ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-flash-latest"]:
+                    try:
+                        g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
+                        g_payload = {
+                            "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor Danny: {q_clean}"}]}],
+                            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 500}
+                        }
+                        g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
+                        with _urlreq.urlopen(g_req, timeout=5) as resp:
+                            g_res = json.loads(resp.read().decode("utf-8"))
+                            txt = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
+                            if txt:
+                                resp_text = txt
+                                break
+                    except Exception as e:
+                        print(f"[Gemini Fast-Path {gm}] {e}")
+
+        # ── Ruta B: Ollama local (si está activo) ──────────────────────────────
         if not resp_text:
             for m in OLLAMA_MODELS:
                 try:
@@ -372,7 +354,7 @@ def run_alberth_full(text: str) -> dict:
 
         # Fallback final cortés y en carácter
         if not resp_text:
-            resp_text = "Señor Daniel, he recibido su instrucción. Todos mis módulos de visión, voz y control de la Mac están operativos a su orden."
+            resp_text = "Señor Danny, he recibido su instrucción. Todos mis módulos de visión, voz y control de la Mac están operativos a su orden."
 
     # Guardar en memoria de conversación
     _conv_history.append({"role": "user", "content": q_clean})
