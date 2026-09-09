@@ -294,36 +294,34 @@ def run_alberth_full(text: str) -> dict:
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
-        # ── Ruta 0: NVIDIA NIM Fast-Path (Ultra rápido, ~0.85s con Llama 3.2 11B Vision) ─
+        # ── Ruta 0: NVIDIA NIM Fast-Path (Ultra rápido, ~0.75s con Llama 3.2 11B Vision) ─
         nv_key = os.environ.get("NVIDIA_API_KEY")
         if nv_key:
-            for nv_model in ["meta/llama-3.2-11b-vision-instruct", "meta/llama-3.1-8b-instruct"]:
-                try:
-                    payload = {
-                        "model": nv_model,
-                        "messages": messages,
-                        "max_tokens": 500,
-                        "temperature": 0.5
-                    }
-                    req = _urlreq.Request(
-                        "https://integrate.api.nvidia.com/v1/chat/completions",
-                        data=json.dumps(payload).encode("utf-8"),
-                        headers={"Authorization": f"Bearer {nv_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
-                    )
-                    with _urlreq.urlopen(req, timeout=5) as resp:
-                        res_json = json.loads(resp.read().decode("utf-8"))
-                        txt_out = res_json["choices"][0]["message"]["content"].strip()
-                        if txt_out:
-                            resp_text = txt_out
-                            break
-                except Exception as e:
-                    print(f"[NVIDIA Fast-Path {nv_model}] {e}")
+            try:
+                payload = {
+                    "model": "meta/llama-3.2-11b-vision-instruct",
+                    "messages": messages,
+                    "max_tokens": 500,
+                    "temperature": 0.5
+                }
+                req = _urlreq.Request(
+                    "https://integrate.api.nvidia.com/v1/chat/completions",
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Authorization": f"Bearer {nv_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
+                )
+                with _urlreq.urlopen(req, timeout=3.5) as resp:
+                    res_json = json.loads(resp.read().decode("utf-8"))
+                    txt_out = res_json["choices"][0]["message"]["content"].strip()
+                    if txt_out:
+                        resp_text = txt_out
+            except Exception as e:
+                print(f"[NVIDIA Fast-Path] {e}")
 
-        # ── Ruta A: Google Gemini Direct Stream (Fast-Path secundario) ────────
+        # ── Ruta A: Google Gemini Direct Stream (Fast-Path secundario ~1.0s) ────────
         if not resp_text:
             gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
             if gemini_key:
-                for gm in ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-flash-latest"]:
+                for gm in ["gemini-2.5-flash", "gemini-2.0-flash"]:
                     try:
                         g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
                         g_payload = {
@@ -331,7 +329,7 @@ def run_alberth_full(text: str) -> dict:
                             "generationConfig": {"temperature": 0.5, "maxOutputTokens": 500}
                         }
                         g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-                        with _urlreq.urlopen(g_req, timeout=5) as resp:
+                        with _urlreq.urlopen(g_req, timeout=4) as resp:
                             g_res = json.loads(resp.read().decode("utf-8"))
                             txt = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
                             if txt:
@@ -340,17 +338,26 @@ def run_alberth_full(text: str) -> dict:
                     except Exception as e:
                         print(f"[Gemini Fast-Path {gm}] {e}")
 
-        # ── Ruta B: Ollama local (si está activo) ──────────────────────────────
+        # ── Ruta B: Ollama local (solo si el puerto 11434 está activo, sin congelar) ─
         if not resp_text:
-            for m in OLLAMA_MODELS:
-                try:
-                    p = {"model": m, "messages": messages, "max_tokens": 500, "temperature": 0.6, "stream": False}
-                    r = _req.post("http://localhost:11434/v1/chat/completions", json=p, timeout=5)
-                    if r.status_code == 200:
-                        resp_text = r.json()["choices"][0]["message"]["content"].strip()
-                        break
-                except Exception:
-                    pass
+            import socket
+            ollama_ready = False
+            try:
+                with socket.create_connection(("127.0.0.1", 11434), timeout=0.15):
+                    ollama_ready = True
+            except Exception:
+                ollama_ready = False
+
+            if ollama_ready:
+                for m in OLLAMA_MODELS:
+                    try:
+                        p = {"model": m, "messages": messages, "max_tokens": 500, "temperature": 0.6, "stream": False}
+                        r = _req.post("http://localhost:11434/v1/chat/completions", json=p, timeout=2.5)
+                        if r.status_code == 200:
+                            resp_text = r.json()["choices"][0]["message"]["content"].strip()
+                            break
+                    except Exception:
+                        pass
 
         # Fallback final cortés y en carácter
         if not resp_text:
@@ -363,8 +370,9 @@ def run_alberth_full(text: str) -> dict:
         _conv_history.pop(0)
         _conv_history.pop(0)
 
-    # ── 5. Síntesis de Voz (Edge-TTS) ──────────────────────────────────────────
+    # ── 5. Síntesis de Voz Asíncrona (Edge-TTS en background sin frenar la respuesta) ──
     try:
+        import threading
         ts = time.strftime("%Y%m%d_%H%M%S")
         VOICE_OUTPUT.mkdir(parents=True, exist_ok=True)
         tts_file = VOICE_OUTPUT / f"alberth_{ts}.mp3"
@@ -373,14 +381,20 @@ def run_alberth_full(text: str) -> dict:
         # Limpiar texto para pronunciación limpia
         clean_speech = resp_text.replace("**", "").replace("#", "").replace("`", "")
         clean_speech = " ".join(clean_speech.split()[:75]) # Limitar a primeras 75 palabras para agilidad
-        subprocess.run(
-            [py_exec, str(WORKSPACE / "alberth_tts_premium.py"), clean_speech, str(tts_file)],
-            capture_output=True, timeout=15
-        )
-        if tts_file.exists() and tts_file.stat().st_size > 0:
-            audio_url = f"/output/{tts_file.name}"
+
+        def _bg_synthesize(speech_txt, dest_file):
+            try:
+                subprocess.run(
+                    [py_exec, str(WORKSPACE / "alberth_tts_premium.py"), speech_txt, str(dest_file)],
+                    capture_output=True, timeout=12
+                )
+            except Exception as te:
+                print(f"[BG TTS Error] {te}")
+
+        threading.Thread(target=_bg_synthesize, args=(clean_speech, tts_file), daemon=True).start()
+        audio_url = f"/output/{tts_file.name}"
     except Exception as e:
-        print(f"[TTS Synthesis Error] {e}")
+        print(f"[TTS Initiation Error] {e}")
 
     return {
         "text": resp_text,

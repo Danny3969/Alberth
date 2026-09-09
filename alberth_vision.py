@@ -86,7 +86,7 @@ def get_gemini_api_key():
     return os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
 
 
-def describe_image_gemini(api_key, prompt, image_path, model="gemini-3.5-flash"):
+def describe_image_gemini(api_key, prompt, image_path, model="gemini-2.5-flash"):
     """Envía la imagen a Google Gemini API (AI Studio) con fallback automático."""
     if not os.path.exists(image_path):
         return None
@@ -94,7 +94,7 @@ def describe_image_gemini(api_key, prompt, image_path, model="gemini-3.5-flash")
         with open(image_path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
         
-        models_to_try = [model, "gemini-3.6-flash", "gemini-flash-latest"] if model and model != "gemini-2.5-flash-lite" else ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-flash-latest"]
+        models_to_try = [model, "gemini-2.0-flash"] if model else ["gemini-2.5-flash", "gemini-2.0-flash"]
         
         for m in models_to_try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}"
@@ -143,20 +143,21 @@ def capture_image():
         except Exception:
             pass
 
-    imagesnap_bin = "/usr/local/bin/imagesnap" if os.path.exists("/usr/local/bin/imagesnap") else "imagesnap"
-    log("Capturando frame de la cámara con imagesnap...")
-    try:
-        res = subprocess.run([imagesnap_bin, "-w", "1.0", IMAGE_PATH], capture_output=True, timeout=8)
-        if os.path.exists(IMAGE_PATH) and os.path.getsize(IMAGE_PATH) > 0:
-            import shutil
-            try:
-                shutil.copyfile(IMAGE_PATH, PANEL_IMAGE_PATH)
-            except Exception:
-                pass
-            log("Captura con imagesnap realizada exitosamente.")
-            return True
-    except Exception as e:
-        log(f"WARN: imagesnap falló ({e}), intentando fallback con ffmpeg...")
+    imagesnap_bin = "/usr/local/bin/imagesnap"
+    if os.path.exists(imagesnap_bin):
+        log("Capturando frame de la cámara con imagesnap...")
+        try:
+            res = subprocess.run([imagesnap_bin, "-w", "1.0", IMAGE_PATH], capture_output=True, timeout=5)
+            if os.path.exists(IMAGE_PATH) and os.path.getsize(IMAGE_PATH) > 0:
+                import shutil
+                try:
+                    shutil.copyfile(IMAGE_PATH, PANEL_IMAGE_PATH)
+                except Exception:
+                    pass
+                log("Captura con imagesnap realizada exitosamente.")
+                return True
+        except Exception as e:
+            log(f"WARN: imagesnap falló ({e}), intentando fallback con ffmpeg...")
 
     log("Capturando frame de la cámara con ffmpeg...")
     cmd = [
