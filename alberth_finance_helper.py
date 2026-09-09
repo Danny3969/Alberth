@@ -8,6 +8,7 @@
 #   - Frankfurter API    → Divisas / Forex
 # =============================================================================
 
+from __future__ import annotations
 import sys
 import json
 import urllib.request

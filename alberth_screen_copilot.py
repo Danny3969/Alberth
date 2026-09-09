@@ -20,6 +20,7 @@
 #   python3 alberth_screen_copilot.py --stop                 → detiene el copiloto
 # =============================================================================
 
+from __future__ import annotations
 import os
 import sys
 import json
