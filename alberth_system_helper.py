@@ -1115,6 +1115,17 @@ def dispatch(query):
         except Exception as re_err:
             pass
 
+    # 0d. Computer Use Autónomo (clics visuales, escritura, acciones de ratón y teclado)
+    if any(k in query_lower for k in ["haz clic", "haz click", "dale clic", "dale click", "mueve el ratón al", "escribe en la pantalla"]):
+        try:
+            import alberth_computer_use
+            cu_res = alberth_computer_use.run_computer_action(query)
+            if cu_res and cu_res.get("exito"):
+                det = cu_res.get("detalle") or cu_res.get("accion") or "Completado"
+                return {"accion": "computer_use", "resultado": f"Acción de pantalla ejecutada con éxito: {det}.", "exito": True}
+        except Exception as cue:
+            pass
+
     # Primero los módulos de alta prioridad
     result = handle_terminal(query, query_lower)
     if result: return result
