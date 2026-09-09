@@ -123,8 +123,14 @@ def _fast_heuristic_classifier(query: str) -> Optional[Dict[str, Any]]:
     if any(k in q for k in ["este pdf", "archivo pdf", "el pdf", "documento pdf", "resume el pdf"]):
         return {"tipo_tarea": "READ_PDF", "habilidad_requerida": "pdf", "argumentos": {}}
 
-    # 7. Control de Sistema Mac
-    if any(k in q for k in ["sube el volumen", "baja el volumen", "silencia", "sube el brillo", "baja el brillo", "modo oscuro", "reinicia el", "apaga el mac"]):
+    # 7. Control de Sistema Mac, Ecosistema Apple, Lector Web y RAG
+    if any(k in q for k in [
+        "sube el volumen", "baja el volumen", "silencia", "sube el brillo", "baja el brillo",
+        "modo oscuro", "reinicia el", "apaga el mac", "calendario", "agenda", "mis reuniones",
+        "crea una nota", "mis notas", "recordatorio", "recuérdame", "recuerdame", "atajo",
+        "en mis documentos", "en mis pdfs", "según el archivo", "busca en el archivo",
+        "lee la página", "resume este enlace", "http://", "https://"
+    ]):
         return {"tipo_tarea": "SYSTEM_UTILS", "habilidad_requerida": "system", "argumentos": {"comando": query}}
 
     # 8. Recordatorios y Timers

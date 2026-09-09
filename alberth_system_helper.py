@@ -1079,6 +1079,42 @@ end tell
 def dispatch(query):
     query_lower = query.lower()
 
+    # 0. Ecosistema Apple macOS (Calendario, Recordatorios, Notas, Atajos)
+    try:
+        import alberth_apple_helper
+        apple_res = alberth_apple_helper.dispatch_apple_command(query)
+        if apple_res:
+            res_txt = apple_res.get("resultado") or apple_res.get("mensaje") or "Acción de Apple completada."
+            return {"accion": apple_res.get("accion", "apple_action"), "resultado": res_txt, "exito": apple_res.get("exito", True)}
+    except Exception as ae:
+        pass
+
+    # 0b. Lector y Extractor Web (si contiene URL o petición de lectura)
+    url_match = re.search(r'https?://[^\s]+', query)
+    if url_match or any(k in query_lower for k in ["lee la página", "lee el link", "resume el enlace", "analiza esta url"]):
+        try:
+            import alberth_browser_agent
+            url_to_fetch = url_match.group(0) if url_match else query.split()[-1]
+            web_res = alberth_browser_agent.extract_web_content(url_to_fetch)
+            if web_res and web_res.get("exito"):
+                return {
+                    "accion": "lectura_web",
+                    "resultado": f"Contenido extraído de {web_res['titulo']}:\n\n{web_res['contenido']}",
+                    "exito": True
+                }
+        except Exception as we:
+            pass
+
+    # 0c. Búsqueda Semántica en Documentos Locales (RAG)
+    if any(k in query_lower for k in ["en mis documentos", "en mis pdfs", "en mis archivos", "según el documento", "busca en el archivo"]):
+        try:
+            import alberth_rag_memory
+            rag_res = alberth_rag_memory.query_rag(query)
+            if rag_res and rag_res.get("exito"):
+                return {"accion": "rag_documental", "resultado": rag_res["resultado"], "exito": True}
+        except Exception as re_err:
+            pass
+
     # Primero los módulos de alta prioridad
     result = handle_terminal(query, query_lower)
     if result: return result
