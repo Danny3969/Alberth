@@ -230,7 +230,7 @@ def describe_image(api_key=None, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY,
     gemini_key = get_gemini_api_key()
     if gemini_key:
         log("Analizando imagen con Google Gemini...")
-        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-3.5-flash")
+        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-2.5-flash")
         if desc_gem:
             return desc_gem
 
