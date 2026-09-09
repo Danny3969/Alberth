@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-08 09:18 GMT-5_
+_Última actualización: 2026-09-09 15:05 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -82,7 +82,7 @@ _Última actualización: 2026-09-08 09:18 GMT-5_
 - **Memoria de Contexto Visual Continuo:** Ventana activa de 90 segundos donde preguntas consecutivas de seguimiento disparan capturas frescas instantáneas desde la cámara FaceTime HD en lugar de responder sobre imágenes viejas archivadas.
 - **Rediseño Estético Quantum HUD:** HUD depurado estilo JARVIS/Iron Man con orbe Three.js interactivo, eliminación de botones superfluos y controles optimizados por voz/texto.
 
-### 2026-09-09 (Optimización Radical de Latencia 30s → 1.4s, Suite de Herramientas Gratuitas & Computer Use Autónomo)
+### 2026-09-09 (Optimización Radical de Latencia 30s → 1.4s, Herramientas Gratuitas, Computer Use & Evaluación SOTA)
 - **Reducción de Latencia de 30s a 1.43s:** Corrección de modelos inválidos de Gemini (`gemini-3.5-flash` a `gemini-2.5-flash`), endpoint activo de NVIDIA NIM (`meta/llama-3.2-11b-vision-instruct`), verificación no bloqueante por socket de Ollama (150ms) y síntesis de voz asíncrona (daemon thread) con Edge-TTS.
 - **Compatibilidad Universal Python 3.9:** Corrección de sintaxis de tipos de unión `dict | None` mediante `from __future__ import annotations` en `alberth_talamo.py`, `alberth_finance_helper.py` y `alberth_screen_copilot.py`.
 - **Suite de Herramientas Gratuitas (Costo $0.00):**
@@ -91,6 +91,10 @@ _Última actualización: 2026-09-08 09:18 GMT-5_
   - `alberth_browser_agent.py`: Lector y extractor web limpio sin publicidad con BeautifulSoup.
   - `alberth_rag_memory.py`: Memoria semántica local documental con SQLite FTS5 (Okapi BM25) y `pypdf`.
 - **Computer Use Autónomo Gratuito:** Módulo `alberth_computer_use.py` que emula Anthropic Computer Use a costo $0.00 combinando captura comprimida, grounding visual con Gemini 2.5 Flash / Llama 3.2 Vision y ejecución física nativa de ratón y teclado con `PyAutoGUI`.
+- **Evaluación Estratégica SOTA (Modelos, Agentes y Herramientas Gratis vs Pago):**
+  - Documento archivado: `memory/2026-09-09_evaluacion_sota_ia.md`.
+  - Comparativa integral a nivel global: DeepSeek R1/V3, Qwen 2.5 Coder, Meta Llama 3.3/3.2 Vision, Claude 3.7 Sonnet, OpenAI o3-mini/GPT-4o, LangGraph, CrewAI, AutoGen AG2, Browser-Use, Mem0, Kokoro-82M, Aider, Cline/Roo Code.
+  - Hoja de ruta para implementación en Servidor MacBook Pro: Integración de **Mem0** (memoria continua de hechos/preferencias) y **Browser-Use** (automatización agéntica de navegador con Playwright).
 
 ### 2026-09-07 (Lanzamiento Fase 5 & Arquitectura Servidor Central Cloudflare)
 - **Lanzamiento de Servicios (Fase 5):** Puesta en marcha limpia de los 4 procesos en PM2 (`alberth-web`, `alberth-voice`, `alberth-reminders`, `alberth-qa-watcher`).
