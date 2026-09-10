@@ -294,30 +294,22 @@ def run_alberth_full(text: str) -> dict:
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
-        # ── Ruta 0: NVIDIA NIM Fast-Path (Ultra rápido, ~0.75s con Llama 3.2 11B Vision) ─
-        nv_key = os.environ.get("NVIDIA_API_KEY")
-        if nv_key:
-            try:
-                payload = {
-                    "model": "meta/llama-3.2-11b-vision-instruct",
-                    "messages": messages,
-                    "max_tokens": 500,
-                    "temperature": 0.5
-                }
-                req = _urlreq.Request(
-                    "https://integrate.api.nvidia.com/v1/chat/completions",
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers={"Authorization": f"Bearer {nv_key}", "Content-Type": "application/json", "User-Agent": "AlberthAI/1.0"}
-                )
-                with _urlreq.urlopen(req, timeout=3.5) as resp:
-                    res_json = json.loads(resp.read().decode("utf-8"))
-                    txt_out = res_json["choices"][0]["message"]["content"].strip()
-                    if txt_out:
-                        resp_text = txt_out
-            except Exception as e:
-                print(f"[NVIDIA Fast-Path] {e}")
+        # ── Orquestador Multi-Modelo Fundacional (DeepSeek / Qwen Coder / Llama Vision) ──
+        try:
+            import alberth_foundation_models
+            ans_text, model_tag, role_assigned = alberth_foundation_models.query_foundation_model(
+                prompt=q_clean,
+                system_prompt=system_prompt,
+                history=_conv_history[-8:],
+                max_tokens=500
+            )
+            if ans_text and ans_text != "Error" and not ans_text.startswith("Señor Danny, no fue posible"):
+                resp_text = ans_text
+                print(f"[Foundation Models] Rol: {role_assigned} | Modelo: {model_tag}")
+        except Exception as e:
+            print(f"[Foundation Models Router Error] {e}")
 
-        # ── Ruta A: Google Gemini Direct Stream (Fast-Path secundario ~1.0s) ────────
+        # ── Fallback secundario directo: Google Gemini Direct Stream ──────────────
         if not resp_text:
             gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
             if gemini_key:
@@ -329,35 +321,14 @@ def run_alberth_full(text: str) -> dict:
                             "generationConfig": {"temperature": 0.5, "maxOutputTokens": 500}
                         }
                         g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
-                        with _urlreq.urlopen(g_req, timeout=4) as resp:
+                        with _urlreq.urlopen(g_req, timeout=3.5) as resp:
                             g_res = json.loads(resp.read().decode("utf-8"))
                             txt = g_res["candidates"][0]["content"]["parts"][0]["text"].strip()
                             if txt:
                                 resp_text = txt
                                 break
                     except Exception as e:
-                        print(f"[Gemini Fast-Path {gm}] {e}")
-
-        # ── Ruta B: Ollama local (solo si el puerto 11434 está activo, sin congelar) ─
-        if not resp_text:
-            import socket
-            ollama_ready = False
-            try:
-                with socket.create_connection(("127.0.0.1", 11434), timeout=0.15):
-                    ollama_ready = True
-            except Exception:
-                ollama_ready = False
-
-            if ollama_ready:
-                for m in OLLAMA_MODELS:
-                    try:
-                        p = {"model": m, "messages": messages, "max_tokens": 500, "temperature": 0.6, "stream": False}
-                        r = _req.post("http://localhost:11434/v1/chat/completions", json=p, timeout=2.5)
-                        if r.status_code == 200:
-                            resp_text = r.json()["choices"][0]["message"]["content"].strip()
-                            break
-                    except Exception:
-                        pass
+                        print(f"[Gemini Direct Stream {gm}] {e}")
 
         # Fallback final cortés y en carácter
         if not resp_text:

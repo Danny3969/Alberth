@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-09 15:05 GMT-5_
+_Última actualización: 2026-09-10 11:55 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -68,6 +68,19 @@ _Última actualización: 2026-09-09 15:05 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-10 (Integración de Modelos Fundacionales SOTA: DeepSeek, Qwen Coder y Meta Llama Vision)
+- **Módulo Orquestador Multi-Modelo (`alberth_foundation_models.py`):**
+  - Implementación de arquitectura multi-modelo inteligente que asigna cada consulta al modelo fundacional abierto de mayor reconocimiento y prestigio mundial según su especialidad:
+    - **DeepSeek (R1/V3/V4 Pro):** Razonamiento matemático, deducción lógica y planificación compleja. Enrutado a Ollama local (`deepseek-r1`) / NVIDIA NIM (`deepseek-ai/deepseek-v4-pro-0813`) con fallback a Gemini 2.5 Flash Thinking.
+    - **Qwen 2.5 Coder:** Generación y depuración de código, scripts en Python/Bash para macOS y llamadas a funciones. Enrutado a Ollama local (`qwen2.5-coder`) / NVIDIA NIM (Llama Code) con fallback a Gemini 2.5 Flash Code.
+    - **Meta Llama 3.3 (70B) / 3.2 Vision:** Visión multimodal veloz (FaceTime HD, capturas de pantalla) y conversación general ultrarrápida. Enrutado a NVIDIA NIM (`meta/llama-3.2-11b-vision-instruct`, ~1.1s) con fallback multimodal.
+- **Integración en el Servidor (`alberth_web_server.py`):**
+  - Enrutamiento dinámico en `run_alberth_full()` conectando el cerebro conversacional al nuevo orquestador de modelos fundacionales, conservando el trato («Señor Danny») y la síntesis de voz asíncrona de fondo con Edge-TTS.
+- **Detección No Bloqueante & Resiliencia:**
+  - Socket check de 150ms para Ollama y conmutación automática en < 1.5s sin caídas del servicio ni costos por token.
+  - Benchmark CLI integrado: `python3 alberth_foundation_models.py --benchmark`.
+
 
 ### 2026-09-08 (Lanzamiento APK v3.2.0 Universal Multi-CPU & Sincronización Completa)
 - **APK v3.2.0 Universal Multi-CPU:** Publicación de la versión 3.2.0 de la aplicación móvil nativa (`alberth-android`), incorporando soporte multiplataforma para arquitecturas `armeabi-v7a`, `arm64-v8a`, `x86` y `x86_64`.
