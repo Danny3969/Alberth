@@ -105,8 +105,19 @@ def investigator_node(state: AlberthAgentState) -> Dict[str, Any]:
     findings = []
     combined_query = f"{mission} {' '.join(plan)}"
 
+    # 0. Navegación Web Autónoma con Playwright si la misión requiere interactuar con páginas o portales
+    if any(w in combined_query.lower() for w in ["navega", "entra a la web", "abre la pagina", "portal", "mercadolibre", "wikipedia", "formulario", "pagina web"]):
+        try:
+            import alberth_playwright_agent as pw_agent
+            print(f"[Investigador] 🌐 Desplegando Navegador Playwright en segundo plano...")
+            pw_res = pw_agent.run_autonomous_browser_mission(mission=mission, max_steps=4)
+            if pw_res and pw_res.get("success") and pw_res.get("summary"):
+                findings.append(f"Resultados de Navegación Playwright:\n{pw_res['summary']}")
+        except Exception as pwe:
+            print(f"[Investigador] Error Playwright: {pwe}")
+
     # 1. Búsqueda Web en tiempo real si requiere noticias, clima o datos externos
-    if any(w in combined_query.lower() for w in ["clima", "tiempo", "noticia", "precio", "buscar", "investiga", "web"]):
+    if not findings and any(w in combined_query.lower() for w in ["clima", "tiempo", "noticia", "precio", "buscar", "investiga", "web"]):
         if search_helper:
             try:
                 # Extraer posible ciudad o tema usando el método correcto search_duckduckgo_live

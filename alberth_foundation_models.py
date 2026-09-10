@@ -138,7 +138,7 @@ def _call_nvidia_nim(
     messages: List[Dict[str, Any]],
     max_tokens: int = 600,
     temperature: float = 0.5,
-    timeout: float = 2.8
+    timeout: float = 4.5
 ) -> Optional[str]:
     """Llama al endpoint ultrarrápido de NVIDIA NIM."""
     key = get_api_key("NVIDIA_API_KEY")

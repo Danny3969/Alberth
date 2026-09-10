@@ -295,6 +295,24 @@ def run_alberth_full(text: str) -> dict:
             except Exception as mae:
                 print(f"[Multi-Agent Error] {mae}")
 
+    # ── 3.6. Navegación Web Autónoma con Playwright (Headless Browser Agent) ────
+    if not resp_text:
+        browser_keywords = [
+            "navega a", "navega en", "entra a la web", "entra a la página",
+            "entra a la pagina", "busca en la web y extrae", "busca en el portal",
+            "abre el portal y busca", "extrae de la web", "navegador autónomo",
+            "navegador autonomo"
+        ]
+        if any(bk in q_lower for bk in browser_keywords):
+            try:
+                import alberth_playwright_agent
+                print(f"[Web Server] 🌐 Activando Agente Web Playwright para: {q_clean}")
+                bw_res = alberth_playwright_agent.run_autonomous_browser_mission(mission=q_clean, max_steps=4)
+                if bw_res and bw_res.get("summary"):
+                    resp_text = bw_res["summary"]
+            except Exception as bwe:
+                print(f"[Browser Agent Error] {bwe}")
+
     # ── 4. Inteligencia Conversacional (Cerebro LLM) ───────────────────────────
     if not resp_text:
         soul_file = WORKSPACE / "SOUL.md"

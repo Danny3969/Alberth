@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-10 13:30 GMT-5_
+_Última actualización: 2026-09-10 13:55 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -20,6 +20,7 @@ _Última actualización: 2026-09-10 13:30 GMT-5_
 │   ├── app.json        → Configuración de compilación (versionCode 7, versionName 3.2.1, permisos CAMERA)
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
+├── alberth_playwright_agent.py → Agente Web Autónomo (Playwright Headless + Marcadores DOM [data-alberth-id])
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
 ├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision)
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` + `/panel/assets` (Puerto 8080)
@@ -75,6 +76,18 @@ _Última actualización: 2026-09-10 13:30 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-10 (Agente Web Autónomo con Playwright & Navegación Headless SOTA)
+- **Navegación Web Autónoma en Segundo Plano (`alberth_playwright_agent.py`):**
+  - Implementación de alternativa nativa a Browser-Use basada en Playwright sobre Chromium, 100% compatible con Python 3.9 sin alterar el entorno ni requerir dependencias conflictivas:
+    1. **Navegación Silenciosa (`Headless`):** Ejecuta búsquedas, clics y descargas en segundo plano sin mover el cursor físico del usuario ni interrumpir su trabajo en macOS.
+    2. **Indexación Determinista del DOM (`data-alberth-id`):** Inyección de script JS que numera los elementos clicables y formularios interactivos (`[1], [2], [3]...`), permitiendo que el LLM (Qwen 2.5 Coder / DeepSeek / Gemini) decida acciones exactas por ID sin errores por coordenadas de pantalla.
+    3. **Bucle Agéntico con Auto-Recuperación:** Ciclo continuo de observación del DOM, acción de navegación y extracción de párrafos limpios entregados al Señor Danny.
+- **Integraciones:**
+  - Conectado al `investigator_node` en la cuadrilla multi-agente (`alberth_multi_agent.py`).
+  - Disparador directo en sección 3.6 del servidor web (`alberth_web_server.py`) para intenciones de navegación web.
+- **Pruebas Validadas:**
+  - Extracción y navegación en Wikipedia (Nikola Tesla y Albert Einstein) completadas con éxito en 3-4 pasos y respuestas ejecutivas entregadas al Señor Danny a **costo $0.00**.
 
 ### 2026-09-10 (Framework Multi-Agente Cíclico en LangGraph con Auto-Corrección SOTA)
 - **Orquestación Multi-Agente Industrial (`alberth_multi_agent.py`):**
