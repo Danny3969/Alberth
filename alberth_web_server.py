@@ -277,6 +277,24 @@ def run_alberth_full(text: str) -> dict:
         except Exception as e:
             print(f"[System Helper Error] {e}")
 
+    # ── 3.5. Misión Multi-Agente Autónoma (LangGraph: Estratega + Investigador + Ingeniero + QA) ──
+    if not resp_text:
+        multi_keywords = [
+            "equipo multi-agente", "equipo multiagente", "multi-agente", "multiagente",
+            "misión multi-agente", "mision multi-agente", "misión multiagente",
+            "investiga y programa", "investiga y calcula", "analiza y crea",
+            "planifica y ejecuta", "desarrolla y prueba", "equipo de trabajo"
+        ]
+        if any(mk in q_lower for mk in multi_keywords):
+            try:
+                import alberth_multi_agent
+                print(f"[Web Server] 🚀 Activando Grafo Multi-Agente para: {q_clean}")
+                ma_res = alberth_multi_agent.run_multi_agent_mission(q_clean)
+                if ma_res and ma_res.get("final_summary"):
+                    resp_text = ma_res["final_summary"]
+            except Exception as mae:
+                print(f"[Multi-Agent Error] {mae}")
+
     # ── 4. Inteligencia Conversacional (Cerebro LLM) ───────────────────────────
     if not resp_text:
         soul_file = WORKSPACE / "SOUL.md"

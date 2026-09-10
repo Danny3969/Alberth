@@ -138,7 +138,7 @@ def _call_nvidia_nim(
     messages: List[Dict[str, Any]],
     max_tokens: int = 600,
     temperature: float = 0.5,
-    timeout: float = 1.2
+    timeout: float = 2.8
 ) -> Optional[str]:
     """Llama al endpoint ultrarrápido de NVIDIA NIM."""
     key = get_api_key("NVIDIA_API_KEY")
@@ -223,41 +223,49 @@ def _call_gemini_fallback(
     image_bytes: Optional[bytes] = None,
     mime_type: str = "image/jpeg",
     max_tokens: int = 600,
-    timeout: float = 4.0
+    timeout: float = 8.0
 ) -> Optional[str]:
-    """Fallback universal a Google Gemini 2.5 Flash."""
+    """Fallback universal a Google Gemini 2.5 Flash / Flash Lite con reintento ante 429."""
     key = get_api_key("GEMINI_API_KEY") or get_api_key("GOOGLE_API_KEY")
     if not key:
         return None
-    for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
-            parts: List[Dict[str, Any]] = []
-            if image_bytes:
-                b64 = base64.b64encode(image_bytes).decode("utf-8")
-                parts.append({"inlineData": {"mimeType": mime_type, "data": b64}})
-            full_text = f"{system_instruction}\n\n{prompt}".strip()
-            parts.append({"text": full_text})
+    for model_name in ["gemini-2.5-flash", "gemini-2.5-flash-lite"]:
+        for attempt in range(2):
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
+                parts: List[Dict[str, Any]] = []
+                if image_bytes:
+                    b64 = base64.b64encode(image_bytes).decode("utf-8")
+                    parts.append({"inlineData": {"mimeType": mime_type, "data": b64}})
+                full_text = f"{system_instruction}\n\n{prompt}".strip()
+                parts.append({"text": full_text})
 
-            payload = {
-                "contents": [{"parts": parts}],
-                "generationConfig": {"temperature": 0.5, "maxOutputTokens": max_tokens}
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                candidates = data.get("candidates", [])
-                if candidates:
-                    text_parts = candidates[0].get("content", {}).get("parts", [])
-                    res = "".join(p.get("text", "") for p in text_parts).strip()
-                    if res:
-                        return res
-        except Exception as e:
-            print(f"[Gemini Fallback {model_name}] Error: {e}", file=sys.stderr)
+                payload = {
+                    "contents": [{"parts": parts}],
+                    "generationConfig": {"temperature": 0.5, "maxOutputTokens": max_tokens}
+                }
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        text_parts = candidates[0].get("content", {}).get("parts", [])
+                        res = "".join(p.get("text", "") for p in text_parts).strip()
+                        if res:
+                            return res
+            except urllib.error.HTTPError as he:
+                if he.code == 429 and attempt == 0:
+                    time.sleep(1.5)
+                    continue
+                print(f"[Gemini Fallback {model_name}] HTTP Error {he.code}", file=sys.stderr)
+                break
+            except Exception as e:
+                print(f"[Gemini Fallback {model_name}] Error: {e}", file=sys.stderr)
+                break
     return None
 
 

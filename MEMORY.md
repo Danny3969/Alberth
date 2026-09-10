@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-10 11:55 GMT-5_
+_Última actualización: 2026-09-10 13:30 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -20,8 +20,15 @@ _Última actualización: 2026-09-10 11:55 GMT-5_
 │   ├── app.json        → Configuración de compilación (versionCode 7, versionName 3.2.1, permisos CAMERA)
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
+├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
+├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision)
 ├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` + `/panel/assets` (Puerto 8080)
 ├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Spotify AppleScript, Volumen, Apps)
+├── alberth_apple_helper.py  → Automatización nativa macOS (Calendario, Recordatorios, Notas, Atajos)
+├── alberth_search_helper.py → Motor de Búsqueda Web Abierta (DuckDuckGo + Wikipedia + Clima)
+├── alberth_browser_agent.py → Lector y extractor web limpio sin cookies ni publicidad
+├── alberth_rag_memory.py    → Memoria Semántica y RAG Local (SQLite FTS5 + Okapi BM25 + PyPDF)
+├── alberth_computer_use.py  → Percepción y ejecución física de pantalla (Screencapture + PyAutoGUI)
 ├── alberth_voice_server.py  → Servidor STT de audio y escucha continua con VAD
 ├── alberth_vision.py        → Cámara On-Demand + Registro de Personas (ej. Danna) + Fast Cosine Embeddings (<500ms)
 ├── alberth_qa_watcher.py    → Demonio de supervisión proactiva (filtro 2 horas)
@@ -68,6 +75,20 @@ _Última actualización: 2026-09-10 11:55 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-10 (Framework Multi-Agente Cíclico en LangGraph con Auto-Corrección SOTA)
+- **Orquestación Multi-Agente Industrial (`alberth_multi_agent.py`):**
+  - Implementación de un grafo cíclico de estados (`StateGraph`) con LangGraph, sustituyendo el enrutamiento lineal por una cuadrilla colaborativa de agentes autónomos:
+    1. **Estratega (DeepSeek R1 / V3):** Genera planes estructurados paso a paso.
+    2. **Investigador (Meta Llama 3.2 Vision + DuckDuckGo + RAG Local):** Extrae información web o documentos locales en tiempo real.
+    3. **Ingeniero (Qwen 2.5 Coder):** Redacta y ejecuta código Python/Bash en el subshell de macOS capturando `stdout`/`stderr`.
+    4. **Auditor / QA:** Inspecciona los resultados; si detecta errores, devuelve cíclicamente el flujo al Ingeniero con correcciones sugeridas (hasta 3 ciclos automáticos).
+    5. **Sintetizador:** Entrega ejecutiva unificada al «Señor Danny».
+- **Auto-Corrección Cíclica Validada en Vivo:**
+  - En prueba de ejecución matemática compleja, el Auditor QA detectó formato irregular en la iteración 1, activó el bucle correctivo y en la iteración 2 el Ingeniero corrigió el script ejecutando `65536` y obteniendo aprobación del 100% de QA antes de responder al Señor Danny.
+- **Integración con Servidor Central (`alberth_web_server.py`):**
+  - Disparadores semánticos automáticos en sección 3.5 para peticiones tipo «misión multi-agente», «equipo de trabajo», «investiga y programa».
+- **Costo Operativo:** $0.00 (cero costo de API).
 
 ### 2026-09-10 (Integración de Modelos Fundacionales SOTA: DeepSeek, Qwen Coder y Meta Llama Vision)
 - **Módulo Orquestador Multi-Modelo (`alberth_foundation_models.py`):**
