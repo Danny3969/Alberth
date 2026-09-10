@@ -979,12 +979,21 @@ async def serve_panel():
 
 # ── Limpieza de Audios Viejos ──────────────────────────────────────────────────
 def cleanup_old_audio():
-    """Elimina respuestas MP3 de más de 10 minutos para ahorrar espacio."""
+    """Elimina respuestas MP3 de más de 10 minutos y grabaciones/capturas de entrada de más de 48h para mantener el disco limpio."""
     now = time.time()
     for f in VOICE_OUTPUT.glob("*.mp3"):
         if f.name != "alberth_test_response.mp3" and (now - f.stat().st_mtime) > 600:
             try: f.unlink()
             except: pass
+
+    # Limpieza preventiva de archivos temporales en input (>48 horas / 172800s)
+    if VOICE_INPUT.exists():
+        for pattern in ("*.wav", "*.jpg", "*.png"):
+            for f in VOICE_INPUT.glob(pattern):
+                try:
+                    if (now - f.stat().st_mtime) > 172800:
+                        f.unlink()
+                except: pass
 
 # ── Watcher de respuestas ──────────────────────────────────────────────────────
 async def watch_output():

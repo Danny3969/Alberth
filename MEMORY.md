@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-10 15:15 GMT-5_
+_Última actualización: 2026-09-10 17:05 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -76,6 +76,15 @@ _Última actualización: 2026-09-10 15:15 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-10 (Auditoría Integral, Optimizaciones Preventivas & Cero Regresiones)
+- **Directriz de Señor Danny:** Mantener el entorno 100% nativo en Google Antigravity sin instalar extensiones secundarias innecesarias (Roo Code / Cline), auditar los 70+ archivos del proyecto e implementar mejoras preventivas que no dañen nada de lo que funciona bien.
+- **Optimizaciones Implementadas:**
+  1. **Consolidación de Dependencias (`requirements.txt`):** Incorporadas formalmente `langgraph>=0.6.0`, `langchain-core>=0.3.0`, `playwright>=1.40.0`, `beautifulsoup4>=4.12.0`, `duckduckgo-search>=7.0.0`, `pyautogui>=0.9.50` y `pypdf>=5.0.0`.
+  2. **Homogeneización de Modelos de Visión (`alberth_vision.py`):** Contingencia en `describe_image_gemini` actualizada a `gemini-2.5-flash-lite`.
+  3. **Rutas Dinámicas en Orquestador (`alberth_master.sh`):** Sustitución de rutas estáticas por resolución dinámica `${OPENCLAW_WORKSPACE:-${ALBERTH_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}}`.
+  4. **Purga Automática de Temporales (`alberth_web_server.py`):** Limpieza automática de grabaciones (`.wav`) y capturas (`.jpg`, `.png`) en `voice_exchange/input` con más de 48h de antigüedad.
+- **Validación de Integridad:** Compilación cruzada `python3 -m py_compile *.py` 100% exitosa con 0 errores. Costo: **$0.00**.
 
 ### 2026-09-10 (Arquitectura Híbrida de Síntesis de Voz SOTA: Edge-TTS Online + Fallback Offline macOS)
 - **Evaluación Estratégica Kokoro-82M:**

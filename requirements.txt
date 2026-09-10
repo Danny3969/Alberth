@@ -24,3 +24,17 @@ pillow>=9.5.0
 
 # Auditoría de Datos y Reportes
 pandas>=2.0.0
+
+# Framework Multi-Agente (LangGraph & LangChain Core)
+langgraph>=0.6.0
+langchain-core>=0.3.0
+
+# Navegación Web Autónoma & Búsqueda
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+duckduckgo-search>=7.0.0
+
+# Automatización de Escritorio & Documentos (Computer Use & RAG)
+pyautogui>=0.9.50
+pypdf>=5.0.0
+

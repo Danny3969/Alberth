@@ -12,7 +12,7 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH"
 [[ -f "$HOME/.openclaw/.env" ]] && source "$HOME/.openclaw/.env"
 
 # --- Rutas base ---
-WORKSPACE_DIR="$HOME/.openclaw/workspace"
+WORKSPACE_DIR="${OPENCLAW_WORKSPACE:-${ALBERTH_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}}"
 VOICE_DIR="$WORKSPACE_DIR/voice_exchange"
 INPUT_DIR="$VOICE_DIR/input"
 OUTPUT_DIR="$VOICE_DIR/output"

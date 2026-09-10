@@ -94,7 +94,7 @@ def describe_image_gemini(api_key, prompt, image_path, model="gemini-2.5-flash")
         with open(image_path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
         
-        models_to_try = [model, "gemini-2.0-flash"] if model else ["gemini-2.5-flash", "gemini-2.0-flash"]
+        models_to_try = [model, "gemini-2.5-flash-lite"] if model else ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
         
         for m in models_to_try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}"
