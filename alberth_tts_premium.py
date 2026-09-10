@@ -39,23 +39,67 @@ def log(msg: str):
     print(f"[TTS-Premium] {msg}", file=sys.stderr, flush=True)
 
 
-async def synthesize(text: str, output_path: str, voice: str = DEFAULT_VOICE) -> bool:
+def synthesize_offline(text: str, output_path: str) -> bool:
     """
-    Sintetiza `text` con edge-tts y lo guarda en `output_path` (MP3).
-    Retorna True si tuvo éxito, False en caso contrario.
+    Sintetiza `text` de forma 100% local y offline usando el motor nativo de macOS (`/usr/bin/say`).
+    Convierte a MP3 mediante ffmpeg o afconvert. Cero consumo de internet y cero dependencias pesadas.
     """
     try:
-        import edge_tts
-    except ImportError:
-        log("ERROR: edge-tts no está instalado. Ejecute: pip3 install edge-tts")
+        temp_aiff = "/tmp/alberth_say_tmp.aiff"
+        if os.path.exists(temp_aiff):
+            os.remove(temp_aiff)
+
+        # Elegir voz en español disponible (Paulina es_MX / Mónica es_ES / Eddy)
+        voice_choice = "Paulina"
+        cmd_say = ["/usr/bin/say", "-v", voice_choice, text, "-o", temp_aiff]
+        res = subprocess.run(cmd_say, capture_output=True, timeout=10)
+        if res.returncode != 0 or not os.path.exists(temp_aiff):
+            # Reintentar con voz por defecto del sistema
+            subprocess.run(["/usr/bin/say", text, "-o", temp_aiff], capture_output=True, timeout=10)
+
+        if not os.path.exists(temp_aiff) or os.path.getsize(temp_aiff) == 0:
+            log("ERROR: macOS say no pudo generar audio offline.")
+            return False
+
+        # Convertir a MP3 mediante ffmpeg
+        ffmpeg_bin = "/usr/local/bin/ffmpeg" if os.path.exists("/usr/local/bin/ffmpeg") else "ffmpeg"
+        res_conv = subprocess.run(
+            [ffmpeg_bin, "-y", "-i", temp_aiff, "-codec:a", "libmp3lame", "-qscale:a", "4", output_path],
+            capture_output=True, timeout=8
+        )
+        if res_conv.returncode == 0 and os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            size_kb = os.path.getsize(output_path) // 1024
+            log(f"OK (Fallback Offline) → Audio generado con macOS '{voice_choice}': {os.path.basename(output_path)} ({size_kb} KB)")
+            return True
+
+        # Fallback alternativo con afconvert si ffmpeg no estuviera disponible
+        res_af = subprocess.run(
+            ["/usr/bin/afconvert", "-f", "MP4F", "-d", "aac", temp_aiff, output_path],
+            capture_output=True, timeout=6
+        )
+        if res_af.returncode == 0 and os.path.exists(output_path):
+            log(f"OK (Offline AAC) → Audio generado con afconvert: {os.path.basename(output_path)}")
+            return True
+
+        return False
+    except Exception as e:
+        log(f"ERROR en fallback offline: {e}")
         return False
 
+
+async def synthesize(text: str, output_path: str, voice: str = DEFAULT_VOICE) -> bool:
+    """
+    Sintetiza `text` con edge-tts (online) y lo guarda en `output_path` (MP3).
+    Si no hay conexión a internet o falla Edge-TTS, conmuta automáticamente
+    al motor offline nativo de macOS para que Alberth nunca quede mudo.
+    """
     # Asegurar directorio de salida
     out_dir = os.path.dirname(os.path.abspath(output_path))
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
 
     try:
+        import edge_tts
         communicate = edge_tts.Communicate(
             text,
             voice,
@@ -66,15 +110,16 @@ async def synthesize(text: str, output_path: str, voice: str = DEFAULT_VOICE) ->
 
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
             size_kb = os.path.getsize(output_path) // 1024
-            log(f"OK → Audio generado: {os.path.basename(output_path)} ({size_kb} KB) | Voz: {voice}")
+            log(f"OK (Online) → Audio generado: {os.path.basename(output_path)} ({size_kb} KB) | Voz: {voice}")
             return True
         else:
-            log("ERROR: edge-tts no generó el archivo de salida.")
-            return False
-
+            log("Aviso: edge-tts no generó el archivo de salida.")
     except Exception as e:
-        log(f"ERROR durante síntesis: {e}")
-        return False
+        log(f"Aviso: Edge-TTS no disponible o sin conexión ({e}).")
+
+    # ── Fallback Automático Offline (macOS say) ──
+    log("🔄 Activando Fallback Offline de macOS...")
+    return synthesize_offline(text, output_path)
 
 
 async def list_es_voices():

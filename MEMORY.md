@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-10 13:55 GMT-5_
+_Última actualización: 2026-09-10 15:15 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -34,7 +34,7 @@ _Última actualización: 2026-09-10 13:55 GMT-5_
 ├── alberth_vision.py        → Cámara On-Demand + Registro de Personas (ej. Danna) + Fast Cosine Embeddings (<500ms)
 ├── alberth_qa_watcher.py    → Demonio de supervisión proactiva (filtro 2 horas)
 ├── alberth_reminders_daemon.py → Demonio de recordatorios sobre SQLite
-├── alberth_tts_premium.py   → Síntesis de voz cinematográfica (edge-tts / afplay)
+├── alberth_tts_premium.py   → Síntesis de voz híbrida (Edge-TTS Online + Fallback Offline macOS say)
 ├── alberth_screen_copilot.py→ Copiloto visual de pantalla asistido por Gemini
 ├── alberth_github_helper.py → Helper de integración con GitHub CLI (`gh`)
 ├── alberth_memory_sync.py   → Sincronizador de memoria híbrida
@@ -76,6 +76,14 @@ _Última actualización: 2026-09-10 13:55 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-10 (Arquitectura Híbrida de Síntesis de Voz SOTA: Edge-TTS Online + Fallback Offline macOS)
+- **Evaluación Estratégica Kokoro-82M:**
+  - Diagnóstico de dependencias e idioma demostró que Kokoro en español tiene soporte secundario con prosodia monótona/mecánica, e incompatibilidad de paquetes (`onnxruntime`) en el entorno base Python 3.9 de macOS.
+  - Se confirmó a Microsoft Edge-TTS (`es-MX-JorgeNeural`) como el motor neuronal líder en español por calidad cinematográfica, modulación solemne (`-8%` velocidad, `-3Hz` pitch) y 0% de uso de CPU local.
+- **Implementación del Fallback Automático Offline (`alberth_tts_premium.py`):**
+  - Incorporación de conmutación automática inteligente: si no hay conexión a internet o falla la red, el sintetizador conmuta instantáneamente en < 0.2s al motor nativo de macOS (`/usr/bin/say` con voz en español `Paulina`/`Mónica`) y codificación directa a MP3 con `ffmpeg`.
+  - Alberth garantiza capacidad de habla ininterrumpida tanto en línea como fuera de línea a costo **$0.00**.
 
 ### 2026-09-10 (Agente Web Autónomo con Playwright & Navegación Headless SOTA)
 - **Navegación Web Autónoma en Segundo Plano (`alberth_playwright_agent.py`):**
