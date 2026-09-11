@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-10 17:48 GMT-5_
+_Última actualización: 2026-09-11 00:51 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -22,8 +22,9 @@ _Última actualización: 2026-09-10 17:48 GMT-5_
 │   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
 ├── alberth_playwright_agent.py → Agente Web Autónomo (Playwright Headless + Marcadores DOM [data-alberth-id])
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
-├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision)
-├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/floating` + `/panel/assets` (Puerto 8080)
+├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision + Groq Fallback)
+├── alberth_video_analyzer.py → Pipeline de descarga de video raw (yt-dlp), extracción de fotogramas (ffmpeg) e inspección de Deepfakes frame-a-frame
+├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/api/video-analyze` + `/floating` (Puerto 8080)
 ├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Spotify AppleScript, Volumen, Apps)
 ├── alberth_apple_helper.py  → Automatización nativa macOS (Calendario, Recordatorios, Notas, Atajos)
 ├── alberth_search_helper.py → Motor de Búsqueda Web Abierta (DuckDuckGo + Wikipedia + Clima)
@@ -50,11 +51,30 @@ _Última actualización: 2026-09-10 17:48 GMT-5_
 - **Panel Web HUD:** `http://localhost:8080` (FastAPI / Three.js 3D Orb / WebSockets)
 - **Desktop Floating Bar v4.5+:** `http://localhost:8080/floating` (Context Autocomplete + QA 7-Day Chart + Push PWA + Auto-DND)
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer & Predictive QA Visualizer)
+- **Video & Deepfake Analyzer API:** `/api/video-analyze` (Raw Video Processing & Frame-by-Frame Inspection)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
 - **Túnel Seguro Cloudflare / Localhost.run:** `https://af3d1d560697b0.lhr.life`
 - **Audit Logs:** `logs/audit_logs.jsonl`
 - **Modo de Contexto Activo:** `.context_mode` (`laboral` | `personal`)
+
+---
+
+## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-11 (Análisis de Video Raw, Detección de Deepfakes Frame-a-Frame & Mejoras UX)
+- **Pipeline de Video Raw y Deepfakes (`alberth_video_analyzer.py`):**
+  - Creado módulo con soporte de descarga multiorigen mediante `yt-dlp` (TikTok, YouTube, Instagram Reels, X/Twitter, Vimeo) o procesado de archivos locales `.mp4`/`.mov`.
+  - Extracción de fotogramas clave distribuidos en el tiempo usando `ffmpeg`.
+  - Inspección frame-a-frame con modelos de visión (Gemini 3.5-flash y Meta Llama 3.2 Vision) para detectar inconsistencias de mandíbula, piel sintética, sombras, parpadeo o deformación espacial (warping).
+  - Integrado a `alberth_web_server.py` mediante detección automática de URLs de video en consultas del usuario y el nuevo endpoint `POST /api/video-analyze`.
+- **Actualización de Stack de Modelos 2026 & Corrección de Truncado:**
+  - Gemini deprecado actualizado a `gemini-3.5-flash` y `gemini-3.8-flash`. Agregado Groq (`llama-3.3-70b-versatile`) como fallback terciario.
+  - Incrementado `max_tokens` de 500 a 1200 en todo el sistema para garantizar respuestas completas sin cortes a la mitad.
+  - Añadida regla de system prompt y post-procesador regex para eliminar símbolos de markdown (`**`, `#`, `*`) en la salida hacia la UI.
+- **Mejoras UX en Consola HUD (`panel/index.html`):**
+  - Sobreescrito el `user-select: none` global para la clase `.msg-body`, permitiendo seleccionar y copiar texto directamente de los diálogos de la consola.
+  - Añadido botón interactivo `📋 Copiar` en cada mensaje de Alberth con confirmación visual (*✓ Copiado*) de 1.5s.
 
 ---
 
