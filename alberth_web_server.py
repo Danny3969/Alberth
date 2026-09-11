@@ -204,13 +204,19 @@ def run_alberth_full(text: str) -> dict:
 
     is_direct_camera = any(k in q_lower for k in camera_keywords)
 
+    # Excluir consultas que contengan URLs explícitas de la detección de cámara/pantalla
+    has_url = bool(re.search(r'https?://', q_lower))
+
     # Preguntas de seguimiento visual en contexto reciente (< 90 segundos)
     is_followup_vision = (
+        not has_url and
         (time.time() - _last_vision_time < 90) and
-        any(k in q_lower for k in ["y ahora", "ahora qué", "ahora que", "lo ves", "qué tal", "que tal", "ves", "esto", "sostengo", "tengo"])
+        any(k in q_lower for k in ["y ahora", "ahora qué", "ahora que", "mira ahora", "mírame ahora", "qué ves ahora", "qué observas ahora"])
     )
 
-    is_camera_query = not is_screen_query and (is_direct_camera or is_followup_vision)
+    is_camera_query = not has_url and not is_screen_query and (is_direct_camera or is_followup_vision)
+    if has_url:
+        is_screen_query = False
 
     # ── Ejecutar Visión si corresponde ────────────────────────────────────────
     if is_camera_query or is_screen_query:
