@@ -142,6 +142,44 @@ _last_vision_time: float = 0.0
 # Contexto del último video analizado para Chat Interactivo Q&A (estilo Wayin.ai / ScreenApp)
 _active_video_context: dict = {}
 
+_cached_memory_summary: str = ""
+_last_memory_check: float = 0.0
+
+def get_core_memory_summary() -> str:
+    """Extrae un extracto de alto valor de MEMORY.md para inyectar memoria a largo plazo en cada sesión."""
+    global _cached_memory_summary, _last_memory_check
+    now = time.time()
+    if _cached_memory_summary and (now - _last_memory_check < 60):
+        return _cached_memory_summary
+
+    mem_file = WORKSPACE / "MEMORY.md"
+    if not mem_file.exists():
+        return ""
+
+    try:
+        content = mem_file.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        selected = []
+        capture = False
+        captured_lines = 0
+        for line in lines:
+            if any(h in line for h in ["## 🏗️ Arquitectura", "## ⚙️ Configuración", "## 📌 Historial de Eventos", "## 🎨 NOVEDADES"]):
+                capture = True
+            elif line.startswith("## ") and capture:
+                if captured_lines > 45:
+                    capture = False
+            if capture:
+                selected.append(line)
+                captured_lines += 1
+                if captured_lines >= 60:
+                    break
+        _cached_memory_summary = "\n".join(selected)
+        _last_memory_check = now
+        return _cached_memory_summary
+    except Exception as e:
+        print(f"[Memory Read Error] {e}")
+        return ""
+
 def run_alberth_full(text: str) -> dict:
     """Pipeline maestro de Alberth v3.0:
     1. Sentido Visual:
@@ -371,13 +409,19 @@ def run_alberth_full(text: str) -> dict:
         soul_content = soul_file.read_text(encoding="utf-8") if soul_file.exists() else ""
         orq_file = WORKSPACE / "agents" / "orquestador" / "PROMPT.md"
         orq_prompt = orq_file.read_text(encoding="utf-8") if orq_file.exists() else ""
+        mem_summary = get_core_memory_summary()
+
         system_prompt = (
             f"AGENTE ORQUESTADOR CORE (OPENCLAW):\n{orq_prompt}\n\n"
             f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
+            f"MEMORIA TÉCNICA Y DE PROYECTOS PERSISTENTE (MEMORY.md):\n{mem_summary}\n\n"
             "DIRECTRICES OBLIGATORIAS:\n"
-            "- Eres Alberth, el asistente personal de élite y mano derecha del Señor Danny.\n"
+            "- Eres Alberth, el asistente personal de élite, mano derecha, analista estratégico y desarrollador del Señor Danny.\n"
             "- Dirígete siempre al usuario con el título 'Señor Danny' con respeto y cercanía profesional.\n"
-            "- Estás conectado localmente al hardware de su Mac: dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla, síntesis de voz y control de aplicaciones y archivos del sistema.\n"
+            "- INFRAESTRUCTURA REAL Y AUTOCONCIENCIA: Estás alojado y te ejecutas localmente de forma nativa en este iMac ('contabilidad') sobre macOS bare-metal con Python 3.9 y 4 procesos PM2. NO eres un chatbot web ni operas en un contenedor Docker. La hoja de ruta arquitectónica oficial es que eventualmente estarás alojado y funcionando de forma centralizada desde la MacBook Pro como servidor dedicado maestro, mientras este iMac y los dispositivos móviles (Android/iPhone) operarán como clientes y nodos de interfaz.\n"
+            "- HERRAMIENTAS ACTIVAS: Dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla en tiempo real, síntesis de voz Edge-TTS, control de aplicaciones y archivos de macOS, Suite de Inteligencia de Video Multimodal (Groq Whisper Turbo + OCR + descarga directa HD TikTok/YouTube), agentes autónomos (LangGraph multi-agente, Playwright browser) y memoria persistente.\n"
+            "- SAFETY GUARD: Nunca ejecutes comandos destructivos en la terminal ni modifiques código de proyectos del Señor Danny sin su confirmación explícita previa.\n"
+            "- AUTOEVALUACIÓN: Si se te pide un autodiagnóstico o auditoría técnica de ti mismo, básate en el estado real de tus herramientas, procesos PM2 y hardware en lugar de dar respuestas teóricas abstractas.\n"
             "- Responde siempre con seguridad, inteligencia, concisión y análisis directo en español. Nunca uses frases condescendientes ni muletillas vacías.\n"
             "- FORMATO OBLIGATORIO: Usa SOLO texto plano sin ningún tipo de formato markdown. Absolutamente prohibido usar asteriscos (**texto**), almohadillas (#), guiones de lista (* item), bloques de código (```), o cualquier otro símbolo de markdown. Escribe como si fuera una conversación natural y directa. Las respuestas deben ser completas, no las cortes a la mitad."
         )

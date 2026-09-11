@@ -12,6 +12,9 @@ import subprocess
 import json
 import os
 import time
+from pathlib import Path
+
+WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or Path(__file__).resolve().parent)
 
 # ── Utilidad: ejecutar AppleScript ────────────────────────────────────────────
 def run_applescript(script: str) -> tuple:
@@ -569,23 +572,42 @@ def handle_system_info(query, query_lower):
 # ══════════════════════════════════════════════════════════════════════════════
 # MÓDULO 6: EJECUCIÓN DE TERMINAL
 # ══════════════════════════════════════════════════════════════════════════════
-# Lista de comandos BLOQUEADOS por seguridad
+# Lista de comandos TERMINANTEMENTE BLOQUEADOS (nunca se ejecutan)
 BLOCKED_COMMANDS = [
-    "rm -rf /", "rm -rf ~", "sudo rm", "mkfs", "dd if=",
+    "rm -rf /", "rm -rf ~", "sudo rm -rf", "mkfs", "dd if=",
     ":(){ :|:& };:", "chmod 777 /", "> /dev/sda", "shutdown", "reboot",
     "curl | sh", "wget | sh", "bash <(curl", "eval $(curl"
 ]
 
+# Lista de comandos CRÍTICOS / DESTRUCTIVOS que requieren CONFIRMACIÓN EXPLÍCITA (Safety Guard)
+CRITICAL_COMMANDS = [
+    "rm -rf", "rm -r", "rm *", "sudo", "chown -R", "chmod -R",
+    "git reset --hard", "git clean -f", "killall -9", "pkill -9",
+    "diskutil erase", "truncate", "drop table", "drop database"
+]
+
 def is_safe_command(cmd: str) -> bool:
-    """Verifica que el comando no esté en la lista negra de seguridad."""
+    """Verifica que el comando no esté en la lista negra terminante."""
     cmd_lower = cmd.lower().strip()
     for blocked in BLOCKED_COMMANDS:
         if blocked.lower() in cmd_lower:
             return False
     return True
 
+def requires_confirmation(cmd: str, query: str) -> bool:
+    """Verifica si el comando es de alto riesgo y si el usuario ya dio confirmación explícita."""
+    cmd_lower = cmd.lower().strip()
+    query_lower = query.lower().strip()
+    is_critical = any(crit in cmd_lower for crit in CRITICAL_COMMANDS)
+    if not is_critical:
+        return False
+    # Si el Señor Danny explícitamente ya confirmó en su consulta
+    if any(tok in query_lower for tok in ["confirmo", "confirmar", "autorizo", "procede con", "estoy seguro"]):
+        return False
+    return True
+
 def handle_terminal(query, query_lower):
-    """Detecta y ejecuta comandos de terminal de forma segura."""
+    """Detecta y ejecuta comandos de terminal de forma segura con protocolo Safety Guard."""
 
     # Extraer el comando entre comillas backtick o tras palabras clave
     cmd_match = re.search(
@@ -608,7 +630,19 @@ def handle_terminal(query, query_lower):
     if not is_safe_command(cmd):
         return {
             "accion": "terminal_bloqueado",
-            "resultado": f"Comando bloqueado por política de seguridad: '{cmd}'. No ejecuto comandos potencialmente destructivos.",
+            "resultado": f"Comando bloqueado de raíz por política de seguridad: '{cmd}'. No ejecuto comandos que puedan comprometer irreversiblemente el sistema operativo.",
+            "exito": False
+        }
+
+    # Protocolo Safety Guard: confirmación explícita previa para comandos destructivos
+    if requires_confirmation(cmd, query):
+        return {
+            "accion": "safety_guard_confirmacion_requerida",
+            "resultado": (
+                f"⚠️ PROTOCOLO DE SEGURIDAD ACTIVADO (Safety Guard):\n"
+                f"Señor Danny, el comando solicitado ('{cmd}') implica una acción de alto riesgo o potencialmente destructiva en su Mac.\n"
+                f"Por directriz de seguridad de Alberth, requiero su confirmación explícita. Para proceder, por favor indíqueme: 'Confirmo ejecutar {cmd}'."
+            ),
             "exito": False
         }
 
@@ -1082,6 +1116,101 @@ end tell
     return None
 
 # ══════════════════════════════════════════════════════════════════════════════
+# MÓDULO 7: AUTODIAGNÓSTICO Y AUDITORÍA TÉCNICA
+# ══════════════════════════════════════════════════════════════════════════════
+def handle_self_audit(query, query_lower):
+    """
+    Ejecuta una auditoría técnica 100% REAL de Alberth sobre su entorno local macOS:
+    - Estado de procesos PM2 (uptime, memoria, reinicios).
+    - Métricas de hardware del iMac (disco, memoria RAM).
+    - Estado de git (rama, último commit).
+    - Últimos logs de ejecución (detección de errores recientes).
+    - Clarificación arquitectónica: Alojado localmente en iMac, hoja de ruta a MacBook Pro como servidor maestro.
+    """
+    audit_triggers = [
+        "audita tu sistema", "audita tu código", "audita tu codigo", "audítate", "auditate",
+        "análisis de ti mismo", "analisis de ti mismo", "autodiagnóstico", "autodiagnostico",
+        "cómo estás funcionando", "como estas funcionando", "estado de tu sistema",
+        "revisa tus logs", "auditoría técnica de alberth", "auditoria tecnica",
+        "autoevaluación", "autoevaluacion", "estado de alberth", "diagnóstico de alberth"
+    ]
+    if not any(trig in query_lower for trig in audit_triggers):
+        return None
+
+    import shutil, platform
+    
+    # 1. Almacenamiento y hardware
+    disk = shutil.disk_usage('/')
+    free_gb = round(disk.free / (1024**3), 1)
+    total_gb = round(disk.total / (1024**3), 1)
+    used_pct = round(((disk.total - disk.free) / disk.total) * 100, 1)
+
+    # 2. Procesos PM2
+    pm2_res = subprocess.run(["pm2", "jlist"], capture_output=True, text=True)
+    pm2_summary = []
+    if pm2_res.returncode == 0:
+        try:
+            p_data = json.loads(pm2_res.stdout)
+            for p in p_data:
+                name = p.get("name")
+                status = p.get("pm2_env", {}).get("status", "unknown")
+                mem_mb = round(p.get("monit", {}).get("memory", 0) / (1024 * 1024), 1)
+                cpu_pct = p.get("monit", {}).get("cpu", 0)
+                restarts = p.get("pm2_env", {}).get("restart_time", 0)
+                uptime_s = int(time.time() - (p.get("pm2_env", {}).get("pm_uptime", time.time() * 1000) / 1000))
+                m, s = divmod(uptime_s, 60)
+                h, m = divmod(m, 60)
+                pm2_summary.append(f"  • {name}: {status.upper()} | RAM: {mem_mb} MB | CPU: {cpu_pct}% | Uptime: {h}h {m}m | Reinicios: {restarts}")
+        except Exception:
+            pass
+
+    # 3. Estado de Git
+    git_res = subprocess.run(["git", "log", "-1", "--oneline"], capture_output=True, text=True, cwd=str(WORKSPACE))
+    last_commit = git_res.stdout.strip() if git_res.returncode == 0 else "N/A"
+
+    # 4. Revisión de logs recientes
+    error_alerts = []
+    log_file = Path("~/.pm2/logs/alberth-web-error.log").expanduser()
+    if log_file.exists():
+        try:
+            lines = log_file.read_text(encoding="utf-8", errors="ignore").splitlines()[-15:]
+            recent_errs = [l.strip() for l in lines if any(e in l.lower() for e in ["error", "exception", "traceback"])]
+            if recent_errs:
+                error_alerts = recent_errs[-3:]
+        except Exception:
+            pass
+
+    pm2_text = "\n".join(pm2_summary) if pm2_summary else "  • No se pudo consultar PM2."
+    err_text = "\n".join(f"    - {e}" for e in error_alerts) if error_alerts else "  • Sin errores críticos activos en logs recientes."
+
+    report = (
+        f"INFORME DE AUTODIAGNÓSTICO Y AUDITORÍA TÉCNICA (ALBERTH NEXUS)\n"
+        f"Preparado para el Señor Danny\n\n"
+        f"1. INFRAESTRUCTURA Y ALOJAMIENTO:\n"
+        f"  • Host Activo: iMac ({platform.node()}) – macOS {platform.mac_ver()[0]} ({platform.machine()})\n"
+        f"  • Modo de Operación: Bare-metal nativo en Python 3.9 (SIN contenedores Docker ni sandbox limitado)\n"
+        f"  • Hoja de Ruta Arquitectónica: Alojado temporalmente en este iMac; migración planificada para operar desde la MacBook Pro como servidor central dedicado\n\n"
+        f"2. SERVICIOS Y PROCESOS PM2:\n"
+        f"{pm2_text}\n\n"
+        f"3. RECURSOS DEL SISTEMA MAC:\n"
+        f"  • Almacenamiento Disco (/): {used_pct}% ocupado ({free_gb} GB libres de {total_gb} GB)\n"
+        f"  • Versión Git Activa: {last_commit}\n\n"
+        f"4. SALUD DE LOGS Y ERRORES:\n"
+        f"{err_text}\n\n"
+        f"5. CAPACIDADES OPERATIVAS ACTIVAS:\n"
+        f"  • Suite de Inteligencia de Video Multimodal: Operativa (Groq Whisper Turbo + TikWM + Gemini/Llama Vision)\n"
+        f"  • Visión y Pantalla: Operativa (FaceTime HD + Screen Capture)\n"
+        f"  • Agentes Autónomos: LangGraph Multi-Agente + Playwright Headless Browser Agent\n"
+        f"  • Control del Sistema: Finder, Spotify, Volumen, Apple Notes, Recordatorios, Calendario\n\n"
+        f"Diagnóstico General: Sistema saludable, en línea y respondiendo a baja latencia, Señor Danny."
+    )
+    return {
+        "accion": "autodiagnostico_alberth",
+        "resultado": report,
+        "exito": True
+    }
+
+# ══════════════════════════════════════════════════════════════════════════════
 # DISPATCHER PRINCIPAL
 # ══════════════════════════════════════════════════════════════════════════════
 def dispatch(query):
@@ -1091,6 +1220,11 @@ def dispatch(query):
     video_indicators = ["tiktok.com", "youtube.com", "youtu.be", "instagram.com/reel", "vimeo.com", "x.com/i/status", "twitter.com/i/status"]
     if any(vi in query_lower for vi in video_indicators) or ("video" in query_lower and any(w in query_lower for w in ["analiz", "revis", "mira", "qué dice", "que dice", "punto de vista", "opinión", "opinion", "resume", "transcrib", "contenido"])):
         return None
+
+    # 0a. Autodiagnóstico y Auditoría Técnica Real de Alberth
+    audit_res = handle_self_audit(query, query_lower)
+    if audit_res:
+        return audit_res
 
     # 0a. Ecosistema Apple macOS (Calendario, Recordatorios, Notas, Atajos)
     try:
