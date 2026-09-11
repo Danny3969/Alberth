@@ -118,7 +118,7 @@ def describe_image_gemini(api_key, prompt, image_path, model="gemini-2.5-flash")
                 headers={"Content-Type": "application/json"}
             )
             try:
-                with urllib.request.urlopen(req, timeout=5) as resp:
+                with urllib.request.urlopen(req, timeout=12) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
                     text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
                     if text:

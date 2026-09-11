@@ -139,6 +139,9 @@ OLLAMA_MODELS = [
 # Marca de tiempo de la última interacción visual (para contexto de seguimiento)
 _last_vision_time: float = 0.0
 
+# Contexto del último video analizado para Chat Interactivo Q&A (estilo Wayin.ai / ScreenApp)
+_active_video_context: dict = {}
+
 def run_alberth_full(text: str) -> dict:
     """Pipeline maestro de Alberth v3.0:
     1. Sentido Visual:
@@ -340,38 +343,82 @@ def run_alberth_full(text: str) -> dict:
         # ── Extracción y Análisis de URLs y Videos en la Consulta ───────────────
         url_in_prompt = re.search(r'https?://[^\s]+', q_clean)
         prompt_with_context = q_clean
+
+        is_video_analysis_query = False
+        target_video_source = None
+
         if url_in_prompt:
             target_url = url_in_prompt.group(0)
             is_video_platform = any(domain in target_url.lower() for domain in [
                 "tiktok.com", "youtube.com", "youtu.be", "instagram.com", "twitter.com", "x.com", "vimeo.com"
-            ]) or any(kw in q_clean.lower() for kw in ["video", "deepfake", "analiza el video", "es real", "es falso", "falsificacion"])
-            
-            if is_video_platform:
-                try:
-                    import alberth_video_analyzer
-                    print(f"[VideoAnalyzer] Ejecutando análisis de video raw para: {target_url}")
-                    vid_result = alberth_video_analyzer.process_video(target_url, max_frames=5)
-                    if vid_result.get("success"):
-                        frames_desc = "\n".join([f"- [{f['timestamp']}]: {f['analysis']}" for f in vid_result.get("frame_breakdown", [])])
-                        prompt_with_context += (
-                            f"\n\n[ANÁLISIS DE VIDEO RAW Y FOTOGRAMAS CLAVE ({target_url})]:\n"
-                            f"Score de Autenticidad: {vid_result.get('authenticity_score')}\n"
-                            f"Veredicto Técnico: {vid_result.get('verdict')}\n"
-                            f"Fotogramas Clave Analizados:\n{frames_desc}\n\n"
-                            f"Utiliza este análisis técnico directo de los fotogramas para responder detalladamente al Señor Danny."
-                        )
-                    else:
-                        prompt_with_context += f"\n\n[NOTA DEL SISTEMA]: Intento de descarga/procesamiento del video ({target_url}): {vid_result.get('error')}. Responde evaluando el contexto y la tecnología actual de IA."
-                except Exception as vide:
-                    print(f"[VideoAnalyzer Error] {vide}")
-            else:
-                try:
-                    import alberth_browser_agent
-                    web_info = alberth_browser_agent.extract_web_content(target_url)
-                    if web_info and web_info.get("exito") and len(web_info.get("contenido", "").strip()) > 40:
-                        prompt_with_context += f"\n\n[CONTEXTO WEB EXTRAÍDO DE LA URL ({target_url})]:\nTítulo: {web_info['titulo']}\nContenido:\n{web_info['contenido']}"
-                except Exception as urle:
-                    print(f"[URL Context Extraction Error] {urle}")
+            ]) or target_url.lower().endswith((".mp4", ".mov", ".mkv", ".webm"))
+            if is_video_platform or any(kw in q_clean.lower() for kw in ["video", "deepfake", "analiza", "qué dice", "de qué trata"]):
+                is_video_analysis_query = True
+                target_video_source = target_url
+        elif any(kw in q_clean.lower() for kw in ["analiza el video", "analiza este video", "analizar video"]):
+            for word in q_clean.split():
+                if os.path.exists(word) and word.lower().endswith((".mp4", ".mov", ".mkv", ".webm", ".avi")):
+                    is_video_analysis_query = True
+                    target_video_source = word
+                    break
+
+        # 1. Ejecutar análisis completo de video
+        if is_video_analysis_query and target_video_source:
+            try:
+                import alberth_video_analyzer
+                print(f"[VideoIntelligence] 🎬 Ejecutando Suite de Inteligencia de Video para: {target_video_source}")
+                vid_result = alberth_video_analyzer.analyze_video_complete(target_video_source, user_prompt=q_clean)
+                if vid_result.get("success"):
+                    global _active_video_context
+                    _active_video_context = {
+                        "url": target_video_source,
+                        "title": vid_result.get("title", "Video"),
+                        "duration": vid_result.get("duration", 0),
+                        "transcript": vid_result.get("transcript", ""),
+                        "transcript_formatted": vid_result.get("transcript_formatted", ""),
+                        "report": vid_result.get("report", ""),
+                        "timestamp": time.time()
+                    }
+                    resp_text = vid_result.get("report")
+                else:
+                    prompt_with_context += f"\n\n[NOTA DEL SISTEMA]: Intento de procesamiento del video ({target_video_source}): {vid_result.get('error')}. Responde evaluando el contexto y solicita al Señor Danny verificar el enlace o archivo."
+            except Exception as vide:
+                print(f"[VideoAnalyzer Error] {vide}")
+
+        # 2. Chat Interactivo Q&A con el video previamente analizado (Wayin / ScreenApp Style)
+        elif not resp_text and _active_video_context and (time.time() - _active_video_context.get("timestamp", 0) < 1800):
+            video_qa_triggers = [
+                "video", "creador", "qué dijo", "que dijo", "qué dice", "que dice",
+                "argumento", "minuto", "segundo", "enlace", "resumen", "conclusiones",
+                "herramienta", "mencionó", "menciono", "opinión", "opinion", "por qué",
+                "por que", "explica", "profundiza", "qué opinas", "que opinas", "sobre eso",
+                "lo que viste", "lo que analizó", "lo que analizo"
+            ]
+            if any(trig in q_clean.lower() for trig in video_qa_triggers):
+                prompt_with_context = (
+                    f"{q_clean}\n\n"
+                    f"[CONTEXTO DE VIDEO ACTIVO PARA CHAT INTERACTIVO (Q&A ESTILO WAYIN.AI / SCREENAPP)]:\n"
+                    f"- Video: {_active_video_context.get('title')} ({_active_video_context.get('url')})\n"
+                    f"- Duración: {_active_video_context.get('duration', 0):.1f}s\n"
+                    f"- Transcripción completa con marcas de tiempo [MM:SS]:\n"
+                    f"{_active_video_context.get('transcript_formatted')}\n\n"
+                    f"- Informe analítico previo:\n"
+                    f"{_active_video_context.get('report', '')[:1200]}\n\n"
+                    f"[DIRECTRIZ DE RESPUESTA]: El Señor Danny te está haciendo una pregunta interactiva sobre este video. "
+                    f"Responde directamente basándote en la transcripción y el análisis, citando timestamps exactos si es relevante. "
+                    f"Sé perspicaz, objetivo, útil y respetuoso."
+                )
+
+        # 3. URL Web no-video (Extracción web estándar)
+        elif not resp_text and url_in_prompt:
+            target_url = url_in_prompt.group(0)
+            try:
+                import alberth_browser_agent
+                web_info = alberth_browser_agent.extract_web_content(target_url)
+                if web_info and web_info.get("exito") and len(web_info.get("contenido", "").strip()) > 40:
+                    prompt_with_context += f"\n\n[CONTEXTO WEB EXTRAÍDO DE LA URL ({target_url})]:\nTítulo: {web_info['titulo']}\nContenido:\n{web_info['contenido']}"
+            except Exception as urle:
+                print(f"[URL Context Extraction Error] {urle}")
 
         # ── Orquestador Multi-Modelo Fundacional (DeepSeek / Qwen Coder / Llama Vision) ──
         try:
@@ -936,17 +983,29 @@ async def set_dnd_timezone_config(payload: DndTimezonePayload, _: None = Depends
 class VideoAnalyzePayload(BaseModel):
     url: Optional[str] = None
     file_path: Optional[str] = None
+    prompt: Optional[str] = None
     max_frames: Optional[int] = 5
 
 @app.post("/api/video-analyze")
 async def analyze_video_endpoint(payload: VideoAnalyzePayload):
-    """Endpoint para análisis directo de video raw y detección de deepfakes."""
+    """Endpoint para la Suite de Inteligencia de Video (Wayin/ScreenApp/TikAlyzer style)."""
     target = payload.url or payload.file_path
     if not target:
         raise HTTPException(status_code=400, detail="Se requiere una URL o ruta de archivo local.")
     try:
         import alberth_video_analyzer
-        result = alberth_video_analyzer.process_video(target, max_frames=payload.max_frames or 5)
+        result = alberth_video_analyzer.analyze_video_complete(target, user_prompt=payload.prompt or "")
+        if result.get("success"):
+            global _active_video_context
+            _active_video_context = {
+                "url": target,
+                "title": result.get("title", "Video"),
+                "duration": result.get("duration", 0),
+                "transcript": result.get("transcript", ""),
+                "transcript_formatted": result.get("transcript_formatted", ""),
+                "report": result.get("report", ""),
+                "timestamp": time.time()
+            }
         return JSONResponse(result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

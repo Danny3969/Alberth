@@ -64,11 +64,12 @@ _Última actualización: 2026-09-11 00:51 GMT-5_
 ## 📌 Historial de Eventos e Hitos Recientes
 
 ### 2026-09-11 (Análisis de Video Raw, Detección de Deepfakes Frame-a-Frame & Mejoras UX)
-- **Pipeline de Video Raw y Deepfakes (`alberth_video_analyzer.py`):**
-  - Creado módulo con soporte de descarga multiorigen mediante `yt-dlp` (TikTok, YouTube, Instagram Reels, X/Twitter, Vimeo) o procesado de archivos locales `.mp4`/`.mov`.
-  - Extracción de fotogramas clave distribuidos en el tiempo usando `ffmpeg`.
-  - Inspección frame-a-frame con modelos de visión (Gemini 3.5-flash y Meta Llama 3.2 Vision) para detectar inconsistencias de mandíbula, piel sintética, sombras, parpadeo o deformación espacial (warping).
-  - Integrado a `alberth_web_server.py` mediante detección automática de URLs de video en consultas del usuario y el nuevo endpoint `POST /api/video-analyze`.
+- **Suite de Inteligencia de Video & Chat Interactivo (`alberth_video_analyzer.py`):**
+  - Descarga universal con `yt-dlp` (TikTok, YouTube, Instagram Reels, Shorts, X, archivos locales).
+  - Transcripción instantánea de audio palabra por palabra con marcas de tiempo usando Groq Whisper Turbo (`whisper-large-v3-turbo`) en <1.5s.
+  - Visión artificial frame-a-frame y OCR de pantalla para leer textos, títulos y subtítulos con Gemini 2.5 Flash / Llama Vision.
+  - Informe estructurado en 6 ejes: Gancho inicial (Hook & Retención 0-5s estilo TikAlyzer), Resumen ejecutivo, Desglose cronológico, Análisis crítico y validez de argumentos (estilo Gemini/Wayin), Verificación forense anti-deepfake y Consejos tácticos.
+  - Memoria contextual en `alberth_web_server.py` (`_active_video_context`) que habilita el **Chat Interactivo Q&A con el video** vía WebSocket o REST.
 - **Actualización de Stack de Modelos & Cascada Resiliente de Proveedores:**
   - Modelos de Gemini alineados con las versiones estables y activas de Google (`gemini-2.5-flash` y `gemini-2.5-flash-lite`, con respuestas en <1.0s).
   - Integrado Groq como proveedor fundacional de primera clase (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`, `openai/gpt-oss-20b`) con latencias de 0.4s.
