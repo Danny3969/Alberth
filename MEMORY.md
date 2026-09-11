@@ -55,6 +55,9 @@ _Última actualización: 2026-09-11 00:51 GMT-5_
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
 - **Modo Operativo Activo:** Servidor Local Autónomo en iMac de Contabilidad (`http://localhost:8080` y LAN `http://192.168.0.41:8080`)
+- **Hoja de Ruta de Servidor:** Migración centralizada planificada hacia MacBook Pro como servidor maestro dedicado (iMac y móviles como nodos cliente)
+- **Protocolo de Seguridad:** Safety Guard activo para comandos de terminal destructivos y confirmaciones
+- **Motor de Autodiagnóstico:** Auto-inspección en tiempo real sobre PM2, hardware y logs (`handle_self_audit`)
 - **Túnel Remoto Cloudflare / Externo:** Bajo demanda (inactivo por modo local)
 - **Audit Logs:** `logs/audit_logs.jsonl`
 - **Modo de Contexto Activo:** `.context_mode` (`laboral` | `personal`)
@@ -63,22 +66,30 @@ _Última actualización: 2026-09-11 00:51 GMT-5_
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
-### 2026-09-11 (Análisis de Video Raw, Detección de Deepfakes Frame-a-Frame & Mejoras UX)
-- **Suite de Inteligencia de Video & Chat Interactivo (`alberth_video_analyzer.py`):**
-  - Descarga universal con `yt-dlp` (TikTok, YouTube, Instagram Reels, Shorts, X, archivos locales).
-  - Transcripción instantánea de audio palabra por palabra con marcas de tiempo usando Groq Whisper Turbo (`whisper-large-v3-turbo`) en <1.5s.
+### 2026-09-11 (Suite de Video Multimodal, Blindaje TikTok, Inyección de Memoria & Autodiagnóstico)
+- **Suite de Inteligencia de Video Multimodal (`alberth_video_analyzer.py`):**
+  - Descarga universal con `yt-dlp` y bypass especializado para TikTok mediante API directa TikWM en HD sin marcas de agua.
+  - Transcripción instantánea palabra por palabra con marcas de tiempo usando Groq Whisper Turbo (`whisper-large-v3-turbo`) en <1.5s.
   - Visión artificial frame-a-frame y OCR de pantalla para leer textos, títulos y subtítulos con Gemini 2.5 Flash / Llama Vision.
-  - Informe estructurado en 6 ejes: Gancho inicial (Hook & Retención 0-5s estilo TikAlyzer), Resumen ejecutivo, Desglose cronológico, Análisis crítico y validez de argumentos (estilo Gemini/Wayin), Verificación forense anti-deepfake y Consejos tácticos.
-  - Memoria contextual en `alberth_web_server.py` (`_active_video_context`) que habilita el **Chat Interactivo Q&A con el video** vía WebSocket o REST.
+  - Informe estructurado en 6 ejes: Gancho inicial (0-5s), Resumen ejecutivo, Desglose cronológico, Análisis crítico y validez de argumentos, Verificación forense anti-deepfake y Consejos tácticos.
+  - Memoria contextual en `alberth_web_server.py` (`_active_video_context`) que habilita el **Chat Interactivo Q&A con el video**.
+- **Blindaje del Pipeline y Eliminación de Falso Positivo (`alberth_system_helper.py`):**
+  - Se corrigió la regla regex que capturaba `contenido de` y listaba erróneamente el Escritorio (`~/Desktop`).
+  - Bypass explícito para ignorar URLs y consultas de video en el gestor de archivos.
+  - La Suite de Video se elevó al Paso 2.8 en `alberth_web_server.py` para procesarse antes de cualquier helper del sistema Mac.
+- **Implementación de las 4 Recomendaciones de Autoconciencia y Seguridad:**
+  - **1. Autoconciencia & Hoja de Ruta (`SOUL.md` + `alberth_web_server.py`):** Alberth reconoce que opera de forma nativa en este iMac (`contabilidad`) sobre macOS bare-metal con 4 procesos PM2 (eliminando el mito del contenedor), y que su destino planificado es operar centralmente desde la MacBook Pro como servidor maestro.
+  - **2. Inyección Dinámica de Memoria (`MEMORY.md`):** Función `get_core_memory_summary()` inyecta automáticamente el estado de proyectos en el `system_prompt` de cada sesión.
+  - **3. Protocolo de Seguridad (*Safety Guard*):** Bloqueo de comandos críticos (`rm -rf`, `sudo`, `diskutil`) requiriendo confirmación explícita previa del Señor Danny.
+  - **4. Motor de Auto-Inspección Real (`handle_self_audit`):** Ante peticiones de autodiagnóstico o auditoría técnica, Alberth consulta métricas reales de PM2, disco, Git y logs, entregando un reporte 100% verificado.
 - **Actualización de Stack de Modelos & Cascada Resiliente de Proveedores:**
-  - Modelos de Gemini alineados con las versiones estables y activas de Google (`gemini-2.5-flash` y `gemini-2.5-flash-lite`, con respuestas en <1.0s).
-  - Integrado Groq como proveedor fundacional de primera clase (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`, `openai/gpt-oss-20b`) con latencias de 0.4s.
-  - En NVIDIA NIM, consolidado `meta/llama-3.2-11b-vision-instruct` y depurados modelos retirados (410 Gone).
-  - Incrementado `max_tokens` a 1200 en todo el sistema para garantizar respuestas completas sin cortes a la mitad.
-  - Añadida regla de system prompt y post-procesador regex para eliminar símbolos de markdown (`**`, `#`, `*`) en la salida hacia la UI.
+  - Modelos de Gemini alineados con versiones estables (`gemini-2.5-flash` y `gemini-2.5-flash-lite`, <1.0s).
+  - Groq integrado como conector primario (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, latencia 0.4s).
+  - Límite de `max_tokens` fijado en 1200 en todo el sistema para evitar respuestas truncadas.
+  - Post-procesador regex para eliminar símbolos de markdown en la salida hacia la UI.
 - **Mejoras UX en Consola HUD (`panel/index.html`):**
-  - Sobreescrito el `user-select: none` global para la clase `.msg-body`, permitiendo seleccionar y copiar texto directamente de los diálogos de la consola.
-  - Añadido botón interactivo `📋 Copiar` en cada mensaje de Alberth con confirmación visual (*✓ Copiado*) de 1.5s.
+  - Selección libre de texto en consola (`.msg-body`).
+  - Botón interactivo `📋 Copiar` en cada mensaje de Alberth con feedback visual (`✓ Copiado`).
 
 ---
 
