@@ -136,7 +136,7 @@ def detect_role_for_query(prompt: str, has_image: bool = False) -> str:
 def _call_nvidia_nim(
     model: str,
     messages: List[Dict[str, Any]],
-    max_tokens: int = 600,
+    max_tokens: int = 1200,
     temperature: float = 0.5,
     timeout: float = 4.5
 ) -> Optional[str]:
@@ -174,7 +174,7 @@ def _call_nvidia_nim(
 def _call_ollama(
     model: str,
     prompt_or_messages: Any,
-    max_tokens: int = 600,
+    max_tokens: int = 1200,
     temperature: float = 0.5,
     images: Optional[List[str]] = None,
     timeout: float = 3.5
@@ -222,7 +222,7 @@ def _call_gemini_fallback(
     system_instruction: str = "",
     image_bytes: Optional[bytes] = None,
     mime_type: str = "image/jpeg",
-    max_tokens: int = 600,
+    max_tokens: int = 1200,
     timeout: float = 15.0
 ) -> Optional[str]:
     """Fallback universal a Google Gemini 2.5 Flash / Flash Lite con reintento ante 429."""
@@ -275,7 +275,7 @@ def query_deepseek_reasoning(
     prompt: str,
     system_prompt: str = "",
     history: Optional[List[Dict[str, str]]] = None,
-    max_tokens: int = 700
+    max_tokens: int = 1200
 ) -> Tuple[str, str]:
     """
     Ejecuta el especialista de Razonamiento Lógico Profundo: DEEPSEEK.
@@ -336,7 +336,7 @@ def query_qwen_coder(
     prompt: str,
     system_prompt: str = "",
     history: Optional[List[Dict[str, str]]] = None,
-    max_tokens: int = 800
+    max_tokens: int = 1200
 ) -> Tuple[str, str]:
     """
     Ejecuta el especialista en Programación y Código: QWEN 2.5 CODER.
@@ -382,7 +382,7 @@ def query_llama_vision(
     image_path: Optional[str] = None,
     system_prompt: str = "",
     history: Optional[List[Dict[str, str]]] = None,
-    max_tokens: int = 500
+    max_tokens: int = 1200
 ) -> Tuple[str, str]:
     """
     Ejecuta el especialista en Visión Multimodal y Velocidad General: META LLAMA 3.3 / 3.2 VISION.
@@ -456,7 +456,7 @@ def query_foundation_model(
     image_path: Optional[str] = None,
     system_prompt: str = "",
     history: Optional[List[Dict[str, str]]] = None,
-    max_tokens: int = 600
+    max_tokens: int = 1200
 ) -> Tuple[str, str, str]:
     """
     Punto de entrada principal para toda la inteligencia de Alberth:

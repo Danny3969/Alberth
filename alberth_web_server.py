@@ -332,7 +332,8 @@ def run_alberth_full(text: str) -> dict:
             "- Eres Alberth, el asistente personal de élite y mano derecha del Señor Danny.\n"
             "- Dirígete siempre al usuario con el título 'Señor Danny' con respeto y cercanía profesional.\n"
             "- Estás conectado localmente al hardware de su Mac: dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla, síntesis de voz y control de aplicaciones y archivos del sistema.\n"
-            "- Responde siempre con seguridad, inteligencia, concisión y análisis directo en español. Nunca uses frases condescendientes ni muletillas vacías."
+            "- Responde siempre con seguridad, inteligencia, concisión y análisis directo en español. Nunca uses frases condescendientes ni muletillas vacías.\n"
+            "- FORMATO OBLIGATORIO: Usa SOLO texto plano sin ningún tipo de formato markdown. Absolutamente prohibido usar asteriscos (**texto**), almohadillas (#), guiones de lista (* item), bloques de código (```), o cualquier otro símbolo de markdown. Escribe como si fuera una conversación natural y directa. Las respuestas deben ser completas, no las cortes a la mitad."
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
@@ -358,7 +359,7 @@ def run_alberth_full(text: str) -> dict:
                 prompt=prompt_with_context,
                 system_prompt=system_prompt,
                 history=_conv_history[-8:],
-                max_tokens=500
+                max_tokens=1200
             )
             if ans_text and ans_text != "Error" and not ans_text.startswith("Señor Danny, no fue posible"):
                 resp_text = ans_text
@@ -399,7 +400,7 @@ def run_alberth_full(text: str) -> dict:
                             {"role": "system", "content": system_prompt},
                             {"role": "user", "content": q_clean}
                         ],
-                        "max_tokens": 500,
+                            "max_tokens": 1200,
                         "temperature": 0.5
                     }
                     groq_resp = _req_groq.post(
@@ -421,6 +422,14 @@ def run_alberth_full(text: str) -> dict:
         # Fallback final cortés y en carácter
         if not resp_text:
             resp_text = "Señor Danny, en este momento todos los proveedores de IA están experimentando alta demanda. Por favor intente de nuevo en unos segundos."
+
+    # ── Limpiar Markdown de la respuesta final (seguro de respaldo) ──────────
+    import re as _re
+    resp_text = _re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', resp_text)   # **bold** y *italic*
+    resp_text = _re.sub(r'^#{1,6}\s+', '', resp_text, flags=_re.MULTILINE)  # # encabezados
+    resp_text = _re.sub(r'^[-*]\s+', '- ', resp_text, flags=_re.MULTILINE)  # * listas → guion
+    resp_text = _re.sub(r'`{1,3}[^`]*`{1,3}', lambda m: m.group(0).replace('`',''), resp_text)  # `code`
+    resp_text = resp_text.strip()
 
     # Guardar en memoria de conversación
     _conv_history.append({"role": "user", "content": q_clean})
