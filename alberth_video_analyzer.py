@@ -160,7 +160,7 @@ def analyze_frame_deepfake(api_key, frame_info):
     # Probar Gemini Vision primero
     gkey = get_gemini_api_key()
     if gkey:
-        desc = describe_image_gemini(gkey, prompt, frame_path, model="gemini-3.5-flash")
+        desc = describe_image_gemini(gkey, prompt, frame_path, model="gemini-2.5-flash")
         if desc:
             return desc
 

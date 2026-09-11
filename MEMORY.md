@@ -69,9 +69,11 @@ _Última actualización: 2026-09-11 00:51 GMT-5_
   - Extracción de fotogramas clave distribuidos en el tiempo usando `ffmpeg`.
   - Inspección frame-a-frame con modelos de visión (Gemini 3.5-flash y Meta Llama 3.2 Vision) para detectar inconsistencias de mandíbula, piel sintética, sombras, parpadeo o deformación espacial (warping).
   - Integrado a `alberth_web_server.py` mediante detección automática de URLs de video en consultas del usuario y el nuevo endpoint `POST /api/video-analyze`.
-- **Actualización de Stack de Modelos 2026 & Corrección de Truncado:**
-  - Gemini deprecado actualizado a `gemini-3.5-flash` y `gemini-3.8-flash`. Agregado Groq (`llama-3.3-70b-versatile`) como fallback terciario.
-  - Incrementado `max_tokens` de 500 a 1200 en todo el sistema para garantizar respuestas completas sin cortes a la mitad.
+- **Actualización de Stack de Modelos & Cascada Resiliente de Proveedores:**
+  - Modelos de Gemini alineados con las versiones estables y activas de Google (`gemini-2.5-flash` y `gemini-2.5-flash-lite`, con respuestas en <1.0s).
+  - Integrado Groq como proveedor fundacional de primera clase (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`, `openai/gpt-oss-20b`) con latencias de 0.4s.
+  - En NVIDIA NIM, consolidado `meta/llama-3.2-11b-vision-instruct` y depurados modelos retirados (410 Gone).
+  - Incrementado `max_tokens` a 1200 en todo el sistema para garantizar respuestas completas sin cortes a la mitad.
   - Añadida regla de system prompt y post-procesador regex para eliminar símbolos de markdown (`**`, `#`, `*`) en la salida hacia la UI.
 - **Mejoras UX en Consola HUD (`panel/index.html`):**
   - Sobreescrito el `user-select: none` global para la clase `.msg-body`, permitiendo seleccionar y copiar texto directamente de los diálogos de la consola.

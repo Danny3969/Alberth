@@ -382,7 +382,7 @@ def run_alberth_full(text: str) -> dict:
                 history=_conv_history[-8:],
                 max_tokens=1200
             )
-            if ans_text and ans_text != "Error" and not ans_text.startswith("Señor Danny, no fue posible"):
+            if ans_text and ans_text != "Error" and not ans_text.startswith("Señor Danny, no fue posible") and "momentáneamente no disponibles" not in ans_text:
                 resp_text = ans_text
                 print(f"[Foundation Models] Rol: {role_assigned} | Modelo: {model_tag}")
         except Exception as e:
@@ -392,7 +392,7 @@ def run_alberth_full(text: str) -> dict:
         if not resp_text:
             gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
             if gemini_key:
-                for gm in ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-3.1-flash-lite"]:
+                for gm in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash"]:
                     try:
                         g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
                         g_payload = {
@@ -409,36 +409,38 @@ def run_alberth_full(text: str) -> dict:
                     except Exception as e:
                         print(f"[Gemini Direct Stream {gm}] {e}")
 
-        # ── Fallback terciario: Groq (Llama 3.3 70B) ────────────────────────────
+        # ── Fallback terciario: Groq (GPT-OSS 120B / Qwen 3.8 / GPT-OSS 20B) ─────
         if not resp_text:
             groq_key = os.environ.get("GROQ_API_KEY")
             if groq_key:
-                try:
-                    import requests as _req_groq
-                    groq_payload = {
-                        "model": "llama-3.3-70b-versatile",
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": q_clean}
-                        ],
+                import requests as _req_groq
+                for groq_m in ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b", "groq/compound-mini"]:
+                    try:
+                        groq_payload = {
+                            "model": groq_m,
+                            "messages": [
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": q_clean}
+                            ],
                             "max_tokens": 1200,
-                        "temperature": 0.5
-                    }
-                    groq_resp = _req_groq.post(
-                        "https://api.groq.com/openai/v1/chat/completions",
-                        json=groq_payload,
-                        headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
-                        timeout=10
-                    )
-                    if groq_resp.status_code == 200:
-                        txt = groq_resp.json()["choices"][0]["message"]["content"].strip()
-                        if txt:
-                            resp_text = txt
-                            print(f"[Groq Fallback] Respuesta OK — Llama 3.3 70B")
-                    else:
-                        print(f"[Groq Fallback] HTTP {groq_resp.status_code}: {groq_resp.text[:100]}")
-                except Exception as ge:
-                    print(f"[Groq Fallback Error] {ge}")
+                            "temperature": 0.5
+                        }
+                        groq_resp = _req_groq.post(
+                            "https://api.groq.com/openai/v1/chat/completions",
+                            json=groq_payload,
+                            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                            timeout=4.0
+                        )
+                        if groq_resp.status_code == 200:
+                            txt = groq_resp.json()["choices"][0]["message"]["content"].strip()
+                            if txt:
+                                resp_text = txt
+                                print(f"[Groq Fallback] Respuesta OK — {groq_m}")
+                                break
+                        else:
+                            print(f"[Groq Fallback {groq_m}] HTTP {groq_resp.status_code}: {groq_resp.text[:80]}")
+                    except Exception as ge:
+                        print(f"[Groq Fallback {groq_m} Error] {ge}")
 
         # Fallback final cortés y en carácter
         if not resp_text:

@@ -217,19 +217,60 @@ def _call_ollama(
         return None
 
 
+def _call_groq(
+    messages: List[Dict[str, Any]],
+    model: str = "openai/gpt-oss-120b",
+    max_tokens: int = 1200,
+    temperature: float = 0.5,
+    timeout: float = 4.0
+) -> Optional[str]:
+    """Llama a Groq Cloud con modelos activos (GPT-OSS 120B / Qwen 3.8 / GPT-OSS 20B)."""
+    key = get_api_key("GROQ_API_KEY")
+    if not key:
+        return None
+    for m in [model, "qwen/qwen3.8-27b", "openai/gpt-oss-20b", "groq/compound-mini"]:
+        try:
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            payload = {
+                "model": m,
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "temperature": temperature
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {key}",
+                    "Content-Type": "application/json",
+                    "User-Agent": "AlberthAI/1.0"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                choice = data.get("choices", [{}])[0]
+                msg = choice.get("message", {})
+                content = msg.get("content", "").strip()
+                if content:
+                    return content
+        except Exception as e:
+            print(f"[Groq ({m})] Error: {e}", file=sys.stderr)
+    return None
+
+
 def _call_gemini_fallback(
     prompt: str,
     system_instruction: str = "",
     image_bytes: Optional[bytes] = None,
     mime_type: str = "image/jpeg",
     max_tokens: int = 1200,
-    timeout: float = 15.0
+    timeout: float = 6.0
 ) -> Optional[str]:
     """Fallback universal a Google Gemini 2.5 Flash / Flash Lite con reintento ante 429."""
     key = get_api_key("GEMINI_API_KEY") or get_api_key("GOOGLE_API_KEY")
     if not key:
         return None
-    for model_name in ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-3.1-flash-lite"]:
+    for model_name in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.5-flash"]:
         for attempt in range(2):
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
@@ -304,12 +345,17 @@ def query_deepseek_reasoning(
             if res:
                 return res, f"Ollama Local ({m})"
 
-    # 2. NVIDIA NIM (DeepSeek V4 Pro)
-    res = _call_nvidia_nim("deepseek-ai/deepseek-v4-pro-0813", messages, max_tokens=max_tokens, temperature=0.4)
+    # 2. Groq (Razonamiento ultrarrápido con GPT-OSS 120B o Qwen 3.8 27B)
+    res = _call_groq(messages, model="openai/gpt-oss-120b", max_tokens=max_tokens, temperature=0.3)
+    if res:
+        return res, "Groq (GPT-OSS 120B Razonamiento)"
+
+    # 3. NVIDIA NIM (DeepSeek V4 Pro)
+    res = _call_nvidia_nim("deepseek-ai/deepseek-v4-pro-0813", messages, max_tokens=max_tokens, temperature=0.4, timeout=4.0)
     if res:
         return res, "NVIDIA NIM (DeepSeek-V4-Pro)"
 
-    # 3. DeepSeek API Oficial (opcional)
+    # 4. DeepSeek API Oficial (opcional)
     ds_key = get_api_key("DEEPSEEK_API_KEY")
     if ds_key:
         try:
@@ -324,7 +370,7 @@ def query_deepseek_reasoning(
         except Exception:
             pass
 
-    # 4. Fallback Gemini 2.5 Flash
+    # 5. Fallback Gemini 2.5 Flash
     res = _call_gemini_fallback(prompt, system_instruction=sys_instruction, max_tokens=max_tokens)
     if res:
         return res, "Gemini 2.5 Flash (DeepSeek Fallback)"
@@ -342,8 +388,9 @@ def query_qwen_coder(
     Ejecuta el especialista en Programación y Código: QWEN 2.5 CODER.
     Prioridad:
     1. Local Ollama: qwen2.5-coder:latest (o variantes 7b/14b/32b)
-    2. NVIDIA NIM: mistralai/codestral-22b-instruct-v0.1 / meta/codellama-70b
-    3. Fallback: Google Gemini 2.5 Flash (Code Specialist)
+    2. Groq Coder: Qwen 3.8 27B / GPT-OSS 120B
+    3. NVIDIA NIM: Llama 3.2 Code Engineer
+    4. Fallback: Google Gemini 2.5 Flash (Code Specialist)
     Retorna: (respuesta, modelo_utilizado)
     """
     sys_instruction = system_prompt or (
@@ -364,12 +411,17 @@ def query_qwen_coder(
             if res:
                 return res, f"Ollama Local ({m})"
 
-    # 2. Fast-Path Cloud vía NVIDIA NIM (con prompt de alta especialización de ingeniería)
+    # 2. Groq Coder (Qwen 3.8 27B / GPT-OSS 120B)
+    res = _call_groq(messages, model="qwen/qwen3.8-27b", max_tokens=max_tokens, temperature=0.2)
+    if res:
+        return res, "Groq (Qwen 3.8 Coder)"
+
+    # 3. Fast-Path Cloud vía NVIDIA NIM
     res = _call_nvidia_nim("meta/llama-3.2-11b-vision-instruct", messages, max_tokens=max_tokens, temperature=0.2, timeout=3.5)
     if res:
         return res, "NVIDIA NIM (Llama 3.2 Code Engineer)"
 
-    # 3. Fallback Gemini 2.5 Flash Code
+    # 4. Fallback Gemini 2.5 Flash Code
     res = _call_gemini_fallback(prompt, system_instruction=sys_instruction, max_tokens=max_tokens)
     if res:
         return res, "Gemini 2.5 Flash (Code Specialist)"
@@ -387,9 +439,10 @@ def query_llama_vision(
     """
     Ejecuta el especialista en Visión Multimodal y Velocidad General: META LLAMA 3.3 / 3.2 VISION.
     Prioridad:
-    1. NVIDIA NIM: meta/llama-3.2-11b-vision-instruct (ultra rápido, ~0.75s, multimodal)
-    2. Local Ollama: llama3.3 / llama3.2-vision
-    3. Fallback: Google Gemini 2.5 Flash (Multimodal nativo)
+    1. NVIDIA NIM: meta/llama-3.2-11b-vision-instruct (ultra rápido, multimodal)
+    2. Groq (en consultas de texto puro): openai/gpt-oss-120b
+    3. Local Ollama: llama3.3 / llama3.2-vision
+    4. Fallback: Google Gemini 2.5 Flash (Multimodal nativo)
     Retorna: (respuesta, modelo_utilizado)
     """
     sys_instruction = system_prompt or (
@@ -423,14 +476,15 @@ def query_llama_vision(
             messages.extend(history[-6:])
         messages.append({"role": "user", "content": prompt})
 
-    res = _call_nvidia_nim("meta/llama-3.2-11b-vision-instruct", messages, max_tokens=max_tokens, temperature=0.5, timeout=8.0)
+    res = _call_nvidia_nim("meta/llama-3.2-11b-vision-instruct", messages, max_tokens=max_tokens, temperature=0.5, timeout=5.0)
     if res:
         return res, "NVIDIA NIM (Meta Llama 3.2 11B Vision)"
 
-    # 1b. Reintento NIM con modelo alternativo más ligero
-    res = _call_nvidia_nim("meta/llama-3.1-8b-instruct", messages, max_tokens=max_tokens, temperature=0.5, timeout=6.0)
-    if res:
-        return res, "NVIDIA NIM (Meta Llama 3.1 8B — Respaldo)"
+    # 1b. Si es solo texto y NIM está saturado, Groq responde en <0.5s
+    if not b64_img:
+        res = _call_groq(messages, model="openai/gpt-oss-120b", max_tokens=max_tokens, temperature=0.5, timeout=3.5)
+        if res:
+            return res, "Groq (GPT-OSS 120B Fast-Path)"
 
     # 2. Ollama local (cualquier modelo disponible)
     local_models = get_local_ollama_models()
@@ -475,11 +529,22 @@ def query_foundation_model(
         response, model_name = query_llama_vision(prompt, image_path=image_path, system_prompt=system_prompt, history=history, max_tokens=max_tokens)
 
     # Master Fallback de Contingencia Directa si el modelo primario de rol falla
-    if model_name == "Error" or "sistema visual no pudo" in response:
+    if model_name == "Error" or "momentáneamente no disponibles" in response or "sistema visual no pudo" in response or not response:
+        # Fallback terciario ultra veloz con Groq si no hay imagen
+        if not image_path:
+            groq_msgs = [
+                {"role": "system", "content": system_prompt or "Eres Alberth. Dirígete siempre al usuario con respeto y lealtad como Señor Danny."},
+                {"role": "user", "content": prompt}
+            ]
+            groq_res = _call_groq(groq_msgs, model="openai/gpt-oss-120b", max_tokens=max_tokens)
+            if groq_res:
+                elapsed = time.time() - t_start
+                return groq_res, f"Groq (GPT-OSS 120B Master Fallback) [{elapsed:.2f}s]", assigned_role
+
         fallback_res = _call_gemini_fallback(prompt, system_instruction=system_prompt, max_tokens=max_tokens)
         if fallback_res:
-            response = fallback_res
-            model_name = "Google Gemini 1.5 Flash (Master Fallback)"
+            elapsed = time.time() - t_start
+            return fallback_res, f"Google Gemini 2.5 Flash (Master Fallback) [{elapsed:.2f}s]", assigned_role
 
     elapsed = time.time() - t_start
     model_tag = f"{model_name} [{elapsed:.2f}s]"
