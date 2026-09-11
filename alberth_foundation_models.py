@@ -229,7 +229,7 @@ def _call_gemini_fallback(
     key = get_api_key("GEMINI_API_KEY") or get_api_key("GOOGLE_API_KEY")
     if not key:
         return None
-    for model_name in ["gemini-2.5-flash", "gemini-2.5-flash-lite"]:
+    for model_name in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-flash-latest"]:
         for attempt in range(2):
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"

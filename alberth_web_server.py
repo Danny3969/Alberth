@@ -9,7 +9,7 @@
 # =============================================================================
 
 from __future__ import annotations
-import os, sys, json, time, asyncio, subprocess, threading, socket
+import os, sys, json, time, asyncio, subprocess, threading, socket, re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional, List, Dict, Any
@@ -330,11 +330,26 @@ def run_alberth_full(text: str) -> dict:
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
+        # ── Extracción y Análisis de URLs en la Consulta ──────────────────────
+        url_in_prompt = re.search(r'https?://[^\s]+', q_clean)
+        prompt_with_context = q_clean
+        if url_in_prompt:
+            target_url = url_in_prompt.group(0)
+            try:
+                import alberth_browser_agent
+                web_info = alberth_browser_agent.extract_web_content(target_url)
+                if web_info and web_info.get("exito") and len(web_info.get("contenido", "").strip()) > 40:
+                    prompt_with_context += f"\n\n[CONTEXTO WEB EXTRAÍDO DE LA URL ({target_url})]:\nTítulo: {web_info['titulo']}\nContenido:\n{web_info['contenido']}"
+                else:
+                    prompt_with_context += f"\n\n[NOTA DEL SISTEMA]: La URL proporcionada ({target_url}) pertenece a una plataforma de video o red social (ej. TikTok/YouTube/Instagram) con renderizado dinámico. Responde al Señor Danny analizando la tecnología actual de IA (Deepfakes, Kling AI, Sora, Runway Gen-3, HeyGen, clonación de voz), evaluando si es técnicamente posible lo que describe el video, cómo detectar falsificaciones y brindándole un análisis claro y directo."
+            except Exception as urle:
+                print(f"[URL Context Extraction Error] {urle}")
+
         # ── Orquestador Multi-Modelo Fundacional (DeepSeek / Qwen Coder / Llama Vision) ──
         try:
             import alberth_foundation_models
             ans_text, model_tag, role_assigned = alberth_foundation_models.query_foundation_model(
-                prompt=q_clean,
+                prompt=prompt_with_context,
                 system_prompt=system_prompt,
                 history=_conv_history[-8:],
                 max_tokens=500

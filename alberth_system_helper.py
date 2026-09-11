@@ -1089,14 +1089,15 @@ def dispatch(query):
     except Exception as ae:
         pass
 
-    # 0b. Lector y Extractor Web (si contiene URL o petición de lectura)
+    # 0b. Lector y Extractor Web (solo para peticiones explícitas de extracción simple)
     url_match = re.search(r'https?://[^\s]+', query)
-    if url_match or any(k in query_lower for k in ["lee la página", "lee el link", "resume el enlace", "analiza esta url"]):
+    is_explicit_read = any(k in query_lower for k in ["extrae el texto", "solo lee el html", "dump url"])
+    if is_explicit_read and url_match:
         try:
             import alberth_browser_agent
-            url_to_fetch = url_match.group(0) if url_match else query.split()[-1]
+            url_to_fetch = url_match.group(0)
             web_res = alberth_browser_agent.extract_web_content(url_to_fetch)
-            if web_res and web_res.get("exito"):
+            if web_res and web_res.get("exito") and len(web_res.get("contenido", "").strip()) > 50:
                 return {
                     "accion": "lectura_web",
                     "resultado": f"Contenido extraído de {web_res['titulo']}:\n\n{web_res['contenido']}",
