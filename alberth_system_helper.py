@@ -698,16 +698,17 @@ def handle_files(query, query_lower):
     """Gestión básica de archivos: crear, leer, listar, mover, copiar, eliminar."""
 
     # ── LISTAR archivos ──────────────────────────────────────────────────
+    # Evitar interceptar consultas sobre videos, audios, portapapeles o URLs
+    if any(w in query_lower for w in ["video", "cancion", "canción", "audio", "portapapeles", "clipboard", "http://", "https://"]):
+        return None
+
     list_match = re.search(
-        r'\b(lista|listar|muestra|ver|archivos|carpetas|contenido\s+de)\b.*?(?:de\s+|en\s+)?([~/\w\s\.\-]+)?(?:carpeta|folder|directorio|directory)?',
-        query, re.IGNORECASE
+        r'\b(lista|listar|muestra\s+los?\s+archivos|archivos\s+de|qué\s+hay\s+en|contenido\s+de\s+(?:la\s+)?(?:carpeta|directorio|folder|escritorio|desktop|descargas|downloads|documentos|documents))\b',
+        query_lower
     )
-    if re.search(r'\b(lista|listar|muestra\s+los?\s+archivos|archivos\s+de|contenido\s+de|qué\s+hay\s+en)\b', query_lower):
-        # Evitar interceptar consultas de portapapeles/clipboard
-        if "portapapeles" in query_lower or "clipboard" in query_lower:
-            return None
+    if list_match:
         # Determinar directorio
-        dir_path = os.path.expanduser("~/Desktop")
+        dir_path = None
         for kw, p in [("desktop", "~/Desktop"), ("escritorio", "~/Desktop"),
                        ("downloads", "~/Downloads"), ("descargas", "~/Downloads"),
                        ("documents", "~/Documents"), ("documentos", "~/Documents"),
@@ -715,6 +716,13 @@ def handle_files(query, query_lower):
             if kw in query_lower:
                 dir_path = os.path.expanduser(p)
                 break
+
+        # Solo asumir Desktop si expresamente pidió listar archivos del escritorio o directorio/carpeta
+        if not dir_path:
+            if any(w in query_lower for w in ["escritorio", "desktop", "carpeta", "directorio", "folder"]):
+                dir_path = os.path.expanduser("~/Desktop")
+            else:
+                return None
 
         if os.path.isdir(dir_path):
             entries = sorted(os.listdir(dir_path))
@@ -1079,7 +1087,12 @@ end tell
 def dispatch(query):
     query_lower = query.lower()
 
-    # 0. Ecosistema Apple macOS (Calendario, Recordatorios, Notas, Atajos)
+    # 0. Ignorar peticiones de video o URLs de plataformas de video para que las maneje la Suite de Video
+    video_indicators = ["tiktok.com", "youtube.com", "youtu.be", "instagram.com/reel", "vimeo.com", "x.com/i/status", "twitter.com/i/status"]
+    if any(vi in query_lower for vi in video_indicators) or ("video" in query_lower and any(w in query_lower for w in ["analiz", "revis", "mira", "qué dice", "que dice", "punto de vista", "opinión", "opinion", "resume", "transcrib", "contenido"])):
+        return None
+
+    # 0a. Ecosistema Apple macOS (Calendario, Recordatorios, Notas, Atajos)
     try:
         import alberth_apple_helper
         apple_res = alberth_apple_helper.dispatch_apple_command(query)

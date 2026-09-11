@@ -26,6 +26,7 @@ import subprocess
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -122,7 +123,29 @@ def download_video_and_audio(source: str, output_dir: str) -> Dict[str, Any]:
         log(f"Descargando video desde URL: {source}")
         out_template = os.path.join(output_dir, "video.%(ext)s")
 
-        if yt_dlp:
+        # 2a. Bypass especializado para TikTok (evita restricciones anti-bot de yt-dlp)
+        if "tiktok.com" in source.lower():
+            try:
+                log("Detectado enlace de TikTok. Intentando resolución directa HD vía TikWM...")
+                clean_src = source.split("?")[0] if "tiktok.com" in source else source
+                api_url = f"https://www.tikwm.com/api/?url={urllib.parse.quote(clean_src)}"
+                req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"})
+                with urllib.request.urlopen(req, timeout=15) as response:
+                    t_data = json.loads(response.read().decode("utf-8"))
+                if t_data.get("code") == 0 and t_data.get("data", {}).get("play"):
+                    play_url = t_data["data"]["play"]
+                    title = t_data["data"].get("title", "TikTok Video")
+                    dest_file = os.path.join(output_dir, "video.mp4")
+                    v_req = urllib.request.Request(play_url, headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(v_req, timeout=60) as v_resp, open(dest_file, "wb") as out_f:
+                        out_f.write(v_resp.read())
+                    if os.path.exists(dest_file) and os.path.getsize(dest_file) > 1024:
+                        video_path = dest_file
+                        log(f"TikTok descargado exitosamente vía TikWM ({os.path.getsize(dest_file)} bytes).")
+            except Exception as t_err:
+                log(f"TikWM fallback falló: {t_err}. Procediendo con yt-dlp...")
+
+        if not video_path and yt_dlp:
             ydl_opts = {
                 "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
                 "outtmpl": out_template,
