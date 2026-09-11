@@ -858,6 +858,10 @@ header.hud-header {
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  cursor: text;
 }
 
 .chat-msg.user .msg-body {
@@ -872,6 +876,39 @@ header.hud-header {
   border: 1px solid rgba(240, 192, 96, 0.25);
   color: var(--text-main);
   border-bottom-left-radius: 2px;
+  position: relative;
+}
+
+/* Botón copiar en mensajes de Alberth */
+.chat-msg.alberth .msg-wrapper {
+  position: relative;
+}
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-size: 11px;
+  padding: 3px 7px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+.chat-msg.alberth:hover .copy-btn {
+  opacity: 1;
+}
+.copy-btn.copied {
+  color: #00ff88;
+  border-color: #00ff88;
+  background: rgba(0, 255, 136, 0.08);
 }
 
 .msg-time {
@@ -1565,9 +1602,17 @@ function appendMsg(msg, animate) {
     `;
   }
 
+  const isAlberth = msg.role !== "user";
+  const copyBtn = isAlberth
+    ? `<button class="copy-btn" onclick="copyMsgText(this)" title="Copiar mensaje">📋 Copiar</button>`
+    : "";
+
   div.innerHTML = `
     <div class="msg-tag">${label}</div>
-    <div class="msg-body">${contentHtml}</div>
+    <div class="msg-body" style="position:relative;">
+      ${copyBtn}
+      ${contentHtml}
+    </div>
     <div class="msg-time">${msg.ts || ""}</div>
   `;
 
@@ -1590,6 +1635,35 @@ function scrollChat() {
 function escHtml(t) {
   if (!t) return "";
   return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+}
+
+function copyMsgText(btn) {
+  const msgBody = btn.closest(".msg-body");
+  // Extraer texto plano excluyendo el botón de copiar
+  const clone = msgBody.cloneNode(true);
+  const btnEl = clone.querySelector(".copy-btn");
+  if (btnEl) btnEl.remove();
+  const plainText = clone.innerText || clone.textContent || "";
+  navigator.clipboard.writeText(plainText.trim()).then(() => {
+    btn.textContent = "✓ Copiado";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "📋 Copiar";
+      btn.classList.remove("copied");
+    }, 1500);
+  }).catch(() => {
+    // Fallback para navegadores sin permisos de clipboard
+    const ta = document.createElement("textarea");
+    ta.value = plainText.trim();
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    btn.textContent = "✓ Copiado";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "📋 Copiar"; btn.classList.remove("copied"); }, 1500);
+  });
 }
 
 // ─── Input & Quick Commands ─────────────────────────────────
