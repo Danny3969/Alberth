@@ -54,7 +54,8 @@ _Última actualización: 2026-09-11 00:51 GMT-5_
 - **Video & Deepfake Analyzer API:** `/api/video-analyze` (Raw Video Processing & Frame-by-Frame Inspection)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
-- **Túnel Seguro Cloudflare / Localhost.run:** `https://af3d1d560697b0.lhr.life`
+- **Modo Operativo Activo:** Servidor Local Autónomo en iMac de Contabilidad (`http://localhost:8080` y LAN `http://192.168.0.41:8080`)
+- **Túnel Remoto Cloudflare / Externo:** Bajo demanda (inactivo por modo local)
 - **Audit Logs:** `logs/audit_logs.jsonl`
 - **Modo de Contexto Activo:** `.context_mode` (`laboral` | `personal`)
 
