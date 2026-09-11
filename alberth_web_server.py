@@ -337,20 +337,41 @@ def run_alberth_full(text: str) -> dict:
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
 
-        # ── Extracción y Análisis de URLs en la Consulta ──────────────────────
+        # ── Extracción y Análisis de URLs y Videos en la Consulta ───────────────
         url_in_prompt = re.search(r'https?://[^\s]+', q_clean)
         prompt_with_context = q_clean
         if url_in_prompt:
             target_url = url_in_prompt.group(0)
-            try:
-                import alberth_browser_agent
-                web_info = alberth_browser_agent.extract_web_content(target_url)
-                if web_info and web_info.get("exito") and len(web_info.get("contenido", "").strip()) > 40:
-                    prompt_with_context += f"\n\n[CONTEXTO WEB EXTRAÍDO DE LA URL ({target_url})]:\nTítulo: {web_info['titulo']}\nContenido:\n{web_info['contenido']}"
-                else:
-                    prompt_with_context += f"\n\n[NOTA DEL SISTEMA]: La URL proporcionada ({target_url}) pertenece a una plataforma de video o red social (ej. TikTok/YouTube/Instagram) con renderizado dinámico. Responde al Señor Danny analizando la tecnología actual de IA (Deepfakes, Kling AI, Sora, Runway Gen-3, HeyGen, clonación de voz), evaluando si es técnicamente posible lo que describe el video, cómo detectar falsificaciones y brindándole un análisis claro y directo."
-            except Exception as urle:
-                print(f"[URL Context Extraction Error] {urle}")
+            is_video_platform = any(domain in target_url.lower() for domain in [
+                "tiktok.com", "youtube.com", "youtu.be", "instagram.com", "twitter.com", "x.com", "vimeo.com"
+            ]) or any(kw in q_clean.lower() for kw in ["video", "deepfake", "analiza el video", "es real", "es falso", "falsificacion"])
+            
+            if is_video_platform:
+                try:
+                    import alberth_video_analyzer
+                    print(f"[VideoAnalyzer] Ejecutando análisis de video raw para: {target_url}")
+                    vid_result = alberth_video_analyzer.process_video(target_url, max_frames=5)
+                    if vid_result.get("success"):
+                        frames_desc = "\n".join([f"- [{f['timestamp']}]: {f['analysis']}" for f in vid_result.get("frame_breakdown", [])])
+                        prompt_with_context += (
+                            f"\n\n[ANÁLISIS DE VIDEO RAW Y FOTOGRAMAS CLAVE ({target_url})]:\n"
+                            f"Score de Autenticidad: {vid_result.get('authenticity_score')}\n"
+                            f"Veredicto Técnico: {vid_result.get('verdict')}\n"
+                            f"Fotogramas Clave Analizados:\n{frames_desc}\n\n"
+                            f"Utiliza este análisis técnico directo de los fotogramas para responder detalladamente al Señor Danny."
+                        )
+                    else:
+                        prompt_with_context += f"\n\n[NOTA DEL SISTEMA]: Intento de descarga/procesamiento del video ({target_url}): {vid_result.get('error')}. Responde evaluando el contexto y la tecnología actual de IA."
+                except Exception as vide:
+                    print(f"[VideoAnalyzer Error] {vide}")
+            else:
+                try:
+                    import alberth_browser_agent
+                    web_info = alberth_browser_agent.extract_web_content(target_url)
+                    if web_info and web_info.get("exito") and len(web_info.get("contenido", "").strip()) > 40:
+                        prompt_with_context += f"\n\n[CONTEXTO WEB EXTRAÍDO DE LA URL ({target_url})]:\nTítulo: {web_info['titulo']}\nContenido:\n{web_info['contenido']}"
+                except Exception as urle:
+                    print(f"[URL Context Extraction Error] {urle}")
 
         # ── Orquestador Multi-Modelo Fundacional (DeepSeek / Qwen Coder / Llama Vision) ──
         try:
@@ -907,6 +928,24 @@ async def set_dnd_timezone_config(payload: DndTimezonePayload, _: None = Depends
         cfg = payload.model_dump()
         memory.set_dnd_setting("dnd_tz_config", json.dumps(cfg))
         return JSONResponse({"ok": True, "config": cfg})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class VideoAnalyzePayload(BaseModel):
+    url: Optional[str] = None
+    file_path: Optional[str] = None
+    max_frames: Optional[int] = 5
+
+@app.post("/api/video-analyze")
+async def analyze_video_endpoint(payload: VideoAnalyzePayload):
+    """Endpoint para análisis directo de video raw y detección de deepfakes."""
+    target = payload.url or payload.file_path
+    if not target:
+        raise HTTPException(status_code=400, detail="Se requiere una URL o ruta de archivo local.")
+    try:
+        import alberth_video_analyzer
+        result = alberth_video_analyzer.process_video(target, max_frames=payload.max_frames or 5)
+        return JSONResponse(result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
