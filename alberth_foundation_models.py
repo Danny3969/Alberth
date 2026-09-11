@@ -223,13 +223,13 @@ def _call_gemini_fallback(
     image_bytes: Optional[bytes] = None,
     mime_type: str = "image/jpeg",
     max_tokens: int = 600,
-    timeout: float = 8.0
+    timeout: float = 15.0
 ) -> Optional[str]:
     """Fallback universal a Google Gemini 2.5 Flash / Flash Lite con reintento ante 429."""
     key = get_api_key("GEMINI_API_KEY") or get_api_key("GOOGLE_API_KEY")
     if not key:
         return None
-    for model_name in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-flash-latest"]:
+    for model_name in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]:
         for attempt in range(2):
             try:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
@@ -259,12 +259,12 @@ def _call_gemini_fallback(
                             return res
             except urllib.error.HTTPError as he:
                 if he.code == 429 and attempt == 0:
-                    time.sleep(1.5)
+                    time.sleep(1.0)
                     continue
                 print(f"[Gemini Fallback {model_name}] HTTP Error {he.code}", file=sys.stderr)
                 break
-            except Exception as e:
-                print(f"[Gemini Fallback {model_name}] Error: {e}", file=sys.stderr)
+            except Exception as ex:
+                print(f"[Gemini Fallback {model_name}] Error: {ex}", file=sys.stderr)
                 break
     return None
 
@@ -423,14 +423,19 @@ def query_llama_vision(
             messages.extend(history[-6:])
         messages.append({"role": "user", "content": prompt})
 
-    res = _call_nvidia_nim("meta/llama-3.2-11b-vision-instruct", messages, max_tokens=max_tokens, temperature=0.5)
+    res = _call_nvidia_nim("meta/llama-3.2-11b-vision-instruct", messages, max_tokens=max_tokens, temperature=0.5, timeout=8.0)
     if res:
         return res, "NVIDIA NIM (Meta Llama 3.2 11B Vision)"
 
-    # 2. Ollama local
+    # 1b. Reintento NIM con modelo alternativo más ligero
+    res = _call_nvidia_nim("meta/llama-3.1-8b-instruct", messages, max_tokens=max_tokens, temperature=0.5, timeout=6.0)
+    if res:
+        return res, "NVIDIA NIM (Meta Llama 3.1 8B — Respaldo)"
+
+    # 2. Ollama local (cualquier modelo disponible)
     local_models = get_local_ollama_models()
     for m in local_models:
-        if "llama3" in m.lower() or "vision" in m.lower():
+        if any(k in m.lower() for k in ["llama3", "vision", "gemma", "llama2", "mistral"]):
             res = _call_ollama(m, messages, max_tokens=max_tokens, temperature=0.5)
             if res:
                 return res, f"Ollama Local ({m})"
@@ -440,7 +445,7 @@ def query_llama_vision(
     if res:
         return res, "Gemini 2.5 Flash (Llama Vision Fallback)"
 
-    return "Señor Danny, el sistema visual no pudo procesar la solicitud.", "Error"
+    return "Señor Danny, todos los proveedores de IA están momentáneamente no disponibles. Por favor intente de nuevo en unos segundos.", "Error"
 
 
 # ── Función Maestra de Enrutamiento ──────────────────────────────────────────
@@ -468,6 +473,13 @@ def query_foundation_model(
         response, model_name = query_qwen_coder(prompt, system_prompt=system_prompt, history=history, max_tokens=max_tokens)
     else:  # ROLE_VISION_FAST o General
         response, model_name = query_llama_vision(prompt, image_path=image_path, system_prompt=system_prompt, history=history, max_tokens=max_tokens)
+
+    # Master Fallback de Contingencia Directa si el modelo primario de rol falla
+    if model_name == "Error" or "sistema visual no pudo" in response:
+        fallback_res = _call_gemini_fallback(prompt, system_instruction=system_prompt, max_tokens=max_tokens)
+        if fallback_res:
+            response = fallback_res
+            model_name = "Google Gemini 1.5 Flash (Master Fallback)"
 
     elapsed = time.time() - t_start
     model_tag = f"{model_name} [{elapsed:.2f}s]"

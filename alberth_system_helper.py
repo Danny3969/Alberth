@@ -59,7 +59,7 @@ def handle_music(query, query_lower):
     is_play = re.search(r'\b(reproduce|contin[uú]a|play|resume|reactiva\s+m[uú]sica|despausa)\b', query_lower)
     is_pause = re.search(r'\b(pausa|pausar|det[eé]n\s+(?:la\s+)?m[uú]sica|stop|pause|silencia\s+m[uú]sica)\b', query_lower)
     is_next = re.search(r'\b(siguiente|next|pasa\s+(?:de\s+)?cancion|pasa\s+(?:de\s+)?canci[oó]n|avanza|siguiente\s+cancion|siguiente\s+canci[oó]n)\b', query_lower)
-    is_prev = re.search(r'\b(anterior|prev|previous|atr[aá]s|retrocede|canci[oó]n\s+anterior|cancion\s+anterior)\b', query_lower)
+    is_prev = re.search(r'\b(prev|previous|atr[aá]s|retrocede|canci[oó]n\s+anterior|cancion\s+anterior|pista\s+anterior|tema\s+anterior|anterior\s+canci[oó]n|anterior\s+pista|anterior\s+tema)\b', query_lower)
 
     if not (is_play or is_pause or is_next or is_prev):
         return None
