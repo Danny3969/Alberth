@@ -370,7 +370,7 @@ def run_alberth_full(text: str) -> dict:
         if not resp_text:
             gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
             if gemini_key:
-                for gm in ["gemini-2.5-flash", "gemini-2.0-flash"]:
+                for gm in ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-3.1-flash-lite"]:
                     try:
                         g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
                         g_payload = {
@@ -387,9 +387,40 @@ def run_alberth_full(text: str) -> dict:
                     except Exception as e:
                         print(f"[Gemini Direct Stream {gm}] {e}")
 
+        # ── Fallback terciario: Groq (Llama 3.3 70B) ────────────────────────────
+        if not resp_text:
+            groq_key = os.environ.get("GROQ_API_KEY")
+            if groq_key:
+                try:
+                    import requests as _req_groq
+                    groq_payload = {
+                        "model": "llama-3.3-70b-versatile",
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": q_clean}
+                        ],
+                        "max_tokens": 500,
+                        "temperature": 0.5
+                    }
+                    groq_resp = _req_groq.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        json=groq_payload,
+                        headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                        timeout=10
+                    )
+                    if groq_resp.status_code == 200:
+                        txt = groq_resp.json()["choices"][0]["message"]["content"].strip()
+                        if txt:
+                            resp_text = txt
+                            print(f"[Groq Fallback] Respuesta OK — Llama 3.3 70B")
+                    else:
+                        print(f"[Groq Fallback] HTTP {groq_resp.status_code}: {groq_resp.text[:100]}")
+                except Exception as ge:
+                    print(f"[Groq Fallback Error] {ge}")
+
         # Fallback final cortés y en carácter
         if not resp_text:
-            resp_text = "Señor Danny, he recibido su instrucción. Todos mis módulos de visión, voz y control de la Mac están operativos a su orden."
+            resp_text = "Señor Danny, en este momento todos los proveedores de IA están experimentando alta demanda. Por favor intente de nuevo en unos segundos."
 
     # Guardar en memoria de conversación
     _conv_history.append({"role": "user", "content": q_clean})

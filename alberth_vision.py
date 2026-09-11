@@ -94,7 +94,7 @@ def describe_image_gemini(api_key, prompt, image_path, model="gemini-2.5-flash")
         with open(image_path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
         
-        models_to_try = [model, "gemini-2.5-flash-lite"] if model else ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
+        models_to_try = [model, "gemini-3.5-flash"] if model else ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash-lite"]
         
         for m in models_to_try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}"
@@ -230,7 +230,7 @@ def describe_image(api_key=None, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY,
     gemini_key = get_gemini_api_key()
     if gemini_key:
         log("Analizando imagen con Google Gemini...")
-        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-2.5-flash")
+        desc_gem = describe_image_gemini(gemini_key, prompt, img_file, model="gemini-3.8-flash")
         if desc_gem:
             return desc_gem
 
