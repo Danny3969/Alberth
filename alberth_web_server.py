@@ -422,7 +422,7 @@ def run_alberth_full(text: str) -> dict:
             "- HERRAMIENTAS ACTIVAS: Dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla en tiempo real, síntesis de voz Edge-TTS, control de aplicaciones y archivos de macOS, Suite de Inteligencia de Video Multimodal (Groq Whisper Turbo + OCR + descarga directa HD TikTok/YouTube), agentes autónomos (LangGraph multi-agente, Playwright browser) y memoria persistente.\n"
             "- SAFETY GUARD: Nunca ejecutes comandos destructivos en la terminal ni modifiques código de proyectos del Señor Danny sin su confirmación explícita previa.\n"
             "- AUTOEVALUACIÓN: Si se te pide un autodiagnóstico o auditoría técnica de ti mismo, básate en el estado real de tus herramientas, procesos PM2 y hardware en lugar de dar respuestas teóricas abstractas.\n"
-            "- Responde siempre con seguridad, inteligencia, concisión y análisis directo en español. Nunca uses frases condescendientes ni muletillas vacías.\n"
+            "- Responde siempre con seguridad, inteligencia, concisión, naturalidad y análisis directo en español. Tus respuestas deben ser concretas, específicas y fluidas. Cuando una respuesta sea extensa, estructúrala con claridad pero asegurando un todo cálido, humano y profesional al ser escuchada por voz, evitando sonar robótico o rígido.\n"
             "- FORMATO OBLIGATORIO: Usa SOLO texto plano sin ningún tipo de formato markdown. Absolutamente prohibido usar asteriscos (**texto**), almohadillas (#), guiones de lista (* item), bloques de código (```), o cualquier otro símbolo de markdown. Escribe como si fuera una conversación natural y directa. Las respuestas deben ser completas, no las cortes a la mitad."
         )
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
@@ -562,9 +562,24 @@ def run_alberth_full(text: str) -> dict:
         tts_file = VOICE_OUTPUT / f"alberth_{ts}.mp3"
         venv_py = WORKSPACE / "venv" / "bin" / "python3"
         py_exec = str(venv_py) if venv_py.exists() else sys.executable
-        # Limpiar texto para pronunciación limpia
-        clean_speech = resp_text.replace("**", "").replace("#", "").replace("`", "")
-        clean_speech = " ".join(clean_speech.split()[:75]) # Limitar a primeras 75 palabras para agilidad
+        # Extraer resumen hablado fluido y natural en oraciones completas
+        import re as _speech_re
+        clean_speech = _speech_re.sub(r'[*#`_~]', '', resp_text).strip()
+        if len(clean_speech) > 280:
+            _sents = [s.strip() for s in _speech_re.split(r'(?<=[.!?])\s+', clean_speech) if s.strip()]
+            _spoken = []
+            _curr_len = 0
+            for _s in _sents:
+                _spoken.append(_s)
+                _curr_len += len(_s)
+                if _curr_len >= 200 or len(_spoken) >= 3:
+                    break
+            if _spoken:
+                clean_speech = " ".join(_spoken)
+                if not clean_speech.endswith((".", "!", "?")):
+                    clean_speech += "."
+            else:
+                clean_speech = clean_speech[:280] + "."
 
         def _bg_synthesize(speech_txt, dest_file):
             try:
