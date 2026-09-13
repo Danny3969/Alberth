@@ -1772,27 +1772,43 @@ function initWakeWordEngine() {
         const rawTranscript = event.results[i][0].transcript.trim();
         const transcript = rawTranscript.toLowerCase();
 
-        // Interrupción Quirúrgica por Voz (Barge-in con límites de palabra \b para evitar falsos positivos con 'preparando', 'comparar', etc.)
-        const interruptRegex = /\b(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth|para|cállate|callate|silencio|espera|stop|detente|basta|silenciar)\b/i;
+        // ── A. Si Alberth está reproduciendo voz por los parlantes ──
         if (currentAudio && !currentAudio.paused) {
-          if (interruptRegex.test(transcript)) {
-            console.log("🛑 Interrupción quirúrgica por voz detectada mientras Alberth hablaba:", transcript);
+          // 1. Interrupción de Parada Explícita ("cállate", "basta", "detente", "alberth para", "alberth stop")
+          const explicitStopRegex = /\b(cállate|callate|basta|detente|alberth para|alberth callate|alberth cállate|alberth stop|alberth silencio)\b/i;
+          if (explicitStopRegex.test(transcript)) {
+            console.log("🛑 Parada explícita por voz durante reproducción:", transcript);
             stopAudio();
-            showToast("🛑 Interrupción por voz: Alberth detuvo la reproducción", 2500);
+            isVoiceSessionActive = false;
+            lastCapturedCmd = "";
+            clearTimeout(vadTimer);
+            showToast("🛑 Conversación por voz pausada", 2500);
+            setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+            return;
+          }
+
+          // 2. Interrupción por Nombre / Palabra Clave ("Alberth", "Albeth", etc.)
+          const explicitWakeRegex = /\b(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\b/i;
+          if (explicitWakeRegex.test(transcript)) {
+            console.log("🎙️ Interrupción por voz 'Alberth' detectada:", transcript);
+            stopAudio(); // Cortar voz actual para escuchar al usuario
+            isVoiceSessionActive = true;
+            showToast("🎙️ Alberth detuvo la voz y te escucha...", 2000);
           } else {
-            // Ignorar eco de su propia voz o ruido ambiental irrelevante mientras reproduce audio
-            continue;
+            // Ignorar ecos de los parlantes o ruido ambiental mientras Alberth habla
+            return;
           }
         }
 
-        // 1. Comando de Parada Directa por Voz ("Alberth para", "cállate", "silencio", "detente", "basta", "stop")
-        const stopRegex = /\b(alberth|albert|alberto|alber)?\s*(para|cállate|callate|silencio|detente|basta|stop|pausa|silenciar)\b/i;
+        // ── B. Estado Normal (Alberth no está hablando) ──
+        // 1. Comando de Parada Explícita
+        const stopRegex = /\b(alberth\s+(para|pausa|silencio|stop|detente)|cállate|callate|basta)\b/i;
         if (stopRegex.test(transcript)) {
           stopAudio();
           isVoiceSessionActive = false;
           lastCapturedCmd = "";
           clearTimeout(vadTimer);
-          showToast("🛑 Conversación por voz pausada", 3000);
+          showToast("🛑 Conversación por voz pausada", 2500);
           setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
           return;
         }
