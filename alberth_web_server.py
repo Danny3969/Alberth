@@ -572,54 +572,79 @@ def run_alberth_full(text: str) -> dict:
         _conv_history.pop(0)
         _conv_history.pop(0)
 
-    # ── 5. Síntesis de Voz Asíncrona (Edge-TTS en background sin frenar la respuesta) ──
+    # ── 5. Síntesis de Voz Streaming por Chunks de Frases (Latencia <600ms) ──
     try:
         import threading
         ts = time.strftime("%Y%m%d_%H%M%S")
         VOICE_OUTPUT.mkdir(parents=True, exist_ok=True)
-        tts_file = VOICE_OUTPUT / f"alberth_{ts}.mp3"
         venv_py = WORKSPACE / "venv" / "bin" / "python3"
         py_exec = str(venv_py) if venv_py.exists() else sys.executable
-        # Preparar texto completo para pantalla y resumen hablado breve para audio
+
         import re as _speech_re
         clean = _speech_re.sub(r'[*#`_~]', '', resp_text).strip()
         clean = _speech_re.sub(r'\[EXECUTE:.*?\]', '', clean).strip()
         clean = _speech_re.sub(r'\[PHONE_CMD:.*?\]', '', clean).strip()
         resp_text = clean
 
-        # Extraer resumen hablado breve, concreto y ejecutivo para el audio por parlantes
-        if len(clean) <= 180:
-            clean_speech = clean
-        else:
-            _sents = [s.strip() for s in _speech_re.split(r'(?<=[.!?])\s+', clean) if s.strip()]
-            _spoken = []
-            _curr_len = 0
-            for _s in _sents:
-                _spoken.append(_s)
-                _curr_len += len(_s)
-                if _curr_len >= 130 or len(_spoken) >= 2:
-                    break
-            if _spoken:
-                clean_speech = " ".join(_spoken)
-                if not clean_speech.endswith((".", "!", "?")):
-                    clean_speech += "."
+        # Extraer frases individuales para síntesis por Chunks
+        _sents = [s.strip() for s in _speech_re.split(r'(?<=[.!?])\s+', clean) if s.strip()]
+        if not _sents:
+            _sents = [clean]
+            
+        _chunks = []
+        _curr = ""
+        for _s in _sents:
+            if _curr:
+                _curr += " " + _s
             else:
-                clean_speech = clean[:180] + "."
+                _curr = _s
+            if len(_curr) >= 45 or len(_chunks) >= 3:
+                _chunks.append(_curr)
+                _curr = ""
+        if _curr:
+            _chunks.append(_curr)
+        _chunks = _chunks[:4]  # Máximo 4 chunks para respuestas ejecutivas concisas
 
-        def _bg_synthesize(speech_txt, dest_file):
+        def _synth_file(speech_txt, dest_file):
             try:
                 subprocess.run(
                     [py_exec, str(WORKSPACE / "alberth_tts_premium.py"), speech_txt, str(dest_file)],
-                    capture_output=True, timeout=20
+                    capture_output=True, timeout=15
                 )
             except Exception as te:
                 print(f"[BG TTS Error] {te}")
 
-        t = threading.Thread(target=_bg_synthesize, args=(clean_speech, tts_file), daemon=True)
-        t.start()
-        t.join(timeout=4.5)
-        if tts_file.exists() and tts_file.stat().st_size > 0:
-            audio_url = f"/output/{tts_file.name}"
+        # Sintetizar chunk 0 (primeras palabras) para reproducción inmediata en <600ms
+        chunk_0_file = VOICE_OUTPUT / f"alberth_{ts}_c0.mp3"
+        t0 = threading.Thread(target=_synth_file, args=(_chunks[0], chunk_0_file), daemon=True)
+        t0.start()
+        t0.join(timeout=1.8)
+        
+        if chunk_0_file.exists() and chunk_0_file.stat().st_size > 0:
+            audio_url = f"/output/{chunk_0_file.name}"
+
+        # Sintetizar chunks restantes en segundo plano
+        def _bg_synth_remaining(remaining_chunks, base_ts):
+            try:
+                main_loop = asyncio.get_event_loop()
+            except Exception:
+                main_loop = None
+
+            for idx, ctext in enumerate(remaining_chunks, start=1):
+                cfile = VOICE_OUTPUT / f"alberth_{base_ts}_c{idx}.mp3"
+                _synth_file(ctext, cfile)
+                if cfile.exists() and cfile.stat().st_size > 0:
+                    curl = f"/output/{cfile.name}"
+                    if main_loop and main_loop.is_running():
+                        asyncio.run_coroutine_threadsafe(
+                            manager.broadcast({"type": "audio_chunk", "chunk_index": idx, "audio_url": curl}),
+                            main_loop
+                        )
+
+        if len(_chunks) > 1:
+            t_rem = threading.Thread(target=_bg_synth_remaining, args=(_chunks[1:], ts), daemon=True)
+            t_rem.start()
+
     except Exception as e:
         print(f"[TTS Initiation Error] {e}")
 
@@ -714,6 +739,12 @@ async def ws_chat(ws: WebSocket):
                 await manager.send(ws, {"type": "pong"})
     except WebSocketDisconnect: manager.disconnect(ws)
     except: manager.disconnect(ws)
+
+from alberth_live_bridge import handle_live_websocket
+
+@app.websocket("/ws/live")
+async def ws_live(ws: WebSocket):
+    await handle_live_websocket(ws)
 
 # ── Audio ──────────────────────────────────────────────────────────────────────
 @app.post("/audio")
