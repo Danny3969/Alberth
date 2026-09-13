@@ -1707,9 +1707,9 @@ if (!localStorage.getItem("alberth_token")) {
   localStorage.setItem("alberth_token", "token-seguro-1781561473");
 }
 
-// ─── Microphone Voice Recording & Continuous Wake Word ─────
 let mediaRecorder, audioChunks = [], isRecording = false;
 let isHandsFreeEnabled = true;
+let isVoiceSessionActive = false;
 let wakeRecognition = null;
 let vadTimer = null;
 let lastCapturedCmd = "";
@@ -1724,11 +1724,12 @@ function initWakeWordEngine() {
     wakeRecognition = new SpeechRecognition();
     wakeRecognition.continuous = true;
     wakeRecognition.interimResults = true;
-    wakeRecognition.lang = "es-ES";
+    wakeRecognition.lang = navigator.language || "es-MX";
 
     wakeRecognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcript = event.results[i][0].transcript.toLowerCase().trim();
+        const rawTranscript = event.results[i][0].transcript.trim();
+        const transcript = rawTranscript.toLowerCase();
 
         // 1. Interrupción en tiempo real (Barge-in): Si Alberth está hablando y se detecta voz -> Cortar audio
         if (currentAudio && transcript.length > 2) {
@@ -1736,19 +1737,25 @@ function initWakeWordEngine() {
           stopAudio();
         }
 
-        // 2. Activación por Voz (Variantes fonéticas: Alberth, Albert, Alberto, Albeth, Albet, etc.)
+        // 2. Detección de Palabra Clave o Sesión de Voz Activa
         const wakeRegex = /(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)/i;
-        if (wakeRegex.test(transcript)) {
+        const hasWakeWord = wakeRegex.test(transcript);
+
+        if (hasWakeWord || isVoiceSessionActive) {
           stopAudio(); // Cortar habla de Alberth de inmediato
 
-          // Extraer comando directo si viene tras la palabra clave
-          let cmdText = transcript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
+          // Extraer comando directo si viene tras la palabra clave, o tomar todo el texto si la sesión de voz ya estaba activa
+          let cmdText = rawTranscript;
+          if (hasWakeWord) {
+            isVoiceSessionActive = true;
+            cmdText = rawTranscript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
+          }
 
           if (cmdText.length > 1) {
             lastCapturedCmd = cmdText;
             setHUDState("listening", `ESCUCHANDO: "${cmdText}"`);
 
-            // VAD Silence Timeout: 1.2 segundos sin nuevas palabras → Enviar automáticamente (estilo ChatGPT/Gemini)
+            // VAD Silence Timeout: 1.3 segundos sin nuevas palabras → Enviar consulta completa
             clearTimeout(vadTimer);
             vadTimer = setTimeout(() => {
               if (lastCapturedCmd && lastCapturedCmd.length > 1) {
@@ -1758,7 +1765,7 @@ function initWakeWordEngine() {
                 setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN DE VOZ...");
                 sendWS({ type: "text", text: finalCmd });
               }
-            }, 1200);
+            }, 1300);
           } else {
             showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
             setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
