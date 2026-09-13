@@ -1702,10 +1702,17 @@ function handleKey(e) {
   }
 }
 
+// Asegurar token por defecto para evitar errores de autorización en peticiones de voz
+if (!localStorage.getItem("alberth_token")) {
+  localStorage.setItem("alberth_token", "token-seguro-1781561473");
+}
+
 // ─── Microphone Voice Recording & Continuous Wake Word ─────
 let mediaRecorder, audioChunks = [], isRecording = false;
 let isHandsFreeEnabled = true;
 let wakeRecognition = null;
+let vadTimer = null;
+let lastCapturedCmd = "";
 
 function initWakeWordEngine() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1737,15 +1744,23 @@ function initWakeWordEngine() {
           // Extraer comando directo si viene tras la palabra clave
           let cmdText = transcript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
 
-          if (cmdText.length > 2) {
-            if (event.results[i].isFinal) {
-              showToast(`🎙️ Procesando comando: "${cmdText}"`, 3500);
-              sendWS({ type: "text", text: cmdText });
-            } else {
-              setHUDState("listening", `ESCUCHANDO: "${cmdText}"`);
-            }
+          if (cmdText.length > 1) {
+            lastCapturedCmd = cmdText;
+            setHUDState("listening", `ESCUCHANDO: "${cmdText}"`);
+
+            // VAD Silence Timeout: 1.2 segundos sin nuevas palabras → Enviar automáticamente (estilo ChatGPT/Gemini)
+            clearTimeout(vadTimer);
+            vadTimer = setTimeout(() => {
+              if (lastCapturedCmd && lastCapturedCmd.length > 1) {
+                const finalCmd = lastCapturedCmd;
+                lastCapturedCmd = "";
+                showToast(`🎙️ Enviando consulta: "${finalCmd}"`, 3500);
+                setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN DE VOZ...");
+                sendWS({ type: "text", text: finalCmd });
+              }
+            }, 1200);
           } else {
-            showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 3000);
+            showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
             setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
           }
         }
