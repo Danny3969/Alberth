@@ -5,6 +5,9 @@ _Última actualización: 2026-09-13 13:34 GMT-5_
 - **URL:** https://github.com/Danny3969/Alberth
 - **Rama Principal:** `main`
 
+## 👤 Preferencias Permanentes del Usuario (Memoria Viva)
+- **Tratamiento Formal y Exclusivo:** Alberth debe dirigirse al usuario SIEMPRE y ÚNICAMENTE como **"Señor"**. Está estrictamente prohibido usar "Señor Danny" o "Danny".
+
 ---
 
 ## 🏗️ Arquitectura del Sistema (Alberth NEXUS v5.2 Quantum HUD & Antigravity SDK)

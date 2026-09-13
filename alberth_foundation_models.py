@@ -329,7 +329,7 @@ def query_deepseek_reasoning(
     """
     sys_instruction = system_prompt or (
         "Eres el motor de Razonamiento Lógico Profundo (DeepSeek) de Alberth. "
-        "Dirígete al usuario como 'Señor Danny'. Proporciona razonamientos impecables, deducciones paso a paso, "
+        "Dirígete al usuario SIEMPRE como 'Señor' (NUNCA digas 'Señor Danny', solo 'Señor'). Proporciona razonamientos impecables, deducciones paso a paso, "
         "solución de problemas matemáticos y pensamiento crítico de alto nivel en español."
     )
     messages = [{"role": "system", "content": sys_instruction}]
@@ -375,7 +375,7 @@ def query_deepseek_reasoning(
     if res:
         return res, "Gemini 2.5 Flash (DeepSeek Fallback)"
 
-    return "Señor Danny, no fue posible conectar con el motor de razonamiento en este momento.", "Error"
+    return "Señor, no fue posible conectar con el motor de razonamiento en este momento.", "Error"
 
 
 def query_qwen_coder(
@@ -395,7 +395,7 @@ def query_qwen_coder(
     """
     sys_instruction = system_prompt or (
         "Eres el motor de Ingeniería de Software y Código (Qwen 2.5 Coder) de Alberth. "
-        "Dirígete al usuario como 'Señor Danny'. Escribe código limpio, robusto, probado, eficiente y sin errores sintácticos. "
+        "Dirígete al usuario SIEMPRE como 'Señor' (NUNCA digas 'Señor Danny', solo 'Señor'). Escribe código limpio, robusto, probado, eficiente y sin errores sintácticos. "
         "Soporta Python, Bash, JavaScript, TypeScript, SQLite y llamadas a APIs de sistema en macOS."
     )
     messages = [{"role": "system", "content": sys_instruction}]
@@ -426,7 +426,7 @@ def query_qwen_coder(
     if res:
         return res, "Gemini 2.5 Flash (Code Specialist)"
 
-    return "Señor Danny, no fue posible generar el código en este momento.", "Error"
+    return "Señor, no fue posible generar el código en este momento.", "Error"
 
 
 def query_llama_vision(
@@ -447,7 +447,7 @@ def query_llama_vision(
     """
     sys_instruction = system_prompt or (
         "Eres el motor conversacional y visual (Meta Llama 3.2/3.3 Vision) de Alberth. "
-        "Dirígete al usuario como 'Señor Danny'. Responde de forma concisa, certera, fluida y veloz en español."
+        "Dirígete al usuario SIEMPRE como 'Señor' (NUNCA digas 'Señor Danny', solo 'Señor'). Responde de forma concisa, certera, fluida y veloz en español."
     )
 
     image_bytes = None
@@ -499,7 +499,7 @@ def query_llama_vision(
     if res:
         return res, "Gemini 2.5 Flash (Llama Vision Fallback)"
 
-    return "Señor Danny, todos los proveedores de IA están momentáneamente no disponibles. Por favor intente de nuevo en unos segundos.", "Error"
+    return "Señor, todos los proveedores de IA están momentáneamente no disponibles. Por favor intente de nuevo en unos segundos.", "Error"
 
 
 # ── Función Maestra de Enrutamiento ──────────────────────────────────────────
@@ -533,7 +533,7 @@ def query_foundation_model(
         # Fallback terciario ultra veloz con Groq si no hay imagen
         if not image_path:
             groq_msgs = [
-                {"role": "system", "content": system_prompt or "Eres Alberth. Dirígete siempre al usuario con respeto y lealtad como Señor Danny."},
+                {"role": "system", "content": system_prompt or "Eres Alberth. Dirígete siempre al usuario con respeto y lealtad como Señor."},
                 {"role": "user", "content": prompt}
             ]
             groq_res = _call_groq(groq_msgs, model="openai/gpt-oss-120b", max_tokens=max_tokens)
