@@ -1527,35 +1527,48 @@ function initAudioContext() {
 
 function playAudioUrl(url) {
   try {
-    stopAudio(); // Detener cualquier audio anterior inmediatamente
-    initAudioContext();
+    stopAudio(); // Detener cualquier audio previo inmediatamente
+    if (!url) return;
+    console.log("🔊 Solicitando reproducción de voz de Alberth:", url);
     const audio = new Audio(url);
-    audio.crossOrigin = "anonymous";
     currentAudio = audio;
-    
-    if (audioCtx) {
-      if (audioSource) {
-        try { audioSource.disconnect(); } catch(e){}
+
+    try {
+      initAudioContext();
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
       }
-      audioSource = audioCtx.createMediaElementSource(audio);
-      audioSource.connect(speakerAnalyser);
-      speakerAnalyser.connect(audioCtx.destination);
+      if (audioCtx && speakerAnalyser) {
+        if (audioSource) { try { audioSource.disconnect(); } catch(e){} }
+        audioSource = audioCtx.createMediaElementSource(audio);
+        audioSource.connect(speakerAnalyser);
+        speakerAnalyser.connect(audioCtx.destination);
+      }
+    } catch(e) {
+      console.warn("MediaElementSource fallback:", e);
     }
     
     setHUDState("speaking", "ALBERTH TRANSMITIENDO VOZ");
-    audio.play().then(() => {
-      // playing
-    }).catch(err => {
-      console.warn("Autoplay audio blocked:", err);
-      audio.play();
-    });
-    
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        console.log("✅ Reproducción por altavoces iniciada correctamente.");
+      }).catch(err => {
+        console.warn("Autoplay bloqueado o demorado:", err);
+        audio.play().catch(e => console.error("Error definitivo en reproducción:", e));
+      });
+    }
+
     audio.onended = () => {
       if (currentAudio === audio) currentAudio = null;
       setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
     };
+    audio.onerror = (e) => {
+      console.warn("Error en archivo de audio:", e);
+      setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+    };
   } catch (e) {
-    console.error("Error reproduciendo audio:", e);
+    console.error("Error general reproduciendo audio:", e);
   }
 }
 
@@ -1724,12 +1737,16 @@ function initWakeWordEngine() {
           // Extraer comando directo si viene tras la palabra clave
           let cmdText = transcript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
 
-          if (cmdText.length > 3 && event.results[i].isFinal) {
-            showToast(`🎙️ Activado por Voz: "${cmdText}"`, 3500);
-            sendWS({ type: "text", text: cmdText });
-          } else if (!isRecording) {
-            showToast("🎙️ ¡Alberth activado por voz! Escuchando...", 3500);
-            toggleRecording(); // Activar captura de voz
+          if (cmdText.length > 2) {
+            if (event.results[i].isFinal) {
+              showToast(`🎙️ Procesando comando: "${cmdText}"`, 3500);
+              sendWS({ type: "text", text: cmdText });
+            } else {
+              setHUDState("listening", `ESCUCHANDO: "${cmdText}"`);
+            }
+          } else {
+            showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 3000);
+            setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
           }
         }
       }

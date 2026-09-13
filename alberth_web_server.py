@@ -581,6 +581,10 @@ def run_alberth_full(text: str) -> dict:
             else:
                 clean_speech = clean_speech[:280] + "."
 
+        # Limpiar bloques de comandos internos del texto para respuesta limpia y hablada
+        resp_text = _re.sub(r'\[EXECUTE:.*?\]', '', resp_text).strip()
+        resp_text = _re.sub(r'\[PHONE_CMD:.*?\]', '', resp_text).strip()
+
         def _bg_synthesize(speech_txt, dest_file):
             try:
                 subprocess.run(
@@ -590,8 +594,11 @@ def run_alberth_full(text: str) -> dict:
             except Exception as te:
                 print(f"[BG TTS Error] {te}")
 
-        threading.Thread(target=_bg_synthesize, args=(clean_speech, tts_file), daemon=True).start()
-        audio_url = f"/output/{tts_file.name}"
+        t = threading.Thread(target=_bg_synthesize, args=(clean_speech, tts_file), daemon=True)
+        t.start()
+        t.join(timeout=3.5)
+        if tts_file.exists() and tts_file.stat().st_size > 0:
+            audio_url = f"/output/{tts_file.name}"
     except Exception as e:
         print(f"[TTS Initiation Error] {e}")
 
