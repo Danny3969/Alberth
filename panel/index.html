@@ -13,8 +13,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Three.js r128 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Three.js r128 (Cargado localmente para garantía 100% offline) -->
+<script src="/three.min.js"></script>
 
 <style>
 /* ============================================================
@@ -1727,14 +1727,22 @@ function initWakeWordEngine() {
     wakeRecognition.lang = navigator.language || "es-MX";
 
     wakeRecognition.onresult = (event) => {
-      // Ignorar captura de micrófono si Alberth está reproduciendo su propia voz por los parlantes (evita bucles y silenciados)
-      if (currentAudio && !currentAudio.paused) {
-        return;
-      }
-
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const rawTranscript = event.results[i][0].transcript.trim();
         const transcript = rawTranscript.toLowerCase();
+
+        // Interrupción Quirúrgica (Barge-in): Si Alberth está hablando y el usuario dice "Alberth", "para", "cállate", "silencio", "espera", etc., se corta la voz inmediatamente.
+        const interruptRegex = /(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth|para|cállate|callate|silencio|espera|stop|detente|basta|silenciar)/i;
+        if (currentAudio && !currentAudio.paused) {
+          if (interruptRegex.test(transcript)) {
+            console.log("🛑 Interrupción quirúrgica por voz detectada mientras Alberth hablaba:", transcript);
+            stopAudio();
+            showToast("🛑 Interrupción por voz: Alberth detuvo la reproducción", 2500);
+          } else {
+            // Ignorar eco de su propia voz o ruido ambiental irrelevante mientras reproduce audio
+            continue;
+          }
+        }
 
         // 1. Comando de Parada Directa por Voz ("Alberth para", "cállate", "silencio", "detente", "basta", "stop")
         const stopRegex = /(alberth|albert|alberto|alber)?\s*(para|cállate|callate|silencio|detente|basta|stop|pausa|silenciar)/i;

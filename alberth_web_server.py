@@ -91,6 +91,13 @@ app.mount("/assets", StaticFiles(directory=str(WORKSPACE)), name="assets")
 if (PANEL_DIR / "assets").exists():
     app.mount("/panel/assets", StaticFiles(directory=str(PANEL_DIR / "assets")), name="panel_assets")
 
+@app.get("/three.min.js", response_class=FileResponse)
+async def get_three_js():
+    three_file = PANEL_DIR / "three.min.js"
+    if three_file.exists():
+        return FileResponse(str(three_file), media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="three.min.js no encontrado")
+
 @app.get("/floating", response_class=FileResponse)
 async def get_floating_bar():
     floating_file = PANEL_DIR / "floating.html"
@@ -566,25 +573,44 @@ def run_alberth_full(text: str) -> dict:
         tts_file = VOICE_OUTPUT / f"alberth_{ts}.mp3"
         venv_py = WORKSPACE / "venv" / "bin" / "python3"
         py_exec = str(venv_py) if venv_py.exists() else sys.executable
-        # Preparar texto completo limpio para pronunciación hablada íntegra (sin truncado)
+        # Preparar texto completo para pantalla y resumen hablado breve para audio
         import re as _speech_re
-        clean_speech = _speech_re.sub(r'[*#`_~]', '', resp_text).strip()
-        clean_speech = _speech_re.sub(r'\[EXECUTE:.*?\]', '', clean_speech).strip()
-        clean_speech = _speech_re.sub(r'\[PHONE_CMD:.*?\]', '', clean_speech).strip()
-        resp_text = clean_speech
+        clean = _speech_re.sub(r'[*#`_~]', '', resp_text).strip()
+        clean = _speech_re.sub(r'\[EXECUTE:.*?\]', '', clean).strip()
+        clean = _speech_re.sub(r'\[PHONE_CMD:.*?\]', '', clean).strip()
+        resp_text = clean
+
+        # Extraer resumen hablado breve, concreto y ejecutivo para el audio por parlantes
+        if len(clean) <= 180:
+            clean_speech = clean
+        else:
+            _sents = [s.strip() for s in _speech_re.split(r'(?<=[.!?])\s+', clean) if s.strip()]
+            _spoken = []
+            _curr_len = 0
+            for _s in _sents:
+                _spoken.append(_s)
+                _curr_len += len(_s)
+                if _curr_len >= 130 or len(_spoken) >= 2:
+                    break
+            if _spoken:
+                clean_speech = " ".join(_spoken)
+                if not clean_speech.endswith((".", "!", "?")):
+                    clean_speech += "."
+            else:
+                clean_speech = clean[:180] + "."
 
         def _bg_synthesize(speech_txt, dest_file):
             try:
                 subprocess.run(
                     [py_exec, str(WORKSPACE / "alberth_tts_premium.py"), speech_txt, str(dest_file)],
-                    capture_output=True, timeout=25
+                    capture_output=True, timeout=20
                 )
             except Exception as te:
                 print(f"[BG TTS Error] {te}")
 
         t = threading.Thread(target=_bg_synthesize, args=(clean_speech, tts_file), daemon=True)
         t.start()
-        t.join(timeout=8.0)
+        t.join(timeout=4.5)
         if tts_file.exists() and tts_file.stat().st_size > 0:
             audio_url = f"/output/{tts_file.name}"
     except Exception as e:
