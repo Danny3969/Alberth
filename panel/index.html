@@ -1753,6 +1753,7 @@ let isHandsFreeEnabled = true;
 let isVoiceSessionActive = false;
 let wakeRecognition = null;
 let vadTimer = null;
+let sessionTimeout = null;
 let lastCapturedCmd = "";
 
 function initWakeWordEngine() {
@@ -1768,9 +1769,27 @@ function initWakeWordEngine() {
     wakeRecognition.lang = navigator.language || "es-MX";
 
     wakeRecognition.onresult = (event) => {
+      // Helper para despachar la consulta de voz una sola vez y cerrar el bucle
+      const dispatchVoiceQuery = (cmd) => {
+        if (!cmd || cmd.trim().length < 2) return;
+        clearTimeout(vadTimer);
+        vadTimer = null;
+        clearTimeout(sessionTimeout);
+        sessionTimeout = null;
+        
+        const finalCmd = cmd.trim();
+        lastCapturedCmd = "";
+        isVoiceSessionActive = false; // RESETEAR SESIÓN: elimina bucles infinitos de habla y ecos
+        
+        showToast(`🎙️ Enviando consulta: "${finalCmd}"`, 2500);
+        setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
+        sendWS({ type: "text", text: finalCmd });
+      };
+
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const rawTranscript = event.results[i][0].transcript.trim();
         const transcript = rawTranscript.toLowerCase();
+        const isFinal = event.results[i].isFinal;
 
         // ── A. Si Alberth está reproduciendo voz por los parlantes ──
         if (currentAudio && !currentAudio.paused) {
@@ -1782,6 +1801,7 @@ function initWakeWordEngine() {
             isVoiceSessionActive = false;
             lastCapturedCmd = "";
             clearTimeout(vadTimer);
+            clearTimeout(sessionTimeout);
             showToast("🛑 Conversación por voz pausada", 2500);
             setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
             return;
@@ -1808,6 +1828,7 @@ function initWakeWordEngine() {
           isVoiceSessionActive = false;
           lastCapturedCmd = "";
           clearTimeout(vadTimer);
+          clearTimeout(sessionTimeout);
           showToast("🛑 Conversación por voz pausada", 2500);
           setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
           return;
@@ -1818,30 +1839,37 @@ function initWakeWordEngine() {
         const hasWakeWord = wakeRegex.test(transcript);
 
         if (hasWakeWord || isVoiceSessionActive) {
-          stopAudio(); // Cortar habla previa de Alberth
+          stopAudio(); // Cortar habla previa de Alberth si la había
 
-          // Extraer comando directo si viene tras la palabra clave
           let cmdText = rawTranscript;
           if (hasWakeWord) {
             isVoiceSessionActive = true;
             cmdText = rawTranscript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
+            
+            // Auto-cerrar ventana de escucha tras 6s si solo dijo "Alberth" sin consulta
+            clearTimeout(sessionTimeout);
+            sessionTimeout = setTimeout(() => {
+              if (isVoiceSessionActive && !lastCapturedCmd) {
+                isVoiceSessionActive = false;
+                setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+              }
+            }, 6000);
           }
 
-          if (cmdText.length > 1 && cmdText !== lastCapturedCmd) {
+          if (cmdText.length >= 2) {
             lastCapturedCmd = cmdText;
             setHUDState("listening", `ESCUCHANDO: "${cmdText}"`);
 
-            // VAD Silence Timeout: 1.3 segundos sin nuevas palabras → Enviar consulta completa
-            clearTimeout(vadTimer);
-            vadTimer = setTimeout(() => {
-              if (lastCapturedCmd && lastCapturedCmd.length > 1) {
-                const finalCmd = lastCapturedCmd;
-                lastCapturedCmd = ""; // Limpiar buffer para evitar bucles
-                showToast(`🎙️ Enviando consulta: "${finalCmd}"`, 3500);
-                setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN DE VOZ...");
-                sendWS({ type: "text", text: finalCmd });
-              }
-            }, 1300);
+            // RÁPIDO Y CLARO: Si Web Speech indica fin de frase (isFinal), despachar inmediatamente (<50ms)
+            if (isFinal) {
+              dispatchVoiceQuery(cmdText);
+            } else {
+              // Si aún es preliminar, despachar tras 700ms de silencio
+              clearTimeout(vadTimer);
+              vadTimer = setTimeout(() => {
+                dispatchVoiceQuery(lastCapturedCmd);
+              }, 700);
+            }
           } else if (!lastCapturedCmd) {
             showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
             setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");

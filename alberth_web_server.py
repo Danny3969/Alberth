@@ -419,10 +419,17 @@ def run_alberth_full(text: str) -> dict:
         orq_prompt = orq_file.read_text(encoding="utf-8") if orq_file.exists() else ""
         mem_summary = get_core_memory_summary()
 
-        now_time = time.strftime("%Y-%m-%d %H:%M:%S")
-        now_day = time.strftime("%A")
+        import datetime
+        now_dt = datetime.datetime.now()
+        days_es = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        months_es = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        day_str = days_es[now_dt.weekday()]
+        month_str = months_es[now_dt.month - 1]
+        time_12h = now_dt.strftime("%I:%M %p").lstrip('0')
+        now_formatted = f"{day_str}, {now_dt.day} de {month_str} de {now_dt.year} a las {time_12h}"
+
         system_prompt = (
-            f"HORA Y FECHA EN VIVO DEL SISTEMA OPERATIVO MAC (LOCAL): {now_time} ({now_day})\n\n"
+            f"HORA Y FECHA EXACTA EN VIVO DEL SISTEMA OPERATIVO MAC (LOCAL): {now_formatted}\n\n"
             f"AGENTE ORQUESTADOR CORE (OPENCLAW):\n{orq_prompt}\n\n"
             f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
             f"MEMORIA TÉCNICA Y DE PROYECTOS PERSISTENTE (MEMORY.md):\n{mem_summary}\n\n"
