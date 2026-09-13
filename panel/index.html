@@ -1710,28 +1710,25 @@ function initWakeWordEngine() {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const transcript = event.results[i][0].transcript.toLowerCase().trim();
 
-        // 1. Interrupción en tiempo real (Barge-in): Si Alberth está hablando y se detecta voz del usuario -> Cortar audio
+        // 1. Interrupción en tiempo real (Barge-in): Si Alberth está hablando y se detecta voz -> Cortar audio
         if (currentAudio && transcript.length > 2) {
           console.log("[Barge-in]: Interrumpiendo voz de Alberth por intervención del usuario...");
           stopAudio();
         }
 
-        // 2. Activación por Voz (Wake Word "Alberth" / "Albert")
-        if (transcript.includes("alberth") || transcript.includes("albert") || transcript.includes("alber")) {
+        // 2. Activación por Voz (Variantes fonéticas: Alberth, Albert, Alberto, Albeth, Albet, etc.)
+        const wakeRegex = /(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)/i;
+        if (wakeRegex.test(transcript)) {
           stopAudio(); // Cortar habla de Alberth de inmediato
 
           // Extraer comando directo si viene tras la palabra clave
-          let cmdText = "";
-          const matchIdx = Math.max(transcript.lastIndexOf("alberth"), transcript.lastIndexOf("albert"), transcript.lastIndexOf("alber"));
-          if (matchIdx !== -1) {
-            cmdText = transcript.substring(matchIdx).replace(/^(alberth|albert|alber)\s*/i, "").trim();
-          }
+          let cmdText = transcript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
 
           if (cmdText.length > 3 && event.results[i].isFinal) {
-            showToast(`🎙️ Activado por Voz: "${cmdText}"`, 3000);
+            showToast(`🎙️ Activado por Voz: "${cmdText}"`, 3500);
             sendWS({ type: "text", text: cmdText });
           } else if (!isRecording) {
-            showToast("🎙️ ¡Alberth activado por voz! Escuchando...", 3000);
+            showToast("🎙️ ¡Alberth activado por voz! Escuchando...", 3500);
             toggleRecording(); // Activar captura de voz
           }
         }
@@ -1739,7 +1736,12 @@ function initWakeWordEngine() {
     };
 
     wakeRecognition.onerror = (e) => {
-      if (e.error !== "no-speech") console.warn("[WakeWord Error]:", e.error);
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        console.warn("[WakeWord Error]: Permiso de micrófono pendiente. Haz clic en la pantalla.");
+        showToast("🎙️ Haz clic en la pantalla para activar el micrófono de Alberth", 5000);
+      } else if (e.error !== "no-speech") {
+        console.warn("[WakeWord Error]:", e.error);
+      }
     };
 
     wakeRecognition.onend = () => {
@@ -1748,8 +1750,24 @@ function initWakeWordEngine() {
       }
     };
 
-    wakeRecognition.start();
-    console.log("✅ Motor de Activación por Voz 'Alberth' (Wake Word) iniciado.");
+    // Intentar iniciar el motor de activación por voz
+    try {
+      wakeRecognition.start();
+      console.log("✅ Motor de Activación por Voz 'Alberth' (Wake Word) iniciado.");
+    } catch(e) {
+      console.warn("WakeWord diferido hasta primera interacción.");
+    }
+
+    // Asegurar que al primer clic del usuario en cualquier parte de la página, el micrófono se active si el navegador lo bloqueaba
+    const enableMicOnUserGesture = () => {
+      try {
+        if (wakeRecognition) wakeRecognition.start();
+      } catch(e){}
+      document.removeEventListener("click", enableMicOnUserGesture);
+      document.removeEventListener("keydown", enableMicOnUserGesture);
+    };
+    document.addEventListener("click", enableMicOnUserGesture, { once: true });
+    document.addEventListener("keydown", enableMicOnUserGesture, { once: true });
   } catch (e) {
     console.error("Error al iniciar WakeWord:", e);
   }
