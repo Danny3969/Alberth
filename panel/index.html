@@ -1727,14 +1727,25 @@ function initWakeWordEngine() {
     wakeRecognition.lang = navigator.language || "es-MX";
 
     wakeRecognition.onresult = (event) => {
+      // Ignorar captura de micrófono si Alberth está reproduciendo su propia voz por los parlantes (evita bucles y silenciados)
+      if (currentAudio && !currentAudio.paused) {
+        return;
+      }
+
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         const rawTranscript = event.results[i][0].transcript.trim();
         const transcript = rawTranscript.toLowerCase();
 
-        // 1. Interrupción en tiempo real (Barge-in): Si Alberth está hablando y se detecta voz -> Cortar audio
-        if (currentAudio && transcript.length > 2) {
-          console.log("[Barge-in]: Interrumpiendo voz de Alberth por intervención del usuario...");
+        // 1. Comando de Parada Directa por Voz ("Alberth para", "cállate", "silencio", "detente", "basta", "stop")
+        const stopRegex = /(alberth|albert|alberto|alber)?\s*(para|cállate|callate|silencio|detente|basta|stop|pausa|silenciar)/i;
+        if (stopRegex.test(transcript)) {
           stopAudio();
+          isVoiceSessionActive = false;
+          lastCapturedCmd = "";
+          clearTimeout(vadTimer);
+          showToast("🛑 Conversación por voz pausada", 3000);
+          setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+          return;
         }
 
         // 2. Detección de Palabra Clave o Sesión de Voz Activa
@@ -1742,16 +1753,16 @@ function initWakeWordEngine() {
         const hasWakeWord = wakeRegex.test(transcript);
 
         if (hasWakeWord || isVoiceSessionActive) {
-          stopAudio(); // Cortar habla de Alberth de inmediato
+          stopAudio(); // Cortar habla previa de Alberth
 
-          // Extraer comando directo si viene tras la palabra clave, o tomar todo el texto si la sesión de voz ya estaba activa
+          // Extraer comando directo si viene tras la palabra clave
           let cmdText = rawTranscript;
           if (hasWakeWord) {
             isVoiceSessionActive = true;
             cmdText = rawTranscript.replace(/.*?(alberth|albert|alberto|alber|álbert|álberth|albeth|albet|alver|alverto|alverth)\s*/i, "").trim();
           }
 
-          if (cmdText.length > 1) {
+          if (cmdText.length > 1 && cmdText !== lastCapturedCmd) {
             lastCapturedCmd = cmdText;
             setHUDState("listening", `ESCUCHANDO: "${cmdText}"`);
 
@@ -1760,13 +1771,13 @@ function initWakeWordEngine() {
             vadTimer = setTimeout(() => {
               if (lastCapturedCmd && lastCapturedCmd.length > 1) {
                 const finalCmd = lastCapturedCmd;
-                lastCapturedCmd = "";
+                lastCapturedCmd = ""; // Limpiar buffer para evitar bucles
                 showToast(`🎙️ Enviando consulta: "${finalCmd}"`, 3500);
                 setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN DE VOZ...");
                 sendWS({ type: "text", text: finalCmd });
               }
             }, 1300);
-          } else {
+          } else if (!lastCapturedCmd) {
             showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
             setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
           }

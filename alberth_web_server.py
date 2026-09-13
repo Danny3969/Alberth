@@ -412,7 +412,10 @@ def run_alberth_full(text: str) -> dict:
         orq_prompt = orq_file.read_text(encoding="utf-8") if orq_file.exists() else ""
         mem_summary = get_core_memory_summary()
 
+        now_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        now_day = time.strftime("%A")
         system_prompt = (
+            f"HORA Y FECHA EN VIVO DEL SISTEMA OPERATIVO MAC (LOCAL): {now_time} ({now_day})\n\n"
             f"AGENTE ORQUESTADOR CORE (OPENCLAW):\n{orq_prompt}\n\n"
             f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
             f"MEMORIA TÉCNICA Y DE PROYECTOS PERSISTENTE (MEMORY.md):\n{mem_summary}\n\n"
