@@ -221,9 +221,9 @@ def describe_image(api_key=None, custom_prompt=None, model=NVIDIA_MODEL_PRIMARY,
 
     prompt = (
         custom_prompt or
-        "Eres Alberth, el asistente personal de élite del Señor Danny. "
+        "Eres Alberth, el asistente personal de élite del Señor. "
         "Describe detalladamente, con respeto, precisión y estilo profesional lo que ves en esta imagen. "
-        "Dirígete al Señor Danny. Responde en español."
+        "Dirígete siempre al Señor con el máximo respeto. Responde en español."
     )
 
     # Prioridad 1: Google Gemini Pro (si el usuario ha configurado GEMINI_API_KEY)
@@ -411,9 +411,9 @@ def main():
     if args.screen:
         if capture_screen():
             prompt = custom_prompt or (
-                "Eres Alberth, el asistente personal de élite del Señor Danny. "
+                "Eres Alberth, el asistente personal de élite del Señor. "
                 "Analiza la captura de pantalla de su Mac y descríbele detalladamente qué aplicaciones, "
-                "ventanas, código o contenido tiene abierto. Responde en español y dirígete al Señor Danny."
+                "ventanas, código o contenido tiene abierto. Responde en español y dirígete al Señor."
             )
             description = describe_image(api_key, custom_prompt=prompt, target_image=SCREEN_PATH)
             if description:

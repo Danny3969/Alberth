@@ -167,7 +167,7 @@ def decide_next_action(
 
     history_text = "\n".join([f"- {h}" for h in action_history[-4:]]) if action_history else "(Inicio de misión)"
 
-    prompt = f"""Eres el Agente de Navegación Web Autónoma de Alberth para el Señor Danny.
+    prompt = f"""Eres el Agente de Navegación Web Autónoma de Alberth para el Señor.
 Tu misión global es:
 "{mission}"
 
@@ -187,10 +187,10 @@ Elige EXACTAMENTE UNA de las siguientes acciones para avanzar hacia la meta:
 3. {{"action": "click", "id": <numero_elemento>, "thought": "Por qué hacer clic en este botón o enlace"}}
 4. {{"action": "press", "key": "Enter", "thought": "Por qué presionar esta tecla"}}
 5. {{"action": "scroll", "direction": "down", "thought": "Por qué desplazarse"}}
-6. {{"action": "finish", "summary": "Informe final detallado con los datos extraídos para el Señor Danny", "thought": "Meta cumplida"}}
+6. {{"action": "finish", "summary": "Informe final detallado con los datos extraídos para el Señor", "thought": "Meta cumplida"}}
 
 CRITERIO DE FINALIZACIÓN:
-Si la URL o el título actual ya corresponden al tema solicitado o si en los textos/enlaces ya observas la respuesta a la misión del Señor Danny, selecciona INMEDIATAMENTE la acción "finish" y redacta el informe en "summary".
+Si la URL o el título actual ya corresponden al tema solicitado o si en los textos/enlaces ya observas la respuesta a la misión del Señor, selecciona INMEDIATAMENTE la acción "finish" y redacta el informe en "summary".
 
 Responde ÚNICAMENTE con el objeto JSON válido.
 """
@@ -225,7 +225,7 @@ Responde ÚNICAMENTE con el objeto JSON válido.
     # Decisión heurística de emergencia si falla la IA
     if not current_url or current_url == "about:blank":
         return {"action": "goto", "url": "https://www.google.com", "thought": "Navegar a buscador base"}
-    return {"action": "finish", "summary": f"Señor Danny, navegación completada en {current_url} ({page_title})."}
+    return {"action": "finish", "summary": f"Señor, navegación completada en {current_url} ({page_title})."}
 
 
 # ── Bucle Principal de Navegación Autónoma ───────────────────────────────────
@@ -241,7 +241,7 @@ def run_autonomous_browser_mission(
     Ejecuta una misión autónoma completa en la web usando Playwright.
     
     Args:
-        mission: Instrucción del Señor Danny (ej. 'Busca en Wikipedia sobre X y extrae Y').
+        mission: Instrucción del Señor (ej. 'Busca en Wikipedia sobre X y extrae Y').
         start_url: URL inicial opcional. Si es None, busca en DuckDuckGo o Google.
         headed: Si es True, abre la ventana visible de Chromium. Si es False (default), corre en segundo plano.
         max_steps: Límite de acciones para evitar bucles infinitos.
@@ -256,7 +256,7 @@ def run_autonomous_browser_mission(
         return {
             "success": False,
             "error": "Playwright no está instalado. Ejecute 'pip install playwright && playwright install chromium'.",
-            "summary": "Señor Danny, Playwright no está disponible en este entorno."
+            "summary": "Señor, Playwright no está disponible en este entorno."
         }
 
     print(f"\n[Browser Agent] 🌐 Iniciando misión: \"{mission}\" (Modo: {'Visible' if headed else 'Segundo Plano / Headless'})...")
@@ -335,7 +335,7 @@ def run_autonomous_browser_mission(
                             paragraphs = page.locator("p").all_inner_texts()
                             clean_p = [p.strip() for p in paragraphs if len(p.strip()) > 35]
                             if clean_p:
-                                final_summary = f"Señor Danny, información extraída de '{curr_title}':\n\n" + "\n\n".join(clean_p[:3])
+                                final_summary = f"Señor, información extraída de '{curr_title}':\n\n" + "\n\n".join(clean_p[:3])
                             else:
                                 body_text = page.inner_text("body")[:1000]
                                 final_summary = f"Misión completada en {curr_url}.\n\nExtracto:\n{body_text}"
@@ -409,25 +409,25 @@ def run_autonomous_browser_mission(
                     clean_p = [p.strip() for p in paragraphs if len(p.strip()) > 35]
                     if clean_p:
                         final_summary = (
-                            f"Señor Danny, la navegación completó su objetivo en '{page.title()}'.\n\n"
+                            f"Señor, la navegación completó su objetivo en '{page.title()}'.\n\n"
                             f"Extracto principal:\n" + "\n\n".join(clean_p[:3])
                         )
                     else:
                         page_text = page.inner_text("main") or page.inner_text("article") or page.inner_text("body")
                         clean_text = "\n".join([line.strip() for line in page_text.splitlines() if len(line.strip()) > 30][:6])
                         final_summary = (
-                            f"Señor Danny, la navegación finalizó en '{page.title()}' ({page.url}).\n\n"
+                            f"Señor, la navegación finalizó en '{page.title()}' ({page.url}).\n\n"
                             f"Información relevante encontrada:\n{clean_text}"
                         )
                 except Exception:
-                    final_summary = f"Señor Danny, la misión finalizó en {page.url} ({page.title()})."
+                    final_summary = f"Señor, la misión finalizó en {page.url} ({page.title()})."
 
             final_url = page.url
             final_title = page.title()
 
         except Exception as e:
             print(f"[Browser Agent] Error general durante la navegación: {e}", file=sys.stderr)
-            final_summary = f"Señor Danny, ocurrió un inconveniente durante la navegación web: {e}"
+            final_summary = f"Señor, ocurrió un inconveniente durante la navegación web: {e}"
             final_url = page.url if 'page' in locals() else ""
             final_title = page.title() if 'page' in locals() else ""
         finally:

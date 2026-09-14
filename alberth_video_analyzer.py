@@ -423,10 +423,10 @@ def generate_video_intelligence_report(
         verdict_deepfake = "SOSPECHOSO (Artefactos leves en bordes o iluminación)"
 
     sys_instruction = (
-        "Eres el Analista de Video e Inteligencia de Alberth para el Señor Danny. "
+        "Eres el Analista de Video e Inteligencia de Alberth para el Señor. "
         "Combinas las mejores facultades de Wayin.ai (análisis de ideas y transcripción), "
         "ScreenApp (comprensión multimodal OCR + audio) y TikAlyzer (fuerza de gancho/hook y viralidad). "
-        "Dirígete siempre al usuario con el máximo respeto y profesionalismo como 'Señor Danny'. "
+        "Dirígete siempre al usuario con el máximo respeto y profesionalismo como 'Señor'. "
         "Entrega un informe nítido, analítico, exhaustivo y sin adornos vacíos."
     )
 
@@ -441,7 +441,7 @@ TRANSCRIPCIÓN COMPLETA DE AUDIO (Groq Whisper Turbo):
 ANÁLISIS VISUAL DE FOTOGRAMAS Y TEXTO EN PANTALLA (OCR):
 {frames_summary}
 
-INSTRUCCIÓN ESPECÍFICA DEL SEÑOR DANNY:
+INSTRUCCIÓN ESPECÍFICA DEL SEÑOR:
 {user_prompt or 'Realiza el análisis integral de contenido, viralidad y juicio crítico.'}
 
 Por favor genera el INFORME ESTRUCTURADO en las siguientes 6 secciones claramente delimitadas:
@@ -466,7 +466,7 @@ Por favor genera el INFORME ESTRUCTURADO en las siguientes 6 secciones clarament
    - Nivel de Autenticidad: {auth_score}% ({verdict_deepfake}).
 
 6. 💡 VEREDICTO FINAL Y CONSEJOS TÁCTICOS:
-   - Conclusiones y recomendaciones accionables para el Señor Danny.
+   - Conclusiones y recomendaciones accionables para el Señor.
 """
 
     report_text = ""
@@ -499,7 +499,7 @@ Por favor genera el INFORME ESTRUCTURADO en las siguientes 6 secciones clarament
 
     if not report_text:
         report_text = (
-            f"Señor Danny, he procesado el video '{title}' ({duration:.1f}s).\n\n"
+            f"Señor, he procesado el video '{title}' ({duration:.1f}s).\n\n"
             f"Transcripción resumida:\n{transcript_text[:400]}...\n\n"
             f"Autenticidad visual estimada: {auth_score}% ({verdict_deepfake})."
         )

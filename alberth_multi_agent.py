@@ -13,9 +13,9 @@ colaboran de forma autónoma con bucles de auto-corrección:
 3. 💻 INGENIERO (Qwen 2.5 Coder + Ejecución macOS):
    - Genera scripts en Python/Bash, crea archivos y ejecuta operaciones controladas.
 4. ⚖️ AUDITOR / QA:
-   - Valida si el resultado cumple la meta del Señor Danny. Si detecta fallos, regresa cíclicamente al Ingeniero.
+   - Valida si el resultado cumple la meta del Señor. Si detecta fallos, regresa cíclicamente al Ingeniero.
 5. 🎙️ SINTETIZADOR:
-   - Redacta la entrega ejecutiva final con el trato característico («Señor Danny»).
+   - Redacta la entrega ejecutiva final con el trato característico («Señor»).
 
 Costo: $0.00 | Tolerancia a fallos con hasta 3 bucles de auto-corrección.
 """
@@ -67,13 +67,13 @@ class AlberthAgentState(TypedDict):
 def strategist_node(state: AlberthAgentState) -> Dict[str, Any]:
     """
     Nodo 1: Estratega (DeepSeek R1 / V3)
-    Analiza la misión global del Señor Danny y formula un plan de pasos estructurado.
+    Analiza la misión global del Señor y formula un plan de pasos estructurado.
     """
     mission = state.get("mission", "")
     print(f"\n[Multi-Agente] 🧠 Estratega (DeepSeek) planificando misión...")
 
     prompt = (
-        f"Misión solicitada por el Señor Danny:\n\"{mission}\"\n\n"
+        f"Misión solicitada por el Señor:\n\"{mission}\"\n\n"
         "Eres el Agente Estratega de Alberth. Desglosa esta misión en 2 a 4 pasos concisos de acción. "
         "Indica qué datos investigar y qué archivo o script se debe construir y ejecutar. "
         "Devuelve exclusivamente una lista numerada en español sin introducciones superfluas."
@@ -198,7 +198,7 @@ def engineer_node(state: AlberthAgentState) -> Dict[str, Any]:
 
     prompt_code = (
         f"Eres el Agente Ingeniero de Software (Qwen Coder) de Alberth.\n"
-        f"Misión del Señor Danny: \"{mission}\"\n"
+        f"Misión del Señor: \"{mission}\"\n"
         f"Plan: {json.dumps(plan, ensure_ascii=False)}\n"
         f"Datos investigados: {research}\n"
         f"{critique_prompt}\n"
@@ -221,7 +221,7 @@ def engineer_node(state: AlberthAgentState) -> Dict[str, Any]:
     script_content = extract_python_code(code_text)
 
     # Validar que sea código antes de intentar ejecutarlo
-    if not script_content or script_content.startswith("Señor Danny") or "Traceback" in script_content:
+    if not script_content or script_content.startswith("Señor") or "Traceback" in script_content:
         print(f"   ⚠️ Respuesta no es código Python válido.")
         return {
             "code_artifacts": {},
@@ -255,7 +255,7 @@ def engineer_node(state: AlberthAgentState) -> Dict[str, Any]:
 def auditor_node(state: AlberthAgentState) -> Dict[str, Any]:
     """
     Nodo 4: Auditor QA
-    Evalúa la salida de ejecución contra la meta original del Señor Danny.
+    Evalúa la salida de ejecución contra la meta original del Señor.
     Si hay un error de ejecución o datos faltantes, rechaza y solicita corrección cíclica.
     """
     exec_out = state.get("execution_output", "")
@@ -288,7 +288,7 @@ def auditor_node(state: AlberthAgentState) -> Dict[str, Any]:
 def synthesizer_node(state: AlberthAgentState) -> Dict[str, Any]:
     """
     Nodo 5: Sintetizador Ejecutivo
-    Redacta la entrega final de alto nivel para el Señor Danny.
+    Redacta la entrega final de alto nivel para el Señor.
     """
     mission = state.get("mission", "")
     plan = state.get("plan", [])
@@ -299,21 +299,21 @@ def synthesizer_node(state: AlberthAgentState) -> Dict[str, Any]:
     print(f"\n[Multi-Agente] 🎙️ Sintetizador generando reporte final...")
 
     prompt_syn = (
-        f"Eres Alberth, el asistente personal de élite del Señor Danny.\n"
+        f"Eres Alberth, el asistente personal de élite del Señor.\n"
         f"Misión solicitada: \"{mission}\"\n"
         f"Pasos ejecutados por tu equipo multi-agente ({iter_count} ciclos):\n{json.dumps(plan, ensure_ascii=False)}\n"
         f"Datos investigados: {research[:300]}\n"
         f"Resultado obtenido del Ingeniero:\n{exec_out[:1000]}\n\n"
-        "Redacta una respuesta ejecutiva, directa, profesional y concisa dirigida al 'Señor Danny'. "
+        "Redacta una respuesta ejecutiva, directa, profesional y concisa dirigida al 'Señor'. "
         "Informa que el equipo multi-agente ha completado la misión y presenta los datos concretos o el estado de los archivos creados."
     )
 
     final_text, model_used = models.query_llama_vision(prompt=prompt_syn, max_tokens=500)
 
     # Respaldo determinista si la API externa experimenta congestión momentánea
-    if not final_text or final_text.startswith("Señor Danny, el sistema") or "Error" in model_used:
+    if not final_text or final_text.startswith("Señor, el sistema") or "Error" in model_used:
         final_text = (
-            f"Señor Danny, la misión «{mission}» ha sido completada con éxito por el equipo multi-agente ({iter_count} ciclo).\n\n"
+            f"Señor, la misión «{mission}» ha sido completada con éxito por el equipo multi-agente ({iter_count} ciclo).\n\n"
             f"Resultados de ejecución:\n{exec_out.strip()}"
         )
 

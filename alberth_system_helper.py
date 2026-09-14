@@ -664,7 +664,7 @@ def requires_confirmation(cmd: str, query: str) -> bool:
     is_critical = any(crit in cmd_lower for crit in CRITICAL_COMMANDS)
     if not is_critical:
         return False
-    # Si el Señor Danny explícitamente ya confirmó en su consulta
+    # Si el Señor explícitamente ya confirmó en su consulta
     if any(tok in query_lower for tok in ["confirmo", "confirmar", "autorizo", "procede con", "estoy seguro"]):
         return False
     return True
@@ -703,7 +703,7 @@ def handle_terminal(query, query_lower):
             "accion": "safety_guard_confirmacion_requerida",
             "resultado": (
                 f"⚠️ PROTOCOLO DE SEGURIDAD ACTIVADO (Safety Guard):\n"
-                f"Señor Danny, el comando solicitado ('{cmd}') implica una acción de alto riesgo o potencialmente destructiva en su Mac.\n"
+                f"Señor, el comando solicitado ('{cmd}') implica una acción de alto riesgo o potencialmente destructiva en su Mac.\n"
                 f"Por directriz de seguridad de Alberth, requiero su confirmación explícita. Para proceder, por favor indíqueme: 'Confirmo ejecutar {cmd}'."
             ),
             "exito": False
@@ -1248,7 +1248,7 @@ def handle_self_audit(query, query_lower):
 
     report = (
         f"INFORME DE AUTODIAGNÓSTICO Y AUDITORÍA TÉCNICA (ALBERTH NEXUS)\n"
-        f"Preparado para el Señor Danny\n\n"
+        f"Preparado para el Señor\n\n"
         f"1. INFRAESTRUCTURA Y ALOJAMIENTO:\n"
         f"  • Host Activo: iMac ({platform.node()}) – macOS {platform.mac_ver()[0]} ({platform.machine()})\n"
         f"  • Modo de Operación: Bare-metal nativo en Python 3.9 (SIN contenedores Docker ni sandbox limitado)\n"
@@ -1262,10 +1262,11 @@ def handle_self_audit(query, query_lower):
         f"{err_text}\n\n"
         f"5. CAPACIDADES OPERATIVAS ACTIVAS:\n"
         f"  • Suite de Inteligencia de Video Multimodal: Operativa (Groq Whisper Turbo + TikWM + Gemini/Llama Vision)\n"
-        f"  • Visión y Pantalla: Operativa (FaceTime HD + Screen Capture)\n"
+        f"  • Visión y Pantalla: Operativa (FaceTime HD + Screen Capture + Apple Vision OCR Nativo)\n"
+        f"  • Memoria Episódica Autonómica: Operativa (SQLite FTS5 Local con deduplicación)\n"
         f"  • Agentes Autónomos: LangGraph Multi-Agente + Playwright Headless Browser Agent\n"
         f"  • Control del Sistema: Finder, Spotify, Volumen, Apple Notes, Recordatorios, Calendario\n\n"
-        f"Diagnóstico General: Sistema saludable, en línea y respondiendo a baja latencia, Señor Danny."
+        f"Diagnóstico General: Sistema saludable, en línea y respondiendo a baja latencia, Señor."
     )
     return {
         "accion": "autodiagnostico_alberth",
@@ -1336,6 +1337,60 @@ def dispatch(query):
                 return {"accion": "computer_use", "resultado": f"Acción de pantalla ejecutada con éxito: {det}.", "exito": True}
         except Exception as cue:
             pass
+
+    # 0e. Memoria Episódica Autonómica (Aprender o Consultar Recuerdos)
+    is_learn_cmd = re.search(r'\b(?:recuerda\s+que|guarda\s+(?:en\s+tu\s+memoria\s+)?que|aprende\s+que|no\s+olvides\s+que)\s+(.+)', query, re.IGNORECASE)
+    if is_learn_cmd:
+        try:
+            import alberth_episodic_memory
+            fact_to_learn = is_learn_cmd.group(1).strip()
+            cat = "preferencias" if any(w in fact_to_learn.lower() for w in ["prefiero", "me gusta", "favorito", "favorita", "odio", "no me gusta"]) else "general"
+            res = alberth_episodic_memory.learn_fact(fact_to_learn, category=cat)
+            if res.get("ok"):
+                return {
+                    "accion": "memoria_guardada",
+                    "resultado": f"Señor, he registrado este hecho en mi memoria episódica: '{res['fact']}'.",
+                    "exito": True
+                }
+        except Exception as me:
+            print(f"[EpisodicMemory Error] {me}")
+
+    if any(k in query_lower for k in ["qué recuerdas de", "que recuerdas de", "qué sabes de mis", "que sabes de mis", "mis preferencias guardadas", "consultar memoria episódica", "qué tienes en memoria"]):
+        try:
+            import alberth_episodic_memory
+            facts = alberth_episodic_memory.get_relevant_facts(query, limit=5)
+            if facts:
+                facts_text = "\n".join([f"  • {f['fact']}" for f in facts])
+                return {
+                    "accion": "memoria_consultada",
+                    "resultado": f"Señor, esto es lo que tengo presente en mi memoria episódica:\n\n{facts_text}",
+                    "exito": True
+                }
+            else:
+                return {
+                    "accion": "memoria_consultada",
+                    "resultado": "Señor, aún no tengo registros específicos sobre ese tema en mi memoria episódica.",
+                    "exito": True
+                }
+        except Exception as me:
+            print(f"[EpisodicMemory Query Error] {me}")
+
+    # 0f. OCR Nativo de Pantalla con Apple Vision
+    if any(k in query_lower for k in ["lee la pantalla", "lee el texto de la pantalla", "qué texto hay en pantalla", "que texto hay en pantalla", "copia el texto de la pantalla", "extrae el texto de la pantalla", "ocr de pantalla"]):
+        try:
+            import alberth_apple_vision
+            ocr_res = alberth_apple_vision.ocr_screen()
+            if ocr_res and ocr_res.get("ok"):
+                txt = ocr_res.get("text", "").strip()
+                if not txt:
+                    return {"accion": "apple_vision_ocr", "resultado": "Señor, la pantalla fue analizada pero no se detectó texto legible.", "exito": True}
+                alberth_apple_vision.copy_to_clipboard(txt)
+                if "copia" in query_lower:
+                    return {"accion": "apple_vision_ocr", "resultado": f"Señor, he extraído el texto de su pantalla ({ocr_res.get('line_count', 0)} líneas en {ocr_res.get('latency_ms', 0)}ms) y lo he copiado a su portapapeles.", "exito": True}
+                preview = txt if len(txt) < 600 else txt[:600] + "\n... [Texto truncado, texto completo copiado al portapapeles]"
+                return {"accion": "apple_vision_ocr", "resultado": f"Señor, texto extraído de la pantalla con Apple Vision ({ocr_res.get('line_count')} líneas):\n\n{preview}", "exito": True}
+        except Exception as ve:
+            print(f"[AppleVision Error] {ve}")
 
     # Primero los módulos de alta prioridad
     result = handle_terminal(query, query_lower)

@@ -284,8 +284,8 @@ def run_alberth_full(text: str) -> dict:
                 target_img = alberth_vision.SCREEN_PATH
                 img_relative = f"/assets/voice_exchange/alberth_screen.jpg?t={int(time.time() * 1000)}"
                 prompt_vision = (
-                    f"Eres Alberth, el asistente técnico de élite del Señor Danny. "
-                    f"El Señor Danny te pregunta sobre su pantalla: '{q_clean}'. "
+                    f"Eres Alberth, el asistente técnico de élite del Señor. "
+                    f"El Señor te pregunta sobre su pantalla: '{q_clean}'. "
                     f"Analiza con detalle las ventanas, aplicaciones y código visible y descríbeselo con respeto y precisión."
                 )
             else:
@@ -297,16 +297,16 @@ def run_alberth_full(text: str) -> dict:
                 is_hand_query = any(w in q_lower for w in ["mano", "sostengo", "sosteniendo", "agarrando", "objeto", "qué es esto", "que es esto", "qué tengo"])
                 if is_hand_query:
                     prompt_vision = (
-                        f"Eres Alberth, el asistente personal y mano derecha de élite del Señor Danny. "
-                        f"El Señor Danny te pregunta mirando a la cámara web: '{q_clean}'. "
+                        f"Eres Alberth, el asistente personal y mano derecha de élite del Señor. "
+                        f"El Señor te pregunta mirando a la cámara web: '{q_clean}'. "
                         f"Inspecciona minuciosamente sus manos y el objeto que sostiene o te está mostrando frente a la cámara. "
                         f"Identifica y describe con máxima precisión el objeto exacto, qué es, su color, forma y qué está haciendo con él. "
-                        f"Responde con respeto, calidez y estilo analítico dirigiéndote al Señor Danny."
+                        f"Responde con respeto, calidez y estilo analítico dirigiéndote al Señor."
                     )
                 else:
                     prompt_vision = (
-                        f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor Danny. "
-                        f"El Señor Danny te pregunta mirando a la cámara web: '{q_clean}'. "
+                        f"Eres Alberth, la mano derecha analítica y asistente personal de élite del Señor. "
+                        f"El Señor te pregunta mirando a la cámara web: '{q_clean}'. "
                         f"Míralo a través de la cámara de su Mac y descríbele detalladamente con respeto, calidez y precisión "
                         f"lo que ves frente a la cámara (su vestimenta, entorno, postura y lo que observas)."
                     )
@@ -357,10 +357,10 @@ def run_alberth_full(text: str) -> dict:
                     }
                     resp_text = vid_result.get("report")
                 else:
-                    resp_text = f"Señor Danny, intenté analizar el video en {target_video_source}, pero ocurrió una dificultad: {vid_result.get('error', 'no se pudo descargar el archivo')}. Por favor verifique el enlace o intente nuevamente."
+                    resp_text = f"Señor, intenté analizar el video en {target_video_source}, pero ocurrió una dificultad: {vid_result.get('error', 'no se pudo descargar el archivo')}. Por favor verifique el enlace o intente nuevamente."
             except Exception as vide:
                 print(f"[VideoAnalyzer Error] {vide}")
-                resp_text = f"Señor Danny, ocurrió un error inesperado al procesar la suite de video: {vide}"
+                resp_text = f"Señor, ocurrió un error inesperado al procesar la suite de video: {vide}"
 
     # ── 3. Acciones Nativas del Sistema Mac (si no es visión ni video) ─────────
     if not resp_text:
@@ -446,9 +446,18 @@ def run_alberth_full(text: str) -> dict:
         time_12h = now_dt.strftime("%I:%M %p").lstrip('0')
         now_formatted = f"{day_str}, {now_dt.day} de {month_str} de {now_dt.year} a las {time_12h}"
 
+        # ── Memoria Episódica Autonómica (Preferencias y contexto relevante del Señor) ──
+        episodic_context = ""
+        try:
+            import alberth_episodic_memory
+            episodic_context = alberth_episodic_memory.get_user_context_block(q_clean, limit=4)
+        except Exception as em_err:
+            pass
+
         system_prompt = (
             f"HORA Y FECHA EXACTA EN VIVO DEL SISTEMA OPERATIVO MAC (LOCAL): {now_formatted}\n\n"
             f"AGENTE ORQUESTADOR CORE (OPENCLAW):\n{orq_prompt}\n\n"
+            f"{episodic_context}\n"
             f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
             f"MEMORIA TÉCNICA Y DE PROYECTOS PERSISTENTE (MEMORY.md):\n{mem_summary}\n\n"
             "DIRECTRICES OBLIGATORIAS:\n"
@@ -486,7 +495,7 @@ def run_alberth_full(text: str) -> dict:
                     f"{_active_video_context.get('transcript_formatted')}\n\n"
                     f"- Informe analítico previo:\n"
                     f"{_active_video_context.get('report', '')[:1200]}\n\n"
-                    f"[DIRECTRIZ DE RESPUESTA]: El Señor Danny te está haciendo una pregunta interactiva sobre este video. "
+                    f"[DIRECTRIZ DE RESPUESTA]: El Señor te está haciendo una pregunta interactiva sobre este video. "
                     f"Responde directamente basándote en la transcripción y el análisis, citando timestamps exactos si es relevante. "
                     f"Sé perspicaz, objetivo, útil y respetuoso."
                 )
@@ -511,7 +520,7 @@ def run_alberth_full(text: str) -> dict:
                 history=_conv_history[-8:],
                 max_tokens=1200
             )
-            if ans_text and ans_text != "Error" and not ans_text.startswith("Señor Danny, no fue posible") and "momentáneamente no disponibles" not in ans_text:
+            if ans_text and ans_text != "Error" and not ans_text.startswith("Señor, no fue posible") and "momentáneamente no disponibles" not in ans_text:
                 resp_text = ans_text
                 print(f"[Foundation Models] Rol: {role_assigned} | Modelo: {model_tag}")
         except Exception as e:
@@ -525,7 +534,7 @@ def run_alberth_full(text: str) -> dict:
                     try:
                         g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
                         g_payload = {
-                            "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor Danny: {q_clean}"}]}],
+                            "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor: {q_clean}"}]}],
                             "generationConfig": {"temperature": 0.5, "maxOutputTokens": 500}
                         }
                         g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
@@ -573,7 +582,7 @@ def run_alberth_full(text: str) -> dict:
 
         # Fallback final cortés y en carácter
         if not resp_text:
-            resp_text = "Señor Danny, en este momento todos los proveedores de IA están experimentando alta demanda. Por favor intente de nuevo en unos segundos."
+            resp_text = "Señor, en este momento todos los proveedores de IA están experimentando alta demanda. Por favor intente de nuevo en unos segundos."
 
     # ── Limpiar Markdown de la respuesta final (seguro de respaldo) ──────────
     import re as _re

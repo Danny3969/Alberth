@@ -2184,7 +2184,7 @@ function appendMsg(msg, animate) {
   const container = document.getElementById("chat-messages");
   const div = document.createElement("div");
   div.className = `chat-msg ${msg.role === "user" ? "user" : "alberth"}`;
-  const label = msg.role === "user" ? "SEÑOR DANNY" : "ALBERTH QUANTUM";
+  const label = msg.role === "user" ? "SEÑOR" : "ALBERTH QUANTUM";
 
   let contentHtml = escHtml(msg.content);
   if (msg.image_url) {
