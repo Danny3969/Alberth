@@ -382,7 +382,9 @@ def run_alberth_full(text: str) -> dict:
                                     "action": sys_res["music_action"],
                                     "track": sys_res.get("track"),
                                     "playlist_id": sys_res.get("playlist_id"),
-                                    "playlist_name": sys_res.get("playlist_name")
+                                    "playlist_name": sys_res.get("playlist_name"),
+                                    "value": sys_res.get("value"),
+                                    "mode": sys_res.get("mode")
                                 }),
                                 loop
                             )

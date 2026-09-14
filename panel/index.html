@@ -734,6 +734,97 @@ header.hud-header {
   background: rgba(255, 0, 55, 0.15);
 }
 
+/* ─── Tracklist Queue Modal & Player Indicators ─── */
+.track-card-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.track-card-item:hover {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: rgba(0, 240, 255, 0.35);
+  transform: translateX(3px);
+}
+
+.track-card-item.playing {
+  background: rgba(0, 240, 255, 0.14);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+}
+
+.track-thumb-mini {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.track-idx-badge {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.track-card-item.playing .track-idx-badge {
+  color: var(--cyan);
+}
+
+.track-playing-anim {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  width: 14px;
+}
+
+.track-playing-bar {
+  width: 2.5px;
+  background: var(--cyan);
+  border-radius: 1px;
+  animation: eqBounce 0.8s infinite ease-in-out;
+}
+.track-playing-bar:nth-child(2) { animation-delay: 0.2s; }
+.track-playing-bar:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes eqBounce {
+  0%, 100% { height: 3px; }
+  50% { height: 12px; }
+}
+
+#btn-media-repeat {
+  position: relative;
+}
+
+#repeat-badge-one {
+  position: absolute;
+  top: -3px;
+  right: -5px;
+  background: var(--cyan);
+  color: #050b14;
+  font-size: 8px;
+  font-family: var(--font-hud);
+  font-weight: 900;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 6px var(--cyan);
+}
+
 /* ─── Tactical Quick Actions Grid ─── */
 .apps-grid {
   display: grid;
@@ -1404,23 +1495,53 @@ header.hud-header {
           </div>
           <div class="media-timestamps">
             <span id="media-cur-time">0:00</span>
+            <div id="media-active-badges" style="display:flex;gap:5px;align-items:center;">
+              <span id="badge-shuffle-indicator" style="display:none;font-size:9px;font-family:var(--font-hud);color:var(--cyan);letter-spacing:0.5px;background:rgba(0,240,255,0.12);padding:1px 5px;border-radius:3px;border:1px solid rgba(0,240,255,0.3);">🔀 ALEATORIO</span>
+              <span id="badge-repeat-indicator" style="display:none;font-size:9px;font-family:var(--font-hud);color:var(--cyan);letter-spacing:0.5px;background:rgba(0,240,255,0.12);padding:1px 5px;border-radius:3px;border:1px solid rgba(0,240,255,0.3);">🔁 BUCLE</span>
+            </div>
             <span id="media-total-time">--:--</span>
           </div>
         </div>
 
         <div class="media-controls">
+          <!-- Modo Aleatorio (Shuffle) -->
           <button class="media-btn" id="btn-media-shuffle" onclick="toggleShuffle()" title="Modo Aleatorio (Shuffle)">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
           </button>
+
+          <!-- Pista Anterior -->
           <button class="media-btn" onclick="prevMediaTrack()" title="Pista Anterior">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"/></svg>
           </button>
+
+          <!-- Reproducir / Pausar -->
           <button class="media-btn media-btn-play" id="btn-media-play" onclick="toggleMediaPlay()" title="Reproducir / Pausar">
             <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
+
+          <!-- Siguiente Pista -->
           <button class="media-btn" onclick="nextMediaTrack()" title="Siguiente Pista">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"/></svg>
           </button>
+
+          <!-- Modo Repetición (Off -> All -> One) -->
+          <button class="media-btn" id="btn-media-repeat" onclick="cycleRepeatMode()" title="Modo Repetición: Desactivado">
+            <svg id="icon-repeat" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            <span id="repeat-badge-one" style="display:none;">1</span>
+          </button>
+
+          <!-- Ver Cola / Lista de Canciones -->
+          <button class="media-btn" id="btn-media-queue" onclick="openTracklistModal()" title="Ver lista de canciones de la playlist">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+
+          <!-- Mini Control de Volumen en Reproductor -->
+          <div class="media-vol-control" style="display:flex;align-items:center;gap:4px;margin-left:6px;border-left:1px solid rgba(255,255,255,0.12);padding-left:6px;">
+            <button class="media-btn" onclick="toggleMuteMedia()" id="btn-media-vol-icon" title="Silenciar / Activar sonido" style="padding:0;">
+              <svg id="icon-media-vol" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <input type="range" id="media-vol-slider" min="0" max="100" value="100" oninput="setMediaVolume(this.value)" title="Volumen de música" style="width:46px;height:3px;accent-color:var(--cyan);cursor:pointer;background:rgba(255,255,255,0.15);border-radius:2px;outline:none;" />
+          </div>
         </div>
       </div>
 
@@ -1637,6 +1758,35 @@ header.hud-header {
           + GUARDAR Y ACTIVAR
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Lista de Pistas / Cola de Reproducción ── -->
+<div class="sys-modal" id="tracklist-modal">
+  <div class="sys-backdrop" onclick="closeTracklistModal()"></div>
+  <div class="sys-card" style="width: 560px; max-height: 85vh; display:flex; flex-direction:column;">
+    <div class="sys-title">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span id="tracklist-modal-title">COLA DE REPRODUCCIÓN · ECHO MUSIC</span>
+      </div>
+      <span style="cursor:pointer;font-size:16px;color:var(--text-dim);" onclick="closeTracklistModal()">✕</span>
+    </div>
+
+    <!-- Buscador dentro de la lista actual -->
+    <div style="margin-bottom:8px;">
+      <input type="text" id="tracklist-search-input" placeholder="🔍 Filtrar canción o artista en esta lista..." oninput="filterTracklistModal(this.value)" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
+    </div>
+
+    <div style="font-size:10px; color:var(--text-dim); margin-bottom:8px; font-family:var(--font-hud); letter-spacing:0.5px; display:flex; justify-content:space-between;">
+      <span id="tracklist-count-label">PISTAS EN COLA</span>
+      <span>CLIC EN UNA CANCIÓN PARA REPRODUCIRLA</span>
+    </div>
+
+    <!-- Lista scrolleable de canciones -->
+    <div id="tracklist-modal-items" style="flex:1; overflow-y:auto; max-height:360px; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
+      <!-- Rellenado dinámicamente con JS -->
     </div>
   </div>
 </div>
@@ -2411,6 +2561,8 @@ function toggleSysModal() {
 let echoPlaylist = [];
 let echoCurrentIndex = 0;
 let isEchoShuffle = false;
+let echoRepeatMode = "off"; // "off", "all", "one"
+let echoVolumeMemory = 1.0;
 let echoAudio = null;
 let isMediaPlaying = false;
 let isFetchingTrack = false;
@@ -2423,6 +2575,7 @@ function getAudioPlayer() {
       echoAudio.addEventListener("ended", onEchoTrackEnded);
       echoAudio.addEventListener("play", () => setEchoPlayState(true));
       echoAudio.addEventListener("pause", () => setEchoPlayState(false));
+      echoAudio.volume = 1.0;
       echoAudio.addEventListener("error", (e) => {
         console.warn("[EchoAudio Error]", e);
         showToast("⚠️ Error al reproducir audio de YouTube Music", 2500);
@@ -2458,6 +2611,19 @@ function onEchoTimeUpdate() {
 }
 
 function onEchoTrackEnded() {
+  if (echoRepeatMode === "one") {
+    const audio = getAudioPlayer();
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(() => playEchoTrack(echoCurrentIndex));
+      return;
+    }
+  }
+  if (echoRepeatMode === "off" && !isEchoShuffle && echoCurrentIndex >= echoPlaylist.length - 1) {
+    setEchoPlayState(false);
+    showToast("⏹️ Fin de la playlist", 2500);
+    return;
+  }
   nextMediaTrack();
 }
 
@@ -2611,7 +2777,13 @@ function nextMediaTrack() {
   if (!echoPlaylist || echoPlaylist.length === 0) return;
   let nextIdx;
   if (isEchoShuffle) {
-    nextIdx = Math.floor(Math.random() * echoPlaylist.length);
+    if (echoPlaylist.length > 1) {
+      do {
+        nextIdx = Math.floor(Math.random() * echoPlaylist.length);
+      } while (nextIdx === echoCurrentIndex && echoPlaylist.length > 1);
+    } else {
+      nextIdx = 0;
+    }
   } else {
     nextIdx = (echoCurrentIndex + 1) % echoPlaylist.length;
   }
@@ -2629,11 +2801,94 @@ function prevMediaTrack() {
   playEchoTrack(prevIdx);
 }
 
-function toggleShuffle() {
-  isEchoShuffle = !isEchoShuffle;
+function toggleShuffle(explicitVal) {
+  if (typeof explicitVal === "boolean") {
+    isEchoShuffle = explicitVal;
+  } else {
+    isEchoShuffle = !isEchoShuffle;
+  }
   const btn = document.getElementById("btn-media-shuffle");
+  const badge = document.getElementById("badge-shuffle-indicator");
   if (btn) btn.classList.toggle("media-btn-active", isEchoShuffle);
+  if (badge) badge.style.display = isEchoShuffle ? "inline-block" : "none";
   showToast(isEchoShuffle ? "🔀 Modo Aleatorio activado" : "▶️ Modo Secuencial activado", 2000);
+}
+
+function cycleRepeatMode(explicitMode) {
+  const modes = ["off", "all", "one"];
+  if (explicitMode && modes.includes(explicitMode)) {
+    echoRepeatMode = explicitMode;
+  } else {
+    const curIdx = modes.indexOf(echoRepeatMode);
+    echoRepeatMode = modes[(curIdx + 1) % modes.length];
+  }
+
+  const btn = document.getElementById("btn-media-repeat");
+  const badgeOne = document.getElementById("repeat-badge-one");
+  const badgeInd = document.getElementById("badge-repeat-indicator");
+
+  if (echoRepeatMode === "off") {
+    if (btn) {
+      btn.classList.remove("media-btn-active");
+      btn.title = "Modo Repetición: Desactivado";
+    }
+    if (badgeOne) badgeOne.style.display = "none";
+    if (badgeInd) badgeInd.style.display = "none";
+    showToast("➡️ Repetición desactivada", 2000);
+  } else if (echoRepeatMode === "all") {
+    if (btn) {
+      btn.classList.add("media-btn-active");
+      btn.title = "Modo Repetición: Toda la lista";
+    }
+    if (badgeOne) badgeOne.style.display = "none";
+    if (badgeInd) {
+      badgeInd.style.display = "inline-block";
+      badgeInd.textContent = "🔁 BUCLE TODO";
+    }
+    showToast("🔁 Repetir toda la playlist", 2000);
+  } else if (echoRepeatMode === "one") {
+    if (btn) {
+      btn.classList.add("media-btn-active");
+      btn.title = "Modo Repetición: Canción actual";
+    }
+    if (badgeOne) badgeOne.style.display = "inline-block";
+    if (badgeInd) {
+      badgeInd.style.display = "inline-block";
+      badgeInd.textContent = "🔂 REPETIR 1";
+    }
+    showToast("🔂 Repetir esta canción", 2000);
+  }
+}
+
+function setMediaVolume(val) {
+  const audio = getAudioPlayer();
+  const num = Math.max(0, Math.min(100, parseFloat(val))) / 100;
+  if (audio) audio.volume = num;
+
+  const slider = document.getElementById("media-vol-slider");
+  if (slider && slider.value != val) slider.value = val;
+
+  const iconEl = document.getElementById("icon-media-vol");
+  if (iconEl) {
+    if (num === 0) {
+      iconEl.innerHTML = `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
+    } else {
+      iconEl.innerHTML = `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
+    }
+  }
+}
+
+function toggleMuteMedia() {
+  const audio = getAudioPlayer();
+  if (!audio) return;
+  if (audio.volume > 0) {
+    echoVolumeMemory = audio.volume;
+    setMediaVolume(0);
+    showToast("🔇 Audio silenciado", 1500);
+  } else {
+    setMediaVolume((echoVolumeMemory || 1.0) * 100);
+    showToast("🔊 Audio reactivado", 1500);
+  }
 }
 
 function seekMedia(e) {
@@ -2840,6 +3095,87 @@ function promptPlaylistUrl() {
   openPlaylistModal();
 }
 
+// ─── Tracklist Queue Modal Management ────────────────────────
+function openTracklistModal() {
+  const titleEl = document.getElementById("tracklist-modal-title");
+  const countEl = document.getElementById("tracklist-count-label");
+  const plName = echoPlaylistsData.active_name || "ECHO MUSIC";
+  if (titleEl) titleEl.textContent = `COLA · ${plName.toUpperCase()}`;
+  if (countEl) countEl.textContent = `${echoPlaylist.length} PISTAS EN COLA`;
+
+  const searchInp = document.getElementById("tracklist-search-input");
+  if (searchInp) searchInp.value = "";
+
+  renderTracklistItems(echoPlaylist);
+  const modal = document.getElementById("tracklist-modal");
+  if (modal) modal.classList.add("open");
+}
+
+function closeTracklistModal() {
+  const modal = document.getElementById("tracklist-modal");
+  if (modal) modal.classList.remove("open");
+}
+
+function filterTracklistModal(query) {
+  const q = (query || "").trim().toLowerCase();
+  if (!q) {
+    renderTracklistItems(echoPlaylist);
+    return;
+  }
+  const filtered = echoPlaylist.filter(t => 
+    (t.title && t.title.toLowerCase().includes(q)) || 
+    (t.artist && t.artist.toLowerCase().includes(q))
+  );
+  renderTracklistItems(filtered);
+}
+
+function renderTracklistItems(tracks) {
+  const container = document.getElementById("tracklist-modal-items");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!tracks || tracks.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:30px;">No se encontraron canciones en esta lista.</div>`;
+    return;
+  }
+
+  tracks.forEach(track => {
+    const origIdx = echoPlaylist.findIndex(t => t.id === track.id);
+    const isPlayingThis = (origIdx === echoCurrentIndex);
+    const item = document.createElement("div");
+    item.className = `track-card-item ${isPlayingThis ? 'active-playing' : ''}`;
+    item.onclick = () => {
+      playEchoTrack(origIdx >= 0 ? origIdx : 0);
+      closeTracklistModal();
+    };
+
+    const thumb = track.thumbnail || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&q=80';
+    const numDisplay = (origIdx >= 0 ? origIdx + 1 : 1).toString().padStart(2, '0');
+
+    item.innerHTML = `
+      <span class="track-idx-badge">${numDisplay}</span>
+      <img src="${thumb}" class="track-thumb-mini" alt="Art" onerror="this.src='https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&q=80'" />
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:${isPlayingThis ? 'var(--cyan)' : '#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${track.title || 'Canción'}
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${track.artist || 'Echo Music'}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);font-family:var(--font-hud);">
+        ${isPlayingThis ? `
+          <div class="track-playing-anim">
+            <span></span><span></span><span></span>
+          </div>
+        ` : ''}
+        <span>${track.duration_str || '--:--'}</span>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
 function handleRemoteMusicAction(action, trackData, fullMsg) {
   if (action === "play") {
     const audio = getAudioPlayer();
@@ -2855,6 +3191,12 @@ function handleRemoteMusicAction(action, trackData, fullMsg) {
     playEchoTrack(0);
   } else if (action === "play_track" && trackData) {
     playDirectTrack(trackData);
+  } else if (action === "toggle_shuffle") {
+    toggleShuffle(fullMsg && fullMsg.value);
+  } else if (action === "set_repeat") {
+    cycleRepeatMode(fullMsg && fullMsg.mode);
+  } else if (action === "set_volume") {
+    if (fullMsg && fullMsg.value !== undefined) setMediaVolume(fullMsg.value);
   } else if (action === "playlist_switched") {
     const name = (fullMsg && fullMsg.playlist_name) || "Playlist";
     showToast(`🎵 Playlist activa: ${name}`, 3000);

@@ -145,7 +145,34 @@ def handle_music(query, query_lower):
             except Exception as me:
                 print(f"[Music Search Error] {me}")
 
-    # 3. Comandos de transporte estándar
+    # 3. Control de Modo Aleatorio (Shuffle)
+    is_shuffle_off = re.search(r'\b(desactiva(?:r)?\s+(?:el\s+)?(?:modo\s+)?aleatorio|quita(?:r)?\s+(?:el\s+)?aleatorio|reproduce\s+en\s+orden|modo\s+secuencial|shuffle\s+off)\b', query_lower)
+    is_shuffle_on = re.search(r'\b(activa(?:r)?\s+(?:el\s+)?(?:modo\s+)?aleatorio|modo\s+aleatorio|pon\s+(?:en\s+)?aleatorio|reproduce\s+en\s+aleatorio|shuffle\s+on)\b', query_lower)
+    is_shuffle_toggle = re.search(r'\b(aleatorio|shuffle)\b', query_lower)
+
+    if is_shuffle_off:
+        return {"accion": "musica_aleatorio", "resultado": "Señor, modo aleatorio desactivado. Reproduciendo en orden secuencial.", "exito": True, "music_action": "toggle_shuffle", "value": False}
+    elif is_shuffle_on:
+        return {"accion": "musica_aleatorio", "resultado": "Señor, modo aleatorio activado en Echo Music.", "exito": True, "music_action": "toggle_shuffle", "value": True}
+    elif is_shuffle_toggle:
+        return {"accion": "musica_aleatorio", "resultado": "Señor, alternando el modo aleatorio en Echo Music.", "exito": True, "music_action": "toggle_shuffle"}
+
+    # 4. Control de Modo Repetición (Repeat: off / all / one)
+    is_repeat_off = re.search(r'\b(desactiva(?:r)?\s+(?:la\s+)?repetici[oó]n|quita(?:r)?\s+(?:la\s+)?repetici[oó]n|sin\s+repetici[oó]n|no\s+repitas|reproducir\s+normal)\b', query_lower)
+    is_repeat_one = re.search(r'\b(repite\s+esta\s+canci[oó]n|repetir\s+esta\s+canci[oó]n|repite\s+el\s+tema|bucle\s+de\s+esta\s+canci[oó]n|repite\s+1|repetir\s+1|repite\s+esta)\b', query_lower)
+    is_repeat_all = re.search(r'\b(repite\s+la\s+playlist|repite\s+la\s+lista|repetir\s+playlist|bucle\s+de\s+la\s+lista|repetir\s+todo|repite\s+todo|bucle\s+completo)\b', query_lower)
+    is_repeat_toggle = re.search(r'\b(repetici[oó]n|repite|repetir|modo\s+bucle)\b', query_lower)
+
+    if is_repeat_off:
+        return {"accion": "musica_repeticion", "resultado": "Señor, modo de repetición desactivado.", "exito": True, "music_action": "set_repeat", "mode": "off"}
+    elif is_repeat_one:
+        return {"accion": "musica_repeticion", "resultado": "Señor, repitiendo la canción actual en bucle.", "exito": True, "music_action": "set_repeat", "mode": "one"}
+    elif is_repeat_all:
+        return {"accion": "musica_repeticion", "resultado": "Señor, repitiendo la lista de reproducción en bucle.", "exito": True, "music_action": "set_repeat", "mode": "all"}
+    elif is_repeat_toggle:
+        return {"accion": "musica_repeticion", "resultado": "Señor, cambiando el modo de repetición.", "exito": True, "music_action": "set_repeat"}
+
+    # 5. Comandos de transporte estándar
     is_play = re.search(r'\b(reproduce|contin[uú]a|play|resume|reactiva\s+m[uú]sica|despausa)\b', query_lower)
     is_pause = re.search(r'\b(pausa|pausar|det[eé]n\s+(?:la\s+)?m[uú]sica|stop|pause|silencia\s+m[uú]sica)\b', query_lower)
     is_next = re.search(r'\b(siguiente|next|pasa\s+(?:de\s+)?cancion|pasa\s+(?:de\s+)?canci[oó]n|avanza|siguiente\s+cancion|siguiente\s+canci[oó]n)\b', query_lower)
