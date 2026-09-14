@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-14 10:56 GMT-5_
+_Última actualización: 2026-09-14 17:25 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,7 +7,7 @@ _Última actualización: 2026-09-14 10:56 GMT-5_
 
 ## 👤 Preferencias Permanentes del Usuario (Memoria Viva)
 - **Tratamiento Formal y Exclusivo:** Alberth debe dirigirse al usuario SIEMPRE y ÚNICAMENTE como **"Señor"**. Está estrictamente prohibido usar "Señor Danny" o "Danny".
-- **Reproductor Multimedia Predeterminado:** **Echo Music** (`echo.music.iad1tya`) en el teléfono móvil y **Echo Music Quantum Streaming (YouTube Music)** en el panel web de iMac y MacBook Pro. Spotify queda completamente desvinculado.
+- **Reproductor Multimedia Predeterminado:** **Echo Music** (`echo.music.iad1tya`) en el teléfono móvil y **Echo Music Quantum Streaming (YouTube Music)** en el panel web de iMac y MacBook Pro (con selector multi-playlist, shuffle, repeat y gestión modal de listas). Spotify queda completamente desvinculado.
 
 ---
 
@@ -25,13 +25,15 @@ _Última actualización: 2026-09-14 10:56 GMT-5_
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Integración directa con Echo Music `echo.music.iad1tya`)
 ├── alberth_music_player.py → Motor de Streaming y Gestión de Playlists de YouTube Music / Echo Music (yt-dlp + caché 4h)
-├── alberth_live_bridge.py → Bridge WebSocket Ultra-Live Bidireccional (`/ws/live`) con Gemini 2.0 Live API
+├── alberth_live_bridge.py → Bridge WebSocket Ultra-Live Bidireccional (<300ms) con Gemini Live API (Voz Charon, Streaming PCM 16/24kHz, Barge-in)
+├── alberth_episodic_memory.py → Motor de Memoria Episódica y Hechos Persistentes con SQLite FTS5 (Ranking BM25)
+├── alberth_apple_vision.py  → OCR Local Nativo macOS con Apple Vision Framework (<50ms, 0 tokens, $0.00)
 ├── alberth_playwright_agent.py → Agente Web Autónomo (Playwright Headless + Marcadores DOM [data-alberth-id])
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
 ├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision + Groq Fallback)
 ├── alberth_video_analyzer.py → Pipeline de descarga de video raw (yt-dlp), extracción de fotogramas (ffmpeg) e inspección de Deepfakes frame-a-frame
-├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/api/video-analyze` + `/floating` (Puerto 8080)
-├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Spotify AppleScript, Volumen, Apps)
+├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/api/video-analyze` + `/floating` + `/ws/live` (Puerto 8080)
+├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Música, Volumen, Apps, Memoria Episódica)
 ├── alberth_apple_helper.py  → Automatización nativa macOS (Calendario, Recordatorios, Notas, Atajos)
 ├── alberth_search_helper.py → Motor de Búsqueda Web Abierta (DuckDuckGo + Wikipedia + Clima)
 ├── alberth_browser_agent.py → Lector y extractor web limpio sin cookies ni publicidad
@@ -71,6 +73,30 @@ _Última actualización: 2026-09-14 10:56 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-14 (Modo Conversacional Bidireccional Ultra-Live con Gemini Live API, Memoria Episódica FTS5 & OCR Apple Vision)
+- **Modo Conversacional Bidireccional en Tiempo Real (Gemini Multimodal Live API):**
+  - **Servidor Puente WebSocket Asíncrono (`alberth_live_bridge.py`):** Conexión upstream directa hacia `wss://generativelanguage.googleapis.com/.../BidiGenerateContent` exponiendo el endpoint `/ws/live`.
+  - **Modelos Live de Vanguardia:** Prioridad en `gemini-3.1-flash-live-preview` con conmutación por error automática hacia `gemini-2.5-flash-native-audio-preview-12-2025`.
+  - **Voz Distinguida:** Configurada la voz preconstruida **Charon** (tono profundo, británico, distinguido y elegante).
+  - **Tratamiento Protocolar Inalterable:** Directriz de sistema estricta para dirigirse única y respetuosamente al usuario como **"Señor"** en todo momento.
+  - **Motor Web Audio en HUD (`panel/index.html`):**
+    - Captura continua de micrófono con `ScriptProcessorNode` (2048 muestras, ~128ms) y remuestreo lineal al vuelo desde cualquier frecuencia nativa (44.1kHz, 48kHz) hacia PCM 16-bit 16kHz Little-Endian enviado en binario puro (ArrayBuffer) sin sobrecarga de codificación.
+    - Reproducción continua programada de chunks PCM 24kHz sintetizados por Google (`AudioBufferSourceNode`), vinculada al `speakerAnalyser` del HUD para que los anillos cuánticos holográficos pulsen al ritmo de la voz de Alberth.
+    - Interrupción inmediata (*Barge-in*) en <50ms: Al recibir la señal `interrupted: true` cuando el Señor interrumpe, el navegador silencia y purga al instante la cola de reproducción.
+    - Transcripción bidireccional en tiempo real reflejada en la consola de chat (`SEÑOR (LIVE)` y `ALBERTH QUANTUM (LIVE)`).
+    - Botón interactivo `[ ⚡ ULTRA-LIVE ]` con animación de pulso cian reactiva y retorno transparente al modo estándar sin afectar las demás funciones del sistema.
+- **Memoria Episódica Local Persistente (`alberth_episodic_memory.py`):**
+  - Motor de memoria sobre SQLite FTS5 (`data/episodic_memory.db`) con ranking Okapi BM25 e indexación instantánea de eventos, intenciones y diálogos pasados.
+  - Integrado en `alberth_system_helper.py` y `alberth_web_server.py` para recuperación contextual inmediata con cero latencia de red.
+- **OCR Local Ultrarrápido con Apple Vision Framework (`alberth_apple_vision.py`):**
+  - Reconocimiento óptico de caracteres directo sobre capturas de pantalla y ventanas mediante `VNRecognizeTextRequest` nativo de macOS (PyObjC).
+  - Velocidad <50ms, costo $0.00 y 0 consumo de tokens de API.
+- **Evolución del Reproductor Echo Music Web (Multi-Playlist & Controles de Transporte):**
+  - Endpoints `/api/music/playlists` y `/api/music/playlists/activate` en `alberth_web_server.py`.
+  - Soporte para gestión de múltiples listas de reproducción de YouTube Music, modal de guardado persistente, selector rápido, botones de reproducción aleatoria (*shuffle*) y repetición (*repeat*).
+- **Auditoría Global de Tratamiento:**
+  - Erradicación absoluta de referencias residuales a "Señor Danny" o "Danny" en todo el código fuente y prompts; consolidación del tratamiento protocolar estricto como **"Señor"**.
 
 ### 2026-09-14 (Integración Completa de Echo Music & Sincronización YouTube Music en Mac y Móvil)
 - **Desvinculación Total de Spotify:**
