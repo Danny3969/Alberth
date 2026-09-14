@@ -419,16 +419,28 @@ header.hud-header {
   font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
-  color: var(--green);
+  color: var(--cyan);
   letter-spacing: 1px;
 }
 
-.media-tag .spotify-dot {
-  width: 6px;
-  height: 6px;
+.media-tag .echo-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+  animation: echoPulse 2s infinite ease-in-out;
+}
+
+@keyframes echoPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 8px var(--cyan)); }
+}
+
+.media-btn-active {
+  color: var(--cyan) !important;
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 8px var(--cyan-glow);
 }
 
 .media-body {
@@ -1180,44 +1192,54 @@ header.hud-header {
     <!-- ── Bottom HUD Deck (Spotify + Tactical Apps) ── -->
     <div class="hud-deck">
       
-      <!-- Integrated Spotify / Media Card (From Reference Video 2) -->
-      <div class="media-card" id="spotify-card">
+      <!-- Integrated Echo Music / YouTube Music Player -->
+      <div class="media-card" id="echomusic-card">
+        <audio id="alberth-audio-player" preload="none" style="display:none;"></audio>
         <div class="media-header">
           <div class="media-tag">
-            <span class="spotify-dot"></span>
-            <span>SPOTIFY CONNECT · REPRODUCTOR</span>
+            <span class="echo-dot"></span>
+            <span id="echo-badge-text">ECHO MUSIC · STREAMING</span>
           </div>
-          <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-hud);">HI-FI</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="media-playlist-count" style="font-size:10px;color:var(--cyan);font-family:var(--font-hud);letter-spacing:1px;">CARGANDO...</span>
+            <button onclick="promptPlaylistUrl()" title="Configurar Playlist de YouTube Music" style="background:rgba(0,240,255,0.08);border:1px solid var(--cyan-dim);color:var(--cyan);border-radius:4px;cursor:pointer;padding:2px 6px;display:flex;align-items:center;font-size:10px;font-family:var(--font-hud);">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:3px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              LISTA
+            </button>
+          </div>
         </div>
 
         <div class="media-body">
-          <div class="media-art-wrap spinning" id="media-art-container">
+          <div class="media-art-wrap" id="media-art-container">
             <img src="/panel/assets/highway_to_hell.jpg" class="media-art" id="media-art-img" onerror="this.src='https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&q=80'" alt="Album Art">
           </div>
-          <div class="media-info">
-            <div class="media-title" id="media-title">Highway to Hell</div>
-            <div class="media-artist" id="media-artist">AC/DC · Iron Man Soundtrack</div>
+          <div class="media-info" style="overflow:hidden;">
+            <div class="media-title" id="media-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Conectando con Echo Music...</div>
+            <div class="media-artist" id="media-artist" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">YouTube Music · Hi-Fi Opus</div>
           </div>
         </div>
 
         <div class="media-progress-wrap">
           <div class="media-bar-bg" onclick="seekMedia(event)">
-            <div class="media-bar-fill" id="media-bar-fill" style="width: 24%;"></div>
+            <div class="media-bar-fill" id="media-bar-fill" style="width: 0%;"></div>
           </div>
           <div class="media-timestamps">
-            <span id="media-cur-time">0:48</span>
-            <span id="media-total-time">3:28</span>
+            <span id="media-cur-time">0:00</span>
+            <span id="media-total-time">--:--</span>
           </div>
         </div>
 
         <div class="media-controls">
-          <button class="media-btn" onclick="sendQuick('música anterior')" title="Anterior">
+          <button class="media-btn" id="btn-media-shuffle" onclick="toggleShuffle()" title="Modo Aleatorio (Shuffle)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          </button>
+          <button class="media-btn" onclick="prevMediaTrack()" title="Pista Anterior">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"/></svg>
           </button>
-          <button class="media-btn media-btn-play" id="btn-media-play" onclick="toggleMediaPlay()" title="Reproducir/Pausar">
+          <button class="media-btn media-btn-play" id="btn-media-play" onclick="toggleMediaPlay()" title="Reproducir / Pausar">
             <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
-          <button class="media-btn" onclick="sendQuick('siguiente canción')" title="Siguiente">
+          <button class="media-btn" onclick="nextMediaTrack()" title="Siguiente Pista">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"/></svg>
           </button>
         </div>
@@ -1462,6 +1484,8 @@ function connectWS() {
         updateActionFeedback(msg.resultado || msg.action);
       } else if (msg.type === "audio_chunk") {
         enqueueAudioChunk(msg.audio_url);
+      } else if (msg.type === "music_action") {
+        handleRemoteMusicAction(msg.action, msg.track);
       } else if (msg.type === "system") {
         showToast(msg.text, 3000);
       }
@@ -2162,54 +2186,288 @@ function toggleSysModal() {
   document.getElementById("sys-modal").classList.toggle("open");
 }
 
-// ─── Spotify Player Simulation & Action ─────────────────────
+// ─── Echo Music / YouTube Music Player Engine ───────────────
+let echoPlaylist = [];
+let echoCurrentIndex = 0;
+let isEchoShuffle = false;
+let echoAudio = null;
 let isMediaPlaying = false;
-let mediaCurSeconds = 48;
-const mediaTotalSeconds = 208; // 3:28
+let isFetchingTrack = false;
 
-function toggleMediaPlay() {
-  isMediaPlaying = !isMediaPlaying;
+function getAudioPlayer() {
+  if (!echoAudio) {
+    echoAudio = document.getElementById("alberth-audio-player");
+    if (echoAudio) {
+      echoAudio.addEventListener("timeupdate", onEchoTimeUpdate);
+      echoAudio.addEventListener("ended", onEchoTrackEnded);
+      echoAudio.addEventListener("play", () => setEchoPlayState(true));
+      echoAudio.addEventListener("pause", () => setEchoPlayState(false));
+      echoAudio.addEventListener("error", (e) => {
+        console.warn("[EchoAudio Error]", e);
+        showToast("⚠️ Error al reproducir audio de YouTube Music", 2500);
+        setEchoPlayState(false);
+      });
+    }
+  }
+  return echoAudio;
+}
+
+function onEchoTimeUpdate() {
+  const audio = getAudioPlayer();
+  if (!audio || !audio.duration) return;
+  const cur = audio.currentTime;
+  const dur = audio.duration;
+  const fill = document.getElementById("media-bar-fill");
+  const curEl = document.getElementById("media-cur-time");
+  const totalEl = document.getElementById("media-total-time");
+  
+  const pct = Math.min(100, Math.max(0, (cur / dur) * 100));
+  if (fill) fill.style.width = pct + "%";
+  
+  if (curEl) {
+    const m = Math.floor(cur / 60);
+    const s = Math.floor(cur % 60);
+    curEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+  }
+  if (totalEl) {
+    const dm = Math.floor(dur / 60);
+    const ds = Math.floor(dur % 60);
+    totalEl.textContent = `${dm}:${ds < 10 ? '0' : ''}${ds}`;
+  }
+}
+
+function onEchoTrackEnded() {
+  nextMediaTrack();
+}
+
+function setEchoPlayState(playing) {
+  isMediaPlaying = playing;
   const btn = document.getElementById("btn-media-play");
   const art = document.getElementById("media-art-container");
-  
-  if (isMediaPlaying) {
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
-    art.classList.add("spinning");
-    sendWS({ type: "text", text: "reproducir spotify" });
-    updateActionFeedback("Spotify: Reproduciendo Highway to Hell");
-  } else {
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
-    art.classList.remove("spinning");
-    sendWS({ type: "text", text: "pausar spotify" });
-    updateActionFeedback("Spotify: Reproducción pausada");
+  if (btn) {
+    if (playing) {
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+      if (art) art.classList.add("spinning");
+    } else {
+      btn.innerHTML = `<svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+      if (art) art.classList.remove("spinning");
+    }
   }
+}
+
+async function loadEchoPlaylist(forceRefresh = false) {
+  try {
+    const res = await fetch(`/api/music/playlist?refresh=${forceRefresh}`);
+    const data = await res.json();
+    if (data && data.ok && data.tracks && data.tracks.length > 0) {
+      echoPlaylist = data.tracks;
+      const countEl = document.getElementById("media-playlist-count");
+      if (countEl) countEl.textContent = `${echoPlaylist.length} PISTAS`;
+      
+      // Mostrar primera canción si no hay nada en reproducción activa
+      if (!isMediaPlaying && echoPlaylist[echoCurrentIndex]) {
+        updateEchoTrackUI(echoPlaylist[echoCurrentIndex], false);
+      }
+      return true;
+    } else {
+      const countEl = document.getElementById("media-playlist-count");
+      if (countEl) countEl.textContent = "VACÍA";
+      return false;
+    }
+  } catch (err) {
+    console.warn("[EchoMusic] Error cargando playlist:", err);
+    return false;
+  }
+}
+
+function updateEchoTrackUI(track, isLivePlaying = true) {
+  const titleEl = document.getElementById("media-title");
+  const artistEl = document.getElementById("media-artist");
+  const imgEl = document.getElementById("media-art-img");
+  const curEl = document.getElementById("media-cur-time");
+  const totalEl = document.getElementById("media-total-time");
+  const fill = document.getElementById("media-bar-fill");
+  
+  if (titleEl) titleEl.textContent = track.title || "Canción";
+  if (artistEl) artistEl.textContent = `${track.artist || 'Echo Music'} · YouTube Music`;
+  if (imgEl && track.thumbnail) imgEl.src = track.thumbnail;
+  if (!isLivePlaying) {
+    if (curEl) curEl.textContent = "0:00";
+    if (totalEl) totalEl.textContent = track.duration_str || "--:--";
+    if (fill) fill.style.width = "0%";
+  }
+}
+
+async function playEchoTrack(index) {
+  if (isFetchingTrack) return;
+  if (!echoPlaylist || echoPlaylist.length === 0) {
+    const loaded = await loadEchoPlaylist();
+    if (!loaded) {
+      showToast("⚠️ No hay canciones en la playlist.", 3000);
+      return;
+    }
+  }
+
+  index = Math.max(0, Math.min(index, echoPlaylist.length - 1));
+  echoCurrentIndex = index;
+  const track = echoPlaylist[echoCurrentIndex];
+  if (!track) return;
+
+  isFetchingTrack = true;
+  updateEchoTrackUI(track, false);
+  updateActionFeedback(`Echo Music: Obteniendo stream de "${track.title}"...`);
+
+  try {
+    const streamRes = await fetch(`/api/music/stream/${track.id}`);
+    const streamData = await streamRes.json();
+    if (streamData && streamData.ok && streamData.stream_url) {
+      const audio = getAudioPlayer();
+      if (audio) {
+        audio.src = streamData.stream_url;
+        await audio.play();
+        setEchoPlayState(true);
+        updateActionFeedback(`Echo Music: Reproduciendo "${track.title}"`);
+      }
+    } else {
+      showToast(`⚠️ No se pudo reproducir ${track.title}`, 2500);
+      setEchoPlayState(false);
+    }
+  } catch (err) {
+    console.warn("[EchoMusic] Error al reproducir track:", err);
+    showToast("⚠️ Error al conectar con el stream de audio", 2500);
+    setEchoPlayState(false);
+  } finally {
+    isFetchingTrack = false;
+  }
+}
+
+async function playDirectTrack(track) {
+  const audio = getAudioPlayer();
+  if (!audio) return;
+  updateEchoTrackUI(track, false);
+  if (track.stream_url) {
+    audio.src = track.stream_url;
+    await audio.play();
+    setEchoPlayState(true);
+    updateActionFeedback(`Echo Music: Reproduciendo "${track.title}"`);
+  } else if (track.id) {
+    const streamRes = await fetch(`/api/music/stream/${track.id}`);
+    const streamData = await streamRes.json();
+    if (streamData.ok && streamData.stream_url) {
+      audio.src = streamData.stream_url;
+      await audio.play();
+      setEchoPlayState(true);
+      updateActionFeedback(`Echo Music: Reproduciendo "${track.title}"`);
+    }
+  }
+}
+
+async function toggleMediaPlay() {
+  const audio = getAudioPlayer();
+  if (!audio) return;
+
+  if (isMediaPlaying) {
+    audio.pause();
+    setEchoPlayState(false);
+    updateActionFeedback("Echo Music: Reproducción pausada");
+  } else {
+    if (audio.src && audio.src !== window.location.href && !audio.ended) {
+      audio.play().catch(e => console.warn(e));
+      setEchoPlayState(true);
+      updateActionFeedback("Echo Music: Reproducción reanudada");
+    } else {
+      playEchoTrack(echoCurrentIndex);
+    }
+  }
+}
+
+function nextMediaTrack() {
+  if (!echoPlaylist || echoPlaylist.length === 0) return;
+  let nextIdx;
+  if (isEchoShuffle) {
+    nextIdx = Math.floor(Math.random() * echoPlaylist.length);
+  } else {
+    nextIdx = (echoCurrentIndex + 1) % echoPlaylist.length;
+  }
+  playEchoTrack(nextIdx);
+}
+
+function prevMediaTrack() {
+  const audio = getAudioPlayer();
+  if (audio && audio.currentTime > 4) {
+    audio.currentTime = 0;
+    return;
+  }
+  if (!echoPlaylist || echoPlaylist.length === 0) return;
+  const prevIdx = (echoCurrentIndex - 1 + echoPlaylist.length) % echoPlaylist.length;
+  playEchoTrack(prevIdx);
+}
+
+function toggleShuffle() {
+  isEchoShuffle = !isEchoShuffle;
+  const btn = document.getElementById("btn-media-shuffle");
+  if (btn) btn.classList.toggle("media-btn-active", isEchoShuffle);
+  showToast(isEchoShuffle ? "🔀 Modo Aleatorio activado" : "▶️ Modo Secuencial activado", 2000);
 }
 
 function seekMedia(e) {
+  const audio = getAudioPlayer();
+  if (!audio || !audio.duration) return;
   const rect = e.currentTarget.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
   const pct = Math.max(0, Math.min(1, clickX / rect.width));
-  mediaCurSeconds = Math.floor(pct * mediaTotalSeconds);
-  updateMediaUI();
+  audio.currentTime = pct * audio.duration;
 }
 
-function updateMediaUI() {
-  const fill = document.getElementById("media-bar-fill");
-  const curTime = document.getElementById("media-cur-time");
-  const pct = (mediaCurSeconds / mediaTotalSeconds) * 100;
-  fill.style.width = pct + "%";
-  
-  const m = Math.floor(mediaCurSeconds / 60);
-  const s = mediaCurSeconds % 60;
-  curTime.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
-}
-
-setInterval(() => {
-  if (isMediaPlaying && mediaCurSeconds < mediaTotalSeconds) {
-    mediaCurSeconds++;
-    updateMediaUI();
+async function promptPlaylistUrl() {
+  const current = echoPlaylist.length > 0 ? `(Actualmente ${echoPlaylist.length} canciones)` : "";
+  const url = prompt(`Ingrese el enlace o ID de su Playlist de YouTube Music ${current}:`);
+  if (url && url.trim()) {
+    showToast("⏳ Sincronizando playlist de YouTube Music...", 3000);
+    try {
+      const res = await fetch("/api/music/playlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url.trim() })
+      });
+      const data = await res.json();
+      if (data && data.ok) {
+        showToast(`✅ Playlist sincronizada: ${data.count || (data.tracks ? data.tracks.length : 0)} canciones`, 3500);
+        await loadEchoPlaylist(true);
+      } else {
+        showToast(`⚠️ No se pudo cargar: ${data.error || 'Error desconocido'}`, 3500);
+      }
+    } catch (err) {
+      showToast("⚠️ Error al conectar con el servidor", 2500);
+    }
   }
-}, 1000);
+}
+
+function handleRemoteMusicAction(action, trackData) {
+  if (action === "play") {
+    const audio = getAudioPlayer();
+    if (audio && !isMediaPlaying) toggleMediaPlay();
+  } else if (action === "pause") {
+    const audio = getAudioPlayer();
+    if (audio && isMediaPlaying) toggleMediaPlay();
+  } else if (action === "next") {
+    nextMediaTrack();
+  } else if (action === "prev") {
+    prevMediaTrack();
+  } else if (action === "play_playlist") {
+    playEchoTrack(0);
+  } else if (action === "play_track" && trackData) {
+    playDirectTrack(trackData);
+  }
+}
+
+// Inicializar reproductor de Echo Music al cargar
+window.addEventListener("DOMContentLoaded", () => {
+  loadEchoPlaylist();
+});
+setTimeout(() => {
+  loadEchoPlaylist();
+}, 600);
 
 // ─── Toast Notifications ────────────────────────────────────
 let toastTimer = null;

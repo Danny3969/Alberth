@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-13 20:51 GMT-5_
+_Última actualización: 2026-09-14 10:56 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -7,6 +7,7 @@ _Última actualización: 2026-09-13 20:51 GMT-5_
 
 ## 👤 Preferencias Permanentes del Usuario (Memoria Viva)
 - **Tratamiento Formal y Exclusivo:** Alberth debe dirigirse al usuario SIEMPRE y ÚNICAMENTE como **"Señor"**. Está estrictamente prohibido usar "Señor Danny" o "Danny".
+- **Reproductor Multimedia Predeterminado:** **Echo Music** (`echo.music.iad1tya`) en el teléfono móvil y **Echo Music Quantum Streaming (YouTube Music)** en el panel web de iMac y MacBook Pro. Spotify queda completamente desvinculado.
 
 ---
 
@@ -14,15 +15,16 @@ _Última actualización: 2026-09-13 20:51 GMT-5_
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── panel/              → Panel Web Quantum HUD & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
-│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Spotify Player + Action Banner + Wake Word ("Alberth") + [ ⚡ ULTRA-LIVE ] Mode
+│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Echo Music Player + Action Banner + Wake Word ("Alberth") + [ ⚡ ULTRA-LIVE ] Mode
 │   ├── floating.html   → Desktop Floating Bar (Quantum Theme / Orbitron / Rajdhani / DND / QA Alerts)
 │   ├── assets/         → Assets multimedia (highway_to_hell.jpg álbum cover cyberpunk)
 │   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
 ├── alberth-android/    → Aplicación Android Nativa Expo / React Native (Alberth Quantum HUD v3.2.1 Crash-Proof Shield)
-│   ├── App.tsx         → Visor 3D Three.js WebGL con fallback nativo 60fps (NativeQuantumCoreOrb) + Chat + Voz `expo-av` + Visión segura
+│   ├── App.tsx         → Visor 3D Three.js WebGL con fallback nativo 60fps (NativeQuantumCoreOrb) + Chat + Voz `expo-av` + Botón Táctico [ECHO MUSIC]
 │   ├── app.json        → Configuración de compilación (versionCode 7, versionName 3.2.1, permisos CAMERA)
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
-│   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
+│   └── android/        → Proyecto Android nativo (Integración directa con Echo Music `echo.music.iad1tya`)
+├── alberth_music_player.py → Motor de Streaming y Gestión de Playlists de YouTube Music / Echo Music (yt-dlp + caché 4h)
 ├── alberth_live_bridge.py → Bridge WebSocket Ultra-Live Bidireccional (`/ws/live`) con Gemini 2.0 Live API
 ├── alberth_playwright_agent.py → Agente Web Autónomo (Playwright Headless + Marcadores DOM [data-alberth-id])
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
@@ -69,6 +71,22 @@ _Última actualización: 2026-09-13 20:51 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-14 (Integración Completa de Echo Music & Sincronización YouTube Music en Mac y Móvil)
+- **Desvinculación Total de Spotify:**
+  - Sustituida la integración previa de Spotify por **Echo Music** (`echo.music.iad1tya`) en la aplicación móvil Android y en los paneles de control web de iMac y MacBook Pro.
+- **Configuración Nativa en Móvil (`alberth-android`):**
+  - Actualizado `android_system_helper.ts` y `AlberthAssistantModule.kt` para direccionar intents multimedia (`MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH`) directamente al paquete `echo.music.iad1tya`.
+  - Botón de acceso rápido y comandos de voz en `App.tsx` actualizados a `[ ECHO MUSIC ]`.
+- **Motor Autónomo de Streaming en Mac (`alberth_music_player.py`):**
+  - Implementado motor de extracción y resolución de playlists y canciones individuales de YouTube Music utilizando `yt-dlp` (`--extractor-args youtube:player_client=android,web`).
+  - Caché en memoria de URLs de streaming de 4 horas para arranque instantáneo de audio.
+  - Almacenamiento persistente de configuración y playlists en `memory/alberth_playlists.json`.
+- **Nuevo Quantum HUD Player (`panel/index.html`):**
+  - Tarjeta multimedia rediseñada como **ECHO MUSIC · STREAMING YOUTUBE**.
+  - Reproductor HTML5 Audio embebido con soporte para cambio de pista secuencial, aleatorio (*shuffle*), seekbar interactivo en tiempo real y lectura de carátulas dinámicas.
+  - Botón directo en la tarjeta y comando modal para cambiar o vincular playlists de YouTube Music en cualquier momento.
+  - Eventos WebSocket `music_action` sincronizados con el backend para control por voz fluido (*«reproduce mi playlist»*, *«pon la canción X»*, *«siguiente»*, *«pausa»*).
 
 ### 2026-09-13 (Overhaul Quirúrgico del Módulo de Voz en 3 Fases, Bridge Gemini 2.0 Live & Archify)
 - **Actualización del Trato y Preferencias del Usuario:**

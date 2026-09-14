@@ -371,7 +371,21 @@ def run_alberth_full(text: str) -> dict:
             import alberth_system_helper
             sys_res = alberth_system_helper.dispatch(q_clean)
             if sys_res and sys_res.get("exito"):
-                resp_text = sys_res.get("resultado", "Acción completada exitosamente, Señor Danny.")
+                resp_text = sys_res.get("resultado", "Acción completada exitosamente, Señor.")
+                if sys_res.get("music_action"):
+                    try:
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            asyncio.run_coroutine_threadsafe(
+                                manager.broadcast({
+                                    "type": "music_action",
+                                    "action": sys_res["music_action"],
+                                    "track": sys_res.get("track")
+                                }),
+                                loop
+                            )
+                    except Exception as bce:
+                        print(f"[Music Broadcast Error] {bce}")
         except Exception as e:
             print(f"[System Helper Error] {e}")
 
@@ -1231,6 +1245,33 @@ async def log_browser_error(err: BrowserError):
     with open(logs_dir / "browser_errors.log", "a", encoding="utf-8") as f:
         f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {err.message} at {err.source}:{err.lineno}:{err.colno}\nStack: {err.error}\n\n")
     return {"ok": True}
+
+# ── Módulo Echo Music & YouTube Music ──────────────────────────────────────────
+from alberth_music_player import music_player
+
+class PlaylistRequest(BaseModel):
+    url: str
+    name: Optional[str] = None
+
+@app.get("/api/music/playlist")
+async def get_music_playlist(refresh: bool = False):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, music_player.get_playlist_tracks, refresh)
+
+@app.post("/api/music/playlist")
+async def set_music_playlist(req: PlaylistRequest):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, music_player.set_playlist, req.url, req.name)
+
+@app.get("/api/music/stream/{track_id}")
+async def get_music_stream(track_id: str):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, music_player.get_stream_url, track_id)
+
+@app.get("/api/music/search")
+async def search_music(q: str):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, music_player.search_song, q)
 
 # ── Servir Panel ───────────────────────────────────────────────────────────────
 @app.get("/")

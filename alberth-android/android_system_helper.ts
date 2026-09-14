@@ -7,7 +7,9 @@ const { AlberthAssistantModule } = NativeModules;
 // Diccionario de paquetes de apps comunes en Android
 const KNOWN_PACKAGES: { [alias: string]: string } = {
   youtube: 'com.google.android.youtube',
-  spotify: 'com.spotify.music',
+  echo_music: 'echo.music.iad1tya',
+  echomusic: 'echo.music.iad1tya',
+  spotify: 'echo.music.iad1tya', // Redirigir hacia Echo Music
   whatsapp: 'com.whatsapp',
   chrome: 'com.android.chrome',
   maps: 'com.google.android.apps.maps',
@@ -224,26 +226,27 @@ export const androidSystemHelper = {
   },
 
   /**
-   * Reproduce música o videos en YouTube o Spotify.
+   * Reproduce música o videos en YouTube o Echo Music.
    */
   playMedia: async (
     query: string,
-    service: 'youtube' | 'spotify' | 'auto' = 'auto'
+    service: 'youtube' | 'echo_music' | 'spotify' | 'auto' = 'auto'
   ): Promise<{ ok: boolean; output: string }> => {
     if (Platform.OS !== 'android' || !AlberthAssistantModule) {
       return { ok: false, output: 'Módulo nativo no disponible' };
     }
     try {
       let mediaType = service;
-      if (service === 'auto') {
+      if (service === 'auto' || service === 'spotify') {
         if (query.toLowerCase().includes('video') || query.toLowerCase().includes('youtube')) {
           mediaType = 'youtube';
         } else {
-          mediaType = 'spotify';
+          mediaType = 'echo_music';
         }
       }
       await AlberthAssistantModule.playMedia(query, mediaType);
-      return { ok: true, output: `Reproduciendo "${query}" en ${mediaType.toUpperCase()}` };
+      const displayName = mediaType === 'echo_music' ? 'ECHO MUSIC' : mediaType.toUpperCase();
+      return { ok: true, output: `Reproduciendo "${query}" en ${displayName}` };
     } catch (e: any) {
       return { ok: false, output: `Error al reproducir: ${e.message}` };
     }

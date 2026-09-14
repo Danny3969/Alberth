@@ -55,10 +55,41 @@ def run_shell(cmd, timeout=10):
         return False, str(e)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# MÓDULO 0: CONTROL MULTIMEDIA (Play, Pause, Siguiente, Anterior)
+# MÓDULO 0: CONTROL MULTIMEDIA (Play, Pause, Siguiente, Anterior, Playlists, Canciones)
 # ══════════════════════════════════════════════════════════════════════════════
 def handle_music(query, query_lower):
-    """Detecta y ejecuta intenciones de control de música/video."""
+    """Detecta y ejecuta intenciones de control de música/video y playlists de Echo Music."""
+    # 1. Petición explícita de reproducir playlist
+    is_playlist_cmd = re.search(r'\b(pon|reproduce|inicia|abre)\s+(?:mi\s+)?(?:playlist|m[uú]sica|lista\s+de\s+reproducci[oó]n)\b', query_lower)
+    if is_playlist_cmd:
+        return {
+            "accion": "musica_playlist",
+            "resultado": "Señor, iniciando su playlist de Echo Music en el Quantum HUD.",
+            "exito": True,
+            "music_action": "play_playlist"
+        }
+
+    # 2. Petición de reproducir canción específica: "pon la canción X", "reproduce X"
+    play_song_match = re.search(r'\b(?:pon|reproduce|escuchar)\s+(?:la\s+canci[oó]n\s+|el\s+tema\s+)?(.+)', query_lower)
+    if play_song_match and not any(k in query_lower for k in ["video", "youtube.com", "tiktok", "pausa", "siguiente", "anterior"]):
+        song_name = play_song_match.group(1).strip()
+        # Descartar si solo es "música" o "playlist"
+        if song_name not in ["musica", "música", "playlist", "la playlist", "mi playlist", "mi música", "mi musica"]:
+            try:
+                from alberth_music_player import music_player
+                found = music_player.search_song(song_name)
+                if found.get("ok"):
+                    return {
+                        "accion": "musica_cancion",
+                        "resultado": f"Señor, reproduciendo '{found['title']}' de {found['artist']} en Echo Music.",
+                        "exito": True,
+                        "music_action": "play_track",
+                        "track": found
+                    }
+            except Exception as me:
+                print(f"[Music Search Error] {me}")
+
+    # 3. Comandos de transporte estándar
     is_play = re.search(r'\b(reproduce|contin[uú]a|play|resume|reactiva\s+m[uú]sica|despausa)\b', query_lower)
     is_pause = re.search(r'\b(pausa|pausar|det[eé]n\s+(?:la\s+)?m[uú]sica|stop|pause|silencia\s+m[uú]sica)\b', query_lower)
     is_next = re.search(r'\b(siguiente|next|pasa\s+(?:de\s+)?cancion|pasa\s+(?:de\s+)?canci[oó]n|avanza|siguiente\s+cancion|siguiente\s+canci[oó]n)\b', query_lower)
@@ -67,65 +98,14 @@ def handle_music(query, query_lower):
     if not (is_play or is_pause or is_next or is_prev):
         return None
 
-    cmd = None
-    action = None
-    msg = ""
-
     if is_play:
-        cmd = ["nowplaying-cli", "play"]
-        action = "musica_play"
-        msg = "Reproducción iniciada."
+        return {"accion": "musica_play", "resultado": "Señor, reproducción de música reanudada.", "exito": True, "music_action": "play"}
     elif is_pause:
-        cmd = ["nowplaying-cli", "pause"]
-        action = "musica_pause"
-        msg = "Reproducción pausada."
+        return {"accion": "musica_pause", "resultado": "Señor, reproducción de música pausada.", "exito": True, "music_action": "pause"}
     elif is_next:
-        cmd = ["nowplaying-cli", "next"]
-        action = "musica_siguiente"
-        msg = "Siguiente pista."
+        return {"accion": "musica_siguiente", "resultado": "Señor, pasando a la siguiente pista en Echo Music.", "exito": True, "music_action": "next"}
     elif is_prev:
-        cmd = ["nowplaying-cli", "previous"]
-        action = "musica_anterior"
-        msg = "Pista anterior."
-
-    if cmd:
-        ok, out = run_shell(cmd)
-        if ok:
-            return {"accion": action, "resultado": msg, "exito": True}
-
-        # Spotify nativo vía AppleScript
-        sp_action = "play" if is_play else ("pause" if is_pause else ("next track" if is_next else "previous track"))
-        sp_script = f'tell application "Spotify" to {sp_action}'
-        sp_ok, _ = run_applescript(sp_script)
-        if sp_ok:
-            return {"accion": action, "resultado": f"Spotify: {msg}", "exito": True}
-
-        # Fallback a AppleScript para navegadores si nowplaying-cli no lo logra directamente
-        act_str = "play" if is_play else ("pause" if is_pause else ("next" if is_next else "previous"))
-        browser_script = """
-tell application "Google Chrome"
-    repeat with w in windows
-        repeat with t in tabs of w
-            if title of t contains "YouTube" or title of t contains "Echo" or title of t contains "Music" then
-                if "{act}" is "play" then
-                    execute t javascript "document.querySelector('video, audio').play()"
-                else if "{act}" is "pause" then
-                    execute t javascript "document.querySelector('video, audio').pause()"
-                else if "{act}" is "next" then
-                    execute t javascript "document.querySelector('.ytp-next-button, #play-control-bar .next-button')?.click()"
-                else if "{act}" is "previous" then
-                    execute t javascript "document.querySelector('#play-control-bar .previous-button')?.click()"
-                end if
-            end if
-        end repeat
-    end repeat
-end tell
-""".format(act=act_str)
-        ok_browser, _ = run_applescript(browser_script)
-        if ok_browser:
-            return {"accion": action, "resultado": f"{msg} (Vía Navegador)", "exito": True}
-
-        return {"accion": action, "resultado": f"No se pudo controlar la música: {out}", "exito": False}
+        return {"accion": "musica_anterior", "resultado": "Señor, volviendo a la pista anterior en Echo Music.", "exito": True, "music_action": "prev"}
 
     return None
 

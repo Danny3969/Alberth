@@ -460,9 +460,9 @@ export default function App() {
     if (lower.startsWith('abre ') || lower.startsWith('abrir ')) {
       const appName = lower.replace(/^(abre|abrir)\s+/, '').trim();
       androidSystemHelper.launchApp(appName);
-    } else if (lower.includes('pon la canción ') || lower.includes('pon musica ') || lower.includes('en spotify')) {
-      const query = lower.replace(/.*(pon la canción|pon musica|reproduce)\s+/, '').replace(/\s+en spotify.*/, '').trim();
-      androidSystemHelper.playMedia(query, 'spotify');
+    } else if (lower.includes('pon la canción ') || lower.includes('pon musica ') || lower.includes('en echo music') || lower.includes('en spotify')) {
+      const query = lower.replace(/.*(pon la canción|pon musica|reproduce)\s+/, '').replace(/\s+(en echo music|en spotify).*/, '').trim();
+      androidSystemHelper.playMedia(query, 'echo_music');
     } else if (lower.includes('pon el video ') || lower.includes('en youtube')) {
       const query = lower.replace(/.*(pon el video|busca en youtube|pon)\s+/, '').replace(/\s+en youtube.*/, '').trim();
       androidSystemHelper.playMedia(query, 'youtube');
@@ -778,10 +778,10 @@ export default function App() {
 
         <TouchableOpacity
           style={styles.quickActionBtn}
-          onPress={() => handleSendMessage('Pon música de rock en Spotify')}
+          onPress={() => handleSendMessage('Pon música de rock en Echo Music')}
         >
-          <Play size={16} color="#00FFA3" />
-          <Text style={styles.quickActionText}>SPOTIFY</Text>
+          <Play size={16} color="#00F0FF" />
+          <Text style={styles.quickActionText}>ECHO MUSIC</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

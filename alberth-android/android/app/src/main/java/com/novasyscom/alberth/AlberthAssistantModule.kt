@@ -241,9 +241,9 @@ class AlberthAssistantModule(reactContext: ReactApplicationContext) : ReactConte
                     promise.resolve(true)
                     return
                 }
-            } else if (mediaType.equals("spotify", ignoreCase = true)) {
+            } else if (mediaType.equals("echo_music", ignoreCase = true) || mediaType.equals("echomusic", ignoreCase = true) || mediaType.equals("spotify", ignoreCase = true)) {
                 val intent = Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH).apply {
-                    setPackage("com.spotify.music")
+                    setPackage("echo.music.iad1tya")
                     putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "vnd.android.cursor.item/*")
                     putExtra(android.app.SearchManager.QUERY, queryOrUrl)
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -253,7 +253,8 @@ class AlberthAssistantModule(reactContext: ReactApplicationContext) : ReactConte
                     promise.resolve(true)
                     return
                 } catch (e: Exception) {
-                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/search/" + Uri.encode(queryOrUrl))).apply {
+                    // Fallback a YouTube Music web si la app no abre directamente el intent
+                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://music.youtube.com/search?q=" + Uri.encode(queryOrUrl))).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     }
                     reactApplicationContext.startActivity(webIntent)
