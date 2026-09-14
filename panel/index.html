@@ -568,6 +568,172 @@ header.hud-header {
   box-shadow: 0 0 16px var(--cyan);
 }
 
+/* ─── Multi-Playlist UI Controls & Badges ─── */
+.playlist-quick-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.media-count-badge {
+  font-size: 10px;
+  color: var(--cyan);
+  font-family: var(--font-hud);
+  letter-spacing: 0.5px;
+  background: rgba(0, 240, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.playlist-pill-btn {
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid var(--cyan-dim);
+  color: var(--cyan);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px 9px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-family: var(--font-hud);
+  letter-spacing: 0.5px;
+  max-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.playlist-pill-btn:hover {
+  background: rgba(0, 240, 255, 0.16);
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.playlist-pill-btn span#active-playlist-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlist-cycle-btn {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(0, 150, 255, 0.18));
+  border: 1px solid var(--cyan);
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-family: var(--font-hud);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+  transition: all 0.2s ease;
+}
+
+.playlist-cycle-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.45), rgba(0, 180, 255, 0.35));
+  box-shadow: 0 0 16px var(--cyan);
+  transform: translateY(-1px);
+}
+
+.playlist-cycle-btn:active {
+  transform: translateY(1px);
+}
+
+.playlist-gear-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-dim);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 4px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.playlist-gear-btn:hover {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* Playlist Card Items in Modal */
+.pl-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pl-card-item:hover {
+  background: rgba(0, 240, 255, 0.06);
+  border-color: rgba(0, 240, 255, 0.3);
+  transform: translateX(3px);
+}
+
+.pl-card-item.active {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.2);
+}
+
+.pl-card-item .pl-item-title {
+  font-family: var(--font-data);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pl-card-item .pl-item-url {
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+  margin-top: 2px;
+}
+
+.pl-active-badge {
+  font-size: 9px;
+  font-family: var(--font-hud);
+  color: var(--cyan);
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.pl-del-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.pl-del-btn:hover {
+  color: var(--red);
+  background: rgba(255, 0, 55, 0.15);
+}
+
 /* ─── Tactical Quick Actions Grid ─── */
 .apps-grid {
   display: grid;
@@ -1198,13 +1364,26 @@ header.hud-header {
         <div class="media-header">
           <div class="media-tag">
             <span class="echo-dot"></span>
-            <span id="echo-badge-text">ECHO MUSIC · STREAMING</span>
+            <span id="echo-badge-text">ECHO MUSIC</span>
+            <span id="media-playlist-count" class="media-count-badge">-- PISTAS</span>
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span id="media-playlist-count" style="font-size:10px;color:var(--cyan);font-family:var(--font-hud);letter-spacing:1px;">CARGANDO...</span>
-            <button onclick="promptPlaylistUrl()" title="Configurar Playlist de YouTube Music" style="background:rgba(0,240,255,0.08);border:1px solid var(--cyan-dim);color:var(--cyan);border-radius:4px;cursor:pointer;padding:2px 6px;display:flex;align-items:center;font-size:10px;font-family:var(--font-hud);">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:3px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              LISTA
+          <div class="playlist-quick-bar">
+            <!-- Botón selector de playlist activa -->
+            <button id="btn-active-playlist" onclick="openPlaylistModal()" title="Ver y cambiar entre todas las playlists" class="playlist-pill-btn">
+              <span style="font-size:11px;">🎵</span>
+              <span id="active-playlist-label">Rock Classics</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <!-- Botón 1-clic para cambiar a la otra playlist -->
+            <button id="btn-cycle-playlist" onclick="cycleNextPlaylistUI()" title="Cambiar a la siguiente playlist en 1 clic" class="playlist-cycle-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+              <span>OTRA PLAYLIST</span>
+            </button>
+
+            <!-- Botón de administración rápida -->
+            <button onclick="openPlaylistModal()" title="Administrar y añadir playlists de YouTube Music" class="playlist-gear-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             </button>
           </div>
         </div>
@@ -1420,6 +1599,45 @@ header.hud-header {
   </div>
 </div>
 
+<!-- ── Modal Gestor de Playlists Echo Music (YouTube Music) ── -->
+<div class="sys-modal" id="playlist-modal">
+  <div class="sys-backdrop" onclick="closePlaylistModal()"></div>
+  <div class="sys-card" style="width: 520px; max-height: 85vh; display:flex; flex-direction:column;">
+    <div class="sys-title">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>GESTOR DE PLAYLISTS · ECHO MUSIC</span>
+      </div>
+      <span style="cursor:pointer;font-size:16px;color:var(--text-dim);" onclick="closePlaylistModal()">✕</span>
+    </div>
+
+    <div style="font-size:11px; color:var(--text-dim); margin-bottom:10px; font-family:var(--font-hud); letter-spacing:0.5px;">
+      SELECCIONE UNA PLAYLIST PARA REPRODUCIR O REGISTRE UNA NUEVA:
+    </div>
+
+    <!-- Lista dinámica de playlists -->
+    <div id="modal-playlists-list" style="flex:1; overflow-y:auto; max-height:260px; display:flex; flex-direction:column; gap:8px; margin-bottom:16px; padding-right:4px;">
+      <!-- Rellenado por renderPlaylistsModalList() -->
+    </div>
+
+    <!-- Formulario para agregar nueva playlist -->
+    <div style="border-top: 1px solid rgba(0,240,255,0.2); padding-top: 14px;">
+      <div style="font-size:11px; color:var(--cyan); font-family:var(--font-hud); margin-bottom:8px; font-weight:700; letter-spacing:0.5px;">
+        + AGREGAR NUEVA PLAYLIST DE YOUTUBE MUSIC
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+        <input type="text" id="new-pl-name" placeholder="Nombre (ej: Lo-Fi Chill, Gym)" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
+        <input type="text" id="new-pl-url" placeholder="URL o ID de YouTube Music" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button onclick="addNewPlaylistFromModal()" style="background:var(--cyan); color:#050b14; border:none; border-radius:6px; font-family:var(--font-hud); font-weight:700; font-size:11px; padding:7px 14px; cursor:pointer; letter-spacing:1px; box-shadow:0 0 10px var(--cyan-glow);">
+          + GUARDAR Y ACTIVAR
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ============================================================
      JAVASCRIPT LOGIC & THREE.JS PARTICLE SWARM REACTOR
      ============================================================ -->
@@ -1485,7 +1703,7 @@ function connectWS() {
       } else if (msg.type === "audio_chunk") {
         enqueueAudioChunk(msg.audio_url);
       } else if (msg.type === "music_action") {
-        handleRemoteMusicAction(msg.action, msg.track);
+        handleRemoteMusicAction(msg.action, msg.track, msg);
       } else if (msg.type === "system") {
         showToast(msg.text, 3000);
       }
@@ -2264,6 +2482,11 @@ async function loadEchoPlaylist(forceRefresh = false) {
       const countEl = document.getElementById("media-playlist-count");
       if (countEl) countEl.textContent = `${echoPlaylist.length} PISTAS`;
       
+      const label = document.getElementById("active-playlist-label");
+      if (label && (data.playlist_name || data.title)) {
+        label.textContent = data.playlist_name || data.title;
+      }
+
       // Mostrar primera canción si no hay nada en reproducción activa
       if (!isMediaPlaying && echoPlaylist[echoCurrentIndex]) {
         updateEchoTrackUI(echoPlaylist[echoCurrentIndex], false);
@@ -2419,31 +2642,184 @@ function seekMedia(e) {
   audio.currentTime = pct * audio.duration;
 }
 
-async function promptPlaylistUrl() {
-  const current = echoPlaylist.length > 0 ? `(Actualmente ${echoPlaylist.length} canciones)` : "";
-  const url = prompt(`Ingrese el enlace o ID de su Playlist de YouTube Music ${current}:`);
-  if (url && url.trim()) {
-    showToast("⏳ Sincronizando playlist de YouTube Music...", 3000);
-    try {
-      const res = await fetch("/api/music/playlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() })
-      });
-      const data = await res.json();
-      if (data && data.ok) {
-        showToast(`✅ Playlist sincronizada: ${data.count || (data.tracks ? data.tracks.length : 0)} canciones`, 3500);
-        await loadEchoPlaylist(true);
-      } else {
-        showToast(`⚠️ No se pudo cargar: ${data.error || 'Error desconocido'}`, 3500);
+// ─── Multi-Playlist State & Management ────────────────────────
+let echoPlaylistsData = {
+  active_id: "",
+  active_name: "Rock Classics",
+  playlists: []
+};
+
+async function loadEchoPlaylistsData() {
+  try {
+    const res = await fetch("/api/music/playlists");
+    const data = await res.json();
+    if (data && data.ok) {
+      echoPlaylistsData = data;
+      const label = document.getElementById("active-playlist-label");
+      if (label && data.active_name) {
+        label.textContent = data.active_name;
       }
-    } catch (err) {
-      showToast("⚠️ Error al conectar con el servidor", 2500);
     }
+  } catch (e) {
+    console.warn("[EchoPlaylists] Error cargando lista:", e);
   }
 }
 
-function handleRemoteMusicAction(action, trackData) {
+async function cycleNextPlaylistUI() {
+  showToast("⏳ Cambiando a la otra playlist...", 2500);
+  try {
+    const res = await fetch("/api/music/playlists/cycle", { method: "POST" });
+    const data = await res.json();
+    if (data && data.ok) {
+      const plName = data.playlist_name || (data.switched_to && data.switched_to.name) || "Siguiente";
+      showToast(`🎵 Playlist activa: ${plName}`, 3000);
+      await loadEchoPlaylistsData();
+      await loadEchoPlaylist(false);
+      playEchoTrack(0);
+    } else {
+      showToast(`⚠️ ${data.error || 'No se pudo alternar de playlist'}`, 3000);
+    }
+  } catch (err) {
+    showToast("⚠️ Error al cambiar de playlist", 2500);
+  }
+}
+
+async function switchPlaylistUI(playlistId) {
+  closePlaylistModal();
+  showToast("⏳ Cambiando playlist...", 2500);
+  try {
+    const res = await fetch("/api/music/playlists/switch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: playlistId })
+    });
+    const data = await res.json();
+    if (data && data.ok) {
+      const plName = data.playlist_name || (data.switched_to && data.switched_to.name) || "Playlist";
+      showToast(`🎵 Playlist activa: ${plName}`, 3000);
+      await loadEchoPlaylistsData();
+      await loadEchoPlaylist(false);
+      playEchoTrack(0);
+    } else {
+      showToast(`⚠️ ${data.error || 'No se pudo activar la playlist'}`, 3000);
+    }
+  } catch (err) {
+    showToast("⚠️ Error de conexión", 2500);
+  }
+}
+
+function openPlaylistModal() {
+  renderPlaylistsModalList();
+  const modal = document.getElementById("playlist-modal");
+  if (modal) modal.classList.add("open");
+}
+
+function closePlaylistModal() {
+  const modal = document.getElementById("playlist-modal");
+  if (modal) modal.classList.remove("open");
+}
+
+function renderPlaylistsModalList() {
+  const listEl = document.getElementById("modal-playlists-list");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+
+  const pls = echoPlaylistsData.playlists || [];
+  if (pls.length === 0) {
+    listEl.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;">No hay playlists registradas aún.</div>`;
+    return;
+  }
+
+  pls.forEach(pl => {
+    const isActive = pl.id === echoPlaylistsData.active_id;
+    const item = document.createElement("div");
+    item.className = `pl-card-item ${isActive ? 'active' : ''}`;
+    item.onclick = () => switchPlaylistUI(pl.id);
+
+    const safeName = pl.name.replace(/'/g, "\\'");
+    item.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div class="pl-item-title">
+          <span>🎵 ${pl.name}</span>
+          ${isActive ? '<span class="pl-active-badge">ACTIVA</span>' : ''}
+        </div>
+        <div class="pl-item-url">${pl.url}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:8px;" onclick="event.stopPropagation()">
+        ${!isActive && pls.length > 1 ? `
+          <button class="pl-del-btn" title="Eliminar playlist" onclick="deletePlaylistUI('${pl.id}', '${safeName}', event)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        ` : ''}
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+}
+
+async function addNewPlaylistFromModal() {
+  const nameInput = document.getElementById("new-pl-name");
+  const urlInput = document.getElementById("new-pl-url");
+  const name = nameInput ? nameInput.value.trim() : "";
+  const url = urlInput ? urlInput.value.trim() : "";
+
+  if (!url) {
+    showToast("⚠️ Ingrese una URL o ID de playlist válido", 2500);
+    return;
+  }
+
+  showToast("⏳ Guardando y extrayendo playlist...", 3000);
+  try {
+    const res = await fetch("/api/music/playlists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name || "Nueva Playlist",
+        url: url,
+        set_active: true
+      })
+    });
+    const data = await res.json();
+    if (data && data.ok) {
+      if (nameInput) nameInput.value = "";
+      if (urlInput) urlInput.value = "";
+      closePlaylistModal();
+      showToast(`✅ Playlist '${data.playlist_name || name}' guardada y activa (${data.count || 0} pistas)`, 3500);
+      await loadEchoPlaylistsData();
+      await loadEchoPlaylist(false);
+      playEchoTrack(0);
+    } else {
+      showToast(`⚠️ ${data.error || 'Error al guardar playlist'}`, 3500);
+    }
+  } catch (err) {
+    showToast("⚠️ Error al conectar con el servidor", 2500);
+  }
+}
+
+async function deletePlaylistUI(plId, plName, event) {
+  if (event) event.stopPropagation();
+  if (!confirm(`¿Desea eliminar la playlist '${plName}'?`)) return;
+
+  try {
+    const res = await fetch(`/api/music/playlists/${plId}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data && data.ok) {
+      showToast(`🗑️ Playlist '${plName}' eliminada`, 2500);
+      await loadEchoPlaylistsData();
+      renderPlaylistsModalList();
+    } else {
+      showToast(`⚠️ ${data.error || 'No se pudo eliminar'}`, 3000);
+    }
+  } catch (err) {
+    showToast("⚠️ Error de conexión", 2500);
+  }
+}
+
+function promptPlaylistUrl() {
+  openPlaylistModal();
+}
+
+function handleRemoteMusicAction(action, trackData, fullMsg) {
   if (action === "play") {
     const audio = getAudioPlayer();
     if (audio && !isMediaPlaying) toggleMediaPlay();
@@ -2458,14 +2834,23 @@ function handleRemoteMusicAction(action, trackData) {
     playEchoTrack(0);
   } else if (action === "play_track" && trackData) {
     playDirectTrack(trackData);
+  } else if (action === "playlist_switched") {
+    const name = (fullMsg && fullMsg.playlist_name) || "Playlist";
+    showToast(`🎵 Playlist activa: ${name}`, 3000);
+    loadEchoPlaylistsData();
+    loadEchoPlaylist(false).then(() => {
+      playEchoTrack(0);
+    });
   }
 }
 
-// Inicializar reproductor de Echo Music al cargar
+// Inicializar reproductor y playlists de Echo Music al cargar
 window.addEventListener("DOMContentLoaded", () => {
+  loadEchoPlaylistsData();
   loadEchoPlaylist();
 });
 setTimeout(() => {
+  loadEchoPlaylistsData();
   loadEchoPlaylist();
 }, 600);
 

@@ -82,11 +82,12 @@ _Última actualización: 2026-09-14 10:56 GMT-5_
   - Implementado motor de extracción y resolución de playlists y canciones individuales de YouTube Music utilizando `yt-dlp` (`--extractor-args youtube:player_client=android,web`).
   - Caché en memoria de URLs de streaming de 4 horas para arranque instantáneo de audio.
   - Almacenamiento persistente de configuración y playlists en `memory/alberth_playlists.json`.
-- **Nuevo Quantum HUD Player (`panel/index.html`):**
+- **Nuevo Quantum HUD Player & Soporte Multi-Playlist (`panel/index.html`):**
   - Tarjeta multimedia rediseñada como **ECHO MUSIC · STREAMING YOUTUBE**.
+  - **Selector y Conmutador Multi-Playlist:** Botón interactivo de playlist activa (`🎵 [Nombre] ▾`), botón de 1-clic `[⇄ OTRA PLAYLIST]` para alternancia cíclica instantánea y modal de gestión completa de playlists.
+  - **Gestor Modal de Playlists:** Permite explorar todas las listas registradas con conteo de pistas, cambiar a cualquiera con un clic, registrar nuevas playlists de YouTube Music (Nombre + URL/ID) y eliminar listas no deseadas.
+  - **Comandos de Voz Multi-Playlist:** Reconocimiento de órdenes como *«cambia de playlist»*, *«otra playlist»*, *«siguiente playlist»* y *«cambia a la playlist [nombre]»*, sincronizado vía WebSocket `playlist_switched`.
   - Reproductor HTML5 Audio embebido con soporte para cambio de pista secuencial, aleatorio (*shuffle*), seekbar interactivo en tiempo real y lectura de carátulas dinámicas.
-  - Botón directo en la tarjeta y comando modal para cambiar o vincular playlists de YouTube Music en cualquier momento.
-  - Eventos WebSocket `music_action` sincronizados con el backend para control por voz fluido (*«reproduce mi playlist»*, *«pon la canción X»*, *«siguiente»*, *«pausa»*).
 
 ### 2026-09-13 (Overhaul Quirúrgico del Módulo de Voz en 3 Fases, Bridge Gemini 2.0 Live & Archify)
 - **Actualización del Trato y Preferencias del Usuario:**

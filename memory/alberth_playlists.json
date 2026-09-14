@@ -1,6 +1,17 @@
 {
-  "active_playlist_url": "https://www.youtube.com/playlist?list=PL4fGSIFgk54G7i5w_Yp9h5iZ5s_9V7d3d",
-  "playlist_name": "Rock Classics",
-  "updated_at": "2026-09-14 10:55:55",
-  "custom_tracks": []
+  "active_playlist_id": "rock_classics",
+  "playlists": [
+    {
+      "id": "rock_classics",
+      "name": "Rock Classics",
+      "url": "https://www.youtube.com/playlist?list=PL5gXyH4VTGplbs-zZ_tCm61w8VCV22p9A",
+      "updated_at": "2026-09-14 11:54:14"
+    },
+    {
+      "id": "top_hits_pop",
+      "name": "Top Hits & Pop",
+      "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+      "updated_at": "2026-09-14 12:00:00"
+    }
+  ]
 }

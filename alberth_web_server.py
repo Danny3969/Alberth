@@ -380,7 +380,9 @@ def run_alberth_full(text: str) -> dict:
                                 manager.broadcast({
                                     "type": "music_action",
                                     "action": sys_res["music_action"],
-                                    "track": sys_res.get("track")
+                                    "track": sys_res.get("track"),
+                                    "playlist_id": sys_res.get("playlist_id"),
+                                    "playlist_name": sys_res.get("playlist_name")
                                 }),
                                 loop
                             )
@@ -1246,12 +1248,16 @@ async def log_browser_error(err: BrowserError):
         f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {err.message} at {err.source}:{err.lineno}:{err.colno}\nStack: {err.error}\n\n")
     return {"ok": True}
 
-# ── Módulo Echo Music & YouTube Music ──────────────────────────────────────────
+# ── Módulo Echo Music & YouTube Music (Multi-Playlist) ───────────────────────
 from alberth_music_player import music_player
 
 class PlaylistRequest(BaseModel):
     url: str
     name: Optional[str] = None
+    set_active: Optional[bool] = True
+
+class SwitchPlaylistRequest(BaseModel):
+    id: str
 
 @app.get("/api/music/playlist")
 async def get_music_playlist(refresh: bool = False):
@@ -1261,7 +1267,45 @@ async def get_music_playlist(refresh: bool = False):
 @app.post("/api/music/playlist")
 async def set_music_playlist(req: PlaylistRequest):
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, music_player.set_playlist, req.url, req.name)
+    name = req.name or "Mi Playlist Echo"
+    set_act = True if req.set_active is None else req.set_active
+    return await loop.run_in_executor(None, music_player.add_or_update_playlist, name, req.url, set_act)
+
+@app.get("/api/music/playlists")
+async def get_all_playlists():
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, music_player.get_all_playlists)
+
+@app.post("/api/music/playlists/switch")
+async def switch_playlist(req: SwitchPlaylistRequest):
+    loop = asyncio.get_event_loop()
+    res = await loop.run_in_executor(None, music_player.switch_playlist, req.id)
+    if res.get("ok"):
+        await manager.broadcast({
+            "type": "music_action",
+            "action": "playlist_switched",
+            "playlist_id": req.id,
+            "playlist_name": res.get("playlist_name")
+        })
+    return res
+
+@app.post("/api/music/playlists/cycle")
+async def cycle_playlist():
+    loop = asyncio.get_event_loop()
+    res = await loop.run_in_executor(None, music_player.cycle_next_playlist)
+    if res.get("ok"):
+        await manager.broadcast({
+            "type": "music_action",
+            "action": "playlist_switched",
+            "playlist_id": res.get("playlist_id"),
+            "playlist_name": res.get("playlist_name")
+        })
+    return res
+
+@app.delete("/api/music/playlists/{playlist_id}")
+async def delete_playlist(playlist_id: str):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, music_player.delete_playlist, playlist_id)
 
 @app.get("/api/music/stream/{track_id}")
 async def get_music_stream(track_id: str):

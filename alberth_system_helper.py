@@ -59,12 +59,68 @@ def run_shell(cmd, timeout=10):
 # ══════════════════════════════════════════════════════════════════════════════
 def handle_music(query, query_lower):
     """Detecta y ejecuta intenciones de control de música/video y playlists de Echo Music."""
-    # 1. Petición explícita de reproducir playlist
+    from alberth_music_player import music_player
+
+    # 1. Cambio / rotación rápida de playlist: "cambia de playlist", "otra playlist", "siguiente playlist", "rota la playlist"
+    is_cycle_pl = re.search(r'\b(?:cambia|pasa|rota|siguiente|otra)\s+(?:de\s+)?playlist\b', query_lower)
+    if is_cycle_pl:
+        try:
+            res = music_player.cycle_next_playlist()
+            if res.get("ok"):
+                pl_name = res.get("playlist_name") or (res.get("switched_to", {}).get("name") if res.get("switched_to") else "Siguiente")
+                return {
+                    "accion": "musica_cambiar_playlist",
+                    "resultado": f"Señor, cambiando a la playlist '{pl_name}'.",
+                    "exito": True,
+                    "music_action": "playlist_switched",
+                    "playlist_id": res.get("playlist_id"),
+                    "playlist_name": pl_name
+                }
+            else:
+                return {
+                    "accion": "musica_cambiar_playlist",
+                    "resultado": f"Señor, no fue posible cambiar de playlist: {res.get('error', 'Error desconocido')}.",
+                    "exito": False
+                }
+        except Exception as pe:
+            print(f"[Cycle Playlist Error] {pe}")
+
+    # 2. Cambio a playlist específica por nombre: "cambia a la playlist rock", "pon la playlist pop hits"
+    switch_pl_match = re.search(r'\b(?:cambia|pon|reproduce|activa|pasa)\s+(?:a\s+)?(?:la\s+)?playlist\s+([a-zA-Z0-9_\s\-]+)', query_lower)
+    if switch_pl_match:
+        target_name = switch_pl_match.group(1).strip()
+        if target_name not in ["siguiente", "otra", "anterior", "de nuevo", "favorita", "favoritas", "activa", "mi musica", "mi música"]:
+            try:
+                res = music_player.switch_playlist(target_name)
+                if res.get("ok"):
+                    pl_name = res.get("playlist_name") or target_name
+                    return {
+                        "accion": "musica_cambiar_playlist",
+                        "resultado": f"Señor, activando la playlist '{pl_name}'.",
+                        "exito": True,
+                        "music_action": "playlist_switched",
+                        "playlist_id": res.get("playlist_id"),
+                        "playlist_name": pl_name
+                    }
+                else:
+                    all_pls = music_player.get_all_playlists().get("playlists", [])
+                    pl_list_str = ", ".join([f"'{p['name']}'" for p in all_pls]) if all_pls else "ninguna"
+                    return {
+                        "accion": "musica_cambiar_playlist",
+                        "resultado": f"Señor, no encontré la playlist '{target_name}'. Las disponibles en su sistema son: {pl_list_str}.",
+                        "exito": True
+                    }
+            except Exception as se:
+                print(f"[Switch Playlist Error] {se}")
+
+    # 3. Petición explícita de reproducir playlist activa
     is_playlist_cmd = re.search(r'\b(pon|reproduce|inicia|abre)\s+(?:mi\s+)?(?:playlist|m[uú]sica|lista\s+de\s+reproducci[oó]n)\b', query_lower)
     if is_playlist_cmd:
+        meta = music_player.get_active_playlist_meta()
+        pl_name = meta["name"] if meta else "Echo Music"
         return {
             "accion": "musica_playlist",
-            "resultado": "Señor, iniciando su playlist de Echo Music en el Quantum HUD.",
+            "resultado": f"Señor, iniciando su playlist '{pl_name}' en el Quantum HUD.",
             "exito": True,
             "music_action": "play_playlist"
         }

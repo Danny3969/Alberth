@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # =============================================================================
-# ALBERTH MUSIC PLAYER — Motor de Streaming y Gestión de Playlists de YouTube Music
+# ALBERTH MUSIC PLAYER — Motor Multi-Playlist y Streaming de YouTube Music
 # Compatible con Echo Music / YouTube Music para reproducción autónoma en Mac
 # =============================================================================
 
@@ -22,35 +22,70 @@ VENV_YT_DLP = WORKSPACE_DIR / "venv" / "bin" / "yt-dlp"
 YT_DLP_BIN = str(VENV_YT_DLP) if VENV_YT_DLP.exists() else "yt-dlp"
 
 # Caché en memoria para URLs de stream: {track_id: (stream_url, timestamp)}
-# Las URLs de YouTube expiran usualmente a las 6 horas; mantenemos 4 horas de validez
 _STREAM_CACHE: Dict[str, tuple] = {}
 CACHE_TTL = 4 * 3600
 
-# Caché de pistas de playlist en memoria
-_PLAYLIST_CACHE: Dict[str, Any] = {
-    "url": None,
-    "title": "Mi Playlist Echo",
-    "updated_at": 0,
-    "tracks": []
-}
+# Caché de pistas por cada playlist: {playlist_id: {"title": ..., "tracks": [...], "updated_at": ...}}
+_PLAYLISTS_CACHE: Dict[str, Any] = {}
 
 def _ensure_memory_dir():
     MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 
+def _normalize_playlist_url(url_or_id: str) -> str:
+    url = url_or_id.strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    return f"https://www.youtube.com/playlist?list={url}"
+
+def _slugify(name: str) -> str:
+    slug = re.sub(r'[^a-zA-Z0-9]+', '_', name.lower()).strip('_')
+    return slug or f"pl_{int(time.time())}"
+
 def load_stored_playlist_config() -> dict:
     _ensure_memory_dir()
+    default_config = {
+        "active_playlist_id": "rock_classics",
+        "playlists": [
+            {
+                "id": "rock_classics",
+                "name": "Rock Classics",
+                "url": "https://www.youtube.com/playlist?list=PL4fGSIFgk54G7i5w_Yp9h5iZ5s_9V7d3d",
+                "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            },
+            {
+                "id": "pop_hits",
+                "name": "Pop Hits",
+                "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+                "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+        ]
+    }
+
     if PLAYLISTS_FILE.exists():
         try:
             with open(PLAYLISTS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Migración de versión previa simple a multi-playlist
+                if "active_playlist_url" in data and "playlists" not in data:
+                    active_url = data["active_playlist_url"]
+                    active_name = data.get("playlist_name", "Mi Playlist Echo")
+                    pid = _slugify(active_name)
+                    data = {
+                        "active_playlist_id": pid,
+                        "playlists": [
+                            {
+                                "id": pid,
+                                "name": active_name,
+                                "url": active_url,
+                                "updated_at": data.get("updated_at") or time.strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                        ]
+                    }
+                    save_stored_playlist_config(data)
+                return data
         except Exception as e:
             print(f"[MusicPlayer] Error al cargar configuración: {e}", file=sys.stderr)
-    return {
-        "active_playlist_url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
-        "playlist_name": "Mi Playlist Echo Music",
-        "updated_at": None,
-        "custom_tracks": []
-    }
+    return default_config
 
 def save_stored_playlist_config(config: dict):
     _ensure_memory_dir()
@@ -63,43 +98,176 @@ def save_stored_playlist_config(config: dict):
 class AlberthMusicPlayer:
     def __init__(self):
         self.config = load_stored_playlist_config()
-        self.active_url = self.config.get("active_playlist_url")
-        self.playlist_name = self.config.get("playlist_name", "Mi Playlist Echo Music")
 
-    def set_playlist(self, url_or_id: str, name: Optional[str] = None) -> dict:
-        url = url_or_id.strip()
-        if not (url.startswith("http://") or url.startswith("https://")):
-            # Puede ser solo el ID de la lista (ej. PL...)
-            url = f"https://www.youtube.com/playlist?list={url}"
+    @property
+    def playlists(self) -> List[Dict[str, Any]]:
+        return self.config.get("playlists", [])
+
+    @property
+    def active_id(self) -> str:
+        aid = self.config.get("active_playlist_id")
+        if not aid and self.playlists:
+            aid = self.playlists[0]["id"]
+            self.config["active_playlist_id"] = aid
+        return aid
+
+    def get_active_playlist_meta(self) -> Optional[Dict[str, Any]]:
+        for pl in self.playlists:
+            if pl["id"] == self.active_id:
+                return pl
+        if self.playlists:
+            return self.playlists[0]
+        return None
+
+    def get_all_playlists(self) -> dict:
+        """Devuelve la lista completa de playlists registradas con el ID activo."""
+        active_meta = self.get_active_playlist_meta()
+        return {
+            "ok": True,
+            "active_id": self.active_id,
+            "active_name": active_meta["name"] if active_meta else "Sin Playlist",
+            "active_url": active_meta["url"] if active_meta else "",
+            "playlists": self.playlists
+        }
+
+    def add_or_update_playlist(self, name: str, url_or_id: str, set_active: bool = True) -> dict:
+        """Agrega una nueva playlist o actualiza una existente."""
+        name = name.strip() or "Nueva Playlist"
+        url = _normalize_playlist_url(url_or_id)
+        pid = _slugify(name)
+        now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        existing = None
+        for pl in self.playlists:
+            if pl["id"] == pid or pl["name"].lower() == name.lower():
+                existing = pl
+                break
+
+        if existing:
+            existing["url"] = url
+            existing["name"] = name
+            existing["updated_at"] = now_str
+            target_id = existing["id"]
+        else:
+            new_pl = {
+                "id": pid,
+                "name": name,
+                "url": url,
+                "updated_at": now_str
+            }
+            self.playlists.append(new_pl)
+            target_id = pid
+
+        if set_active:
+            self.config["active_playlist_id"] = target_id
+
+        save_stored_playlist_config(self.config)
         
-        self.active_url = url
-        if name:
-            self.playlist_name = name
-        
-        self.config["active_playlist_url"] = self.active_url
-        self.config["playlist_name"] = self.playlist_name
-        self.config["updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        # Invalidar caché de esta playlist
+        if target_id in _PLAYLISTS_CACHE:
+            del _PLAYLISTS_CACHE[target_id]
+
+        tracks_res = self.get_playlist_tracks(force_refresh=True)
+        return {
+            "ok": True,
+            "message": f"Playlist '{name}' guardada exitosamente.",
+            "all_playlists": self.get_all_playlists(),
+            **tracks_res
+        }
+
+    def switch_playlist(self, id_or_name: str) -> dict:
+        """Cambia la playlist activa por ID o por nombre."""
+        target = None
+        search = id_or_name.strip().lower()
+
+        # Búsqueda exacta por ID
+        for pl in self.playlists:
+            if pl["id"] == id_or_name:
+                target = pl
+                break
+
+        # Búsqueda por nombre si no se encontró por ID
+        if not target:
+            for pl in self.playlists:
+                if pl["name"].lower() == search or search in pl["name"].lower():
+                    target = pl
+                    break
+
+        if not target:
+            return {"ok": False, "error": f"No se encontró la playlist '{id_or_name}'"}
+
+        self.config["active_playlist_id"] = target["id"]
         save_stored_playlist_config(self.config)
 
-        # Invalidar caché de playlist
-        _PLAYLIST_CACHE["updated_at"] = 0
-        return self.get_playlist_tracks(force_refresh=True)
+        tracks_res = self.get_playlist_tracks()
+        return {
+            "ok": True,
+            "switched_to": target,
+            "playlist_id": target["id"],
+            "playlist_name": target["name"],
+            "all_playlists": self.get_all_playlists(),
+            **tracks_res
+        }
+
+    def cycle_next_playlist(self) -> dict:
+        """Alterna a la siguiente playlist registrada en ciclo circular."""
+        if not self.playlists:
+            return {"ok": False, "error": "No hay playlists registradas"}
+
+        current_idx = 0
+        for i, pl in enumerate(self.playlists):
+            if pl["id"] == self.active_id:
+                current_idx = i
+                break
+
+        next_idx = (current_idx + 1) % len(self.playlists)
+        next_pl = self.playlists[next_idx]
+        return self.switch_playlist(next_pl["id"])
+
+    def delete_playlist(self, playlist_id: str) -> dict:
+        """Elimina una playlist. Conserva al menos una."""
+        if len(self.playlists) <= 1:
+            return {"ok": False, "error": "No puedes eliminar la única playlist existente"}
+
+        self.config["playlists"] = [pl for pl in self.playlists if pl["id"] != playlist_id]
+        if self.active_id == playlist_id:
+            self.config["active_playlist_id"] = self.playlists[0]["id"]
+
+        save_stored_playlist_config(self.config)
+        if playlist_id in _PLAYLISTS_CACHE:
+            del _PLAYLISTS_CACHE[playlist_id]
+
+        return {
+            "ok": True,
+            "message": "Playlist eliminada",
+            "all_playlists": self.get_all_playlists(),
+            **self.get_playlist_tracks()
+        }
 
     def get_playlist_tracks(self, force_refresh: bool = False) -> dict:
-        now = time.time()
-        # Si está en caché y tiene menos de 1 hora de antigüedad, retornar de memoria
-        if not force_refresh and _PLAYLIST_CACHE["url"] == self.active_url and (now - _PLAYLIST_CACHE["updated_at"] < 3600) and _PLAYLIST_CACHE["tracks"]:
-            return {
-                "ok": True,
-                "title": _PLAYLIST_CACHE["title"],
-                "url": self.active_url,
-                "count": len(_PLAYLIST_CACHE["tracks"]),
-                "tracks": _PLAYLIST_CACHE["tracks"],
-                "cached": True
-            }
+        """Extrae o retorna en caché las canciones de la playlist actualmente activa."""
+        active_meta = self.get_active_playlist_meta()
+        if not active_meta:
+            return {"ok": False, "error": "No hay playlist activa configurada", "tracks": []}
 
-        if not self.active_url:
-            return {"ok": False, "error": "No hay playlist configurada", "tracks": []}
+        pid = active_meta["id"]
+        url = active_meta["url"]
+        now = time.time()
+
+        # Si está en caché y tiene menos de 1 hora de antigüedad, retornar de memoria
+        if not force_refresh and pid in _PLAYLISTS_CACHE:
+            cached = _PLAYLISTS_CACHE[pid]
+            if (now - cached["updated_at"] < 3600) and cached["tracks"]:
+                return {
+                    "ok": True,
+                    "playlist_id": pid,
+                    "playlist_name": active_meta["name"],
+                    "title": cached["title"],
+                    "url": url,
+                    "count": len(cached["tracks"]),
+                    "tracks": cached["tracks"],
+                    "cached": True
+                }
 
         cmd = [
             YT_DLP_BIN,
@@ -107,28 +275,30 @@ class AlberthMusicPlayer:
             "--dump-single-json",
             "--no-warnings",
             "--quiet",
-            self.active_url
+            url
         ]
 
         try:
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
             if res.returncode != 0 or not res.stdout.strip():
-                # Si falló, intentar devolver lo que haya en caché
-                if _PLAYLIST_CACHE["tracks"]:
+                if pid in _PLAYLISTS_CACHE and _PLAYLISTS_CACHE[pid]["tracks"]:
+                    cached = _PLAYLISTS_CACHE[pid]
                     return {
                         "ok": True,
-                        "title": _PLAYLIST_CACHE["title"],
-                        "url": self.active_url,
-                        "count": len(_PLAYLIST_CACHE["tracks"]),
-                        "tracks": _PLAYLIST_CACHE["tracks"],
+                        "playlist_id": pid,
+                        "playlist_name": active_meta["name"],
+                        "title": cached["title"],
+                        "url": url,
+                        "count": len(cached["tracks"]),
+                        "tracks": cached["tracks"],
                         "cached": True,
-                        "warning": "Usando versión en caché"
+                        "warning": "Usando versión en caché previa"
                     }
                 return {"ok": False, "error": res.stderr or "No se pudo extraer la lista", "tracks": []}
 
             data = json.loads(res.stdout)
             raw_entries = data.get("entries", [])
-            playlist_title = data.get("title") or self.playlist_name
+            playlist_title = data.get("title") or active_meta["name"]
 
             tracks = []
             for i, item in enumerate(raw_entries):
@@ -138,15 +308,12 @@ class AlberthMusicPlayer:
                 title = item.get("title") or "Canción desconocida"
                 uploader = item.get("uploader") or item.get("channel") or "Artista Desconocido"
                 
-                # Intentar limpiar título si viene como "Artista - Canción"
                 if " - " in title and uploader == "Artista Desconocido":
                     parts = title.split(" - ", 1)
                     uploader = parts[0].strip()
                     title = parts[1].strip()
 
                 duration = item.get("duration") or 0
-                
-                # Obtener la mejor miniatura disponible
                 thumbnails = item.get("thumbnails") or []
                 thumbnail_url = thumbnails[-1].get("url") if thumbnails else f"https://img.youtube.com/vi/{track_id}/hqdefault.jpg"
 
@@ -161,15 +328,18 @@ class AlberthMusicPlayer:
                     "url": f"https://www.youtube.com/watch?v={track_id}"
                 })
 
-            _PLAYLIST_CACHE["url"] = self.active_url
-            _PLAYLIST_CACHE["title"] = playlist_title
-            _PLAYLIST_CACHE["updated_at"] = now
-            _PLAYLIST_CACHE["tracks"] = tracks
+            _PLAYLISTS_CACHE[pid] = {
+                "title": playlist_title,
+                "tracks": tracks,
+                "updated_at": now
+            }
 
             return {
                 "ok": True,
+                "playlist_id": pid,
+                "playlist_name": active_meta["name"],
                 "title": playlist_title,
-                "url": self.active_url,
+                "url": url,
                 "count": len(tracks),
                 "tracks": tracks,
                 "cached": False
@@ -245,7 +415,6 @@ class AlberthMusicPlayer:
             thumbnails = item.get("thumbnails") or []
             thumbnail_url = thumbnails[-1].get("url") if thumbnails else f"https://img.youtube.com/vi/{track_id}/hqdefault.jpg"
 
-            # Obtener stream
             stream_res = self.get_stream_url(track_id)
             if not stream_res.get("ok"):
                 return stream_res
@@ -268,12 +437,5 @@ music_player = AlberthMusicPlayer()
 
 if __name__ == "__main__":
     player = AlberthMusicPlayer()
-    print("Obteniendo canciones de la playlist activa...")
-    tracks = player.get_playlist_tracks()
-    print(f"Resultado: {tracks.get('ok')}, Total canciones: {tracks.get('count')}")
-    if tracks.get("tracks"):
-        first = tracks["tracks"][0]
-        print(f"Primera pista: {first['title']} ({first['id']})")
-        print("Obteniendo stream...")
-        stream = player.get_stream_url(first['id'])
-        print(f"Stream OK: {stream.get('ok')}, URL: {bool(stream.get('stream_url'))}")
+    print("Playlists disponibles:", player.get_all_playlists())
+    print("Pistas activas:", player.get_playlist_tracks().get("count"))
