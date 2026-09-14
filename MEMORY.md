@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-13 13:34 GMT-5_
+_Última actualización: 2026-09-13 20:51 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -14,7 +14,7 @@ _Última actualización: 2026-09-13 13:34 GMT-5_
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
 ├── panel/              → Panel Web Quantum HUD & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
-│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Spotify Player + Action Banner + Wake Word ("Alberth")
+│   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Spotify Player + Action Banner + Wake Word ("Alberth") + [ ⚡ ULTRA-LIVE ] Mode
 │   ├── floating.html   → Desktop Floating Bar (Quantum Theme / Orbitron / Rajdhani / DND / QA Alerts)
 │   ├── assets/         → Assets multimedia (highway_to_hell.jpg álbum cover cyberpunk)
 │   └── sw.js           → Service Worker para funcionamiento PWA Offline de la UI
@@ -23,6 +23,7 @@ _Última actualización: 2026-09-13 13:34 GMT-5_
 │   ├── app.json        → Configuración de compilación (versionCode 7, versionName 3.2.1, permisos CAMERA)
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Multi-CPU armeabi-v7a, arm64-v8a, x86, x86_64)
+├── alberth_live_bridge.py → Bridge WebSocket Ultra-Live Bidireccional (`/ws/live`) con Gemini 2.0 Live API
 ├── alberth_playwright_agent.py → Agente Web Autónomo (Playwright Headless + Marcadores DOM [data-alberth-id])
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
 ├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision + Groq Fallback)
@@ -68,6 +69,27 @@ _Última actualización: 2026-09-13 13:34 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-13 (Overhaul Quirúrgico del Módulo de Voz en 3 Fases, Bridge Gemini 2.0 Live & Archify)
+- **Actualización del Trato y Preferencias del Usuario:**
+  - Estandarización estricta del tratamiento en `SOUL.md`, `MEMORY.md` y `alberth_web_server.py`: Alberth se dirige al usuario SIEMPRE y ÚNICAMENTE como **"Señor"** (estrictamente prohibido usar "Señor Danny" o "Danny").
+- **Implementación Completa de la Hoja de Ruta de Voz en 3 Fases:**
+  - **Fase 1 (Chunking TTS por Oraciones & Streaming Continuo):**
+    - En `alberth_web_server.py`, la respuesta del LLM se divide y sintetiza por oraciones completas en milisegundos (<600ms latencia del primer fragmento hablado).
+    - En `panel/index.html`, encolamiento asíncrono ordenado con `AudioChunkQueue` previniendo solapamientos de audio.
+  - **Fase 2 (Interrupción Instantánea por VAD Muestreado en Cliente):**
+    - Muestreo continuo del micrófono mediante WebAudio API RMS en `panel/index.html` cada 40ms.
+    - Detección instantánea de voz humana superando el umbral adaptativo (RMS > 0.035 durante 2 frames seguidos), cancelando la reproducción TTS actual y vaciando la cola en <80ms (*barge-in*).
+  - **Fase 3 (Bridge Ultra-Live Bidireccional `alberth_live_bridge.py`):**
+    - Desarrollo de `alberth_live_bridge.py` exponiendo un endpoint WebSocket `/ws/live` para la API Gemini 2.0 Flash Live Multimodal.
+    - Incorporación del botón de alternancia `[ ⚡ ULTRA-LIVE ]` en la consola HUD para conmutación fluida entre modo estándar y modo ultra-live de baja latencia.
+- **Resolución de Bugs Críticos de Reconocimiento y Diálogo:**
+  - **Auto-Pausa Involuntaria Corregida:** Adición de límites de palabra exactos (`\b`) a `stopRegex`, evitando que subpalabras ("preparando", "comparación") dentro del audio reproducido o dictado pausaran erróneamente el reconocimiento.
+  - **Reajuste de Estado al Despachar:** Reset de `isVoiceSessionActive = false` tras cada consulta para impedir bucles infinitos de habla.
+  - **Formato Exacto de Fecha y Hora en Español:** Inyección del tiempo local en formato 12 horas en el prompt del sistema (ej. `Domingo, 13 de Septiembre de 2026 a las 4:24 PM`).
+- **Integración de Habilidades Archify & Google Stitch:**
+  - Habilidad **Archify** instalada e integrada en `~/.gemini/config/skills/archify` para visualización y renders arquitectónicos 3D de alta fidelidad.
+  - Confirmación e integración activa del ecosistema **Google Stitch** (`stitch-ui-design`, `stitch-loop`, `stitch-design-taste`) para prototipado acelerado de UI.
 
 ### 2026-09-11 (Suite de Video Multimodal, Blindaje TikTok, Inyección de Memoria & Autodiagnóstico)
 - **Suite de Inteligencia de Video Multimodal (`alberth_video_analyzer.py`):**
