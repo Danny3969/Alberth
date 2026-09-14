@@ -1265,11 +1265,20 @@ async def get_music_playlist(refresh: bool = False):
     return await loop.run_in_executor(None, music_player.get_playlist_tracks, refresh)
 
 @app.post("/api/music/playlist")
+@app.post("/api/music/playlists")
 async def set_music_playlist(req: PlaylistRequest):
     loop = asyncio.get_event_loop()
     name = req.name or "Mi Playlist Echo"
     set_act = True if req.set_active is None else req.set_active
-    return await loop.run_in_executor(None, music_player.add_or_update_playlist, name, req.url, set_act)
+    res = await loop.run_in_executor(None, music_player.add_or_update_playlist, name, req.url, set_act)
+    if res.get("ok"):
+        await manager.broadcast({
+            "type": "music_action",
+            "action": "playlist_switched",
+            "playlist_id": res.get("playlist_id"),
+            "playlist_name": res.get("playlist_name")
+        })
+    return res
 
 @app.get("/api/music/playlists")
 async def get_all_playlists():

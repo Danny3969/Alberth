@@ -1625,12 +1625,15 @@ header.hud-header {
       <div style="font-size:11px; color:var(--cyan); font-family:var(--font-hud); margin-bottom:8px; font-weight:700; letter-spacing:0.5px;">
         + AGREGAR NUEVA PLAYLIST DE YOUTUBE MUSIC
       </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-        <input type="text" id="new-pl-name" placeholder="Nombre (ej: Lo-Fi Chill, Gym)" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
-        <input type="text" id="new-pl-url" placeholder="URL o ID de YouTube Music" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:6px;">
+        <input type="text" id="new-pl-name" placeholder="Nombre (ej: Baladas, Gym)" onkeydown="if(event.key==='Enter') addNewPlaylistFromModal()" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
+        <input type="text" id="new-pl-url" placeholder="URL o ID de YouTube Music" onkeydown="if(event.key==='Enter') addNewPlaylistFromModal()" style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.3); border-radius:6px; color:#fff; padding:7px 10px; font-size:12px; outline:none; font-family:var(--font-data);" />
+      </div>
+      <div style="font-size:10px; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
+        💡 <i>Importante:</i> La playlist en YouTube Music debe estar configurada como <b>Pública</b> o <b>No listada (Oculta)</b> para permitir el acceso.
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button onclick="addNewPlaylistFromModal()" style="background:var(--cyan); color:#050b14; border:none; border-radius:6px; font-family:var(--font-hud); font-weight:700; font-size:11px; padding:7px 14px; cursor:pointer; letter-spacing:1px; box-shadow:0 0 10px var(--cyan-glow);">
+        <button id="btn-save-new-pl" onclick="addNewPlaylistFromModal()" style="background:var(--cyan); color:#050b14; border:none; border-radius:6px; font-family:var(--font-hud); font-weight:700; font-size:11px; padding:8px 16px; cursor:pointer; letter-spacing:1px; box-shadow:0 0 10px var(--cyan-glow); transition:all 0.2s;">
           + GUARDAR Y ACTIVAR
         </button>
       </div>
@@ -2760,15 +2763,23 @@ function renderPlaylistsModalList() {
 async function addNewPlaylistFromModal() {
   const nameInput = document.getElementById("new-pl-name");
   const urlInput = document.getElementById("new-pl-url");
+  const btn = document.getElementById("btn-save-new-pl");
   const name = nameInput ? nameInput.value.trim() : "";
   const url = urlInput ? urlInput.value.trim() : "";
 
   if (!url) {
-    showToast("⚠️ Ingrese una URL o ID de playlist válido", 2500);
+    showToast("⚠️ Ingrese una URL o ID de playlist válido", 3000);
     return;
   }
 
-  showToast("⏳ Guardando y extrayendo playlist...", 3000);
+  const origBtnText = btn ? btn.innerHTML : "+ GUARDAR Y ACTIVAR";
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+    btn.innerHTML = "⏳ VERIFICANDO...";
+  }
+
+  showToast("⏳ Extrayendo playlist de YouTube Music...", 4000);
   try {
     const res = await fetch("/api/music/playlists", {
       method: "POST",
@@ -2784,15 +2795,25 @@ async function addNewPlaylistFromModal() {
       if (nameInput) nameInput.value = "";
       if (urlInput) urlInput.value = "";
       closePlaylistModal();
-      showToast(`✅ Playlist '${data.playlist_name || name}' guardada y activa (${data.count || 0} pistas)`, 3500);
+      showToast(`✅ Playlist '${data.playlist_name || name}' guardada y activa (${data.count || 0} pistas)`, 4000);
       await loadEchoPlaylistsData();
       await loadEchoPlaylist(false);
       playEchoTrack(0);
     } else {
-      showToast(`⚠️ ${data.error || 'Error al guardar playlist'}`, 3500);
+      const errMsg = data.error || data.detail || 'Error al guardar playlist';
+      showToast(`⚠️ ${errMsg}`, 5000);
+      alert(`⚠️ No se pudo cargar la playlist:\n\n${errMsg}`);
     }
   } catch (err) {
-    showToast("⚠️ Error al conectar con el servidor", 2500);
+    console.warn("[AddNewPlaylist Error]", err);
+    showToast("⚠️ Error al conectar con el servidor", 3000);
+    alert("⚠️ Error al conectar con el servidor de Alberth.");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.innerHTML = origBtnText;
+    }
   }
 }
 

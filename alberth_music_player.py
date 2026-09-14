@@ -158,19 +158,34 @@ class AlberthMusicPlayer:
             self.playlists.append(new_pl)
             target_id = pid
 
+        previous_active = self.config.get("active_playlist_id")
         if set_active:
             self.config["active_playlist_id"] = target_id
 
-        save_stored_playlist_config(self.config)
-        
         # Invalidar caché de esta playlist
         if target_id in _PLAYLISTS_CACHE:
             del _PLAYLISTS_CACHE[target_id]
 
         tracks_res = self.get_playlist_tracks(force_refresh=True)
+        if not tracks_res.get("ok"):
+            # Revertir active y remover lista si era nueva y no existe
+            if set_active and previous_active and previous_active != target_id:
+                self.config["active_playlist_id"] = previous_active
+            if not existing and new_pl in self.playlists:
+                self.playlists.remove(new_pl)
+            save_stored_playlist_config(self.config)
+            return {
+                "ok": False,
+                "error": tracks_res.get("error", "No se pudo acceder a la playlist de YouTube"),
+                "all_playlists": self.get_all_playlists()
+            }
+
+        save_stored_playlist_config(self.config)
         return {
             "ok": True,
             "message": f"Playlist '{name}' guardada exitosamente.",
+            "playlist_id": target_id,
+            "playlist_name": name,
             "all_playlists": self.get_all_playlists(),
             **tracks_res
         }
@@ -281,6 +296,15 @@ class AlberthMusicPlayer:
         try:
             res = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
             if res.returncode != 0 or not res.stdout.strip():
+                err_raw = res.stderr or ""
+                clean_err = "No se pudo acceder a la lista en YouTube."
+                if "does not exist" in err_raw or "no existe" in err_raw:
+                    clean_err = "La playlist no existe o está configurada como 'Privada'. En YouTube Music, cámbiela a 'Pública' o 'No listada (Oculta)'."
+                elif "private" in err_raw.lower() or "privad" in err_raw.lower():
+                    clean_err = "La playlist es Privada. En YouTube Music cámbiela a 'Pública' u 'Oculta' para que Alberth pueda leerla."
+                elif "timeout" in err_raw.lower():
+                    clean_err = "Tiempo de espera agotado al conectar con YouTube Music."
+
                 if pid in _PLAYLISTS_CACHE and _PLAYLISTS_CACHE[pid]["tracks"]:
                     cached = _PLAYLISTS_CACHE[pid]
                     return {
@@ -294,7 +318,7 @@ class AlberthMusicPlayer:
                         "cached": True,
                         "warning": "Usando versión en caché previa"
                     }
-                return {"ok": False, "error": res.stderr or "No se pudo extraer la lista", "tracks": []}
+                return {"ok": False, "error": clean_err, "tracks": []}
 
             data = json.loads(res.stdout)
             raw_entries = data.get("entries", [])
