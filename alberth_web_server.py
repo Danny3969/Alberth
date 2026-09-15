@@ -468,17 +468,16 @@ def run_alberth_full(text: str) -> dict:
             f"{episodic_context}\n"
             f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
             f"MEMORIA TÉCNICA Y DE PROYECTOS PERSISTENTE (MEMORY.md):\n{mem_summary}\n\n"
-            "DIRECTRICES OBLIGATORIAS:\n"
+            "DIRECTRICES OBLIGATORIAS DE INTELIGENCIA Y COHERENCIA:\n"
             "- Eres Alberth, el asistente personal de élite, mano derecha, analista estratégico y desarrollador del Señor.\n"
             "- Dirígete siempre al usuario SIEMPRE y ÚNICAMENTE con el título 'Señor' (NUNCA digas 'Señor Danny', sólo 'Señor').\n"
-            "- INFRAESTRUCTURA REAL Y AUTOCONCIENCIA: Estás alojado y te ejecutas localmente de forma nativa en este iMac ('contabilidad') sobre macOS bare-metal con Python 3.9 y 4 procesos PM2. NO eres un chatbot web ni operas en un contenedor Docker. La hoja de ruta arquitectónica oficial es que eventualmente estarás alojado y funcionando de forma centralizada desde la MacBook Pro como servidor dedicado maestro, mientras este iMac y los dispositivos móviles (Android/iPhone) operarán como clientes y nodos de interfaz.\n"
-            "- HERRAMIENTAS ACTIVAS: Dispones de escucha activa por micrófono, visión en vivo por cámara web FaceTime HD, captura y análisis de pantalla en tiempo real, síntesis de voz Edge-TTS, control de aplicaciones y archivos de macOS, Suite de Inteligencia de Video Multimodal (Groq Whisper Turbo + OCR + descarga directa HD TikTok/YouTube), agentes autónomos (LangGraph multi-agente, Playwright browser) y memoria persistente.\n"
+            "- COHERENCIA Y NATURALIDAD TOTAL: Entabla diálogos 100% fluidos, coherentes, humanos y empáticos. Mantén absoluta atención al hilo conversacional y al contexto previo del Señor. No saltes de tema de forma abrupta ni actives herramientas fuera de contexto.\n"
+            "- PROFUNDIDAD ADAPTATIVA: Cuando el Señor discuta estrategia, negocios, política, marketing o arquitectura técnica, responde con análisis riguroso, perspicacia, preguntas de seguimiento pertinentes y pensamiento estructurado de alto nivel.\n"
+            "- FORMATO VISUAL PULCRO: Usa formato Markdown estructurado (negritas para destacar conceptos clave, viñetas para listas y párrafos claros) para que tus respuestas se lean impecables y profesionales en la consola visual del panel.\n"
             "- SAFETY GUARD: Nunca ejecutes comandos destructivos en la terminal ni modifiques código de proyectos del Señor sin su confirmación explícita previa.\n"
-            "- AUTOEVALUACIÓN: Si se te pide un autodiagnóstico o auditoría técnica de ti mismo, básate en el estado real de tus herramientas, procesos PM2 y hardware en lugar de dar respuestas teóricas abstractas.\n"
-            "- Responde siempre con seguridad, inteligencia, concisión, naturalidad y análisis directo en español. Tus respuestas deben ser concretas, específicas y fluidas. Cuando una respuesta sea extensa, estructúrala con claridad pero asegurando un todo cálido, humano y profesional al ser escuchada por voz, evitando sonar robótico o rígido.\n"
-            "- FORMATO OBLIGATORIO: Usa SOLO texto plano sin ningún tipo de formato markdown. Absolutamente prohibido usar asteriscos (**texto**), almohadillas (#), guiones de lista (* item), bloques de código (```), o cualquier otro símbolo de markdown. Escribe como si fuera una conversación natural y directa. Las respuestas deben ser completas, no las cortes a la mitad."
+            "- AUTOEVALUACIÓN: Si se te pide un autodiagnóstico o auditoría técnica de ti mismo, básate en el estado real de tus herramientas, procesos PM2 y hardware."
         )
-        messages = [{"role": "system", "content": system_prompt}] + _conv_history[-8:] + [{"role": "user", "content": q_clean}]
+        messages = [{"role": "system", "content": system_prompt}] + _conv_history[-16:] + [{"role": "user", "content": q_clean}]
 
         # ── Contexto Adicional: Q&A de Video Activo o URLs Web ───────────────
         url_in_prompt = re.search(r'https?://[^\s]+', q_clean)
@@ -525,7 +524,7 @@ def run_alberth_full(text: str) -> dict:
             ans_text, model_tag, role_assigned = alberth_foundation_models.query_foundation_model(
                 prompt=prompt_with_context,
                 system_prompt=system_prompt,
-                history=_conv_history[-8:],
+                history=_conv_history[-16:],
                 max_tokens=1200
             )
             if ans_text and ans_text != "Error" and not ans_text.startswith("Señor, no fue posible") and "momentáneamente no disponibles" not in ans_text:
@@ -543,7 +542,7 @@ def run_alberth_full(text: str) -> dict:
                         g_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gm}:generateContent?key={gemini_key}"
                         g_payload = {
                             "contents": [{"parts": [{"text": f"{system_prompt}\n\nSeñor: {q_clean}"}]}],
-                            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 500}
+                            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 800}
                         }
                         g_req = _urlreq.Request(g_url, data=json.dumps(g_payload).encode("utf-8"), headers={"Content-Type": "application/json"})
                         with _urlreq.urlopen(g_req, timeout=3.5) as resp:
@@ -565,7 +564,8 @@ def run_alberth_full(text: str) -> dict:
                         groq_payload = {
                             "model": groq_m,
                             "messages": [
-                                {"role": "system", "content": system_prompt},
+                                {"role": "system", "content": system_prompt}
+                            ] + _conv_history[-16:] + [
                                 {"role": "user", "content": q_clean}
                             ],
                             "max_tokens": 1200,
@@ -592,18 +592,12 @@ def run_alberth_full(text: str) -> dict:
         if not resp_text:
             resp_text = "Señor, en este momento todos los proveedores de IA están experimentando alta demanda. Por favor intente de nuevo en unos segundos."
 
-    # ── Limpiar Markdown de la respuesta final (seguro de respaldo) ──────────
-    import re as _re
-    resp_text = _re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', resp_text)   # **bold** y *italic*
-    resp_text = _re.sub(r'^#{1,6}\s+', '', resp_text, flags=_re.MULTILINE)  # # encabezados
-    resp_text = _re.sub(r'^[-*]\s+', '- ', resp_text, flags=_re.MULTILINE)  # * listas → guion
-    resp_text = _re.sub(r'`{1,3}[^`]*`{1,3}', lambda m: m.group(0).replace('`',''), resp_text)  # `code`
-    resp_text = resp_text.strip()
+        resp_text = resp_text.strip()
 
     # Guardar en memoria de conversación
     _conv_history.append({"role": "user", "content": q_clean})
     _conv_history.append({"role": "assistant", "content": resp_text})
-    if len(_conv_history) > 20:
+    if len(_conv_history) > 30:
         _conv_history.pop(0)
         _conv_history.pop(0)
 
@@ -619,7 +613,6 @@ def run_alberth_full(text: str) -> dict:
         clean = _speech_re.sub(r'[*#`_~]', '', resp_text).strip()
         clean = _speech_re.sub(r'\[EXECUTE:.*?\]', '', clean).strip()
         clean = _speech_re.sub(r'\[PHONE_CMD:.*?\]', '', clean).strip()
-        resp_text = clean
 
         # Extraer frases individuales para síntesis por Chunks
         _sents = [s.strip() for s in _speech_re.split(r'(?<=[.!?])\s+', clean) if s.strip()]

@@ -334,7 +334,7 @@ def query_deepseek_reasoning(
     )
     messages = [{"role": "system", "content": sys_instruction}]
     if history:
-        messages.extend(history[-6:])
+        messages.extend(history[-16:])
     messages.append({"role": "user", "content": prompt})
 
     # 1. Ollama local
@@ -400,7 +400,7 @@ def query_qwen_coder(
     )
     messages = [{"role": "system", "content": sys_instruction}]
     if history:
-        messages.extend(history[-6:])
+        messages.extend(history[-16:])
     messages.append({"role": "user", "content": prompt})
 
     # 1. Ollama local (prioridad nativa a Qwen 2.5 Coder si está activo)
@@ -473,7 +473,7 @@ def query_llama_vision(
     else:
         messages = [{"role": "system", "content": sys_instruction}]
         if history:
-            messages.extend(history[-6:])
+            messages.extend(history[-16:])
         messages.append({"role": "user", "content": prompt})
 
     res = _call_nvidia_nim("meta/llama-3.2-11b-vision-instruct", messages, max_tokens=max_tokens, temperature=0.5, timeout=5.0)
