@@ -368,7 +368,40 @@ def run_alberth_full(text: str) -> dict:
                     resp_text = f"Señor, intenté analizar el video en {target_video_source}, pero ocurrió una dificultad: {vid_result.get('error', 'no se pudo descargar el archivo')}. Por favor verifique el enlace o intente nuevamente."
             except Exception as vide:
                 print(f"[VideoAnalyzer Error] {vide}")
-                resp_text = f"Señor, ocurrió un error inesperado al procesar la suite de video: {vide}"
+    # ── 2.8. Proyección en Live Canvas (A2UI / OpenPage Declarativo) ───────────
+    if not resp_text:
+        canvas_patterns = [
+            (r'\b(canvas|proyecta|muestra en canvas|tablero de|panel de|dashboard)\b.*\b(telemetr[íi]a|sistema|recursos|hardware|daemons?)\b', "system", "tablero de telemetría de sistema"),
+            (r'\b(canvas|proyecta|muestra en canvas|tablero de|panel de|dashboard)\b.*\b(finanzas?|gastos?|cuentas?|contabilidad|presupuesto)\b', "finance", "tablero contable y de gastos"),
+            (r'\b(canvas|proyecta|muestra en canvas|tablero de|panel de|dashboard)\b.*\b(tareas?|pendientes?|t[áa]cticas?|checklist|actividades)\b', "tasks", "tablero de tareas tácticas"),
+            (r'\b(abre el canvas|mostrar canvas|proyecta el canvas|canvas abierto|ver canvas)\b', "default", "lienzo Live Canvas")
+        ]
+        for pattern, preset_key, preset_label in canvas_patterns:
+            if re.search(pattern, q_lower):
+                try:
+                    from alberth_openpage import get_openpage_preset, OpenPageCompiler
+                    preset_obj = get_openpage_preset(preset_key)
+                    active_canvas = {
+                        "title": preset_obj.title,
+                        "schema": preset_obj.model_dump(),
+                        "html": OpenPageCompiler.compile(preset_obj),
+                        "css": OpenPageCompiler.get_canonical_css(),
+                        "js": "",
+                        "updated_at": time.time()
+                    }
+                    try:
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            asyncio.run_coroutine_threadsafe(
+                                manager.broadcast({"type": "canvas_update", "canvas": active_canvas}),
+                                loop
+                            )
+                    except Exception:
+                        pass
+                    resp_text = f"He proyectado en el Live Canvas el {preset_label}, Señor."
+                    break
+                except Exception as ce:
+                    print(f"[Canvas Intent Error] {ce}")
 
     # ── 3. Acciones Nativas del Sistema Mac (si no es visión ni video) ─────────
     if not resp_text:
@@ -696,24 +729,51 @@ async def run_alberth_async(text: str) -> str:
     return res.get("text", "")
 
 
-# ── Live Canvas (A2UI - Interfaces Dinámicas del Agente) ──────────────────────
+# ── Live Canvas (A2UI - Interfaces Dinámicas del Agente con OpenPage) ────────
+from alberth_openpage import OpenPageCompiler, get_openpage_preset, OpenPageSchema
+
 class CanvasPayload(BaseModel):
-    title: str = "Live Canvas UI"
-    html: str
+    title: Optional[str] = "Live Canvas UI"
+    schema_data: Optional[Dict[str, Any]] = None
+    html: Optional[str] = None
     js: Optional[str] = ""
     css: Optional[str] = ""
 
+_init_preset = get_openpage_preset("default")
 active_canvas = {
-    "title": "Live Canvas UI",
-    "html": "<div style='padding:20px;text-align:center;'><h3>🎨 Alberth Live Canvas</h3><p>Esperando componentes dinámicos generados por Alberth...</p></div>",
+    "title": _init_preset.title,
+    "schema": _init_preset.model_dump(),
+    "html": OpenPageCompiler.compile(_init_preset),
+    "css": OpenPageCompiler.get_canonical_css(),
     "js": "",
-    "css": ""
+    "updated_at": _init_preset.updated_at
 }
 
 @app.post("/api/canvas")
 async def update_canvas(payload: CanvasPayload, _: None = Depends(require_token)):
     global active_canvas
-    active_canvas = payload.model_dump()
+    if payload.schema_data:
+        try:
+            schema_obj = OpenPageSchema.model_validate(payload.schema_data)
+            active_canvas = {
+                "title": schema_obj.title,
+                "schema": schema_obj.model_dump(),
+                "html": OpenPageCompiler.compile(schema_obj),
+                "css": OpenPageCompiler.get_canonical_css(),
+                "js": payload.js or "",
+                "updated_at": time.time()
+            }
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid OpenPage Schema: {e}")
+    else:
+        active_canvas = {
+            "title": payload.title or "Live Canvas UI",
+            "schema": None,
+            "html": payload.html or "<div style='padding:20px;text-align:center;'><h3>🎨 Alberth Live Canvas</h3></div>",
+            "css": payload.css or OpenPageCompiler.get_canonical_css(),
+            "js": payload.js or "",
+            "updated_at": time.time()
+        }
     await manager.broadcast({"type": "canvas_update", "canvas": active_canvas})
     return {"status": "ok", "canvas": active_canvas}
 
@@ -721,10 +781,37 @@ async def update_canvas(payload: CanvasPayload, _: None = Depends(require_token)
 async def get_canvas():
     return active_canvas
 
+@app.get("/api/canvas/presets")
+async def list_canvas_presets():
+    return {
+        "presets": ["default", "system", "finance", "tasks"],
+        "description": "Presets canónicos OpenPage para Live Canvas A2UI"
+    }
+
+@app.post("/api/canvas/preset/{name}")
+async def activate_canvas_preset(name: str):
+    global active_canvas
+    try:
+        preset_schema = get_openpage_preset(name)
+        active_canvas = {
+            "title": preset_schema.title,
+            "schema": preset_schema.model_dump(),
+            "html": OpenPageCompiler.compile(preset_schema),
+            "css": OpenPageCompiler.get_canonical_css(),
+            "js": "",
+            "updated_at": time.time()
+        }
+        await manager.broadcast({"type": "canvas_update", "canvas": active_canvas})
+        return {"status": "ok", "preset": name, "canvas": active_canvas}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Preset '{name}' no encontrado: {e}")
+
+
 
 def run_sys_cmd(command: str, args: dict) -> dict:
     try:
-        cmd = ["python3", str(SYSTEM_HELPER), command]
+        py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
+        cmd = [py_bin, str(SYSTEM_HELPER), command]
         for k, v in args.items(): cmd += [f"--{k}", str(v)]
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=15, cwd=str(WORKSPACE))
         return {"ok": r.returncode == 0, "output": (r.stdout or r.stderr).strip()}

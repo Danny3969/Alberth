@@ -1057,6 +1057,338 @@ header.hud-header {
   right: 16px;
 }
 
+/* ─── Live Canvas A2UI Drawer (OpenPage Protocol) ─── */
+.canvas-drawer {
+  position: fixed;
+  top: 75px;
+  left: -540px;
+  width: 510px;
+  max-width: 92vw;
+  bottom: 80px;
+  background: rgba(6, 12, 26, 0.96);
+  border: 1px solid var(--panel-border-bright);
+  border-radius: 16px;
+  box-shadow: 10px 0 40px rgba(0,0,0,0.85), inset 0 0 20px var(--cyan-soft);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.canvas-drawer.open {
+  left: 16px;
+}
+.canvas-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.canvas-preset-pill {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  color: var(--cyan);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.canvas-preset-pill:hover {
+  background: rgba(0, 240, 255, 0.2);
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+}
+
+/* ─── OpenPage Component Styles ─── */
+.openpage-canvas-wrapper {
+  font-family: var(--font-data, 'Rajdhani', sans-serif);
+  color: var(--text-main, #f0f6fc);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  animation: opFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes opFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.op-canvas-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(4, 7, 17, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 10px rgba(0, 240, 255, 0.08);
+}
+.op-banner-left { display: flex; align-items: center; gap: 8px; }
+.op-banner-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: opPulse 1.8s infinite alternate;
+}
+@keyframes opPulse {
+  from { transform: scale(0.9); opacity: 0.7; }
+  to { transform: scale(1.2); opacity: 1; }
+}
+.op-banner-title {
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+}
+.op-banner-right { display: flex; align-items: center; gap: 10px; }
+.op-banner-sub { font-size: 11px; color: var(--text-dim); }
+.op-banner-badge {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: var(--cyan);
+  letter-spacing: 0.05em;
+}
+.op-canvas-content { display: flex; flex-direction: column; gap: 14px; }
+.op-container { display: flex; flex-direction: column; gap: 12px; }
+.op-stack { display: flex; flex-direction: column; }
+.op-grid { display: grid; }
+@media(max-width: 680px) { .op-grid { grid-template-columns: 1fr !important; } }
+.op-card {
+  background: rgba(6, 14, 28, 0.72);
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55), inset 0 0 14px rgba(0, 240, 255, 0.05);
+  backdrop-filter: blur(14px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.op-card:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65), inset 0 0 18px rgba(0, 240, 255, 0.12);
+}
+.op-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+}
+.op-card-title {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-transform: uppercase;
+}
+.op-card-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.op-badge {
+  font-family: var(--font-hud);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.op-badge-cyan {
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.5);
+  color: #00f0ff;
+}
+.op-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+.op-metric-box {
+  background: rgba(4, 8, 18, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.op-metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.op-metric-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.op-metric-value {
+  font-family: var(--font-hud);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.op-metric-unit { font-size: 10px; color: var(--cyan); }
+.op-metric-trend {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.op-trend-pos { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+.op-trend-neg { background: rgba(255, 0, 85, 0.15); color: #ff0055; }
+.op-trend-warn { background: rgba(255, 183, 3, 0.15); color: #ffb703; }
+.op-trend-neu { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
+.op-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.op-alert-info {
+  background: rgba(0, 119, 255, 0.12);
+  border: 1px solid rgba(0, 119, 255, 0.4);
+  color: #93c5fd;
+}
+.op-alert-success {
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  color: #86efac;
+}
+.op-alert-warning {
+  background: rgba(255, 183, 3, 0.12);
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  color: #fde047;
+}
+.op-alert-critical {
+  background: rgba(255, 0, 85, 0.15);
+  border: 1px solid rgba(255, 0, 85, 0.5);
+  color: #fda4af;
+}
+.op-alert-icon { font-size: 14px; }
+.op-alert-content { flex: 1; line-height: 1.4; }
+.op-chart-bars { display: flex; flex-direction: column; gap: 8px; }
+.op-chart-title {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+}
+.op-bar-list { display: flex; flex-direction: column; gap: 8px; }
+.op-bar-item { display: flex; flex-direction: column; gap: 3px; }
+.op-bar-header { display: flex; justify-content: space-between; font-size: 11px; }
+.op-bar-label { color: #e2e8f0; }
+.op-bar-val { font-family: var(--font-hud); color: var(--cyan); font-size: 10px; }
+.op-bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.op-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease-out; }
+.op-table-wrap { width: 100%; overflow-x: auto; border-radius: 6px; border: 1px solid rgba(0, 240, 255, 0.15); }
+.op-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 11px; }
+.op-table th {
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--cyan);
+  padding: 7px 10px;
+  font-family: var(--font-hud);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+.op-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+.op-table tr:hover td { background: rgba(0, 240, 255, 0.04); color: #fff; }
+.op-tasks-list { display: flex; flex-direction: column; gap: 6px; }
+.op-task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(4, 8, 18, 0.6);
+  border: 1px solid rgba(0, 240, 255, 0.12);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.op-task-check { font-size: 14px; color: var(--cyan); }
+.op-task-txt { flex: 1; color: #f1f5f9; }
+.op-task-done .op-task-txt { text-decoration: line-through; color: var(--text-dim); }
+.op-task-tag {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(255, 183, 3, 0.15);
+  color: #ffb703;
+  font-family: var(--font-hud);
+}
+.op-actions-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+.op-btn {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.op-btn-primary {
+  background: var(--cyan);
+  color: #040711;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+.op-btn-primary:hover {
+  background: #38f9d7;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
+  transform: translateY(-1px);
+}
+.op-btn-secondary {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: rgba(0, 240, 255, 0.3);
+  color: var(--cyan);
+}
+.op-btn-secondary:hover {
+  background: rgba(0, 240, 255, 0.2);
+  border-color: rgba(0, 240, 255, 0.7);
+}
+.op-btn-danger {
+  background: rgba(255, 0, 85, 0.15);
+  border-color: rgba(255, 0, 85, 0.4);
+  color: #ff0055;
+}
+.op-btn-danger:hover {
+  background: rgba(255, 0, 85, 0.3);
+  box-shadow: 0 0 12px rgba(255, 0, 85, 0.5);
+}
+.op-divider { height: 1px; background: rgba(0, 240, 255, 0.15); margin: 6px 0; }
+
+
 .drawer-header {
   display: flex;
   align-items: center;
@@ -1428,6 +1760,11 @@ header.hud-header {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg>
         <span>Widget</span>
       </button>
+      <button class="hud-btn" id="btn-toggle-canvas" onclick="toggleCanvasDrawer()" title="Lienzo Dinámico A2UI / OpenPage">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span id="btn-canvas-txt">Canvas</span>
+        <span id="canvas-badge-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);margin-left:4px;"></span>
+      </button>
       <button class="hud-btn" id="btn-toggle-chat" onclick="toggleChatDrawer()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span id="btn-chat-txt">Consola</span>
@@ -1664,6 +2001,27 @@ header.hud-header {
 
 </div>
 
+<!-- ── Live Canvas A2UI Drawer (OpenPage Protocol) ── -->
+<div class="canvas-drawer" id="canvas-drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span id="canvas-drawer-title-txt">CANVAS A2UI · OPENPAGE</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="canvas-preset-pill" onclick="loadCanvasPreset('system')" title="Telemetría de Sistema">⚡ Sistema</button>
+      <button class="canvas-preset-pill" onclick="loadCanvasPreset('finance')" title="Tablero Contable">💰 Finanzas</button>
+      <button class="canvas-preset-pill" onclick="loadCanvasPreset('tasks')" title="Tareas Tácticas">📋 Tareas</button>
+      <button class="drawer-close-btn" onclick="toggleCanvasDrawer()">✕</button>
+    </div>
+  </div>
+  <div class="canvas-drawer-body" id="canvas-drawer-body">
+    <div style="text-align:center;padding:30px;color:var(--text-dim);font-family:var(--font-data);">
+      Cargando componentes OpenPage...
+    </div>
+  </div>
+</div>
+
 <!-- ── Chat Console Drawer ── -->
 <div class="chat-drawer" id="chat-drawer">
   <div class="drawer-header">
@@ -1870,6 +2228,8 @@ function connectWS() {
         enqueueAudioChunk(msg.audio_url);
       } else if (msg.type === "music_action") {
         handleRemoteMusicAction(msg.action, msg.track, msg);
+      } else if (msg.type === "canvas_update") {
+        handleCanvasUpdate(msg.canvas);
       } else if (msg.type === "system") {
         showToast(msg.text, 3000);
       }
@@ -2440,6 +2800,77 @@ function toggleChatDrawer() {
   btn.classList.toggle("active", isChatOpen);
   btnTxt.textContent = isChatOpen ? "Cerrar" : "Consola";
   if (isChatOpen) scrollChat();
+}
+
+// ─── Live Canvas Drawer & OpenPage Management ───────────────
+let isCanvasOpen = false;
+function toggleCanvasDrawer() {
+  isCanvasOpen = !isCanvasOpen;
+  const drawer = document.getElementById("canvas-drawer");
+  const btn = document.getElementById("btn-toggle-canvas");
+  const dot = document.getElementById("canvas-badge-dot");
+  
+  if (drawer) drawer.classList.toggle("open", isCanvasOpen);
+  if (btn) btn.classList.toggle("active", isCanvasOpen);
+  if (isCanvasOpen && dot) dot.style.display = "none";
+}
+
+function handleCanvasUpdate(canvasData) {
+  if (!canvasData) return;
+  const body = document.getElementById("canvas-drawer-body");
+  const title = document.getElementById("canvas-drawer-title-txt");
+  const dot = document.getElementById("canvas-badge-dot");
+  
+  if (title && canvasData.title) title.textContent = canvasData.title;
+  if (body) {
+    let content = "";
+    if (canvasData.html) {
+      content = canvasData.html;
+    } else if (canvasData.schema) {
+      content = `<pre style="color:var(--cyan);font-size:11px;overflow-x:auto;">${JSON.stringify(canvasData.schema, null, 2)}</pre>`;
+    }
+    body.innerHTML = content;
+  }
+  
+  if (dot && !isCanvasOpen) dot.style.display = "inline-block";
+  showToast(`🎨 Canvas A2UI: ${canvasData.title || 'Actualizado'}`, 2500);
+}
+
+async function loadCanvasPreset(presetName) {
+  try {
+    const res = await fetch(`/api/canvas/preset/${presetName}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.status === 'ok' || data.ok) {
+      handleCanvasUpdate(data.canvas);
+    }
+  } catch(e) {
+    console.error("Error cargando preset de canvas:", e);
+    showToast("⚠️ Error al proyectar preset en Canvas", 2000);
+  }
+}
+
+function handleOpenPageAction(action, arg) {
+  if (action === "load_preset") {
+    loadCanvasPreset(arg);
+  } else if (action === "sys_cmd") {
+    sendWS({ type: "message", content: arg });
+  } else if (action === "navigate" || action === "open_url") {
+    window.open(arg, "_blank");
+  } else {
+    console.log("Acción OpenPage:", action, arg);
+  }
+}
+
+async function fetchInitialCanvas() {
+  try {
+    const res = await fetch('/api/canvas');
+    if (res.ok) {
+      const data = await res.json();
+      handleCanvasUpdate(data);
+    }
+  } catch(e) {
+    console.warn("No se pudo cargar el canvas inicial:", e);
+  }
 }
 
 function updateActionFeedback(text) {
@@ -3817,6 +4248,7 @@ function animateHologram() {
 document.addEventListener("DOMContentLoaded", () => {
   connectWS();
   setTimeout(initThreeHologram, 100);
+  setTimeout(fetchInitialCanvas, 400);
   setTimeout(initWakeWordEngine, 1000);
 });
 </script>

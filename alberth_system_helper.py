@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 # =============================================================================
 # ALBERTH SYSTEM HELPER — Control de Sistema Operativo para macOS
 # Versión: 1.0
