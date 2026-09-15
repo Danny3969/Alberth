@@ -195,12 +195,11 @@ def handle_music(query, query_lower):
 # ══════════════════════════════════════════════════════════════════════════════
 # MÓDULO 1: CONTROL DE VOLUMEN
 # ══════════════════════════════════════════════════════════════════════════════
-def handle_volume(query, query_lower):
-
-    """Detecta y ejecuta intenciones de control de volumen."""
+def handle_volume(query: str, query_lower: str) -> dict | None:
+    """Detecta y ejecuta intenciones de control de volumen requiring explicit volume keywords."""
 
     # Silenciar
-    if re.search(r'\b(silencia|silenciar|mute|muta|apaga\s+el\s+sonido|sin\s+sonido)\b', query_lower):
+    if re.search(r'\b(silencia\s+el\s+(?:volumen|sonido|audio)|silenciar\s+(?:el\s+)?(?:volumen|sonido|audio)|mute\s+(?:volumen|audio)|muta\s+(?:el\s+)?(?:volumen|audio)|apaga\s+el\s+sonido|sin\s+sonido)\b', query_lower):
         ok, out = run_applescript('set volume output muted true')
         if ok:
             return {"accion": "volumen_silenciado", "resultado": "Volumen silenciado correctamente.", "exito": True}
@@ -214,7 +213,7 @@ def handle_volume(query, query_lower):
         return {"accion": "volumen_activado", "resultado": f"Error: {out}", "exito": False}
 
     # Subir volumen
-    if re.search(r'\b(sube|subir|aumenta|aumentar|incrementa|más\s+volumen|sube\s+el\s+volumen)\b', query_lower):
+    if re.search(r'\b(sube|subir|aumenta|aumentar|incrementa)\s+(?:el\s+)?(volumen|sonido|audio)\b|\b(más|mas)\s+(volumen|sonido|audio)\b', query_lower):
         amount_match = re.search(r'(\d+)', query)
         amount = int(amount_match.group(1)) if amount_match else 15
         script = """
@@ -230,7 +229,7 @@ return new_vol
         return {"accion": "volumen_subido", "resultado": f"Error: {out}", "exito": False}
 
     # Bajar volumen
-    if re.search(r'\b(baja|bajar|reduce|reducir|disminuye|disminuir|menos\s+volumen|baja\s+el\s+volumen)\b', query_lower):
+    if re.search(r'\b(baja|bajar|reduce|reducir|disminuye|disminuir)\s+(?:el\s+)?(volumen|sonido|audio)\b|\b(menos)\s+(volumen|sonido|audio)\b', query_lower):
         amount_match = re.search(r'(\d+)', query)
         amount = int(amount_match.group(1)) if amount_match else 15
         script = """
@@ -245,10 +244,10 @@ return new_vol
             return {"accion": "volumen_bajado", "resultado": f"Volumen reducido. Nivel actual: {out}%", "exito": True}
         return {"accion": "volumen_bajado", "resultado": f"Error: {out}", "exito": False}
 
-    # Establecer a valor específico
-    level_match = re.search(r'\b(?:pon|poner|coloca|establece|fija|deja|al?)\s+(?:el\s+)?(?:volumen\s+)?(?:en\s+|a\s+)?(\d+)\b', query_lower)
+    # Establecer a valor específico (requiere explícitamente volumen, sonido o audio)
+    level_match = re.search(r'\b(?:volumen|sonido|audio)\s+(?:en\s+|a\s+|al?\s+)?(\d+)\b', query_lower)
     if not level_match:
-        level_match = re.search(r'\bvolumen\s+(?:en\s+|a\s+|al?\s+)?(\d+)\b', query_lower)
+        level_match = re.search(r'\b(?:pon|poner|coloca|establece|fija|deja)\s+(?:el\s+)?(?:volumen|sonido|audio)\s+(?:en\s+|a\s+|al?\s+)?(\d+)\b', query_lower)
     if level_match:
         level = min(100, max(0, int(level_match.group(1))))
         ok, out = run_applescript(f'set volume output volume {level}')
