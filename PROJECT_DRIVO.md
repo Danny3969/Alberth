@@ -2,7 +2,7 @@
 
 > Este archivo es la base de conocimiento permanente de los DOS proyectos de Novasyscom.
 > Alberth debe leerlo antes de responder cualquier pregunta sobre cualquiera de los proyectos.
-> Última actualización: 2026-06-19
+> Última actualización: 2026-09-15
 
 > ⚠️ IMPORTANTE: Son dos productos DISTINTOS con bases de código SEPARADAS. No confundirlos.
 
@@ -113,6 +113,25 @@ Estas reglas son **absolutas** y Alberth debe respetarlas al 100%:
 
 ### Roles en MapScreen
 Los conductores ven viajes que pueden pagar con su `walletBalance`. El rol se detecta via `rideData['riderId']` para evitar "ceguera de rol" entre conductor y pasajero.
+
+---
+
+## 🌐 Presencia Web y Landing Page Oficial (Auditoría 2026-09-15)
+
+### Diagnóstico de Presencia Web:
+- **Estado Actual:** **NO existe página web pública o landing page construida para DRIVO.**
+- **Componente Web Existente:** Únicamente `macondo-admin-web/` (panel interno privado en Flutter Web para administración de conductores, viajes y comisiones). No está pensado ni adaptado para usuarios finales.
+- **Iniciativa en Curso:** Construcción de la Landing Page Oficial de DRIVO (frontend moderno, responsivo, optimizado para conversión, sin AI-slop, usando la suite OpenDesign y UI/UX Pro Max).
+
+### Banco de Preguntas Clave para el Señor (Alcance de la Landing Page):
+1. **Audiencia y Prioridad de Conversión:** ¿Enfoque primordial en captar pasajeros ("Viaja seguro al mejor precio"), reclutar conductores ("Gana más con solo 10% de comisión"), o doble llamado a la acción (Dual CTA)?
+2. **Cobertura Geográfica y Moneda:** ¿Cuál es la ciudad/país de lanzamiento prioritario para reflejar moneda (ej. COP, USD), rutas de ejemplo y soporte local?
+3. **Mecanismo de Descarga:** Teniendo la versión activa `DRIVO v5.12.1` (`DRIVO_v5.12.1_PERFORMANCE_UX.apk`), ¿ofrecemos descarga directa de APK con guía de instalación, insignias de Google Play / App Store, o pre-registro para lista de espera?
+4. **Módulos Interactivos Deseados:** ¿Qué módulos interactivos desea incluir en la primera versión? (Simulador/estimador de tarifa, formulario de pre-registro de conductores con subida de documentos, preguntas frecuentes/FAQ, políticas de seguridad y legal).
+
+### Activos de Marca y Logos:
+- Los archivos originales del logo e identidad gráfica de DRIVO se encuentran en los registros del proyecto en la máquina **MacBook Pro** (`/Users/digitalspace/Desktop/Drivo/`).
+- Se tomarán directamente de los registros o se incorporarán al nuevo repositorio/directorio web al iniciar la sesión en la MacBook.
 
 ---
 
@@ -243,3 +262,4 @@ El proyecto vive en `/Users/digitalspace/Desktop/Drivo One/` y tiene **5 compone
 2. **Generar keystore** para distribución en Play Store
 3. **Testing del segundo viaje** — Bug reportado: botón "PEDIR OTRO" no operativo post-Fase 63
 4. **Fase de QA** — Probar flujo completo conductor-pasajero con las últimas correcciones
+5. **Construcción de la Landing Page Oficial de DRIVO:** Recibir respuestas del Señor a las 4 preguntas de alcance, vincular los logos del proyecto desde la MacBook Pro (`/Users/digitalspace/Desktop/Drivo/`) y generar el frontend web oficial de captación.

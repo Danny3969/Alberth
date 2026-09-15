@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-15 09:50 GMT-5_
+_Última actualización: 2026-09-15 17:30 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -80,6 +80,20 @@ _Última actualización: 2026-09-15 09:50 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-15 (Auditoría Web DRIVO, Claridad de Core Service y Definición de Alcance de Landing Page)
+- **Diagnóstico Integral del Proyecto DRIVO:**
+  - **Claridad del Core Service:** Plataforma de transporte urbano P2P de pasajeros (tipo Uber/InDrive) con negociación dinámica de tarifas (pujas en tiempo real), radar Google Maps en vivo, comisiones de billetera 10% y validación de seguridad (cédula, placas, cooperativa). Distinción categórica frente a DRIVO ONE (delivery multitienda).
+  - **Auditoría de Presencia Web:** Se constató que **NO existe aún un sitio web público ni landing page oficial** para DRIVO. El único activo web es `macondo-admin-web/` (panel interno privado en Flutter Web para administración de flota y viajes).
+- **Banco de Preguntas Clave Estructurado para el Señor:**
+  - 1. *Audiencia y Prioridad:* Dual CTA (Pasajeros vs Conductores) o enfoque prioritario en uno de los dos segmentos.
+  - 2. *Geografía y Moneda:* Ciudad/país de lanzamiento prioritario (moneda ej. COP o USD, rutas de muestra y soporte local).
+  - 3. *Descarga de App:* Descarga directa de instalador APK (`DRIVO v5.12.1`) con guía de instalación vs badges de tiendas oficiales (Google Play / App Store) vs pre-registro.
+  - 4. *Módulos Interactivos:* Simulador/estimador de tarifa, formulario de registro de conductores con carga documental, preguntas frecuentes y marco legal/seguridad.
+- **Activos Gráficos y Logos de DRIVO:**
+  - El Señor confirmó que los logos oficiales y registros gráficos residen en la máquina de desarrollo **MacBook Pro** (`/Users/digitalspace/Desktop/Drivo/`). Listos para ser extraídos y vinculados en la creación de la web al reanudar la sesión en la MacBook.
+- **Preparación de Infraestructura y Resumen Sin Pérdida de Contexto:**
+  - Guardadas todas las memorias (`memory/2026-09-15.md`, `PROJECT_DRIVO.md`, `MEMORY.md`, base episódica SQLite) y sincronizadas en GitHub para permitir una reanudación instantánea desde la MacBook Pro sin iniciar desde cero.
 
 ### 2026-09-15 (Implementación del Paradigma OpenPage en Live Canvas A2UI de Alberth)
 - **Motor Declarativo Basado en Esquemas JSON (`alberth_openpage.py`):**
