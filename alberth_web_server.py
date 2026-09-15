@@ -215,12 +215,19 @@ def run_alberth_full(text: str) -> dict:
     image_url = None
     audio_url = None
 
+    # ── Check for Negations (cancel vision/camera if prompt negates action) ───
+    has_vision_negation = bool(re.search(
+        r'\b(no\s+te\s+he\s+dicho|no\s+he\s+dicho|no\s+tomes|no\s+hagas|no\s+uses|sin\s+cámara|sin\s+camara|no\s+captures|mal\s*interpretando|no\s+mires|no\s+estoy\s+diciendo)\b',
+        q_lower
+    ))
+
     # ── 1. Detección de Visión: Pantalla ──────────────────────────────────────
-    is_screen_query = any(k in q_lower for k in [
-        "pantalla", "captura la pantalla", "captura de pantalla",
+    screen_keywords = [
+        "captura la pantalla", "captura de pantalla",
         "qué hay en la pantalla", "que hay en la pantalla", "mira mi pantalla",
         "analiza mi pantalla", "visión mac", "vision mac", "screenshot"
-    ])
+    ]
+    is_screen_query = not has_vision_negation and any(bool(re.search(r'\b' + re.escape(k) + r'\b', q_lower)) for k in screen_keywords)
 
     # ── 2. Detección de Visión: Cámara Web (Verme, Objetos, Manos, etc.) ──────
     camera_keywords = [
@@ -251,21 +258,22 @@ def run_alberth_full(text: str) -> dict:
         "como ando vestido", "qué traigo", "que traigo"
     ]
 
-    is_direct_camera = any(k in q_lower for k in camera_keywords)
+    is_direct_camera = not has_vision_negation and any(bool(re.search(r'\b' + re.escape(k) + r'\b', q_lower)) for k in camera_keywords)
 
     # Excluir consultas que contengan URLs explícitas de la detección de cámara/pantalla
     has_url = bool(re.search(r'https?://', q_lower))
 
     # Preguntas de seguimiento visual en contexto reciente (< 90 segundos)
     is_followup_vision = (
-        not has_url and
+        not has_url and not has_vision_negation and
         (time.time() - _last_vision_time < 90) and
         any(k in q_lower for k in ["y ahora", "ahora qué", "ahora que", "mira ahora", "mírame ahora", "qué ves ahora", "qué observas ahora"])
     )
 
     is_camera_query = not has_url and not is_screen_query and (is_direct_camera or is_followup_vision)
-    if has_url:
+    if has_url or has_vision_negation:
         is_screen_query = False
+        is_camera_query = False
 
     # ── Ejecutar Visión si corresponde ────────────────────────────────────────
     if is_camera_query or is_screen_query:

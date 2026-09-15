@@ -1168,7 +1168,8 @@ end tell
         return {"accion": "dnd_toggle", "resultado": "Modo No Molestar alternado." if ok else "No se pudo activar No Molestar.", "exito": ok}
 
     # ── CAPTURA DE PANTALLA ───────────────────────────────────────────────
-    if re.search(r'\b(captura|screenshot|pantallazo|toma\s+una\s+foto\s+de\s+la\s+pantalla)\b', query_lower):
+    has_negation = bool(re.search(r'\b(no\s+te\s+he\s+dicho|no\s+he\s+dicho|no\s+tomes|no\s+hagas|sin\s+captura|no\s+captures|mal\s*interpretando|no\s+quiero\s+captura)\b', query_lower))
+    if not has_negation and re.search(r'\b(captura\s+la\s+pantalla|captura\s+de\s+pantalla|toma\s+pantallazo|haz\s+un\s+screenshot|toma\s+una\s+foto\s+de\s+la\s+pantalla)\b', query_lower):
         ts = __import__('time').strftime("%Y%m%d_%H%M%S")
         filepath = os.path.expanduser(f"~/Desktop/captura_{ts}.png")
         ok, out = run_shell(["screencapture", "-x", filepath])
