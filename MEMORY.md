@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-15 17:30 GMT-5_
+_Última actualización: 2026-09-15 18:01 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -80,6 +80,22 @@ _Última actualización: 2026-09-15 17:30 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-15 (Overhaul Conversacional, Corrección Quirúrgica de Disparadores & Producción de Campaña Francisco Azuero)
+- **Reingeniería del Motor Conversacional y Coherencia:**
+  - **Buffer de Historial Ampliado:** Incrementado a 16 mensajes de contexto activo (8 turnos de diálogo completo) en `alberth_web_server.py` y `alberth_foundation_models.py`, eliminando la pérdida de hilo en conversaciones largas.
+  - **Desacoplamiento de Formato Visual vs. Audio Locutado:** Preservación de formato Markdown enriquecido (negritas, viñetas, tablas) para la consola visual del panel HUD, y limpieza regex automática de símbolos únicamente para la locución por audio sintetizada con Edge-TTS.
+  - **Optimización de System Prompt:** Remoción de saturación técnica secundaria en consultas generales para enfocar la atención de los modelos fundacionales (DeepSeek, Qwen, Llama Vision, Gemini, Groq) en el análisis perspicaz, empático y estructurado.
+- **Auditoría Quirúrgica de Disparadores del Sistema:**
+  - **Cámara Web (`alberth_web_server.py`):** Límite estricto de palabra (`\b`) en palabras clave como `"cara"`, evitando activaciones falsas al mencionar palabras como `"Macará"`. Integración de detectores de frases negativas (*"no te he dicho que..."*).
+  - **Control de Volumen (`alberth_system_helper.py`):** Modificada la función `handle_volume` para requerir explícitamente palabras clave como `volumen`, `audio` o `sonido`, solucionando la activación involuntaria causada por expresiones numéricas como `"de 30 a 70"`.
+- **Producción Audiovisual Completa de Campaña Política (Francisco Azuero — Macará):**
+  - **Arquetipo e Identidad:** "Hombre del Pueblo, Humilde y de Territorio", enfocado en obras comunitarias y protección ante el Fenómeno del Niño.
+  - **Eslogan Oficial:** *"Francisco Azuero: Con el Pueblo, de Corazón y en la Obra."*
+  - **Inteligencia Visual sobre Fotos Reales:** Inspección y análisis con visión por computador de 108 fotografías reales tomadas en territorio desde `~/Desktop/Pancho`.
+  - **Procesamiento de Imágenes HD 1080p (16:9):** Selección, encuadre y escalado de 15 fotografías clave guardadas en `assets/campana_macara/15_fotos_spot/`.
+  - **Locución de Audio Oficial:** Producción de locuciones sintetizadas `locucion_spot_pancho_30s.mp3` (29.88s exactos) y `locucion_spot_pancho.mp3` (35.7s pausado) con voz masculina cálida e inspiradora (`es-MX-JorgeNeural`).
+  - **Spot de Video 1080p Full HD:** Renderizado completo con `ffmpeg` del video publicitario de 30 segundos ([spot_pancho_macara_30s.mp4](file:///Users/digitalspace/.openclaw/workspace/assets/campana_macara/spot_pancho_macara_30s.mp4)) a 30 FPS H.264 / AAC.
 
 ### 2026-09-15 (Auditoría Web DRIVO, Claridad de Core Service y Definición de Alcance de Landing Page)
 - **Diagnóstico Integral del Proyecto DRIVO:**

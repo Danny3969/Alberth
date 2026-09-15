@@ -1,0 +1,107 @@
+[
+  {
+    "num": 1,
+    "filename": "foto_01.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_01.jpg",
+    "time_range": "0.0s - 2.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 2,
+    "filename": "foto_02.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_02.jpg",
+    "time_range": "2.0s - 4.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 3,
+    "filename": "foto_03.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_03.jpg",
+    "time_range": "4.0s - 6.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 4,
+    "filename": "foto_04.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_04.jpg",
+    "time_range": "6.0s - 8.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 5,
+    "filename": "foto_05.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_05.jpg",
+    "time_range": "8.0s - 10.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 6,
+    "filename": "foto_06.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_06.jpg",
+    "time_range": "10.0s - 12.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 7,
+    "filename": "foto_07.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_07.jpg",
+    "time_range": "12.0s - 14.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 8,
+    "filename": "foto_08.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_08.jpg",
+    "time_range": "14.0s - 16.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 9,
+    "filename": "foto_09.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_09.jpg",
+    "time_range": "16.0s - 18.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 10,
+    "filename": "foto_10.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_10.jpg",
+    "time_range": "18.0s - 20.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 11,
+    "filename": "foto_11.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_11.jpg",
+    "time_range": "20.0s - 22.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 12,
+    "filename": "foto_12.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_12.jpg",
+    "time_range": "22.0s - 24.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 13,
+    "filename": "foto_13.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_13.jpg",
+    "time_range": "24.0s - 26.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 14,
+    "filename": "foto_14.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_14.jpg",
+    "time_range": "26.0s - 28.0s",
+    "duration": "2.0s"
+  },
+  {
+    "num": 15,
+    "filename": "foto_15.jpg",
+    "path": "/Users/digitalspace/.openclaw/workspace/assets/campana_macara/15_fotos_spot/foto_15.jpg",
+    "time_range": "28.0s - 30.0s",
+    "duration": "2.0s"
+  }
+]
