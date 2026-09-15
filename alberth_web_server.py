@@ -1338,6 +1338,15 @@ async def search_music(q: str):
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, music_player.search_song, q)
 
+# ── OpenDesign Contract & Tokens ──────────────────────────────────────────────
+@app.get("/api/design")
+async def get_design():
+    from alberth_opendesign import get_design_contract, list_craft_rules, list_design_skills
+    contract = get_design_contract()
+    contract["craft_rules"] = list_craft_rules()
+    contract["skills"] = list_design_skills()
+    return contract
+
 # ── Servir Panel ───────────────────────────────────────────────────────────────
 @app.get("/")
 async def serve_panel():

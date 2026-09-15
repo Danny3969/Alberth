@@ -14,7 +14,9 @@ _Última actualización: 2026-09-15 09:50 GMT-5_
 ## 🏗️ Arquitectura del Sistema (Alberth NEXUS v5.2 Quantum HUD & Antigravity SDK)
 ```text
 [WORKSPACE_ROOT] (dinámico: OPENCLAW_WORKSPACE / ALBERTH_WORKSPACE / ruta local)
-├── .agents/            → Skills y Customizaciones de Workspace (UI/UX Pro Max, Design Systems, Branding, Styling)
+├── .agents/            → Skills y Customizaciones de Workspace (UI/UX Pro Max, OpenDesign 20+ Skills, Craft Rules)
+│   ├── craft/          → Directrices de artesanía visual OpenDesign (anti-ai-slop, animation-discipline, etc.)
+│   └── skills/         → Skills de diseño y desarrollo frontend (Three.js, GSAP, Shader-dev, Design-md, etc.)
 ├── panel/              → Panel Web Quantum HUD & Floating Bar UI (HTML5/CSS3/Three.js/WebSockets/PWA)
 │   ├── index.html      → Quantum HUD Cockpit (Iron Man / JARVIS / AMSY Style) + Three.js 3D Swarm Orb + Echo Music Player + Action Banner + Wake Word ("Alberth") + [ ⚡ ULTRA-LIVE ] Mode
 │   ├── floating.html   → Desktop Floating Bar (Quantum Theme / Orbitron / Rajdhani / DND / QA Alerts)
@@ -25,6 +27,8 @@ _Última actualización: 2026-09-15 09:50 GMT-5_
 │   ├── app.json        → Configuración de compilación (versionCode 7, versionName 3.2.1, permisos CAMERA)
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Integración directa con Echo Music `echo.music.iad1tya`)
+├── DESIGN.md           → Contrato de Diseño Oficial y Brand Tokens OpenDesign (Quantum HUD / Cyber Cyan)
+├── alberth_opendesign.py → Módulo y CLI de Tokens y Directrices de Craft de OpenDesign
 ├── alberth_music_player.py → Motor de Streaming y Gestión de Playlists de YouTube Music / Echo Music (yt-dlp + caché 4h)
 ├── alberth_live_bridge.py → Bridge WebSocket Ultra-Live Bidireccional (<300ms) con Gemini Live API (Voz Charon, Streaming PCM 16/24kHz, Barge-in)
 ├── alberth_episodic_memory.py → Motor de Memoria Episódica y Hechos Persistentes con SQLite FTS5 (Ranking BM25)
@@ -33,7 +37,7 @@ _Última actualización: 2026-09-15 09:50 GMT-5_
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)
 ├── alberth_foundation_models.py → Orquestador Multi-Modelo Fundacional (DeepSeek R1/V3 + Qwen Coder + Meta Llama 3.2 Vision + Groq Fallback)
 ├── alberth_video_analyzer.py → Pipeline de descarga de video raw (yt-dlp), extracción de fotogramas (ffmpeg) e inspección de Deepfakes frame-a-frame
-├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/api/video-analyze` + `/floating` + `/ws/live` (Puerto 8080)
+├── alberth_web_server.py    → Panel Web FastAPI + WebSockets + Live Canvas A2UI + `/api/video-analyze` + `/floating` + `/ws/live` + `/api/design` (Puerto 8080)
 ├── alberth_system_helper.py → Helper de acciones del sistema Mac (Carpetas, Música, Volumen, Apps, Memoria Episódica)
 ├── alberth_apple_helper.py  → Automatización nativa macOS (Calendario, Recordatorios, Notas, Atajos)
 ├── alberth_search_helper.py → Motor de Búsqueda Web Abierta (DuckDuckGo + Wikipedia + Clima)
@@ -60,6 +64,7 @@ _Última actualización: 2026-09-15 09:50 GMT-5_
 - **Panel Web HUD:** `http://localhost:8080` (FastAPI / Three.js 3D Orb / WebSockets)
 - **Desktop Floating Bar v4.5+:** `http://localhost:8080/floating` (Context Autocomplete + QA 7-Day Chart + Push PWA + Auto-DND)
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer & Predictive QA Visualizer)
+- **Design Tokens & Craft API:** `/api/design` (OpenDesign Tokens & Craft Guidelines)
 - **Video & Deepfake Analyzer API:** `/api/video-analyze` (Raw Video Processing & Frame-by-Frame Inspection)
 - **OpenClaw Gateway:** `http://localhost:18789` (Control Plane)
 - **Skills Registry:** ClawHub Integration Enabled (`https://clawhub.dev/api/v1`)
@@ -74,6 +79,18 @@ _Última actualización: 2026-09-15 09:50 GMT-5_
 ---
 
 ## 📌 Historial de Eventos e Hitos Recientes
+
+### 2026-09-15 (Instalación e Integración Completa de OpenDesign en Antigravity y Alberth)
+- **Instalación Global en Antigravity (`~/.gemini/config/plugins/opendesign/`):**
+  - Desplegado el plugin nativo `opendesign` con sus metadatos en `plugin.json`.
+  - Integradas 167 habilidades especializadas (`skills/`), 15 directrices de artesanía visual (`craft/`) y 117 plantillas de renderizado (`design-templates/`).
+  - Habilidades disponibles globalmente en Antigravity: `design-md`, `artifacts-builder`, `frontend-design`, `threejs`, `shader-dev`, `gsap-core`, `apple-hig`, `color-expert`, `canvas-design`, etc.
+- **Integración de Espacio de Trabajo en Alberth (`.agents/` y Core):**
+  - **Skills de Workspace (`.agents/skills/`):** 13 skills esenciales de OpenDesign agregados directamente al workspace para potenciar el diseño de componentes, animaciones y WebGL en el Quantum Cockpit.
+  - **Reglas de Craft (`.agents/craft/`):** Directrices integradas contra "AI slop", disciplina de animación, líneas base de accesibilidad (a11y), leyes de UX, tipografía y balance cromático.
+  - **Contrato de Marca Oficial (`DESIGN.md`):** Archivo central en la raíz de Alberth que define los tokens de diseño (Cian `#00f0ff`, Obsidiana `#040711`, tipografías Orbitron/Rajdhani, swarm de partículas Three.js y layouts HUD).
+  - **Módulo Python y CLI (`alberth_opendesign.py`):** Utilidad para consultar tokens (`--tokens`), directrices de craft (`--craft`) y skills activos (`--skills`).
+  - **API de Diseño en Servidor Web (`/api/design`):** Endpoint en `alberth_web_server.py` que expone dinámicamente los tokens de color, tipografía y reglas de diseño al frontend y agentes.
 
 ### 2026-09-15 (Instalación Global y de Workspace del Skill Suite UI/UX Pro Max en Antigravity y Alberth)
 - **Instalación y Despliegue de UI/UX Pro Max (`nextlevelbuilder/ui-ux-pro-max-skill`):**
