@@ -116,22 +116,20 @@ Los conductores ven viajes que pueden pagar con su `walletBalance`. El rol se de
 
 ---
 
-## 🌐 Presencia Web y Landing Page Oficial (Auditoría 2026-09-15)
+## 🌐 Presencia Web y Landing Page Oficial (Desplegada 2026-09-15)
 
-### Diagnóstico de Presencia Web:
-- **Estado Actual:** **NO existe página web pública o landing page construida para DRIVO.**
-- **Componente Web Existente:** Únicamente `macondo-admin-web/` (panel interno privado en Flutter Web para administración de conductores, viajes y comisiones). No está pensado ni adaptado para usuarios finales.
-- **Iniciativa en Curso:** Construcción de la Landing Page Oficial de DRIVO (frontend moderno, responsivo, optimizado para conversión, sin AI-slop, usando la suite OpenDesign y UI/UX Pro Max).
-
-### Banco de Preguntas Clave para el Señor (Alcance de la Landing Page):
-1. **Audiencia y Prioridad de Conversión:** ¿Enfoque primordial en captar pasajeros ("Viaja seguro al mejor precio"), reclutar conductores ("Gana más con solo 10% de comisión"), o doble llamado a la acción (Dual CTA)?
-2. **Cobertura Geográfica y Moneda:** ¿Cuál es la ciudad/país de lanzamiento prioritario para reflejar moneda (ej. COP, USD), rutas de ejemplo y soporte local?
-3. **Mecanismo de Descarga:** Teniendo la versión activa `DRIVO v5.12.1` (`DRIVO_v5.12.1_PERFORMANCE_UX.apk`), ¿ofrecemos descarga directa de APK con guía de instalación, insignias de Google Play / App Store, o pre-registro para lista de espera?
-4. **Módulos Interactivos Deseados:** ¿Qué módulos interactivos desea incluir en la primera versión? (Simulador/estimador de tarifa, formulario de pre-registro de conductores con subida de documentos, preguntas frecuentes/FAQ, políticas de seguridad y legal).
-
-### Activos de Marca y Logos:
-- Los archivos originales del logo e identidad gráfica de DRIVO se encuentran en los registros del proyecto en la máquina **MacBook Pro** (`/Users/digitalspace/Desktop/Drivo/`).
-- Se tomarán directamente de los registros o se incorporarán al nuevo repositorio/directorio web al iniciar la sesión en la MacBook.
+### Diagnóstico y Estado de la Landing Page:
+- **Estado Actual:** **COMPLETADA Y DESPLEGADA**.
+- **Ubicación:** `/Users/digitalspace/Desktop/Drivo/drivo-landing-page/`
+- **Servidor Activo:** Proceso PM2 `drivo-web` en `http://localhost:8088`.
+- **Enfoque Estratégico Implementado:** Exclusivo en **Pasajeros y Tarifas Justas** (el módulo de reclutamiento de conductores fue omitido por instrucción directa del Señor para concentrar el embudo de conversión en el usuario final).
+- **Componentes Clave:**
+  - Cotizador de precios P2P en vivo y negociación en tiempo real.
+  - Mockup de teléfono con radar 2D animado.
+  - Simulador interactivo de rutas con slider dinámico de tarifas.
+  - Búnker de seguridad en 3 capas (verificación de placas, cooperativas y cédulas).
+  - Descarga directa del instalador oficial `DRIVO v5.12.1 PERFORMANCE UX.apk`.
+- **Panel Administrativo (Interno):** `macondo-admin-web/` (panel en Flutter Web para administración de conductores, viajes y comisiones).
 
 ---
 
@@ -219,6 +217,19 @@ El proyecto vive en `/Users/digitalspace/Desktop/Drivo One/` y tiene **5 compone
 
 ---
 
+## 🌐 Presencia Web y Landing Page Oficial — DRIVO ONE (Desplegada 2026-09-15)
+
+### Diagnóstico y Estado de la Landing Page:
+- **Estado Actual:** **COMPLETADA Y DESPLEGADA**.
+- **Ubicación:** `/Users/digitalspace/Desktop/Drivo One/drivo-one-landing-page/`
+- **Servidor Activo:** Proceso PM2 `drivo-one-web` en `http://localhost:8090`.
+- **Estrategia Neuromarketing Gastronómica & Multicategoría:**
+  - Identidad visual de alto impacto con Obsidiana OLED Noche (`#0D1117`), Verde Esmeralda Neón (`#00E676`) y Naranja Coral (`#FF5722`).
+  - Arquitectura 3-Sided Marketplace: Secciones optimizadas para Clientes (Comida, Supermercado, Farmacia, Envíos express), Repartidores Socios y Comercios/Restaurantes.
+  - Descarga directa de instaladores oficiales: `Drivo_One_V53_Premium_Cart_Refinement.apk` y `Drivo_One_Socio.apk`.
+
+---
+
 ## 🗺️ Rutas de Archivos Clave — DRIVO ONE
 
 ```
@@ -234,6 +245,7 @@ El proyecto vive en `/Users/digitalspace/Desktop/Drivo One/` y tiene **5 compone
 │   ├── prisma/               ← Schema SQL y migraciones
 │   └── package.json          ← name: "drivo-eats-backend"
 ├── drivo-admin-web/          ← Panel admin Flutter Web
+├── drivo-one-landing-page/   ← Landing Page Oficial (PM2 drivo-one-web :8090)
 └── Drivo_One_Instaladores/   ← APKs históricos
 ```
 
@@ -251,6 +263,7 @@ El proyecto vive en `/Users/digitalspace/Desktop/Drivo One/` y tiene **5 compone
 | **Backend** | Firebase Firestore (NoSQL) | Express + Prisma (SQL) |
 | **Auth** | Firebase Authentication | Firebase Admin + JWT |
 | **Storage** | Firebase Storage | Cloudinary |
+| **Landing Page** | `http://localhost:8088` (`drivo-web`) | `http://localhost:8090` (`drivo-one-web`) |
 | **Versión vigente** | v5.12.1 | V53 |
 | **Ruta** | `/Desktop/Drivo/drivo/` | `/Desktop/Drivo One/` |
 
@@ -258,8 +271,8 @@ El proyecto vive en `/Users/digitalspace/Desktop/Drivo One/` y tiene **5 compone
 
 ## 🔮 Próximos Pasos Sugeridos
 
-1. **Completar pendientes de seguridad** — Restricción Maps API + Firebase App Check (manuales en consola)
+1. **Completar pendientes de seguridad** — Restricción Maps API + Firebase App Check (manuales en consola Firebase y Google Cloud)
 2. **Generar keystore** para distribución en Play Store
 3. **Testing del segundo viaje** — Bug reportado: botón "PEDIR OTRO" no operativo post-Fase 63
 4. **Fase de QA** — Probar flujo completo conductor-pasajero con las últimas correcciones
-5. **Construcción de la Landing Page Oficial de DRIVO:** Recibir respuestas del Señor a las 4 preguntas de alcance, vincular los logos del proyecto desde la MacBook Pro (`/Users/digitalspace/Desktop/Drivo/`) y generar el frontend web oficial de captación.
+5. **Monitoreo y feedback de Landing Pages:** Evaluar conversión y rendimiento de las páginas oficiales desplegadas en puertos 8088 (`drivo-web`) y 8090 (`drivo-one-web`).
