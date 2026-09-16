@@ -389,11 +389,16 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 - **UI PWA & Floating Bar:** Floating Bar con Glassmorphism, WebAudio Haptics, Notificaciones push y encolamiento offline.
 - **Reconocimiento Facial:** Modo de cámara bajo demanda y comparación de embeddings de rostros.
 
-### 2026-09-16 (Instalación del Gabinete Multi-Agente The Agency & Estructura Corporativa Novasyscom)
+### 2026-09-16 (Instalación del Gabinete Multi-Agente The Agency, Estructura Novasyscom & Monetización)
 - **Empresa Matriz:** **Novasyscom** (CEO & Fundador Único: El Señor).
-- **Jefe de Gabinete / COO:** Alberth NEXUS.
-- **Portafolio:** DRIVO (Movilidad P2P / Pasajeros) y DRIVO ONE (Flotas y B2B).
-- **Gabinete Instalado (41 Agentes Senior en `~/.gemini/config/skills/agency-*`):**
+- **Jefe de Gabinete / COO:** Alberth NEXUS (daemon 24/7, Quantum HUD, supervisión operativa).
+- **Portafolio de Proyectos (5 Activos Oficiales):**
+  1. **DRIVO:** Ride-hailing y movilidad P2P urbana (estilo InDrive/Uber). App Flutter v5.12.1, backend Firebase, landing page oficial en puerto `8088`.
+  2. **DRIVO ONE:** Delivery y Quick-Commerce multitienda (estilo PedidosYa/Uber Eats/Rappi). Marketplace tripartito (cliente/comercio/repartidor), backend Node.js + Prisma, landing oficial en puerto `8090`.
+  3. **ALBERTH:** Asistente Personal de IA y Chief of Staff / COO Digital de Novasyscom. Quantum HUD 3D en puerto `8080`, daemons PM2, visión y voz.
+  4. **GLOBALMARKET:** Portal Web Agroexportador B2B (banano, pitahaya, etc.) + Cloud Drive privado (`/drive`).
+  5. **VALEX:** Fintech de Cambio de Divisas & Giros Transfronterizos Ecuador ↔ Perú (USD ↔ PEN). Backend NestJS/Prisma, Supabase PostgreSQL, consolas de caja y terminales operativos.
+- **Gabinete Instalado (41 Agentes Senior en `~/.gemini/config/skills/agency-*` y `.agents/skills/agency-*`):**
   - **Auditoría & Capital Shield:** `reality-checker` (auditor implacable de puntos ciegos antes de gastar capital) y `paid-media-auditor`.
   - **Finanzas & CFO:** `chief-financial-officer`, `financial-analyst`, `fp-a-analyst`, `pricing-analyst`, `bookkeeper-controller`, `tax-strategist`, `investment-researcher`.
   - **Ventas & Cierre:** `outbound-strategist`, `sales-coach`, `deal-strategist`, `proposal-strategist`, `discovery-coach`, `pipeline-analyst`, `offer-lead-gen-strategist`, `sales-outreach`.
