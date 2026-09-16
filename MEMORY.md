@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-15 18:01 GMT-5_
+_Última actualización: 2026-09-15 20:20 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -63,6 +63,8 @@ _Última actualización: 2026-09-15 18:01 GMT-5_
 
 ## ⚙️ Configuración y Puertos Activos
 - **Panel Web HUD:** `http://localhost:8080` (FastAPI / Three.js 3D Orb / WebSockets)
+- **DRIVO Landing Page Web:** `http://localhost:8088` (Proceso PM2 `drivo-web`, `/Users/digitalspace/Desktop/Drivo/drivo-landing-page`)
+- **DRIVO ONE Landing Page Web:** `http://localhost:8090` (Proceso PM2 `drivo-one-web`, `/Users/digitalspace/Desktop/Drivo One/drivo-one-landing-page`)
 - **Desktop Floating Bar v4.5+:** `http://localhost:8080/floating` (Context Autocomplete + QA 7-Day Chart + Push PWA + Auto-DND)
 - **Live Canvas A2UI:** `/api/canvas` (Dynamic Component Drawer & Predictive QA Visualizer)
 - **Design Tokens & Craft API:** `/api/design` (OpenDesign Tokens & Craft Guidelines)
@@ -81,7 +83,19 @@ _Última actualización: 2026-09-15 18:01 GMT-5_
 
 ## 📌 Historial de Eventos e Hitos Recientes
 
-### 2026-09-15 (Overhaul Conversacional, Corrección Quirúrgica de Disparadores & Producción de Campaña Francisco Azuero)
+### 2026-09-15 (Creación y Despliegue de las Landing Pages Oficiales para DRIVO y DRIVO ONE)
+- **Desarrollo y Lanzamiento de la Página Web Oficial de DRIVO (Transporte Urbano P2P):**
+  - **Ubicación:** `/Users/digitalspace/Desktop/Drivo/drivo-landing-page/`
+  - **Servidor Activo:** Proceso PM2 `drivo-web` (ID 5, `http://localhost:8088`).
+  - **Enfoque Exclusivo en Pasajeros & Tarifas Justas:** Eliminación del módulo de reclutamiento de conductores por instrucción del Señor, centrando la experiencia en la negociación P2P en tiempo real, tarifas transparentes y búnker de seguridad.
+  - **Componentes Intermedios:** Cotizador de precios P2P en vivo, radar 2D animado en mockup de teléfono, simulador de rutas con slider dinámico de tarifas, escudo de seguridad en 3 capas y descarga directa de APK `DRIVO v5.12.1 PERFORMANCE UX`.
+- **Desarrollo y Lanzamiento de la Página Web Oficial de DRIVO ONE (Delivery & E-Commerce):**
+  - **Ubicación:** `/Users/digitalspace/Desktop/Drivo One/drivo-one-landing-page/`
+  - **Servidor Activo:** Proceso PM2 `drivo-one-web` (ID 6, `http://localhost:8090`).
+  - **Estrategia Neuromarketing Gastronómica & Multicategoría:** Identidad visual única con Obsidiana OLED Noche (`#0D1117`), Verde Esmeralda Neón (`#00E676`) y Naranja Coral (`#FF5722`).
+  - **Arquitectura 3-Sided Marketplace:** Secciones diferenciadas para Clientes (Comida, Supermercado, Farmacia, Envíos), Repartidores Socios y Comercios/Restaurantes.
+  - **Descargas Directas:** Enlaces a `Drivo_One_V53_Premium_Cart_Refinement.apk` y `Drivo_One_Socio.apk`.
+
 - **Reingeniería del Motor Conversacional y Coherencia:**
   - **Buffer de Historial Ampliado:** Incrementado a 16 mensajes de contexto activo (8 turnos de diálogo completo) en `alberth_web_server.py` y `alberth_foundation_models.py`, eliminando la pérdida de hilo en conversaciones largas.
   - **Desacoplamiento de Formato Visual vs. Audio Locutado:** Preservación de formato Markdown enriquecido (negritas, viñetas, tablas) para la consola visual del panel HUD, y limpieza regex automática de símbolos únicamente para la locución por audio sintetizada con Edge-TTS.
