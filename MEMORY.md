@@ -401,7 +401,8 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
   - **Investigación & Estrategia:** `research-synthesist`, `business-strategist`, `data-consolidation-agent`, `strategy-duel-agent`, `operations-manager`, `workflow-architect`.
   - **Ingeniería & Seguridad:** `software-architect`, `backend-architect`, `mobile-app-builder`, `mobile-release-engineer`, `code-reviewer`, `database-optimizer`, `devops-automator`, `security-architect`, `application-security-engineer`, `secrets-credential-hygiene-engineer`.
   - **Paid Media & Crecimiento:** `ad-creative-strategist`, `paid-social-strategist`, `growth-hacker`.
-- **Referencia Documental:** Ver `COMPANY_NOVASYSCOM.md`.
+- **Hoja de Ruta de Monetización Autónoma ($500/semana):** Auditoría forense de capacidades completada; formulación de 4 modelos comprobados de ingresos con IA (Grid Trading, Arbitraje Polymarket, Brokerage de Leads B2B y Micro-Activos en RapidAPI/Apify).
+- **Referencia Documental:** Ver `COMPANY_NOVASYSCOM.md` y bitácora `memory/2026-09-16.md`.
 
 ---
 
