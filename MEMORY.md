@@ -56,6 +56,8 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 ├── alberth_learn.py         → CLI de aprendizaje continuo e in-context feedback
 ├── ecosystem.config.js      → Orquestador de procesos PM2 portable
 ├── SOUL.md                  → Definición estricta de personalidad y comportamiento
+├── PROJECT_DRIVO.md         → Base de conocimiento de productos DRIVO y DRIVO ONE
+├── COMPANY_NOVASYSCOM.md    → Arquitectura corporativa de Novasyscom y Gabinete Multi-Agente
 └── MEMORY.md                → Memoria técnica y continuativa del proyecto
 ```
 
@@ -386,6 +388,20 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 ### 2026-09-04 (Lanzamiento Alberth NEXUS v4.0 a v4.3)
 - **UI PWA & Floating Bar:** Floating Bar con Glassmorphism, WebAudio Haptics, Notificaciones push y encolamiento offline.
 - **Reconocimiento Facial:** Modo de cámara bajo demanda y comparación de embeddings de rostros.
+
+### 2026-09-16 (Instalación del Gabinete Multi-Agente The Agency & Estructura Corporativa Novasyscom)
+- **Empresa Matriz:** **Novasyscom** (CEO & Fundador Único: El Señor).
+- **Jefe de Gabinete / COO:** Alberth NEXUS.
+- **Portafolio:** DRIVO (Movilidad P2P / Pasajeros) y DRIVO ONE (Flotas y B2B).
+- **Gabinete Instalado (41 Agentes Senior en `~/.gemini/config/skills/agency-*`):**
+  - **Auditoría & Capital Shield:** `reality-checker` (auditor implacable de puntos ciegos antes de gastar capital) y `paid-media-auditor`.
+  - **Finanzas & CFO:** `chief-financial-officer`, `financial-analyst`, `fp-a-analyst`, `pricing-analyst`, `bookkeeper-controller`, `tax-strategist`, `investment-researcher`.
+  - **Ventas & Cierre:** `outbound-strategist`, `sales-coach`, `deal-strategist`, `proposal-strategist`, `discovery-coach`, `pipeline-analyst`, `offer-lead-gen-strategist`, `sales-outreach`.
+  - **QA & Pre-Producción:** `test-automation-engineer`, `test-results-analyzer`, `api-tester`, `performance-benchmarker`, `accessibility-auditor`.
+  - **Investigación & Estrategia:** `research-synthesist`, `business-strategist`, `data-consolidation-agent`, `strategy-duel-agent`, `operations-manager`, `workflow-architect`.
+  - **Ingeniería & Seguridad:** `software-architect`, `backend-architect`, `mobile-app-builder`, `mobile-release-engineer`, `code-reviewer`, `database-optimizer`, `devops-automator`, `security-architect`, `application-security-engineer`, `secrets-credential-hygiene-engineer`.
+  - **Paid Media & Crecimiento:** `ad-creative-strategist`, `paid-social-strategist`, `growth-hacker`.
+- **Referencia Documental:** Ver `COMPANY_NOVASYSCOM.md`.
 
 ---
 
