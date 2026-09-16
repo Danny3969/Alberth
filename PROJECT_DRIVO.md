@@ -14,7 +14,7 @@
 
 DRIVO (también llamado internamente **Macondo Drive**) es una plataforma de transporte urbano tipo Uber, construida por **Novasyscom**. Conecta **conductores** y **pasajeros** en tiempo real, con negociación de precios, sistema de créditos/comisión, y mapas en vivo.
 
-**CEO / Propietario del proyecto:** `digitalspace` (el usuario de este workspace).
+**CEO / Propietario del proyecto:** El Señor (Fundador y CEO Único de Novasyscom).
 
 ---
 
@@ -169,7 +169,7 @@ DRIVO ONE es una plataforma de **delivery y comercio electrónico** tipo Rappi/U
 
 **Es un producto diferente a DRIVO** — no comparten código fuente ni base de datos.
 
-**CEO / Propietario:** `digitalspace` (el usuario de este workspace)
+**CEO / Propietario:** El Señor (Fundador y CEO Único de Novasyscom).
 
 ---
 
