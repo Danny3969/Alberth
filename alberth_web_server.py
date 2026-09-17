@@ -811,6 +811,76 @@ async def activate_canvas_preset(name: str):
 # ── Alberth Dev Console (AGC) & Antigravity Endpoints ────────────────────────
 console_logs_history = []
 
+def get_agc_config() -> dict:
+    cfg_path = WORKSPACE / "alberth_cli" / "ag-config.yaml"
+    if not cfg_path.exists():
+        return {"projects": {}}
+    try:
+        import yaml
+        with open(cfg_path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except Exception:
+        return {"projects": {}}
+
+@app.get("/api/projects")
+async def list_projects():
+    cfg = get_agc_config()
+    projects = []
+    for k, p in cfg.get("projects", {}).items():
+        p_path = Path(p.get("path", "")).expanduser()
+        exists = p_path.exists()
+        git_branch = "no git"
+        if exists and (p_path / ".git").exists():
+            try:
+                git_branch = subprocess.run(["git", "branch", "--show-current"], cwd=p_path, capture_output=True, text=True).stdout.strip() or "main"
+            except Exception:
+                pass
+        projects.append({
+            "id": k,
+            "slug": k,
+            "name": p.get("name", k.upper()),
+            "category": p.get("category", "General"),
+            "description": p.get("description", ""),
+            "path": str(p_path),
+            "port": p.get("port", 0),
+            "branch": git_branch,
+            "git_branch": git_branch,
+            "exists": exists
+        })
+    return {"ok": True, "projects": projects}
+
+class CreateProjectRequest(BaseModel):
+    name: str
+    category: str = "General"
+    template: str = "blank"
+    description: str = ""
+
+@app.post("/api/projects/new")
+async def create_new_project(req: CreateProjectRequest):
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="El nombre del proyecto es obligatorio")
+    
+    cli_py = WORKSPACE / "alberth_cli" / "ag-console.py"
+    py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
+    cmd = [py_bin, str(cli_py), "new", name, "--template", req.template]
+    
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(WORKSPACE))
+        out = (r.stdout or r.stderr or "").strip()
+        if r.returncode != 0:
+            return {"ok": False, "detail": out}
+        
+        cfg = get_agc_config()
+        slug = name.lower().strip().replace(" ", "-")
+        await manager.broadcast({
+            "type": "project_created",
+            "project": cfg.get("projects", {}).get(slug, {"name": name, "id": slug})
+        })
+        return {"ok": True, "slug": slug, "output": out}
+    except Exception as e:
+        return {"ok": False, "detail": str(e)}
+
 class ConsoleEventModel(BaseModel):
     project: str = "system"
     action: str = "status"
@@ -867,6 +937,118 @@ async def exec_console_command(req: ConsoleExecRequest):
         return {"ok": r.returncode == 0, "status": status, "command": raw_cmd, "output": out}
     except Exception as e:
         return {"ok": False, "status": "ERROR", "command": raw_cmd, "output": str(e)}
+
+class ConsoleChatRequest(BaseModel):
+    message: str
+    project: str = "global"
+    mode: str = "auto"
+
+@app.post("/api/console/chat")
+async def console_chat_endpoint(req: ConsoleChatRequest):
+    msg = req.message.strip()
+    if not msg:
+        raise HTTPException(status_code=400, detail="Mensaje vacío")
+    
+    project_key = req.project.lower().strip()
+    mode = req.mode.lower().strip()
+    
+    cli_keywords = ["agc", "git", "open", "status", "run", "list", "new", "build", "pm2", "hud", "help"]
+    first_token = msg.split()[0].lower() if msg.split() else ""
+    
+    is_terminal = (
+        mode == "terminal" or
+        msg.startswith(">") or
+        msg.startswith("/") or
+        msg.startswith("$") or
+        (mode == "auto" and first_token in cli_keywords)
+    )
+    
+    # ── Modo Terminal ─────────────────────────────────────────────────────────
+    if is_terminal:
+        clean_cmd = msg
+        if clean_cmd.startswith(">") or clean_cmd.startswith("/") or clean_cmd.startswith("$"):
+            clean_cmd = clean_cmd[1:].strip()
+        if clean_cmd.startswith("agc "):
+            clean_cmd = clean_cmd[4:].strip()
+        
+        tokens = clean_cmd.split()
+        if tokens and tokens[0] in ["status", "open", "git", "run"] and len(tokens) == 1 and project_key not in ["global", "all"]:
+            clean_cmd = f"{tokens[0]} {project_key}"
+        elif tokens and tokens[0] == "git" and len(tokens) > 1 and tokens[1] not in ["clone", "config", "help"] and project_key not in ["global", "all"] and tokens[1] != project_key:
+            clean_cmd = f"git {project_key} {' '.join(tokens[1:])}"
+            
+        cli_py = WORKSPACE / "alberth_cli" / "ag-console.py"
+        py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
+        cmd = [py_bin, str(cli_py)] + clean_cmd.split()
+        
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(WORKSPACE))
+            out = (r.stdout or r.stderr or "").strip()
+            st = "SUCCESS" if r.returncode == 0 else "ERROR"
+            evt = {
+                "project": project_key,
+                "action": tokens[0] if tokens else "exec",
+                "command": f"agc {clean_cmd}",
+                "status": st,
+                "output": out,
+                "timestamp": time.time(),
+                "type": "terminal"
+            }
+            console_logs_history.append(evt)
+            if len(console_logs_history) > 60: console_logs_history.pop(0)
+            await manager.broadcast({"type": "console_event", "payload": evt})
+            return {"type": "terminal", "ok": r.returncode == 0, "status": st, "command": f"agc {clean_cmd}", "output": out, "project": project_key}
+        except Exception as e:
+            return {"type": "terminal", "ok": False, "status": "ERROR", "command": clean_cmd, "output": str(e), "project": project_key}
+
+    # ── Modo Lenguaje Natural (IA Antigravity / Alberth) ──────────────────────
+    cfg = get_agc_config()
+    proj_info = cfg.get("projects", {}).get(project_key)
+    
+    if proj_info:
+        context_header = (
+            f"[Contexto Operativo Antigravity: Proyecto Activo '{proj_info.get('name')}' "
+            f"({proj_info.get('category')}) en '{proj_info.get('path')}']\n"
+            f"Descripción: {proj_info.get('description')}\n"
+        )
+    else:
+        context_header = (
+            f"[Contexto Operativo Antigravity: Modo Global Novasyscom / Consultas Libres sin proyecto atado]\n"
+        )
+        
+    ai_prompt = f"{context_header}\nEl Señor dice: {msg}\nResponde de manera ejecutiva, útil y clara con formato Markdown profesional."
+    
+    try:
+        await manager.broadcast({"type": "thinking", "active": True})
+        full_resp = await run_alberth_pipeline_async(ai_prompt)
+        await manager.broadcast({"type": "thinking", "active": False})
+        
+        resp_text = full_resp.get("text", "")
+        evt = {
+            "project": project_key,
+            "action": "ai_chat",
+            "command": msg,
+            "status": "SUCCESS",
+            "output": resp_text,
+            "timestamp": time.time(),
+            "type": "ai"
+        }
+        console_logs_history.append(evt)
+        if len(console_logs_history) > 60: console_logs_history.pop(0)
+        
+        return {
+            "type": "ai",
+            "ok": True,
+            "status": "SUCCESS",
+            "prompt": msg,
+            "text": resp_text,
+            "image_url": full_resp.get("image_url"),
+            "audio_url": full_resp.get("audio_url"),
+            "project": project_key
+        }
+    except Exception as e:
+        await manager.broadcast({"type": "thinking", "active": False})
+        return {"type": "ai", "ok": False, "status": "ERROR", "prompt": msg, "text": f"Error procesando con la IA: {str(e)}", "project": project_key}
 
 def run_sys_cmd(command: str, args: dict) -> dict:
     try:

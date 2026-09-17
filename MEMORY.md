@@ -409,13 +409,18 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 - **Hoja de Ruta de Monetización Autónoma ($500/semana):** Auditoría forense de capacidades completada; formulación de 4 modelos comprobados de ingresos con IA (Grid Trading, Arbitraje Polymarket, Brokerage de Leads B2B y Micro-Activos en RapidAPI/Apify).
 - **Referencia Documental:** Ver `COMPANY_NOVASYSCOM.md` y bitácora `memory/2026-09-16.md`.
 
-### 2026-09-17 (Consola de Desarrollo AGC & Antigravity Engine Integrado)
-- **Alberth Dev Console (`agc`):** Wrapper CLI y UI creado en `alberth_cli/` y vinculado a `~/alberth_cli` para gestionar los 5 proyectos corporativos (Drivo, Drivo One, Alberth, GlobalMarket, Valex).
+### 2026-09-17 (Consola Maestra Unificada AGC v2.0 & Antigravity IDE Engine)
+- **Alberth Master Dev Console (`agc` v2.0):** Evolución integral a Consola Maestra Unificada combinando IA conversacional ejecutiva y terminal técnica.
+- **Enrutador Inteligente (`POST /api/console/chat`):** Detección automática entre intenciones conversacionales ("hola", consultas generales) y comandos técnicos (`git`, `status`, `open`, `pm2`, `list`, `new`). Genera respuestas Markdown estructuradas, audio locutado con Edge-TTS y tratamiento exclusivo como **"Señor"**.
+- **Soporte Multilínea Intuitivo:** Entrada `<textarea>` con auto-escalado dinámico (hasta 180px); `Enter` envía la orden; `Shift + Enter` genera saltos de línea para redacción extensa y pegado de código.
+- **Selector Dinámico de Proyectos Escalable:** Dropdown con buscador en tiempo real conectado dinámicamente a `ag-config.yaml` vía `GET /api/projects`. Soporta X proyectos sin saturación visual.
+- **Modo Global / Consultas Libres (`🌐 GLOBAL · CONSULTAS LIBRES`):** Modo transversal para dialogar con Antigravity y Alberth sin asociar la sesión a un proyecto particular.
+- **Creación e Inicialización de Proyectos (`POST /api/projects/new` y `agc new`):** Modal interactivo en el HUD (`#new-project-modal`) y comando CLI para crear proyectos limpios con `git init`, README, plantillas (blank, flutter, react, fastapi, node), registro automático en `ag-config.yaml` y apertura instantánea en Antigravity IDE.
 - **Integración Nativa con Antigravity:** Comando `agc open <proyecto>` (o `agc <proyecto> open`) que abre automáticamente los workspaces en **Antigravity IDE** (`open -a "Antigravity IDE"` y binario `agy-ide`).
-- **Backend FastAPI & WebSockets:** Endpoints `/api/console/event`, `/api/console/logs` y `/api/console/exec` en `alberth_web_server.py` para recepción, ejecución remota y retransmisión por `/ws`.
-- **Quantum HUD Dev Console Drawer (`#dev-console-drawer`):** Dock lateral Cyber-HUD en `http://localhost:8080` con visor de terminal en vivo, botonera de acciones tácticas, selector de proyectos, entrada interactiva de comandos y atajo global de teclado `Ctrl + Alt + C`.
+- **Backend FastAPI & WebSockets:** Endpoints `/api/projects`, `/api/projects/new`, `/api/console/chat`, `/api/console/event`, `/api/console/logs` y `/api/console/exec` en `alberth_web_server.py`.
+- **Quantum HUD Master Console Drawer (`#dev-console-drawer`):** Dock lateral Cyber-HUD en `http://localhost:8080` con feed unificado, botonera táctica, footer con conmutador de modos (`Auto`, `Solo IA`, `Terminal`), atajo de teclado `Ctrl + Alt + C`.
 - **Integración Shell:** Alias `alias agc='python3 ~/alberth_cli/ag-console.py'` y script de autocompletado Zsh (`ag-complete.sh`) en `~/.zshrc`.
-- **Referencia Documental:** Ver bitácora `memory/2026-09-17.md`.
+- **Referencia Documental:** Ver bitácora `memory/2026-09-17.md` y `walkthrough.md`.
 
 ---
 

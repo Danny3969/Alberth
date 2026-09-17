@@ -283,6 +283,88 @@ def action_run(config: dict, project_key: str, script_name: str, extra_args: lis
     log_execution(project_key, f"run {script_name}", status, out)
     return res.returncode
 
+def save_config(config: dict):
+    try:
+        import yaml
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            yaml.dump(config, f, sort_keys=False, default_flow_style=False, allow_unicode=True)
+    except Exception as e:
+        print(f"{C_YELLOW}[!] Error guardando config yaml: {e}{C_RESET}")
+
+def action_new(config: dict, name: str, template: str = "blank", category: str = "General", description: str = ""):
+    banner()
+    project_slug = name.lower().strip().replace(" ", "-")
+    scratch_dir = Path("/Users/contabilidad/.gemini/antigravity-ide/scratch")
+    project_path = scratch_dir / project_slug
+
+    if project_path.exists():
+        print(f"{C_RED}[ERROR] La carpeta ya existe: {project_path}{C_RESET}")
+        return 1
+
+    print(f"\n{C_CYAN}📁 Creando nuevo proyecto: {C_BOLD}{name}{C_RESET} (Plantilla: {template})")
+    project_path.mkdir(parents=True, exist_ok=True)
+
+    # 1. Inicializar Git
+    subprocess.run(["git", "init"], cwd=project_path, capture_output=True)
+
+    # 2. Scaffolding básico
+    readme_content = f"# {name.upper()}\n\nProyecto de Novasyscom.\nCategoría: {category}\nPlantilla: {template}\n"
+    (project_path / "README.md").write_text(readme_content, encoding="utf-8")
+
+    gitignore_content = ".DS_Store\nnode_modules/\nbuild/\n*.log\n.env\n"
+    (project_path / ".gitignore").write_text(gitignore_content, encoding="utf-8")
+
+    if template == "flutter":
+        (project_path / "pubspec.yaml").write_text(f"name: {project_slug}\ndescription: {description or name}\nversion: 1.0.0+1\nenvironment:\n  sdk: '>=3.0.0 <4.0.0'\n", encoding="utf-8")
+        (project_path / "lib").mkdir(exist_ok=True)
+        (project_path / "lib" / "main.dart").write_text("// Entry point Flutter\nvoid main() {\n  print('Hola Novasyscom');\n}\n", encoding="utf-8")
+    elif template in ["react", "node"]:
+        pkg_json = {
+            "name": project_slug,
+            "version": "1.0.0",
+            "private": True,
+            "scripts": {"dev": "vite", "build": "vite build"} if template == "react" else {"start": "node index.js"}
+        }
+        (project_path / "package.json").write_text(json.dumps(pkg_json, indent=2), encoding="utf-8")
+    elif template == "fastapi":
+        (project_path / "main.py").write_text("from fastapi import FastAPI\napp = FastAPI()\n\n@app.get('/')\ndef root(): return {'status': 'ok'}\n", encoding="utf-8")
+        (project_path / "requirements.txt").write_text("fastapi\nuvicorn\n", encoding="utf-8")
+
+    # Initial commit
+    subprocess.run(["git", "add", "."], cwd=project_path, capture_output=True)
+    subprocess.run(["git", "commit", "-m", f"feat: inicializar proyecto {name} ({template})"], cwd=project_path, capture_output=True)
+
+    # 3. Registrar en ag-config.yaml
+    if "projects" not in config:
+        config["projects"] = {}
+    config["projects"][project_slug] = {
+        "name": name.upper(),
+        "path": str(project_path),
+        "category": category,
+        "description": description or f"Proyecto {name}",
+        "port": 0,
+        "scripts": {
+            "dev": "npm run dev" if template in ["react", "node"] else ("flutter run" if template == "flutter" else "python3 main.py")
+        }
+    }
+    save_config(config)
+
+    print(f"[{C_GREEN}✓{C_RESET}] Repositorio inicializado en {project_path}")
+    print(f"[{C_GREEN}✓{C_RESET}] Registrado exitosamente en ag-config.yaml")
+
+    notify_hud(config, {
+        "project": project_slug,
+        "action": "new",
+        "command": f"agc new {name}",
+        "status": "SUCCESS",
+        "output": f"Nuevo proyecto {name} creado en {project_path}",
+        "timestamp": time.time()
+    })
+
+    # Abrir en Antigravity IDE
+    action_open(config, project_slug)
+    return 0
+
 def action_hud(config: dict):
     url = config.get("hud", {}).get("browser_url", "http://localhost:8080")
     print(f"{C_CYAN}Abriendo Quantum HUD en Google Chrome: {C_BOLD}{url}{C_RESET}")
@@ -291,12 +373,6 @@ def action_hud(config: dict):
 
 # ── Argument Normalizer (Sintaxis Flexible) ───────────────────────────────────
 def normalize_args(args: list, valid_projects: list) -> tuple:
-    """
-    Permite tanto:
-      agc open drivo
-    como:
-      agc drivo open
-    """
     if not args:
         return ("list", None, [])
 
@@ -306,6 +382,10 @@ def normalize_args(args: list, valid_projects: list) -> tuple:
     # Casos sin proyecto:
     if first in ["list", "hud", "-h", "--help", "help"]:
         return (first, None, rest)
+
+    if first == "new":
+        proj_name = rest[0] if rest else None
+        return ("new", proj_name, rest[1:] if len(rest) > 1 else [])
 
     # Si el primer argumento es un proyecto: agc drivo open -> acción='open', proyecto='drivo'
     if first in valid_projects:
@@ -337,6 +417,7 @@ Uso:
   agc status [proyecto]            → Muestra la rama git, commits pendientes y cambios
   agc git <proyecto> <args...>     → Ejecuta comandos git en el proyecto seleccionado
   agc run <proyecto> <script>      → Ejecuta scripts definidos (dev, build, status, etc.)
+  agc new <nombre> [--template X]  → Crea e inicializa un nuevo proyecto en Antigravity
   agc hud                          → Abre el Quantum HUD en Google Chrome
 
 Proyectos disponibles:
@@ -349,6 +430,17 @@ Proyectos disponibles:
 
     if action == "hud":
         sys.exit(action_hud(config))
+
+    if action == "new":
+        if not project:
+            print(f"{C_RED}[ERROR] Especifica el nombre del nuevo proyecto. Ej: agc new mi-app{C_RESET}")
+            sys.exit(1)
+        template = "blank"
+        if "--template" in extra:
+            idx = extra.index("--template")
+            if idx + 1 < len(extra):
+                template = extra[idx + 1]
+        sys.exit(action_new(config, project, template=template))
 
     if action == "open":
         if not project:

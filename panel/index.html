@@ -1106,18 +1106,18 @@ header.hud-header {
   transform: translateY(-1px);
 }
 
-/* ─── Alberth Dev Console (AGC) & Antigravity Drawer ─── */
+/* ─── Alberth Dev Console (AGC) & Antigravity Drawer v2.0 ─── */
 .dev-console-drawer {
   position: fixed;
   top: 75px;
-  right: -580px;
-  width: 540px;
-  max-width: 95vw;
+  right: -620px;
+  width: 580px;
+  max-width: 96vw;
   bottom: 80px;
-  background: rgba(5, 10, 22, 0.96);
+  background: rgba(5, 10, 22, 0.97);
   border: 1px solid rgba(0, 240, 255, 0.4);
   border-radius: 16px;
-  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.9), inset 0 0 25px rgba(0, 240, 255, 0.08);
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(0, 240, 255, 0.08);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   z-index: 101;
@@ -1129,44 +1129,146 @@ header.hud-header {
 .dev-console-drawer.open {
   right: 16px;
 }
-.dev-console-projects-bar {
+.dev-console-context-bar {
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: space-between;
   padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.45);
   border-bottom: 1px solid rgba(0, 240, 255, 0.15);
-  overflow-x: auto;
-  scrollbar-width: none;
+  position: relative;
+  gap: 8px;
 }
-.dev-console-projects-bar::-webkit-scrollbar {
-  display: none;
+.project-selector-dropdown-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
 }
-.proj-pill {
+.project-selector-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: var(--cyan, #00f0ff);
   font-family: var(--font-hud, monospace);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 3px 9px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--text-dim, #8ba2b8);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   cursor: pointer;
   transition: all 0.15s;
-  white-space: nowrap;
 }
-.proj-pill:hover {
-  background: rgba(0, 240, 255, 0.15);
-  color: #fff;
-  border-color: rgba(0, 240, 255, 0.4);
-}
-.proj-pill.active {
-  background: rgba(0, 240, 255, 0.25);
+.project-selector-trigger:hover {
+  background: rgba(0, 240, 255, 0.16);
   border-color: var(--cyan, #00f0ff);
-  color: var(--cyan, #00f0ff);
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
 }
+.project-selector-trigger svg {
+  margin-left: auto;
+  transition: transform 0.2s;
+}
+.project-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  min-width: 320px;
+  max-width: 420px;
+  background: #091122;
+  border: 1px solid var(--cyan, #00f0ff);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: dropIn 0.15s ease-out;
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.project-search-wrap {
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+.project-search-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: #fff;
+  font-size: 11px;
+  outline: none;
+}
+.project-search-wrap input:focus {
+  border-color: var(--cyan, #00f0ff);
+}
+.project-dropdown-items {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.project-item {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.project-item:hover {
+  background: rgba(0, 240, 255, 0.12);
+}
+.project-item.active {
+  background: rgba(0, 240, 255, 0.2);
+  border-left: 3px solid var(--cyan, #00f0ff);
+}
+.project-item-title {
+  font-family: var(--font-hud, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+.project-item-desc {
+  font-size: 9px;
+  color: var(--text-dim, #8ba2b8);
+  margin-top: 2px;
+}
+.project-item-badge {
+  font-size: 9px;
+  font-family: var(--font-hud);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cyan, #00f0ff);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.project-dropdown-footer {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(0, 240, 255, 0.15);
+}
+.btn-create-project-trigger {
+  width: 100%;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px dashed var(--cyan, #00f0ff);
+  border-radius: 4px;
+  padding: 6px;
+  color: var(--cyan, #00f0ff);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-create-project-trigger:hover {
+  background: rgba(0, 240, 255, 0.25);
+}
+
 .dev-console-actions-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1206,28 +1308,25 @@ header.hud-header {
 .dev-action-btn.primary:hover {
   background: linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(0, 150, 255, 0.4));
 }
-.dev-console-terminal {
+
+.dev-console-feed {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 14px;
+  padding: 14px;
   background: #02050b;
-  font-family: 'Share Tech Mono', 'Menlo', 'Consolas', monospace;
-  font-size: 11px;
-  line-height: 1.45;
-  color: #c9d1d9;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   position: relative;
 }
-.dev-console-terminal::before {
+.dev-console-feed::before {
   content: " ";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
   background-size: 100% 2px, 3px 100%;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 .terminal-banner {
   color: var(--cyan, #00f0ff);
@@ -1237,91 +1336,177 @@ header.hud-header {
   border-bottom: 1px dashed rgba(0, 240, 255, 0.25);
   padding-bottom: 6px;
   margin-bottom: 4px;
+  font-family: 'Share Tech Mono', monospace;
 }
-.terminal-entry {
-  background: rgba(255, 255, 255, 0.02);
-  border-left: 3px solid var(--cyan, #00f0ff);
-  padding: 6px 10px;
-  border-radius: 0 5px 5px 0;
-}
-.terminal-entry.status-SUCCESS {
-  border-left-color: var(--green, #00ff88);
-}
-.terminal-entry.status-ERROR {
-  border-left-color: var(--red, #ff3366);
-}
-.terminal-entry-meta {
+
+/* Burbujas de chat / terminal unificadas */
+.feed-msg {
   display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  color: var(--text-dim, #8ba2b8);
-  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 94%;
+  position: relative;
+  z-index: 2;
+  animation: feedFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.terminal-entry-cmd {
-  color: var(--gold, #ffd700);
-  font-weight: bold;
+@keyframes feedFade {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.terminal-entry-output {
-  white-space: pre-wrap;
-  word-break: break-all;
-  color: #e6edf3;
+.feed-msg.user {
+  align-self: flex-end;
 }
-.dev-console-input-row {
+.feed-msg.ai, .feed-msg.terminal {
+  align-self: flex-start;
+  width: 100%;
+}
+.feed-msg-header {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
-  background: rgba(4, 9, 20, 0.95);
-  border-top: 1px solid rgba(0, 240, 255, 0.25);
-}
-.terminal-prompt {
+  font-size: 9px;
   font-family: var(--font-hud, monospace);
-  font-size: 11px;
-  color: var(--cyan, #00f0ff);
-  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-dim, #8ba2b8);
 }
-#dev-console-input {
-  flex: 1;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(0, 240, 255, 0.3);
-  border-radius: 5px;
-  padding: 6px 10px;
-  font-family: 'Share Tech Mono', monospace;
+.feed-msg-content {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.feed-msg.user .feed-msg-content {
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  color: #fff;
+  white-space: pre-wrap;
+}
+.feed-msg.ai .feed-msg-content {
+  background: rgba(12, 22, 40, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  color: #e6edf3;
+}
+.feed-msg.terminal .feed-msg-content {
+  background: #030812;
+  border-left: 3px solid var(--green, #00ff88);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: 'Share Tech Mono', 'Menlo', monospace;
   font-size: 11px;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+}
+.feed-msg.terminal.status-ERROR .feed-msg-content {
+  border-left-color: var(--red, #ff3366);
+}
+
+/* Multiline Textarea Input Bar */
+.dev-console-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(4, 9, 20, 0.98);
+  border-top: 1px solid rgba(0, 240, 255, 0.25);
+  position: relative;
+  z-index: 10;
+}
+.textarea-container {
+  flex: 1;
+  position: relative;
+}
+#dev-console-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
   color: #fff;
   outline: none;
+  resize: none;
+  min-height: 38px;
+  max-height: 180px;
+  overflow-y: auto;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-#dev-console-input:focus {
+#dev-console-textarea:focus {
   border-color: var(--cyan, #00f0ff);
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
 }
 .dev-send-btn {
-  font-family: var(--font-hud, monospace);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 6px 12px;
+  height: 38px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--cyan, #00f0ff);
   color: #000;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
+  flex-shrink: 0;
 }
 .dev-send-btn:hover {
   background: #fff;
   box-shadow: 0 0 10px var(--cyan, #00f0ff);
+  transform: scale(1.05);
 }
 .dev-tool-btn {
-  background: rgba(255, 255, 255, 0.08);
+  height: 38px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
-  border-radius: 5px;
-  padding: 5px 8px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: all 0.15s;
 }
 .dev-tool-btn:hover {
   background: rgba(255, 255, 255, 0.15);
+  border-color: var(--cyan, #00f0ff);
+}
+.dev-console-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px 6px;
+  background: rgba(3, 7, 16, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 9px;
+  font-family: var(--font-hud, monospace);
+  color: var(--text-dim, #8ba2b8);
+}
+.mode-toggles {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mode-pill {
+  font-size: 9px;
+  font-family: var(--font-hud);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-dim, #8ba2b8);
+  border-radius: 4px;
+  padding: 1px 6px;
+  cursor: pointer;
+}
+.mode-pill.active {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: var(--cyan, #00f0ff);
+  color: var(--cyan, #00f0ff);
 }
 
 /* ─── OpenPage Component Styles ─── */
@@ -2267,64 +2452,144 @@ header.hud-header {
   </div>
 </div>
 
-<!-- ── Alberth Dev Console (AGC) & Antigravity Drawer ── -->
+<!-- ── Alberth Dev Console (AGC) & Antigravity Master Drawer v2.0 ── -->
 <div class="dev-console-drawer" id="dev-console-drawer">
   <div class="drawer-header">
     <div class="drawer-title" style="color:var(--cyan);display:flex;align-items:center;gap:8px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-      <span style="letter-spacing:1px;font-weight:700;">AGC DEV CONSOLE · ANTIGRAVITY</span>
+      <span style="letter-spacing:1px;font-weight:700;">AGC MASTER CONSOLE · ANTIGRAVITY</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <span class="hud-tag" style="font-size:9px;background:rgba(0,240,255,0.1);color:var(--cyan);border:1px solid rgba(0,240,255,0.3);padding:2px 6px;border-radius:4px;">ANTIGRAVITY LINKED</span>
+      <span class="hud-tag" id="dev-console-status-tag" style="font-size:9px;background:rgba(0,240,255,0.1);color:var(--cyan);border:1px solid rgba(0,240,255,0.3);padding:2px 6px;border-radius:4px;">QUANTUM ONLINE</span>
       <button class="drawer-close-btn" onclick="toggleDevConsoleDrawer()">✕</button>
     </div>
   </div>
 
-  <!-- Selector de Proyectos -->
-  <div class="dev-console-projects-bar">
-    <span style="font-size:10px;font-family:var(--font-hud);color:var(--text-dim);margin-right:4px;">PROYECTO:</span>
-    <button class="proj-pill" id="pill-proj-all" onclick="setDevProject('all', this)">TODOS</button>
-    <button class="proj-pill active" id="pill-proj-drivo" onclick="setDevProject('drivo', this)">DRIVO</button>
-    <button class="proj-pill" id="pill-proj-drivo-one" onclick="setDevProject('drivo-one', this)">DRIVO ONE</button>
-    <button class="proj-pill" id="pill-proj-alberth" onclick="setDevProject('alberth', this)">ALBERTH</button>
-    <button class="proj-pill" id="pill-proj-globalmarket" onclick="setDevProject('globalmarket', this)">GLOBALMARKET</button>
-    <button class="proj-pill" id="pill-proj-valex" onclick="setDevProject('valex', this)">VALEX</button>
+  <!-- Selector de Proyectos Dinámico con Búsqueda -->
+  <div class="dev-console-context-bar">
+    <div class="project-selector-dropdown-wrap">
+      <button class="project-selector-trigger" id="proj-selector-trigger" onclick="toggleProjectDropdown()" title="Cambiar proyecto o modo libre">
+        <span id="proj-selector-icon">🌐</span>
+        <span id="proj-selector-label">GLOBAL · CONSULTAS LIBRES</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      
+      <div class="project-dropdown-menu" id="project-dropdown-menu" style="display:none;">
+        <div class="project-search-wrap">
+          <input type="text" id="project-search-input" placeholder="🔍 Buscar proyecto (Drivo, Valex...)..." oninput="filterProjectsList(this.value)" autocomplete="off">
+        </div>
+        <div class="project-dropdown-items" id="project-dropdown-items">
+          <!-- Inyectado dinámicamente -->
+        </div>
+        <div class="project-dropdown-footer">
+          <button class="btn-create-project-trigger" onclick="openNewProjectModal()">
+            ➕ Inicializar Nuevo Proyecto
+          </button>
+        </div>
+      </div>
+    </div>
+    <span id="active-project-branch-tag" style="font-size:9px;font-family:var(--font-hud);color:var(--gold);background:rgba(240,192,96,0.1);padding:2px 6px;border-radius:4px;border:1px solid rgba(240,192,96,0.3);white-space:nowrap;">BRANCH: main</span>
   </div>
 
   <!-- Botonera de Acciones Tácticas -->
   <div class="dev-console-actions-bar">
-    <button class="dev-action-btn primary" onclick="runDevAction('open')" title="Abrir proyecto seleccionado en Antigravity IDE">
+    <button class="dev-action-btn primary" onclick="runDevAction('open')" title="Abrir en Antigravity IDE">
       🚀 Abrir Antigravity
     </button>
     <button class="dev-action-btn" onclick="runDevAction('status')" title="Consultar estado de Git y cambios">
       🌿 Git Status
     </button>
-    <button class="dev-action-btn" onclick="runDevAction('git pull')" title="Actualizar código desde GitHub">
+    <button class="dev-action-btn" onclick="runDevAction('git pull')" title="Descargar cambios de GitHub">
       ⬇️ Git Pull
     </button>
-    <button class="dev-action-btn" onclick="runDevAction('run status')" title="Estado de daemons PM2">
+    <button class="dev-action-btn" onclick="runDevAction('run status')" title="Estado de procesos PM2">
       ⚙️ PM2
     </button>
-    <button class="dev-action-btn" onclick="runDevAction('list')" title="Listar proyectos de Novasyscom">
+    <button class="dev-action-btn" onclick="runDevAction('list')" title="Listar proyectos registrados">
       📋 Proyectos
+    </button>
+    <button class="dev-action-btn" onclick="openNewProjectModal()" title="Crear nuevo proyecto">
+      ➕ Nuevo
     </button>
   </div>
 
-  <!-- Visor de Terminal en Vivo -->
-  <div class="dev-console-terminal" id="dev-console-terminal">
+  <!-- Feed Unificado: IA Conversacional + Terminal -->
+  <div class="dev-console-feed" id="dev-console-terminal">
     <div class="terminal-banner">
-      ⚡ [ALBERTH AGC DEV TERMINAL - TELEMETRÍA BIDIRECCIONAL ACTIVA]
-      Conectado al motor Antigravity y runtime local. Use los botones o escriba comandos 'agc'.
+      ⚡ [ALBERTH AGC MASTER CONSOLE · ANTIGRAVITY v2.0 READY]
+      Escriba libremente para dialogar con Alberth o ejecute comandos de desarrollo (git, agc, status, open).
     </div>
   </div>
 
-  <!-- Barra de Entrada de Comandos Web -->
+  <!-- Barra de Entrada Multilínea -->
   <div class="dev-console-input-row">
-    <span class="terminal-prompt">&gt; agc</span>
-    <input type="text" id="dev-console-input" placeholder="status drivo | open alberth | git status..." onkeydown="handleDevConsoleKey(event)" autocomplete="off">
-    <button class="dev-send-btn" onclick="submitDevConsoleInput()" title="Ejecutar comando">EJECUTAR</button>
-    <button class="dev-tool-btn" onclick="clearDevConsole()" title="Limpiar pantalla">🧹</button>
-    <button class="dev-tool-btn" onclick="copyDevConsole()" title="Copiar logs">📋</button>
+    <div class="textarea-container">
+      <textarea id="dev-console-textarea" rows="1" placeholder="Escriba a Alberth o ejecute comandos (Shift+Enter para nueva línea)..." oninput="autoResizeTextarea(this)" onkeydown="handleDevConsoleKey(event)"></textarea>
+    </div>
+    <button class="dev-send-btn" id="dev-send-btn" onclick="submitDevConsoleInput()" title="Enviar orden (Enter)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+      </svg>
+    </button>
+    <button class="dev-tool-btn" onclick="clearDevConsole()" title="Limpiar feed">🧹</button>
+    <button class="dev-tool-btn" onclick="copyDevConsole()" title="Copiar feed y logs">📋</button>
+  </div>
+
+  <!-- Footer con Modos y Atajos -->
+  <div class="dev-console-footer-bar">
+    <div class="mode-toggles">
+      <span style="margin-right:2px;opacity:0.7;">MODO:</span>
+      <button class="mode-pill active" id="mode-auto" onclick="setConsoleMode('auto')">Auto-Detect</button>
+      <button class="mode-pill" id="mode-ai" onclick="setConsoleMode('ai')">Solo IA</button>
+      <button class="mode-pill" id="mode-terminal" onclick="setConsoleMode('terminal')">Terminal</button>
+    </div>
+    <div style="opacity:0.6;font-size:8px;">
+      [Enter] Enviar &nbsp;|&nbsp; [Shift+Enter] Salto de línea
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Inicializar Nuevo Proyecto ── -->
+<div class="sys-modal" id="new-project-modal">
+  <div class="sys-backdrop" onclick="closeNewProjectModal()"></div>
+  <div class="sys-card" style="width:480px;border-color:var(--cyan);box-shadow:0 0 35px rgba(0,240,255,0.25);">
+    <div class="sys-title">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">✨</span>
+        <span>INICIALIZAR NUEVO PROYECTO</span>
+      </div>
+      <button class="drawer-close-btn" onclick="closeNewProjectModal()">✕</button>
+    </div>
+    
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px;">
+      <div>
+        <label style="display:block;font-size:11px;font-family:var(--font-hud);color:var(--cyan);margin-bottom:6px;font-weight:700;">NOMBRE DEL PROYECTO:</label>
+        <input type="text" id="new-proj-name" placeholder="ej. MarketPay, DrivoBot, ValexAnalytics..." style="width:100%;box-sizing:border-box;background:rgba(0,0,0,0.6);border:1px solid rgba(0,240,255,0.3);border-radius:6px;padding:8px 12px;color:#fff;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')submitCreateProject()">
+      </div>
+
+      <div>
+        <label style="display:block;font-size:11px;font-family:var(--font-hud);color:var(--cyan);margin-bottom:6px;font-weight:700;">PLANTILLA BASE (SCAFFOLDING):</label>
+        <select id="new-proj-template" style="width:100%;box-sizing:border-box;background:rgba(9,17,34,0.95);border:1px solid rgba(0,240,255,0.3);border-radius:6px;padding:8px 12px;color:#fff;font-size:12px;outline:none;">
+          <option value="blank">📁 Proyecto Limpio (Git Init + Estructura + README)</option>
+          <option value="flutter">📱 Flutter App (Mobile iOS / Android + Web)</option>
+          <option value="react">⚛️ React + Vite + Tailwind CSS (Web SPA)</option>
+          <option value="fastapi">⚡ Python FastAPI (Microservicio Backend)</option>
+          <option value="node">🟢 Node.js / Express (API REST / Workers)</option>
+        </select>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+        <input type="checkbox" id="new-proj-open-ide" checked style="accent-color:var(--cyan);width:16px;height:16px;cursor:pointer;">
+        <label for="new-proj-open-ide" style="font-size:11px;color:var(--text-main);cursor:pointer;">Abrir automáticamente en Antigravity IDE al inicializar</label>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button class="sys-action-btn" onclick="closeNewProjectModal()" style="padding:8px 16px;">Cancelar</button>
+      <button class="dev-action-btn primary" id="btn-submit-create-proj" onclick="submitCreateProject()" style="padding:8px 20px;font-size:12px;">
+        🚀 Crear e Inicializar
+      </button>
+    </div>
   </div>
 </div>
 
@@ -3091,9 +3356,11 @@ function toggleChatDrawer() {
   }
 }
 
-// ─── Alberth Dev Console (AGC) & Antigravity Management ─────
+// ─── Alberth Dev Console (AGC) & Antigravity Master Drawer v2.0 ─────
 let isDevConsoleOpen = false;
-let selectedDevProject = "drivo";
+let selectedDevProject = "all";
+let devConsoleMode = "auto"; // "auto" | "ai" | "terminal"
+let allProjectsList = [];
 
 function toggleDevConsoleDrawer() {
   isDevConsoleOpen = !isDevConsoleOpen;
@@ -3107,34 +3374,195 @@ function toggleDevConsoleDrawer() {
   if (isDevConsoleOpen) {
     if (dot) dot.style.display = "none";
     if (isChatOpen) toggleChatDrawer();
-    loadDevConsoleLogs();
+    refreshProjectsList();
     setTimeout(() => {
-      const inp = document.getElementById("dev-console-input");
-      if (inp) inp.focus();
+      const textarea = document.getElementById("dev-console-textarea");
+      if (textarea) textarea.focus();
     }, 150);
   }
 }
 
-function setDevProject(proj, btnEl) {
-  selectedDevProject = proj;
-  document.querySelectorAll(".dev-console-projects-bar .proj-pill").forEach(p => p.classList.remove("active"));
-  if (btnEl) btnEl.classList.add("active");
-  const inp = document.getElementById("dev-console-input");
-  if (inp && proj !== "all") {
-    inp.placeholder = `status ${proj} | open ${proj} | git status...`;
+// Control del Dropdown de Proyectos
+function toggleProjectDropdown(forceClose = false) {
+  const menu = document.getElementById("project-dropdown-menu");
+  if (!menu) return;
+  if (forceClose || menu.style.display === "flex") {
+    menu.style.display = "none";
+  } else {
+    menu.style.display = "flex";
+    const searchInp = document.getElementById("project-search-input");
+    if (searchInp) {
+      searchInp.value = "";
+      searchInp.focus();
+    }
+    renderProjectDropdownItems("");
   }
 }
 
+// Cerrar dropdown al hacer click fuera
+document.addEventListener("click", (e) => {
+  const wrap = document.querySelector(".project-selector-dropdown-wrap");
+  if (wrap && !wrap.contains(e.target)) {
+    toggleProjectDropdown(true);
+  }
+});
+
+// Cargar proyectos dinámicamente desde /api/projects
+async function refreshProjectsList() {
+  try {
+    const res = await fetch("/api/projects");
+    const data = await res.json();
+    if (data && data.ok && Array.isArray(data.projects)) {
+      allProjectsList = data.projects;
+      renderProjectDropdownItems();
+      updateActiveProjectUI();
+    }
+  } catch (err) {
+    console.warn("Error cargando lista de proyectos:", err);
+  }
+}
+
+function renderProjectDropdownItems(filterText = "") {
+  const container = document.getElementById("project-dropdown-items");
+  if (!container) return;
+
+  const query = (filterText || "").trim().toLowerCase();
+  container.innerHTML = "";
+
+  // 1. Opción Global / Consultas Libres
+  if (!query || "global consultas libres".includes(query)) {
+    const isGlobActive = selectedDevProject === "all";
+    const globDiv = document.createElement("div");
+    globDiv.className = `project-item ${isGlobActive ? "active" : ""}`;
+    globDiv.onclick = () => selectDevProject("all", "GLOBAL · CONSULTAS LIBRES", "main");
+    globDiv.innerHTML = `
+      <div>
+        <div class="project-item-title" style="display:flex;align-items:center;gap:6px;">
+          <span>🌐</span>
+          <span style="color:var(--cyan);">GLOBAL · CONSULTAS LIBRES</span>
+        </div>
+        <div class="project-item-desc">Consultas y asistencia IA sin vincular a un proyecto</div>
+      </div>
+      <span class="project-item-badge">LIBRE</span>
+    `;
+    container.appendChild(globDiv);
+  }
+
+  // 2. Proyectos registrados
+  const filtered = allProjectsList.filter(p => {
+    if (!query) return true;
+    return (p.name && p.name.toLowerCase().includes(query)) ||
+           (p.slug && p.slug.toLowerCase().includes(query)) ||
+           (p.category && p.category.toLowerCase().includes(query)) ||
+           (p.description && p.description.toLowerCase().includes(query));
+  });
+
+  if (filtered.length === 0 && query) {
+    const emptyDiv = document.createElement("div");
+    emptyDiv.style.padding = "10px 12px";
+    emptyDiv.style.fontSize = "11px";
+    emptyDiv.style.color = "var(--text-dim)";
+    emptyDiv.style.textAlign = "center";
+    emptyDiv.textContent = `No se encontraron proyectos con "${filterText}"`;
+    container.appendChild(emptyDiv);
+    return;
+  }
+
+  filtered.forEach(p => {
+    const isActive = selectedDevProject === p.slug;
+    const item = document.createElement("div");
+    item.className = `project-item ${isActive ? "active" : ""}`;
+    item.onclick = () => selectDevProject(p.slug, p.name, p.git_branch || "main");
+
+    const badgeText = p.category ? p.category.toUpperCase() : (p.git_branch ? `🌿 ${p.git_branch}` : 'CODE');
+    item.innerHTML = `
+      <div>
+        <div class="project-item-title" style="display:flex;align-items:center;gap:6px;">
+          <span>📁</span>
+          <span>${escapeHtml(p.name)}</span>
+        </div>
+        <div class="project-item-desc">${escapeHtml(p.description || p.path || '')}</div>
+      </div>
+      <span class="project-item-badge">${escapeHtml(badgeText)}</span>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function filterProjectsList(query) {
+  renderProjectDropdownItems(query);
+}
+
+function selectDevProject(slug, name, branch = "main") {
+  selectedDevProject = slug;
+  const label = document.getElementById("proj-selector-label");
+  const icon = document.getElementById("proj-selector-icon");
+  const branchTag = document.getElementById("active-project-branch-tag");
+  const textarea = document.getElementById("dev-console-textarea");
+
+  if (slug === "all") {
+    if (label) label.textContent = "GLOBAL · CONSULTAS LIBRES";
+    if (icon) icon.textContent = "🌐";
+    if (branchTag) branchTag.textContent = "MODO: LIBRE";
+    if (textarea) textarea.placeholder = "Escriba su consulta o comando libre a Alberth (Shift+Enter para nueva línea)...";
+  } else {
+    if (label) label.textContent = name.toUpperCase();
+    if (icon) icon.textContent = "📁";
+    if (branchTag) branchTag.textContent = `🌿 ${branch || 'main'}`;
+    if (textarea) textarea.placeholder = `[${name}] Escriba a Alberth o ejecute 'git status', 'open'...`;
+  }
+
+  toggleProjectDropdown(true);
+}
+
+function updateActiveProjectUI() {
+  if (selectedDevProject === "all") return;
+  const p = allProjectsList.find(x => x.slug === selectedDevProject);
+  if (p) {
+    const branchTag = document.getElementById("active-project-branch-tag");
+    if (branchTag && p.git_branch) {
+      branchTag.textContent = `🌿 ${p.git_branch}`;
+    }
+  }
+}
+
+// Modos de Consola: Auto / Solo IA / Terminal
+function setConsoleMode(mode) {
+  devConsoleMode = mode;
+  document.querySelectorAll(".mode-pill").forEach(btn => btn.classList.remove("active"));
+  const btn = document.getElementById(`mode-${mode}`);
+  if (btn) btn.classList.add("active");
+
+  const names = { auto: "Auto-Detección Inteligente", ai: "Solo Asistencia IA", terminal: "Solo Terminal / Comandos" };
+  showToast(`Modo consola: ${names[mode] || mode}`, 2000);
+}
+
+// Ajuste automático de altura de textarea
+function autoResizeTextarea(el) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 180) + "px";
+}
+
+// Manejo de teclado: Enter para enviar, Shift+Enter para salto de línea
+function handleDevConsoleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    submitDevConsoleInput();
+  }
+}
+
+// Acciones tácticas rápidas
 function runDevAction(action) {
   let cmd = action;
+  const p = selectedDevProject === "all" ? "alberth" : selectedDevProject;
+
   if (action === "open") {
-    const p = selectedDevProject === "all" ? "drivo" : selectedDevProject;
     cmd = `open ${p}`;
   } else if (action === "status") {
-    cmd = selectedDevProject === "all" ? "status" : `status ${selectedDevProject}`;
+    cmd = selectedDevProject === "all" ? "status" : `status ${p}`;
   } else if (action.startsWith("git")) {
-    const p = selectedDevProject === "all" ? "alberth" : selectedDevProject;
-    const sub = action.replace('git', '').trim();
+    const sub = action.replace("git", "").trim();
     cmd = `git ${p} ${sub}`;
   } else if (action === "run status") {
     cmd = "run alberth status";
@@ -3142,113 +3570,227 @@ function runDevAction(action) {
     cmd = "list";
   }
 
-  executeDevConsoleCmd(cmd);
+  executeDevUnifiedMessage(cmd, "terminal");
 }
 
-function handleDevConsoleKey(e) {
-  if (e.key === "Enter") {
-    submitDevConsoleInput();
-  }
-}
-
+// Envío unificado al backend /api/console/chat
 function submitDevConsoleInput() {
-  const inp = document.getElementById("dev-console-input");
-  if (!inp) return;
-  const cmd = inp.value.trim();
-  if (!cmd) return;
-  inp.value = "";
-  executeDevConsoleCmd(cmd);
+  const textarea = document.getElementById("dev-console-textarea");
+  if (!textarea) return;
+  const text = textarea.value.trim();
+  if (!text) return;
+
+  textarea.value = "";
+  textarea.style.height = "auto";
+
+  executeDevUnifiedMessage(text, devConsoleMode);
 }
 
-async function executeDevConsoleCmd(cmd) {
-  appendDevConsoleEntry({
-    project: selectedDevProject,
-    command: `agc ${cmd}`,
-    status: "RUNNING",
-    output: "⚡ Ejecutando comando en el sistema...",
-    timestamp: Date.now() / 1000
-  });
-
-  try {
-    const res = await fetch("/api/console/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: cmd })
-    });
-    const data = await res.json();
-    if (data && data.output) {
-      appendDevConsoleEntry({
-        project: selectedDevProject,
-        command: `agc ${cmd}`,
-        status: data.status || (data.ok ? "SUCCESS" : "ERROR"),
-        output: data.output,
-        timestamp: Date.now() / 1000
-      });
-    }
-  } catch (err) {
-    appendDevConsoleEntry({
-      project: selectedDevProject,
-      command: `agc ${cmd}`,
-      status: "ERROR",
-      output: `Error al conectar con la API de consola: ${err.message}`,
-      timestamp: Date.now() / 1000
-    });
-  }
-}
-
-async function loadDevConsoleLogs() {
-  try {
-    const res = await fetch("/api/console/logs?limit=25");
-    const data = await res.json();
-    if (data && data.logs && data.logs.length > 0) {
-      const term = document.getElementById("dev-console-terminal");
-      if (term) {
-        term.innerHTML = `<div class="terminal-banner">⚡ [ALBERTH AGC DEV TERMINAL - TELEMETRÍA BIDIRECCIONAL ACTIVA]</div>`;
-        data.logs.forEach(evt => appendDevConsoleEntry(evt, false));
-        term.scrollTop = term.scrollHeight;
-      }
-    }
-  } catch (e) {
-    console.warn("No se pudieron cargar logs de consola:", e);
-  }
-}
-
-function handleDevConsoleEvent(evt) {
-  appendDevConsoleEntry(evt, true);
-  const dot = document.getElementById("dev-console-dot");
-  if (dot && !isDevConsoleOpen) {
-    dot.style.display = "inline-block";
-  }
-}
-
-function appendDevConsoleEntry(evt, scroll = true) {
+// Ejecución unificada
+async function executeDevUnifiedMessage(messageText, forcedMode = null) {
   const term = document.getElementById("dev-console-terminal");
   if (!term) return;
 
-  const d = new Date((evt.timestamp || Date.now() / 1000) * 1000);
-  const timeStr = d.toTimeString().split(" ")[0];
-  const stClass = evt.status === "ERROR" ? "status-ERROR" : (evt.status === "RUNNING" ? "status-RUNNING" : "status-SUCCESS");
+  // 1. Agregar burbuja de usuario al feed
+  appendUserFeedMessage(messageText);
 
-  let cleanOut = (evt.output || "").replace(/\u001b\[[0-9;]*m/g, "");
+  // 2. Agregar indicador de pensamiento / ejecución
+  const pendingId = "pending-" + Date.now();
+  appendPendingFeedMessage(pendingId);
 
-  const entry = document.createElement("div");
-  entry.className = `terminal-entry ${stClass}`;
-  entry.innerHTML = `
-    <div class="terminal-entry-meta">
-      <span><strong class="terminal-entry-cmd">${escapeHtml(evt.command || 'agc')}</strong> · [${escapeHtml((evt.project || 'SYS').toUpperCase())}]</span>
-      <span>[${escapeHtml(evt.status || 'OK')}] ${timeStr}</span>
+  try {
+    const res = await fetch("/api/console/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: messageText,
+        project: selectedDevProject,
+        mode: forcedMode || devConsoleMode
+      })
+    });
+
+    const data = await res.json();
+    removePendingFeedMessage(pendingId);
+
+    if (data && data.ok) {
+      if (data.type === "ai") {
+        appendAiFeedMessage(data.text || data.output || "Orden procesada, Señor.");
+        if (data.audio_url && typeof playAudioUrl === "function") {
+          playAudioUrl(data.audio_url);
+        }
+      } else {
+        // Tipo terminal
+        appendTerminalFeedMessage({
+          command: data.command || messageText,
+          project: data.project || selectedDevProject,
+          status: data.status || "SUCCESS",
+          output: data.output || ""
+        });
+      }
+    } else {
+      appendTerminalFeedMessage({
+        command: messageText,
+        project: selectedDevProject,
+        status: "ERROR",
+        output: data.error || data.output || "Error desconocido al procesar orden en el sistema."
+      });
+    }
+  } catch (err) {
+    removePendingFeedMessage(pendingId);
+    appendTerminalFeedMessage({
+      command: messageText,
+      project: selectedDevProject,
+      status: "ERROR",
+      output: `Falla de comunicación con el núcleo Alberth: ${err.message}`
+    });
+  }
+
+  term.scrollTop = term.scrollHeight;
+}
+
+// Renderizado de burbujas en el feed
+function appendUserFeedMessage(text) {
+  const term = document.getElementById("dev-console-terminal");
+  if (!term) return;
+
+  const timeStr = new Date().toTimeString().split(" ")[0];
+  const div = document.createElement("div");
+  div.className = "feed-msg user";
+  div.innerHTML = `
+    <div class="feed-msg-header">
+      <span>SEÑOR</span>
+      <span>•</span>
+      <span>${timeStr}</span>
     </div>
-    <div class="terminal-entry-output">${escapeHtml(cleanOut)}</div>
+    <div class="feed-msg-content">${escapeHtml(text)}</div>
   `;
+  term.appendChild(div);
+  term.scrollTop = term.scrollHeight;
+}
 
-  term.appendChild(entry);
-  if (scroll) term.scrollTop = term.scrollHeight;
+function appendPendingFeedMessage(id) {
+  const term = document.getElementById("dev-console-terminal");
+  if (!term) return;
+
+  const div = document.createElement("div");
+  div.id = id;
+  div.className = "feed-msg ai";
+  div.innerHTML = `
+    <div class="feed-msg-header">
+      <span style="color:var(--cyan);">ALBERTH QUANTUM</span>
+      <span>•</span>
+      <span style="color:var(--gold);">PROCESANDO ORDEN...</span>
+    </div>
+    <div class="feed-msg-content" style="display:flex;align-items:center;gap:8px;color:var(--text-dim);">
+      <div class="thinking-dots" style="display:flex;gap:4px;">
+        <span style="width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blinkDots 1.4s infinite;"></span>
+        <span style="width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blinkDots 1.4s infinite 0.2s;"></span>
+        <span style="width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blinkDots 1.4s infinite 0.4s;"></span>
+      </div>
+      <span style="font-size:11px;">Consultando modelos y subsistemas tácticos...</span>
+    </div>
+  `;
+  term.appendChild(div);
+  term.scrollTop = term.scrollHeight;
+}
+
+function removePendingFeedMessage(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function appendAiFeedMessage(aiText) {
+  const term = document.getElementById("dev-console-terminal");
+  if (!term) return;
+
+  const timeStr = new Date().toTimeString().split(" ")[0];
+  const parsedContent = renderConsoleMarkdown(aiText);
+
+  const div = document.createElement("div");
+  div.className = "feed-msg ai";
+  div.innerHTML = `
+    <div class="feed-msg-header">
+      <span style="color:var(--cyan);font-weight:700;">ALBERTH QUANTUM · ANTIGRAVITY</span>
+      <span>•</span>
+      <span>${timeStr}</span>
+      <button onclick="copyMsgElement(this)" style="margin-left:auto;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px;" title="Copiar texto">📋</button>
+    </div>
+    <div class="feed-msg-content">${parsedContent}</div>
+  `;
+  term.appendChild(div);
+  term.scrollTop = term.scrollHeight;
+}
+
+function appendTerminalFeedMessage(evt) {
+  const term = document.getElementById("dev-console-terminal");
+  if (!term) return;
+
+  const timeStr = new Date().toTimeString().split(" ")[0];
+  const stClass = evt.status === "ERROR" ? "status-ERROR" : (evt.status === "RUNNING" ? "status-RUNNING" : "status-SUCCESS");
+  const cleanOut = (evt.output || "").replace(/\u001b\[[0-9;]*m/g, "");
+
+  const div = document.createElement("div");
+  div.className = `feed-msg terminal ${stClass}`;
+  div.innerHTML = `
+    <div class="feed-msg-header">
+      <span style="color:var(--green);font-weight:700;">&gt; ${escapeHtml(evt.command || 'agc')}</span>
+      <span>•</span>
+      <span>[${escapeHtml((evt.project || 'SYS').toUpperCase())}]</span>
+      <span>•</span>
+      <span style="color:${evt.status === 'ERROR' ? 'var(--red)' : 'var(--green)'};">[${escapeHtml(evt.status || 'OK')}]</span>
+      <span>${timeStr}</span>
+      <button onclick="copyMsgElement(this)" style="margin-left:auto;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px;" title="Copiar logs">📋</button>
+    </div>
+    <div class="feed-msg-content">${escapeHtml(cleanOut)}</div>
+  `;
+  term.appendChild(div);
+  term.scrollTop = term.scrollHeight;
+}
+
+// Markdown parser ligero para el feed
+function renderConsoleMarkdown(raw) {
+  if (!raw) return "";
+  let s = escapeHtml(raw);
+
+  // 1. Bloques de código: ```lang\ncode\n```
+  s = s.replace(/```([a-zA-Z0-9_\-\.\+]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    return `<div style="margin:8px 0;background:#030812;border:1px solid rgba(0,240,255,0.25);border-radius:6px;overflow:hidden;"><div style="background:rgba(0,240,255,0.08);padding:3px 8px;font-size:9px;font-family:var(--font-hud);color:var(--cyan);display:flex;justify-content:space-between;"><span>${lang || 'CODE'}</span><button onclick="copyCodeBlock(this)" style="background:none;border:none;color:var(--cyan);cursor:pointer;font-size:9px;">Copiar</button></div><pre style="margin:0;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;overflow-x:auto;color:#d1e7dd;"><code>${code}</code></pre></div>`;
+  });
+
+  // 2. Código inline `code`
+  s = s.replace(/`([^`]+)`/g, `<code style="background:rgba(0,240,255,0.1);color:var(--cyan);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px;">$1</code>`);
+
+  // 3. Negritas **text**
+  s = s.replace(/\*\*([^*]+)\*\*/g, `<strong>$1</strong>`);
+
+  // 4. Saltos de línea
+  s = s.replace(/\n/g, "<br>");
+
+  return s;
+}
+
+function copyCodeBlock(btn) {
+  const pre = btn.closest("div").parentElement.querySelector("pre");
+  if (pre) {
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      showToast("📋 Código copiado", 1500);
+    });
+  }
+}
+
+function copyMsgElement(btn) {
+  const content = btn.closest(".feed-msg").querySelector(".feed-msg-content");
+  if (content) {
+    navigator.clipboard.writeText(content.innerText).then(() => {
+      showToast("📋 Contenido copiado", 1500);
+    });
+  }
 }
 
 function clearDevConsole() {
   const term = document.getElementById("dev-console-terminal");
   if (term) {
-    term.innerHTML = `<div class="terminal-banner">⚡ [CONSOLA LIMPIADA · LISTO PARA TELEMETRÍA]</div>`;
+    term.innerHTML = `<div class="terminal-banner">⚡ [FEED LIMPIADO · LISTO PARA TELEMETRÍA Y DIÁLOGO]</div>`;
   }
 }
 
@@ -3256,9 +3798,108 @@ function copyDevConsole() {
   const term = document.getElementById("dev-console-terminal");
   if (term) {
     navigator.clipboard.writeText(term.innerText).then(() => {
-      showToast("📋 Logs copiados al portapapeles", 2500);
+      showToast("📋 Historial copiado al portapapeles", 2500);
     });
   }
+}
+
+// ─── Modal de Creación de Proyecto ───────────────────────────
+function openNewProjectModal() {
+  toggleProjectDropdown(true);
+  const modal = document.getElementById("new-project-modal");
+  if (modal) {
+    modal.classList.add("open");
+    const nameInp = document.getElementById("new-proj-name");
+    if (nameInp) {
+      nameInp.value = "";
+      nameInp.focus();
+    }
+  }
+}
+
+function closeNewProjectModal() {
+  const modal = document.getElementById("new-project-modal");
+  if (modal) modal.classList.remove("open");
+}
+
+async function submitCreateProject() {
+  const nameInp = document.getElementById("new-proj-name");
+  const tplSelect = document.getElementById("new-proj-template");
+  const openCheck = document.getElementById("new-proj-open-ide");
+  const submitBtn = document.getElementById("btn-submit-create-proj");
+
+  if (!nameInp) return;
+  const name = nameInp.value.trim();
+  if (!name) {
+    showToast("⚠️ Ingrese un nombre para el proyecto", 2500);
+    nameInp.focus();
+    return;
+  }
+
+  const template = tplSelect ? tplSelect.value : "blank";
+  const openIde = openCheck ? openCheck.checked : true;
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "⚙️ Inicializando...";
+  }
+
+  try {
+    const res = await fetch("/api/projects/new", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name,
+        template: template,
+        open_ide: openIde
+      })
+    });
+
+    const data = await res.json();
+    if (data && data.ok) {
+      showToast(`✅ Proyecto '${name}' creado e inicializado`, 3500);
+      closeNewProjectModal();
+
+      await refreshProjectsList();
+      const slug = data.project ? data.project.slug : name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+      selectDevProject(slug, name, "main");
+
+      appendTerminalFeedMessage({
+        command: `agc new ${name} --template ${template}`,
+        project: slug,
+        status: "SUCCESS",
+        output: `Proyecto '${name}' inicializado con éxito en ${data.project ? data.project.path : ''}.\nGit repository configurado y registrado en Antigravity.`
+      });
+    } else {
+      showToast(`❌ Error: ${data.error || 'No se pudo crear el proyecto'}`, 4000);
+    }
+  } catch (err) {
+    showToast(`❌ Falla de red: ${err.message}`, 4000);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "🚀 Crear e Inicializar";
+    }
+  }
+}
+
+function handleDevConsoleEvent(evt) {
+  if (!evt) return;
+  appendTerminalFeedMessage(evt);
+  const dot = document.getElementById("dev-console-dot");
+  if (dot && !isDevConsoleOpen) {
+    dot.style.display = "inline-block";
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 // Atajo global Ctrl+Alt+C para alternar la Dev Console
