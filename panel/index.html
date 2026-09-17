@@ -966,7 +966,8 @@ header.hud-header {
   align-items: center;
 }
 
-.command-input-box input {
+.command-input-box input,
+.command-input-box textarea {
   width: 100%;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(0, 240, 255, 0.25);
@@ -978,15 +979,23 @@ header.hud-header {
   color: var(--cyan);
   letter-spacing: 0.5px;
   outline: none;
+  resize: none;
+  min-height: 40px;
+  max-height: 140px;
+  line-height: 1.4;
+  box-sizing: border-box;
+  overflow-y: auto;
   transition: all 0.2s ease;
 }
 
-.command-input-box input::placeholder {
+.command-input-box input::placeholder,
+.command-input-box textarea::placeholder {
   color: var(--text-muted);
   font-weight: 500;
 }
 
-.command-input-box input:focus {
+.command-input-box input:focus,
+.command-input-box textarea:focus {
   border-color: var(--cyan);
   box-shadow: 0 0 16px var(--cyan-glow);
   background: rgba(0, 0, 0, 0.55);
@@ -995,6 +1004,7 @@ header.hud-header {
 .command-prompt-symbol {
   position: absolute;
   left: 12px;
+  top: 11px;
   font-family: var(--font-hud);
   font-size: 14px;
   font-weight: 800;
@@ -1014,6 +1024,7 @@ header.hud-header {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-command-send:hover {
@@ -1055,6 +1066,70 @@ header.hud-header {
 
 .chat-drawer.open {
   right: 16px;
+}
+
+/* ─── Chat Drawer Multiline Input Row (Consola de Diálogo) ─── */
+.chat-drawer-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(4, 9, 20, 0.98);
+  border-top: 1px solid rgba(240, 192, 96, 0.25);
+  position: relative;
+  z-index: 10;
+}
+#chat-drawer-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(240, 192, 96, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fff;
+  outline: none;
+  resize: none;
+  min-height: 38px;
+  max-height: 180px;
+  overflow-y: auto;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#chat-drawer-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(240, 192, 96, 0.3);
+}
+.chat-drawer-send-btn {
+  height: 38px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.chat-drawer-send-btn:hover {
+  background: #fff;
+  box-shadow: 0 0 10px var(--gold);
+  transform: scale(1.05);
+}
+.chat-drawer-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px 6px;
+  background: rgba(3, 7, 16, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 9px;
+  font-family: var(--font-hud, monospace);
+  color: var(--text-dim, #8ba2b8);
 }
 
 /* ─── Live Canvas A2UI Drawer (OpenPage Protocol) ─── */
@@ -2396,11 +2471,11 @@ header.hud-header {
 
     <div class="command-input-box">
       <span class="command-prompt-symbol">&gt;</span>
-      <input type="text" id="cmd-input" placeholder="Transmitir comando o hablar con Alberth..." onkeydown="handleKey(event)" autocomplete="off">
+      <textarea id="cmd-input" rows="1" placeholder="Transmitir comando o hablar con Alberth (Shift+Enter para nueva línea)..." oninput="autoResizeCmdInput(this)" onkeydown="handleKey(event)" autocomplete="off"></textarea>
       <canvas id="voice-waveform-canvas"></canvas>
     </div>
 
-    <button class="btn-command-send" onclick="sendText()" title="Ejecutar">
+    <button class="btn-command-send" onclick="sendText()" title="Ejecutar (Enter)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
       </svg>
@@ -2449,6 +2524,26 @@ header.hud-header {
       <span></span><span></span><span></span>
     </div>
     <span style="font-family:var(--font-data);font-size:12px;color:var(--gold);">Alberth procesando orden...</span>
+  </div>
+
+  <!-- Barra de Entrada Multilínea Consola de Diálogo -->
+  <div class="chat-drawer-input-row">
+    <div class="textarea-container" style="flex:1;position:relative;">
+      <textarea id="chat-drawer-textarea" rows="1" placeholder="Escribir a Alberth (Shift+Enter para nueva línea)..." oninput="autoResizeTextarea(this)" onkeydown="handleChatDrawerKey(event)"></textarea>
+    </div>
+    <button class="chat-drawer-send-btn" id="btn-chat-drawer-send" onclick="sendChatDrawerText()" title="Enviar orden (Enter)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+      </svg>
+    </button>
+    <button class="dev-tool-btn" onclick="clearChatMessages()" title="Limpiar diálogo">🧹</button>
+    <button class="dev-tool-btn" onclick="copyChatMessages()" title="Copiar diálogo">📋</button>
+  </div>
+
+  <!-- Footer con Atajos -->
+  <div class="chat-drawer-footer-bar">
+    <span style="color:var(--gold);font-weight:700;">ALBERTH DIALOGUE ENGINE</span>
+    <span style="opacity:0.6;font-size:8px;">[Enter] Enviar &nbsp;|&nbsp; [Shift+Enter] Salto de línea</span>
   </div>
 </div>
 
@@ -3353,6 +3448,10 @@ function toggleChatDrawer() {
   if (isChatOpen) {
     if (typeof isDevConsoleOpen !== "undefined" && isDevConsoleOpen) toggleDevConsoleDrawer();
     scrollChat();
+    setTimeout(() => {
+      const ta = document.getElementById("chat-drawer-textarea");
+      if (ta) ta.focus();
+    }, 150);
   }
 }
 
@@ -4075,9 +4174,16 @@ function copyMsgText(btn) {
 }
 
 // ─── Input & Quick Commands ─────────────────────────────────
+function autoResizeCmdInput(el) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 140) + "px";
+}
+
 function sendText() {
   stopAudio(); // Interrumpir respuesta de Alberth inmediatamente si el usuario envía un texto
   const inp = document.getElementById("cmd-input");
+  if (!inp) return;
   const txt = inp.value.trim();
   if (!txt) return;
 
@@ -4088,6 +4194,47 @@ function sendText() {
     sendWS({ type: "text", text: txt });
   }
   inp.value = "";
+  inp.style.height = "auto";
+}
+
+// Envío desde la Consola de Diálogo Drawer
+function sendChatDrawerText() {
+  stopAudio();
+  const ta = document.getElementById("chat-drawer-textarea");
+  if (!ta) return;
+  const txt = ta.value.trim();
+  if (!txt) return;
+
+  if (isLiveModeActive && liveWS && liveWS.readyState === WebSocket.OPEN) {
+    liveWS.send(JSON.stringify({ type: "text", text: txt }));
+    renderLiveTranscript("user", txt);
+  } else {
+    sendWS({ type: "text", text: txt });
+  }
+  ta.value = "";
+  ta.style.height = "auto";
+}
+
+function handleChatDrawerKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChatDrawerText();
+  }
+}
+
+function clearChatMessages() {
+  const c = document.getElementById("chat-messages");
+  if (c) c.innerHTML = "";
+  showToast("🧹 Diálogo limpiado", 1500);
+}
+
+function copyChatMessages() {
+  const c = document.getElementById("chat-messages");
+  if (c) {
+    navigator.clipboard.writeText(c.innerText).then(() => {
+      showToast("📋 Diálogo copiado al portapapeles", 2000);
+    });
+  }
 }
 
 function sendQuick(txt) {
