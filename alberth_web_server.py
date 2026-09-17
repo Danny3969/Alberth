@@ -271,6 +271,16 @@ def run_alberth_full(text: str) -> dict:
     )
 
     is_camera_query = not has_url and not is_screen_query and (is_direct_camera or is_followup_vision)
+
+    # Excluir consultas sobre la identidad o rostro de Alberth (no son fotos del usuario)
+    is_alberth_identity_query = any(k in q_lower for k in [
+        "darte una cara", "darte una imagen", "darle una cara", "tu cara", "tu imagen",
+        "tu rostro", "tu identidad", "tu avatar", "un rostro para ti", "una cara para ti",
+        "qué cara", "que cara", "diseñar tu cara", "ponerte una cara", "ponerte cara"
+    ])
+    if is_alberth_identity_query:
+        is_camera_query = False
+
     if has_url or has_vision_negation:
         is_screen_query = False
         is_camera_query = False
