@@ -71,9 +71,10 @@ Bienvenido a la Bóveda Maestra de **Novasyscom**. Esta base de conocimiento loc
 
 ---
 
-## 💡 4. Pizarra Visual de Estrategia
-Abra el lienzo interactivo en Obsidian para ver las conexiones gráficas:
-- **Lienzo Visual:** `Novasyscom_Ecosistema.canvas`
+## 💡 4. Identidad Visual 3D & Pizarra de Estrategia
+- **Propuesta de Identidad Facial 3D (Cara de Alberth):** [[identidad_visual_alberth_3d|identidad_visual_alberth_3d — Conceptos Holograma 3D, Androide y Metahumano]]
+- **Lienzo Visual Canvas:** `Novasyscom_Ecosistema.canvas`
+- **Assets de Concepto en Alta Definición:** `panel/assets/identity/` (Holograma 3D, Androide Ejecutivo, Metahumano)
 
 ---
 

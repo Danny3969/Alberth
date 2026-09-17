@@ -420,24 +420,28 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 - **Backend FastAPI & WebSockets:** Endpoints `/api/projects`, `/api/projects/new`, `/api/console/chat`, `/api/console/event`, `/api/console/logs` y `/api/console/exec` en `alberth_web_server.py`.
 - **Quantum HUD Master Console Drawer (`#dev-console-drawer`):** Dock lateral Cyber-HUD en `http://localhost:8080` con feed unificado, botonera táctica, footer con conmutador de modos (`Auto`, `Solo IA`, `Terminal`), atajo de teclado `Ctrl + Alt + C`.
 - **Integración Nativa con Obsidian (Bóveda Maestra de Novasyscom):** Instalación oficial de Obsidian en macOS (`/Applications/Obsidian.app`). Bóveda configurada en `/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth`, con Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`), pizarra infinita (`Novasyscom_Ecosistema.canvas`), comando `agc obsidian` / `agc vault` y botón `🧠 Obsidian` en el HUD.
+- **Identidad Facial 3D de Alberth (Conceptos & Corrección Visión):** Corrección en `alberth_web_server.py` (`is_alberth_identity_query`) para que consultas sobre la cara/rostro/avatar de Alberth no disparen falsas capturas de cámara web ni se corten a medias. Generación de 3 conceptos visuales en `panel/assets/identity/`: 1) Holograma Cuántico Volumétrico en nube de puntos 3D (`alberth_holograma_3d.jpg` - recomendada para evolucionar el Swarm Orb en Three.js con reactividad de audio), 2) Androide Ejecutivo Obsidiana (`alberth_androide_ejecutivo.jpg`), 3) Metahumano Digital Humanoide (`alberth_metahumano_digital.jpg`). Documentado en `identidad_visual_alberth_3d.md`.
 - **Integración Shell:** Alias `alias agc='python3 ~/alberth_cli/ag-console.py'` y script de autocompletado Zsh (`ag-complete.sh`) en `~/.zshrc`.
 - **Referencia Documental:** Ver bitácora `memory/2026-09-17.md` y `walkthrough.md`.
 
 ---
 
-## 🚀 Guía de Continuidad desde Otros Equipos
+## 🚀 Guía de Continuidad desde Otros Equipos (MacBook Pro)
 
-Para conectarte o continuar este proyecto desde otra computadora:
+Para conectarte o continuar este proyecto desde tu **MacBook Pro**:
 
-1. **Clonar el Repositorio:**
+1. **Clonar o Actualizar el Repositorio:**
    ```bash
-   git clone https://github.com/Danny3969/Alberth.git
+   git pull origin main
    ```
-2. **Revisar MEMORY.md:**
-   Consultar este archivo para saber el estado exacto de las configuraciones y daemons.
-3. **Sincronizar y Subir Cambios:**
+2. **Revisar MEMORY.md & MOC en Obsidian:**
+   - Abrir la carpeta `Alberth` en Obsidian para ver el grafo visual y el Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`).
+3. **Continuar el Desarrollo de la Cara 3D de Alberth:**
+   - Inspeccionar los conceptos en `panel/assets/identity/`.
+   - Modificar la clase `SwarmOrb` / `VolumetricHologram` en `panel/index.html` para implementar la transición del orbe a la nube de puntos del rostro holográfico de Alberth con shaders Three.js y reactividad por voz.
+4. **Sincronizar y Subir Cambios:**
    ```bash
    git add .
-   git commit -m "feat: actualización de estado"
+   git commit -m "feat: actualización desde MacBook"
    git push origin main
    ```
