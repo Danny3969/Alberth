@@ -1,0 +1,64 @@
+# ag-config.yaml – Configuración Maestra de Proyectos Novasyscom & Antigravity
+# Entorno: iMac Contabilidad (macOS)
+
+hud:
+  ws_url: "ws://localhost:8080/ws"
+  api_url: "http://localhost:8080/api/console/event"
+  browser_url: "http://localhost:8080"
+
+antigravity:
+  bin_path: "/Users/contabilidad/.antigravity-ide/antigravity-ide/bin/agy-ide"
+  app_name: "Antigravity IDE"
+
+projects:
+  drivo:
+    name: "DRIVO"
+    path: "/Users/contabilidad/.gemini/antigravity-ide/scratch/Drivo"
+    category: "Mobility P2P"
+    description: "Plataforma de Ride-Hailing P2P urbana (Ecuador)"
+    port: 8088
+    scripts:
+      run: "flutter run"
+      build: "flutter build apk --release"
+      clean: "flutter clean && flutter pub get"
+
+  drivo-one:
+    name: "DRIVO ONE"
+    path: "/Users/contabilidad/.gemini/antigravity-ide/scratch/Drivo-One"
+    category: "Quick-Commerce"
+    description: "Marketplace de Delivery y multitienda tripartito"
+    port: 8090
+    scripts:
+      dev: "npm run dev"
+      build: "npm run build"
+
+  alberth:
+    name: "ALBERTH NEXUS"
+    path: "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth"
+    category: "AI Chief of Staff"
+    description: "COO Digital y Asistente Personal con Quantum HUD 3D"
+    port: 8080
+    scripts:
+      status: "pm2 list"
+      restart: "pm2 restart all"
+      logs: "pm2 logs --lines 20"
+
+  globalmarket:
+    name: "GLOBALMARKET"
+    path: "/Users/contabilidad/.gemini/antigravity-ide/scratch/GlobalMarket"
+    category: "Agroexport B2B"
+    description: "Portal Web Agroexportador y Cloud Drive privado"
+    port: 3000
+    scripts:
+      dev: "npm run dev"
+      build: "npm run build"
+
+  valex:
+    name: "VALEX"
+    path: "/Users/contabilidad/.gemini/antigravity-ide/scratch/Divisas"
+    category: "Fintech FX"
+    description: "Fintech de Divisas y Giros Ecuador ↔ Perú (USD ↔ PEN)"
+    port: 4000
+    scripts:
+      dev: "npm run start:dev"
+      build: "npm run build"

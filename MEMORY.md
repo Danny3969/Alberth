@@ -409,6 +409,14 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 - **Hoja de Ruta de Monetización Autónoma ($500/semana):** Auditoría forense de capacidades completada; formulación de 4 modelos comprobados de ingresos con IA (Grid Trading, Arbitraje Polymarket, Brokerage de Leads B2B y Micro-Activos en RapidAPI/Apify).
 - **Referencia Documental:** Ver `COMPANY_NOVASYSCOM.md` y bitácora `memory/2026-09-16.md`.
 
+### 2026-09-17 (Consola de Desarrollo AGC & Antigravity Engine Integrado)
+- **Alberth Dev Console (`agc`):** Wrapper CLI y UI creado en `alberth_cli/` y vinculado a `~/alberth_cli` para gestionar los 5 proyectos corporativos (Drivo, Drivo One, Alberth, GlobalMarket, Valex).
+- **Integración Nativa con Antigravity:** Comando `agc open <proyecto>` (o `agc <proyecto> open`) que abre automáticamente los workspaces en **Antigravity IDE** (`open -a "Antigravity IDE"` y binario `agy-ide`).
+- **Backend FastAPI & WebSockets:** Endpoints `/api/console/event`, `/api/console/logs` y `/api/console/exec` en `alberth_web_server.py` para recepción, ejecución remota y retransmisión por `/ws`.
+- **Quantum HUD Dev Console Drawer (`#dev-console-drawer`):** Dock lateral Cyber-HUD en `http://localhost:8080` con visor de terminal en vivo, botonera de acciones tácticas, selector de proyectos, entrada interactiva de comandos y atajo global de teclado `Ctrl + Alt + C`.
+- **Integración Shell:** Alias `alias agc='python3 ~/alberth_cli/ag-console.py'` y script de autocompletado Zsh (`ag-complete.sh`) en `~/.zshrc`.
+- **Referencia Documental:** Ver bitácora `memory/2026-09-17.md`.
+
 ---
 
 ## 🚀 Guía de Continuidad desde Otros Equipos

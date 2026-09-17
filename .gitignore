@@ -24,3 +24,7 @@ panel/assets/voice_exchange/*
 *.db
 *.sqlite*
 scratch/
+
+# Alberth Dev Console CLI logs
+alberth_cli/logs/*
+!alberth_cli/logs/.gitkeep

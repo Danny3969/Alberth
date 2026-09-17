@@ -808,6 +808,66 @@ async def activate_canvas_preset(name: str):
 
 
 
+# ── Alberth Dev Console (AGC) & Antigravity Endpoints ────────────────────────
+console_logs_history = []
+
+class ConsoleEventModel(BaseModel):
+    project: str = "system"
+    action: str = "status"
+    command: str = ""
+    status: str = "SUCCESS"
+    output: str = ""
+    timestamp: float = 0.0
+
+@app.post("/api/console/event")
+async def receive_console_event(evt: ConsoleEventModel):
+    if not evt.timestamp:
+        evt.timestamp = time.time()
+    evt_dict = evt.model_dump() if hasattr(evt, "model_dump") else evt.dict()
+    console_logs_history.append(evt_dict)
+    if len(console_logs_history) > 60:
+        console_logs_history.pop(0)
+    await manager.broadcast({"type": "console_event", "payload": evt_dict})
+    return {"status": "ok", "recorded": True}
+
+@app.get("/api/console/logs")
+async def get_console_logs(limit: int = 50):
+    return {"logs": console_logs_history[-limit:]}
+
+class ConsoleExecRequest(BaseModel):
+    command: str
+
+@app.post("/api/console/exec")
+async def exec_console_command(req: ConsoleExecRequest):
+    raw_cmd = req.command.strip()
+    if not raw_cmd:
+        raise HTTPException(status_code=400, detail="Comando vacío")
+    
+    cli_py = WORKSPACE / "alberth_cli" / "ag-console.py"
+    py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
+    args = raw_cmd.split()
+    cmd = [py_bin, str(cli_py)] + args
+    
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(WORKSPACE))
+        out = (r.stdout or r.stderr or "").strip()
+        status = "SUCCESS" if r.returncode == 0 else "ERROR"
+        evt_dict = {
+            "project": args[1] if len(args) > 1 and not args[1].startswith("-") else (args[0] if len(args) > 0 else "system"),
+            "action": args[0] if len(args) > 0 else "exec",
+            "command": f"agc {raw_cmd}",
+            "status": status,
+            "output": out,
+            "timestamp": time.time()
+        }
+        console_logs_history.append(evt_dict)
+        if len(console_logs_history) > 60:
+            console_logs_history.pop(0)
+        await manager.broadcast({"type": "console_event", "payload": evt_dict})
+        return {"ok": r.returncode == 0, "status": status, "command": raw_cmd, "output": out}
+    except Exception as e:
+        return {"ok": False, "status": "ERROR", "command": raw_cmd, "output": str(e)}
+
 def run_sys_cmd(command: str, args: dict) -> dict:
     try:
         py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
@@ -850,6 +910,29 @@ async def ws_chat(ws: WebSocket):
                     msg_dict["audio_url"] = full_resp["audio_url"]
 
                 await manager.broadcast({"type": "message", "message": msg_dict})
+            elif t == "console_cmd":
+                raw_c = data.get("command", "").strip()
+                if raw_c:
+                    cli_py = WORKSPACE / "alberth_cli" / "ag-console.py"
+                    py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
+                    c_args = raw_c.split()
+                    sub_c = [py_bin, str(cli_py)] + c_args
+                    try:
+                        r = subprocess.run(sub_c, capture_output=True, text=True, timeout=25, cwd=str(WORKSPACE))
+                        out = (r.stdout or r.stderr or "").strip()
+                        st = "SUCCESS" if r.returncode == 0 else "ERROR"
+                        ev = {
+                            "project": c_args[1] if len(c_args) > 1 and not c_args[1].startswith("-") else (c_args[0] if len(c_args) > 0 else "system"),
+                            "action": c_args[0] if len(c_args) > 0 else "exec",
+                            "command": f"agc {raw_c}",
+                            "status": st,
+                            "output": out,
+                            "timestamp": time.time()
+                        }
+                        console_logs_history.append(ev)
+                        await manager.broadcast({"type": "console_event", "payload": ev})
+                    except Exception as ex:
+                        await manager.broadcast({"type": "console_event", "payload": {"status": "ERROR", "command": raw_c, "output": str(ex), "timestamp": time.time()}})
             elif t == "ping":
                 await manager.send(ws, {"type": "pong"})
     except WebSocketDisconnect: manager.disconnect(ws)
