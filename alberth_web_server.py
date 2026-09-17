@@ -952,7 +952,7 @@ async def console_chat_endpoint(req: ConsoleChatRequest):
     project_key = req.project.lower().strip()
     mode = req.mode.lower().strip()
     
-    cli_keywords = ["agc", "git", "open", "status", "run", "list", "new", "build", "pm2", "hud", "help"]
+    cli_keywords = ["agc", "git", "open", "status", "run", "list", "new", "build", "pm2", "hud", "obsidian", "vault", "help"]
     first_token = msg.split()[0].lower() if msg.split() else ""
     
     is_terminal = (

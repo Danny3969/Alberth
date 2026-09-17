@@ -371,6 +371,28 @@ def action_hud(config: dict):
     subprocess.run(["open", "-a", "Google Chrome", url])
     return 0
 
+def action_obsidian(config: dict):
+    banner()
+    vault_path = Path("/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth")
+    print(f"\n{C_CYAN}🧠 Abriendo Bóveda de Conocimiento Novasyscom en Obsidian...{C_RESET}")
+    print(f"{C_DIM}Ruta de Bóveda:{C_RESET} {vault_path}\n")
+    res = subprocess.run(["open", "-a", "Obsidian", str(vault_path)], capture_output=True, text=True)
+    if res.returncode == 0:
+        print(f"[{C_GREEN}✓{C_RESET}] Bóveda abierta exitosamente en Obsidian.app")
+        notify_hud(config, {
+            "project": "alberth",
+            "action": "obsidian",
+            "command": "agc obsidian",
+            "status": "SUCCESS",
+            "output": f"Bóveda Obsidian abierta en {vault_path}",
+            "timestamp": time.time()
+        })
+        log_execution("alberth", "obsidian", "SUCCESS", f"Bóveda abierta en {vault_path}")
+        return 0
+    else:
+        print(f"[{C_RED}✗{C_RESET}] Error al abrir Obsidian: {res.stderr}")
+        return 1
+
 # ── Argument Normalizer (Sintaxis Flexible) ───────────────────────────────────
 def normalize_args(args: list, valid_projects: list) -> tuple:
     if not args:
@@ -380,7 +402,7 @@ def normalize_args(args: list, valid_projects: list) -> tuple:
     rest = args[1:]
 
     # Casos sin proyecto:
-    if first in ["list", "hud", "-h", "--help", "help"]:
+    if first in ["list", "hud", "obsidian", "vault", "-h", "--help", "help"]:
         return (first, None, rest)
 
     if first == "new":
@@ -418,6 +440,7 @@ Uso:
   agc git <proyecto> <args...>     → Ejecuta comandos git en el proyecto seleccionado
   agc run <proyecto> <script>      → Ejecuta scripts definidos (dev, build, status, etc.)
   agc new <nombre> [--template X]  → Crea e inicializa un nuevo proyecto en Antigravity
+  agc obsidian                     → Abre la Bóveda de Conocimiento y Canvas en Obsidian
   agc hud                          → Abre el Quantum HUD en Google Chrome
 
 Proyectos disponibles:
@@ -430,6 +453,9 @@ Proyectos disponibles:
 
     if action == "hud":
         sys.exit(action_hud(config))
+
+    if action in ["obsidian", "vault"]:
+        sys.exit(action_obsidian(config))
 
     if action == "new":
         if not project:

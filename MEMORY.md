@@ -419,6 +419,7 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 - **Integración Nativa con Antigravity:** Comando `agc open <proyecto>` (o `agc <proyecto> open`) que abre automáticamente los workspaces en **Antigravity IDE** (`open -a "Antigravity IDE"` y binario `agy-ide`).
 - **Backend FastAPI & WebSockets:** Endpoints `/api/projects`, `/api/projects/new`, `/api/console/chat`, `/api/console/event`, `/api/console/logs` y `/api/console/exec` en `alberth_web_server.py`.
 - **Quantum HUD Master Console Drawer (`#dev-console-drawer`):** Dock lateral Cyber-HUD en `http://localhost:8080` con feed unificado, botonera táctica, footer con conmutador de modos (`Auto`, `Solo IA`, `Terminal`), atajo de teclado `Ctrl + Alt + C`.
+- **Integración Nativa con Obsidian (Bóveda Maestra de Novasyscom):** Instalación oficial de Obsidian en macOS (`/Applications/Obsidian.app`). Bóveda configurada en `/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth`, con Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`), pizarra infinita (`Novasyscom_Ecosistema.canvas`), comando `agc obsidian` / `agc vault` y botón `🧠 Obsidian` en el HUD.
 - **Integración Shell:** Alias `alias agc='python3 ~/alberth_cli/ag-console.py'` y script de autocompletado Zsh (`ag-complete.sh`) en `~/.zshrc`.
 - **Referencia Documental:** Ver bitácora `memory/2026-09-17.md` y `walkthrough.md`.
 

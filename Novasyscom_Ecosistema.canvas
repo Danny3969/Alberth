@@ -1,0 +1,135 @@
+{
+  "nodes": [
+    {
+      "id": "node-holding",
+      "x": 300,
+      "y": -200,
+      "width": 380,
+      "height": 160,
+      "type": "text",
+      "text": "## 🏛️ NOVASYSCOM HOLDING\n**CEO & Fundador:** El Señor\n**Sede:** iMac Contabilidad / MacBook Pro\n*Conglomerado de Tecnología, Movilidad, Fintech y Comercio*",
+      "color": "5"
+    },
+    {
+      "id": "node-alberth",
+      "x": 300,
+      "y": 80,
+      "width": 380,
+      "height": 180,
+      "type": "text",
+      "text": "### 🤖 ALBERTH NEXUS (AI Chief of Staff)\n- **Rol:** COO Digital & Orquestador de Infraestructura\n- **HUD 3D:** `http://localhost:8080`\n- **Daemons:** PM2 (alberth-web, voice, reminders, qa)\n- **Vínculo:** [[MEMORY]], [[SOUL]]",
+      "color": "4"
+    },
+    {
+      "id": "node-drivo",
+      "x": -260,
+      "y": 340,
+      "width": 300,
+      "height": 180,
+      "type": "text",
+      "text": "### 🚗 DRIVO (Mobility P2P)\n- **Modelo:** Ride-Hailing tipo InDrive / Uber\n- **App:** Flutter v5.12.1\n- **Web:** `http://localhost:8088`\n- **Comisión:** 10%\n- **Doc:** [[PROJECT_DRIVO]]",
+      "color": "2"
+    },
+    {
+      "id": "node-drivo-one",
+      "x": 80,
+      "y": 340,
+      "width": 300,
+      "height": 180,
+      "type": "text",
+      "text": "### 🛵 DRIVO ONE (Quick-Commerce)\n- **Modelo:** Delivery multitienda tripartito\n- **Backend:** Node.js + Prisma\n- **Web:** `http://localhost:8090`\n- **Comercios / Repartidores / Clientes**",
+      "color": "3"
+    },
+    {
+      "id": "node-valex",
+      "x": 420,
+      "y": 340,
+      "width": 300,
+      "height": 180,
+      "type": "text",
+      "text": "### 💱 VALEX (Fintech FX)\n- **Modelo:** Divisas & Giros USD ↔ PEN\n- **Backend:** NestJS / Supabase\n- **Puerto:** `4000`\n- **Mercado:** Ecuador ↔ Perú",
+      "color": "1"
+    },
+    {
+      "id": "node-globalmarket",
+      "x": 760,
+      "y": 340,
+      "width": 300,
+      "height": 180,
+      "type": "text",
+      "text": "### 📦 GLOBALMARKET (Agro B2B)\n- **Modelo:** Exportación Banano / Pitahaya\n- **Portal:** Web + Cloud Drive Privado\n- **Puerto:** `3000`",
+      "color": "6"
+    },
+    {
+      "id": "node-agency",
+      "x": 600,
+      "y": 80,
+      "width": 340,
+      "height": 180,
+      "type": "text",
+      "text": "### 👥 GABINETE THE AGENCY\n- **Especialistas:** 41 Agentes Senior\n- **Áreas:** Finanzas (CFO), Legal, QA, Growth\n- **Doc:** [[COMPANY_NOVASYSCOM]]",
+      "color": "5"
+    },
+    {
+      "id": "node-antigravity",
+      "x": 40,
+      "y": 80,
+      "width": 220,
+      "height": 180,
+      "type": "text",
+      "text": "### ⚡ ANTIGRAVITY IDE\n- **CLI:** `agc open <proj>`\n- **SDK:** Agentes y compiladores\n- **Consola:** v2.0 Unificada",
+      "color": "4"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-holding-alberth",
+      "fromNode": "node-holding",
+      "fromSide": "bottom",
+      "toNode": "node-alberth",
+      "toSide": "top"
+    },
+    {
+      "id": "edge-alberth-drivo",
+      "fromNode": "node-alberth",
+      "fromSide": "bottom",
+      "toNode": "node-drivo",
+      "toSide": "top"
+    },
+    {
+      "id": "edge-alberth-drivo-one",
+      "fromNode": "node-alberth",
+      "fromSide": "bottom",
+      "toNode": "node-drivo-one",
+      "toSide": "top"
+    },
+    {
+      "id": "edge-alberth-valex",
+      "fromNode": "node-alberth",
+      "fromSide": "bottom",
+      "toNode": "node-valex",
+      "toSide": "top"
+    },
+    {
+      "id": "edge-alberth-globalmarket",
+      "fromNode": "node-alberth",
+      "fromSide": "bottom",
+      "toNode": "node-globalmarket",
+      "toSide": "top"
+    },
+    {
+      "id": "edge-alberth-agency",
+      "fromNode": "node-alberth",
+      "fromSide": "right",
+      "toNode": "node-agency",
+      "toSide": "left"
+    },
+    {
+      "id": "edge-alberth-antigravity",
+      "fromNode": "node-alberth",
+      "fromSide": "left",
+      "toNode": "node-antigravity",
+      "toSide": "right"
+    }
+  ]
+}

@@ -35,6 +35,7 @@ projects:
       status: pm2 list
       restart: pm2 restart all
       logs: pm2 logs --lines 20
+      obsidian: python3 alberth_cli/ag-console.py obsidian
   globalmarket:
     name: GLOBALMARKET
     path: /Users/contabilidad/.gemini/antigravity-ide/scratch/GlobalMarket
