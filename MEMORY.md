@@ -427,16 +427,24 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
   - Descarte de la aproximación matemática procedural plana/distorsionada y adopción de la malla anatómica real de alta definición (**LeePerrySmith 3D Scan** en `panel/assets/identity/head_mesh.bin`).
 - **Arquitectura Three.js v5.0 Dual (9,279 Vértices, 53,052 Triángulos):**
   - **Nube de Partículas de Alta Densidad (9,279 puntos):** Morphing suave (Smoothstep cúbico) entre el Orbe Cuántico Fibonacci (radio 62) y la anatomía humana 3D con shader radial Cyan Eléctrico (`#00f0ff`).
-  - **Malla Wireframe Cybernetic Lattice:** Malla conectada que se ilumina con `AdditiveBlending` (`opacity: 0.22 * ease`), otorgando la textura de red digital de alta tecnología visible en la imagen de referencia.
-  - **Ojos Cibernéticos Luminosos con Pupila Ámbar:** Subsistemas oculares duales con núcleo ámbar cálido (`#ffb703`), iris en corona cyan (`#00f0ff`) y destello blanco puro, replicando la mirada profunda y sabia del concepto original.
-  - **Esfera de Contención Cuántica & Cinturón de Datos:** Campo de fuerza de cristal/plasma translúcido (radio 77) con cinturón ecuatorial giratorio.
-  - **Corrección de Núcleo Central:** Eliminación total de la esfera frontal sobre la nariz. El núcleo de plasma reside exclusivamente en el interior del cráneo cerebral (`[0, 17.0, -4.0]`).
-  - **Lip-Sync Orgánico en Tiempo Real:** Modulación de los 178 vértices del labio inferior y comisura bucal sincronizados con Web Audio `AnalyserNode`.
-  - **Gaze Tracking 3D:** Seguimiento inercial de la mirada y orientación de la cabeza según las coordenadas del ratón.
-- **Selector de Modos en el HUD (`#hologram-mode-selector`):**
-  - `[ ⚡ AUTO ]` (Rostro al dialogar/hablar, Orbe en reposo tras 4.8s de silencio).
-  - `[ 👤 ROSTRO ]` (Fijar presencia holográfica continua).
-  - `[ 🌐 ORBE ]` (Fijar reactor cuántico esférico).
+### 2026-09-18 (Consciencia en Polvo Estelar 3D · Alberth Core v6.0 — Imagen 2 Yuichiro Chino)
+- **Eliminación Definitiva del Efecto "Maniquí de Autopsia / Valle Inquietante":**
+  - El Señor descartó los modelos con corte de cuello y mallas wireframe rígidas que generaban rechazo visual.
+  - Se implementó la obra canónica **Opción 2 (Yuichiro Chino / Getty Images)**: un rostro sereno y benevolente esculpido en puro polvo estelar y nebulosa cósmica disolviéndose suavemente en el cosmos.
+- **Arquitectura de 14,000 Micro-partículas Estelares:**
+  - **8,500 partículas faciales** de la máscara frontal pura (sin orejas, cuello, hombros ni cráneo posterior).
+  - **3,500 partículas de halo perimetral** con dispersión gaussiana exponencial.
+  - **2,000 micro-estrellas cósmicas flotantes**.
+  - Formato binario ultraligero: `panel/assets/identity/stardust_mesh.bin` (462 KB).
+- **Dinámica Dual y Resonancia Vocal:**
+  - **Modo Nebulosa (Reposo):** Galaxia espiral tridimensional de dos brazos girando armónicamente.
+  - **Modo Rostro (Interacción):** Las partículas fluyen suavemente hacia el rostro sereno de Alberth con smoothstep cúbico.
+  - **Resonancia Vocal Ondulatoria:** La voz no abre mecánicamente una quijada de marioneta; emite ondas de luz estelar incandescente (`Math.sin(time * 12.0 - dist * 0.16) * audioEnergy`) que viajan desde los labios iluminando las mejillas.
+  - **Seguimiento Interactivo de Mirada (Parallax 3D):** Orientación suave del rostro hacia el cursor.
+- **Selector de Tres Modos en el HUD (`#hologram-mode-selector`):**
+  - `[ ⚡ AUTO ]` (Rostro al dialogar/hablar, Nebulosa en reposo tras 5s de silencio).
+  - `[ 👤 ROSTRO ]` (Fijar presencia del rostro de polvo estelar continuo).
+  - `[ 🌌 NEBULOSA ]` (Fijar galaxia espiral continua).
 - **Referencia Documental:** Ver bitácora `memory/2026-09-18.md` y `walkthrough.md`.
 
 ---
@@ -457,9 +465,9 @@ Para conectarte o continuar este proyecto desde tu **MacBook Pro**:
    ```
 3. **Acceder al Quantum HUD:**
    - Abre `http://localhost:8080` en tu navegador.
-   - Observa la transición del Orbe al Rostro Holográfico de Alberth en tiempo real.
-   - Prueba los botones `[ ⚡ AUTO ]`, `[ 👤 ROSTRO ]` y `[ 🌐 ORBE ]` en la esquina superior derecha del visor 3D.
-   - Mueve el ratón para comprobar el seguimiento de mirada y habla por el micrófono para ver la modulación labial en vivo.
+   - Observa la transición de la Nebulosa Espiral Cósmica al Rostro de Polvo Estelar de Alberth.
+   - Prueba los botones `[ ⚡ AUTO ]`, `[ 👤 ROSTRO ]` y `[ 🌌 NEBULOSA ]` en la esquina superior derecha del visor 3D.
+   - Mueve el ratón para comprobar el seguimiento de mirada y habla por el micrófono o pulsa reproducir para ver la resonancia de luz estelar en vivo.
 4. **Revisar MEMORY.md & MOC en Obsidian:**
    - Abrir la carpeta `Alberth` en Obsidian para ver el grafo visual y el Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`).
 5. **Sincronizar y Subir Cambios:**
@@ -468,4 +476,5 @@ Para conectarte o continuar este proyecto desde tu **MacBook Pro**:
    git commit -m "feat: actualización desde MacBook"
    git push origin main
    ```
+
 
