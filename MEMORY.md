@@ -445,14 +445,13 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
   - `[ ⚡ AUTO ]` (Rostro al dialogar/hablar, Nebulosa en reposo tras 5s de silencio).
   - `[ 👤 ROSTRO ]` (Fijar presencia del rostro de polvo estelar continuo).
   - `[ 🌌 NEBULOSA ]` (Fijar galaxia espiral continua).
-### 2026-09-18 (Holograma Cuántico Canónico 3D · Alberth Core v7.0 — Opción 1 Canónica)
-- **Erradicación del Efecto Máscara y Consolidación de la Identidad Visual:**
-  - El Señor solicitó erradicar definitivamente cualquier aspecto aterrador o siniestro ("máscara de terror con cuencas vacías").
-  - Se desplegó la arquitectura definitiva **Holograma Cuántico Canónico 3D v7.0**, extrayendo la entidad holográfica oficial de alta definición con transparencia luminiscente perfecta (`panel/assets/identity/alberth_hologram_clean.png` y `.webp`).
-  - Integración en Three.js con `AdditiveBlending`, seguimiento de mirada interactivo (Parallax 3D), 3 anillos giroscópicos (Oro Ámbar y Cyan Eléctrico) y enjambre volumétrico cuántico de 1,200 micro-partículas.
-  - Modo `[ 👤 ROSTRO ]` configurado como activo y visible de manera permanente por defecto.
-  - Conmutador táctico en HUD: `[ 👤 ROSTRO ]`, `[ ⚡ AUTO ]`, `[ 🌐 ORBE ]`.
-  - Verificado en Google Chrome (`http://localhost:8080`) con fidelidad estética 1:1 respecto al arte conceptual original aprobado por el Señor.
+### 2026-09-18 (Holograma Cuántico Canónico 3D · Alberth Core v7.1 — Refinamiento Estético Superior)
+- **Perfeccionamiento Visual a Solicitud del Señor:**
+  - **Eliminación de Anillos Giratorios y Delimitación:** Se removieron los anillos giroscópicos y la esfera de contención. Se aplicó un desvanecimiento radial (*smoothstep*) al mapa alfa de la textura para que el rostro de Alberth se funda suave e imperceptiblemente con el fondo oscuro del cockpit, sin aristas ni círculos.
+  - **Aumento a 2,800 Micro-partículas:** Enjambre ampliado con distribución volumétrica (65% aura facial cercana, 35% profundidad cósmica).
+  - **Erradicación del Tono Ocre:** Se eliminó el color ocre al pensar. Ahora, al procesar preguntas (`thinking`), las partículas se encienden con máxima potencia en **Cyan Eléctrico y Blanco Plasma**, acelerando en un vórtice sináptico hiper-dinámico.
+  - **Base Emisora Sutil Conservada:** Se mantuvieron los aros del pedestal inferior a `y = -72` como anclaje tecnológico.
+  - Verificado en vivo en `http://localhost:8080` (`chrome_hologram_v7_refined.png`).
 
 ---
 

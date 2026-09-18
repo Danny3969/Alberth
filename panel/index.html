@@ -5295,10 +5295,10 @@ function setHUDState(state, label) {
     dotEl.style.background = "var(--cyan)";
     dotEl.style.boxShadow = "0 0 12px var(--cyan)";
   } else if (state === "thinking") {
-    pillEl.style.borderColor = "var(--gold)";
-    pillEl.style.boxShadow = "0 0 24px var(--gold-glow)";
-    dotEl.style.background = "var(--gold)";
-    dotEl.style.boxShadow = "0 0 12px var(--gold)";
+    pillEl.style.borderColor = "#00f0ff";
+    pillEl.style.boxShadow = "0 0 24px rgba(0, 240, 255, 0.85)";
+    dotEl.style.background = "#ffffff";
+    dotEl.style.boxShadow = "0 0 12px #00f0ff";
   } else if (state === "speaking") {
     pillEl.style.borderColor = "#38f9d7";
     pillEl.style.boxShadow = "0 0 24px rgba(56, 249, 215, 0.6)";
@@ -5325,12 +5325,11 @@ function setHUDState(state, label) {
 // ============================================================
 const canvas = document.getElementById("hologram-canvas");
 let scene, camera, renderer;
-let stageGroup, headGroup, gimbalGroup, particlesGroup, projectorGroup;
-let hologramMesh, containmentOrb;
-let ringMesh1, ringMesh2, ringMesh3;
+let stageGroup, headGroup, projectorGroup;
+let hologramMesh;
 let quantumParticlesMesh;
 
-const PARTICLE_COUNT = 1200;
+const PARTICLE_COUNT = 2800;
 let particlePositions, faceCloudPositions, orbCloudPositions, particleColors;
 
 // Modos de Visualización y Morphing
@@ -5397,21 +5396,22 @@ function initParticlePositions() {
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     const idx = i * 3;
 
-    // A) Enjambre Volumétrico del Rostro (Flotando en torno a la cabeza en 3D)
+    // A) Enjambre Volumétrico del Rostro (Flotando libremente en torno a la cabeza en 3D)
+    // 65% envolvente facial cercana, 35% polvo estelar cósmico profundo
+    const isClose = i < PARTICLE_COUNT * 0.65;
     const thetaF = Math.random() * Math.PI * 2;
-    const rF = 35.0 + Math.random() * 45.0;
-    const phiF = (Math.random() - 0.5) * Math.PI * 0.85;
+    const phiF = (Math.random() - 0.5) * Math.PI * 0.90;
+    const rF = isClose ? (22.0 + Math.random() * 52.0) : (58.0 + Math.random() * 65.0);
 
     faceCloudPositions[idx] = rF * Math.cos(phiF) * Math.cos(thetaF);
-    faceCloudPositions[idx + 1] = rF * Math.sin(phiF) * 0.95;
-    // 50% de partículas delante (Z > 0) y 50% detrás (Z < 0)
-    faceCloudPositions[idx + 2] = rF * Math.cos(phiF) * Math.sin(thetaF) * 0.85;
+    faceCloudPositions[idx + 1] = rF * Math.sin(phiF) * 0.98;
+    faceCloudPositions[idx + 2] = rF * Math.cos(phiF) * Math.sin(thetaF) * (isClose ? 0.82 : 1.15);
 
-    // B) Orbe Cuántico Condensado (Reactor Fibonacci)
+    // B) Orbe Cuántico Condensado (Reactor Fibonacci para modo orbe)
     const yO = 1 - (i / (PARTICLE_COUNT - 1)) * 2;
     const radO = Math.sqrt(Math.max(0, 1 - yO * yO));
     const thetaO = phi * i;
-    const rOrb = 38.0 + (Math.random() - 0.5) * 6.0;
+    const rOrb = 40.0 + (Math.random() - 0.5) * 8.0;
 
     orbCloudPositions[idx] = Math.cos(thetaO) * radO * rOrb;
     orbCloudPositions[idx + 1] = yO * rOrb;
@@ -5423,7 +5423,7 @@ function initParticlePositions() {
     particlePositions[idx + 2] = faceCloudPositions[idx + 2];
 
     // Color: Cyan Eléctrico con destellos estelares blancos
-    const isBright = Math.random() > 0.82;
+    const isBright = Math.random() > 0.80;
     particleColors[idx] = isBright ? 0.95 : 0.05;
     particleColors[idx + 1] = isBright ? 1.00 : 0.88;
     particleColors[idx + 2] = 1.00;
@@ -5448,10 +5448,7 @@ function initThreeHologram() {
   headGroup = new THREE.Group();
   stageGroup.add(headGroup);
 
-  gimbalGroup = new THREE.Group();
-  stageGroup.add(gimbalGroup);
-
-  // A) Entidad Holográfica Maestra de Alberth (Imagen Canónica Oficial)
+  // A) Entidad Holográfica Maestra de Alberth (Imagen Canónica Oficial sin bordes)
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load(
     "/panel/assets/identity/alberth_hologram_clean.png",
@@ -5469,19 +5466,19 @@ function initThreeHologram() {
         side: THREE.DoubleSide
       });
 
-      // Plano holográfico de alta definición perfectamente escalado
+      // Plano holográfico de alta definición perfectamente escalado y fundido
       const holoGeo = new THREE.PlaneGeometry(134, 134);
       hologramMesh = new THREE.Mesh(holoGeo, holoMat);
       hologramMesh.position.set(0, 3.5, 0);
       headGroup.add(hologramMesh);
 
-      console.log("ALBERTH: Holograma Cuántico Canónico v7.0 desplegado con éxito.");
+      console.log("ALBERTH: Holograma Cuántico Canónico v7.1 desplegado con éxito.");
     },
     undefined,
     (err) => console.warn("ALBERTH: Error cargando textura holográfica:", err)
   );
 
-  // B) Enjambre Volumétrico Cuántico (1,200 Partículas 3D)
+  // B) Enjambre Volumétrico Cuántico (2,800 Micro-Partículas 3D)
   initParticlePositions();
 
   const particleGeo = new THREE.BufferGeometry();
@@ -5490,7 +5487,7 @@ function initThreeHologram() {
 
   const pTexture = createParticleTexture();
   const particleMat = new THREE.PointsMaterial({
-    size: 2.8,
+    size: 2.7,
     map: pTexture,
     vertexColors: true,
     transparent: true,
@@ -5502,75 +5499,19 @@ function initThreeHologram() {
   quantumParticlesMesh = new THREE.Points(particleGeo, particleMat);
   stageGroup.add(quantumParticlesMesh);
 
-  // C) Anillos Giroscópicos Gimbal 3D (Oro Ámbar & Cyan Eléctrico)
-  // Anillo 1: Oro Ámbar inclinado
-  const ringGeo1 = new THREE.RingGeometry(82, 84.2, 72);
-  const ringMat1 = new THREE.MeshBasicMaterial({
-    color: 0xffb703,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.32,
-    wireframe: true,
-    blending: THREE.AdditiveBlending
-  });
-  ringMesh1 = new THREE.Mesh(ringGeo1, ringMat1);
-  ringMesh1.rotation.x = Math.PI * 0.35;
-  gimbalGroup.add(ringMesh1);
-
-  // Anillo 2: Cyan Eléctrico orbital
-  const ringGeo2 = new THREE.RingGeometry(94, 95.8, 64);
-  const ringMat2 = new THREE.MeshBasicMaterial({
-    color: 0x00f0ff,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.25,
-    wireframe: true,
-    blending: THREE.AdditiveBlending
-  });
-  ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
-  ringMesh2.rotation.y = -Math.PI * 0.28;
-  gimbalGroup.add(ringMesh2);
-
-  // Anillo 3: Cinturón Ecuatorial de Datos
-  const ringGeo3 = new THREE.RingGeometry(75, 76.5, 64);
-  const ringMat3 = new THREE.MeshBasicMaterial({
-    color: 0x00d8f6,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.18,
-    wireframe: true,
-    blending: THREE.AdditiveBlending
-  });
-  ringMesh3 = new THREE.Mesh(ringGeo3, ringMat3);
-  ringMesh3.rotation.x = Math.PI / 2;
-  gimbalGroup.add(ringMesh3);
-
-  // D) Esfera de Contención Cuántica (Cristal / Plasma)
-  const orbGeo = new THREE.SphereGeometry(78, 36, 36);
-  const orbMat = new THREE.MeshBasicMaterial({
-    color: 0x00f0ff,
-    transparent: true,
-    opacity: 0.055,
-    wireframe: false,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
-  });
-  containmentOrb = new THREE.Mesh(orbGeo, orbMat);
-  stageGroup.add(containmentOrb);
-
-  // E) Pedestal Emisor Holográfico (Base y = -72)
+  // C) Pedestal Emisor Holográfico Sutil (Base inferior a y = -72)
   projectorGroup = new THREE.Group();
   projectorGroup.position.y = -72;
   stageGroup.add(projectorGroup);
 
-  const baseGeo1 = new THREE.RingGeometry(26, 29, 48);
-  const baseMat1 = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.40, wireframe: true });
+  const baseGeo1 = new THREE.RingGeometry(26, 28.5, 48);
+  const baseMat1 = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.28, wireframe: true, blending: THREE.AdditiveBlending });
   const baseMesh1 = new THREE.Mesh(baseGeo1, baseMat1);
   baseMesh1.rotation.x = Math.PI / 2;
   projectorGroup.add(baseMesh1);
 
-  const baseGeo2 = new THREE.RingGeometry(38, 41, 48);
-  const baseMat2 = new THREE.MeshBasicMaterial({ color: 0x0077b6, side: THREE.DoubleSide, transparent: true, opacity: 0.22, wireframe: true });
+  const baseGeo2 = new THREE.RingGeometry(38, 40.5, 48);
+  const baseMat2 = new THREE.MeshBasicMaterial({ color: 0x0077b6, side: THREE.DoubleSide, transparent: true, opacity: 0.16, wireframe: true, blending: THREE.AdditiveBlending });
   const baseMesh2 = new THREE.Mesh(baseGeo2, baseMat2);
   baseMesh2.rotation.x = Math.PI / 2;
   projectorGroup.add(baseMesh2);
@@ -5637,13 +5578,13 @@ function animateHologram() {
   currentHeadRotX += (targetHeadRotX - currentHeadRotX) * 0.07;
 
   // 4. Parámetros de Dinámica de Estado
-  let rotSpeed = 0.25;
+  let rotSpeed = 0.22;
   if (currentState === "listening") {
-    rotSpeed = 0.50;
+    rotSpeed = 0.55;
   } else if (currentState === "thinking") {
-    rotSpeed = 1.60;
+    rotSpeed = 2.40; // Aceleración orbital rápida de sinapsis
   } else if (currentState === "speaking") {
-    rotSpeed = 0.35;
+    rotSpeed = 0.45;
   }
 
   // 5. Orientación 3D del Rostro y Levitación Armónica
@@ -5662,20 +5603,14 @@ function animateHologram() {
 
   // 6. Animación del Plano Holográfico Maestra
   if (hologramMesh && hologramMesh.material) {
-    // Opacidad según modo y voz
-    const baseAlpha = 0.92;
+    const baseAlpha = 0.94;
     const voiceBoost = (currentState === "speaking") ? audioEnergy * 0.15 : 0.0;
     hologramMesh.material.opacity = Math.max(0.001, ease * (baseAlpha + voiceBoost));
-
-    // Paleta de Estado: Oro Cuántico al pensar, Cyan Límpido normal
-    if (currentState === "thinking") {
-      hologramMesh.material.color.setHex(0xffe082);
-    } else {
-      hologramMesh.material.color.setHex(0xffffff);
-    }
+    // Color siempre puro sin tonos ocres
+    hologramMesh.material.color.setHex(0xffffff);
   }
 
-  // 7. Enjambre Volumétrico Cuántico (Partículas 3D)
+  // 7. Enjambre Volumétrico Cuántico (2,800 Micro-Partículas 3D)
   if (quantumParticlesMesh) {
     const pos = quantumParticlesMesh.geometry.attributes.position.array;
     const col = quantumParticlesMesh.geometry.attributes.color.array;
@@ -5696,48 +5631,56 @@ function animateHologram() {
       // Micro-escintilación estelar
       const shimmer = Math.sin(time * 3.2 + i * 0.8) * 0.8;
 
-      // LERP (Orbe ⟷ Rostro)
-      pos[idx] = ox * (1 - ease) + (fx + shimmer) * ease;
-      pos[idx + 1] = oy * (1 - ease) + (fy + shimmer) * ease;
-      pos[idx + 2] = oz * (1 - ease) + fz * ease;
-
-      // Color dinámico según estado
       if (currentState === "thinking") {
-        col[idx] = 0.95;
-        col[idx + 1] = 0.80;
-        col[idx + 2] = 0.25;
+        // Ondas sinápticas intensas al procesar preguntas: Cyan Eléctrico & Blanco Plasma
+        const pulse = Math.sin(time * 8.0 - i * 0.05);
+        const isSuperWhite = pulse > 0.35;
+        col[idx] = isSuperWhite ? 1.00 : 0.20;
+        col[idx + 1] = isSuperWhite ? 1.00 : 0.95;
+        col[idx + 2] = 1.00;
+
+        // Vórtice dinámico y ondas sinápticas aceleradas
+        const wave = Math.sin(time * 7.0 + i * 0.2) * 2.5;
+        pos[idx] = ox * (1 - ease) + (fx + shimmer + wave) * ease;
+        pos[idx + 1] = oy * (1 - ease) + (fy + shimmer + wave) * ease;
+        pos[idx + 2] = oz * (1 - ease) + (fz + wave) * ease;
       } else if (currentState === "speaking") {
-        col[idx] = 0.20 + audioEnergy * 0.6;
-        col[idx + 1] = 0.95;
+        // Resonancia vocal viva
+        const vocalPulse = audioEnergy * 0.7;
+        col[idx] = 0.15 + vocalPulse;
+        col[idx + 1] = 0.92 + vocalPulse * 0.08;
         col[idx + 2] = 1.00;
+
+        pos[idx] = ox * (1 - ease) + (fx + shimmer) * ease;
+        pos[idx + 1] = oy * (1 - ease) + (fy + shimmer) * ease;
+        pos[idx + 2] = oz * (1 - ease) + fz * ease;
       } else {
-        col[idx] = 0.05;
-        col[idx + 1] = 0.88;
+        // Reposo sereno: Cyan eléctrico estelar con micro-destellos
+        const isGlitter = (i % 7 === 0);
+        col[idx] = isGlitter ? 0.85 : 0.05;
+        col[idx + 1] = isGlitter ? 0.98 : 0.88;
         col[idx + 2] = 1.00;
+
+        pos[idx] = ox * (1 - ease) + (fx + shimmer) * ease;
+        pos[idx + 1] = oy * (1 - ease) + (fy + shimmer) * ease;
+        pos[idx + 2] = oz * (1 - ease) + fz * ease;
       }
     }
 
-    // Giro suave del enjambre cuántico
+    if (quantumParticlesMesh.material) {
+      quantumParticlesMesh.material.opacity = (currentState === "thinking") ? 0.98 : 0.88;
+      quantumParticlesMesh.material.size = (currentState === "thinking") ? 3.3 : 2.7;
+    }
+
+    // Giro dinámico del enjambre cuántico
     quantumParticlesMesh.rotation.y += rotSpeed * 0.5 * delta;
     quantumParticlesMesh.geometry.attributes.position.needsUpdate = true;
     quantumParticlesMesh.geometry.attributes.color.needsUpdate = true;
   }
 
-  // 8. Anillos Giroscópicos Gimbal 3D
-  if (ringMesh1) {
-    ringMesh1.rotation.z += (rotSpeed * 0.65) * delta;
-  }
-  if (ringMesh2) {
-    ringMesh2.rotation.z -= (rotSpeed * 0.50) * delta;
-    ringMesh2.rotation.x += 0.20 * delta;
-  }
-  if (ringMesh3) {
-    ringMesh3.rotation.z += (rotSpeed * 0.30) * delta;
-  }
-
-  // 9. Esfera de Contención
-  if (containmentOrb) {
-    containmentOrb.rotation.y += 0.12 * delta;
+  // 8. Base Holográfica Emisora Sutil
+  if (projectorGroup) {
+    projectorGroup.rotation.y += 0.06 * delta;
   }
 
   renderer.render(scene, camera);
