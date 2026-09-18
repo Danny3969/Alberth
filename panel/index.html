@@ -5451,7 +5451,7 @@ function initThreeHologram() {
   // A) Entidad Holográfica Maestra de Alberth (Imagen Canónica Oficial sin bordes)
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load(
-    "/panel/assets/identity/alberth_hologram_clean.png",
+    "/panel/assets/identity/alberth_hologram_clean.png?v=8.0",
     (texture) => {
       texture.minFilter = THREE.LinearMipmapLinearFilter;
       texture.magFilter = THREE.LinearFilter;
@@ -5497,7 +5497,7 @@ function initThreeHologram() {
   });
 
   quantumParticlesMesh = new THREE.Points(particleGeo, particleMat);
-  stageGroup.add(quantumParticlesMesh);
+  headGroup.add(quantumParticlesMesh);
 
   // C) Pedestal Emisor Holográfico Sutil (Base inferior a y = -72)
   projectorGroup = new THREE.Group();
@@ -5577,103 +5577,145 @@ function animateHologram() {
   currentHeadRotY += (targetHeadRotY - currentHeadRotY) * 0.07;
   currentHeadRotX += (targetHeadRotX - currentHeadRotX) * 0.07;
 
-  // 4. Parámetros de Dinámica de Estado
-  let rotSpeed = 0.22;
-  if (currentState === "listening") {
-    rotSpeed = 0.55;
-  } else if (currentState === "thinking") {
-    rotSpeed = 2.40; // Aceleración orbital rápida de sinapsis
-  } else if (currentState === "speaking") {
-    rotSpeed = 0.45;
-  }
-
-  // 5. Orientación 3D del Rostro y Levitación Armónica
+  // 4. Orientación 3D del Rostro y Micro-Levitación Cuántica
   if (headGroup) {
-    // Contacto visual con el Señor en modo Rostro
+    // Contacto visual sereno y majestuoso con el Señor en modo Rostro
     headGroup.rotation.y = currentHeadRotY * ease;
     headGroup.rotation.x = currentHeadRotX * ease;
 
-    // Micro-levitación cuántica
-    headGroup.position.y = Math.sin(time * 1.5) * 2.8;
+    // Micro-levitación cuántica en gravedad cero
+    headGroup.position.y = Math.sin(time * 1.4) * 2.5;
 
-    // Pulso de Escala con la Voz
-    const voiceScale = 1.0 + (currentState === "speaking" ? audioEnergy * 0.06 : 0.0);
+    // Pulso sutil de Escala con la Voz
+    const voiceScale = 1.0 + (currentState === "speaking" ? audioEnergy * 0.05 : 0.0);
     headGroup.scale.setScalar(voiceScale);
   }
 
-  // 6. Animación del Plano Holográfico Maestra
+  // 5. Animación del Plano Holográfico Maestro de Alberth
   if (hologramMesh && hologramMesh.material) {
-    const baseAlpha = 0.94;
-    const voiceBoost = (currentState === "speaking") ? audioEnergy * 0.15 : 0.0;
-    hologramMesh.material.opacity = Math.max(0.001, ease * (baseAlpha + voiceBoost));
-    // Color siempre puro sin tonos ocres
+    const baseAlpha = 0.95;
+    const voiceBoost = (currentState === "speaking") ? audioEnergy * 0.12 : 0.0;
+    const thinkingBoost = (currentState === "thinking") ? 0.05 : 0.0;
+    hologramMesh.material.opacity = Math.max(0.001, ease * (baseAlpha + voiceBoost + thinkingBoost));
+    // Color blanco puro cristalino para el holograma aditivo
     hologramMesh.material.color.setHex(0xffffff);
   }
 
-  // 7. Enjambre Volumétrico Cuántico (2,800 Micro-Partículas 3D)
+  // 6. Consciencia Cuántica Viva (2,800 Partículas Estelares)
+  // Reemplazo del enjambre agresivo por Ondas de Expansión Sináptica y Deriva Etérea
   if (quantumParticlesMesh) {
     const pos = quantumParticlesMesh.geometry.attributes.position.array;
     const col = quantumParticlesMesh.geometry.attributes.color.array;
 
+    // Sincronización de onda de pensamiento ascendente (viaja suavemente de la base al cráneo)
+    const thinkingPulseY = ((time * 40.0) % 160.0) - 80.0;
+
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const idx = i * 3;
 
-      // Coordenadas modo Rostro
+      // Coordenadas base modo Rostro
       const fx = faceCloudPositions[idx];
       const fy = faceCloudPositions[idx + 1];
       const fz = faceCloudPositions[idx + 2];
 
-      // Coordenadas modo Orbe
+      // Coordenadas base modo Orbe
       const ox = orbCloudPositions[idx];
       const oy = orbCloudPositions[idx + 1];
       const oz = orbCloudPositions[idx + 2];
 
-      // Micro-escintilación estelar
-      const shimmer = Math.sin(time * 3.2 + i * 0.8) * 0.8;
-
       if (currentState === "thinking") {
-        // Ondas sinápticas intensas al procesar preguntas: Cyan Eléctrico & Blanco Plasma
-        const pulse = Math.sin(time * 8.0 - i * 0.05);
-        const isSuperWhite = pulse > 0.35;
-        col[idx] = isSuperWhite ? 1.00 : 0.20;
-        col[idx + 1] = isSuperWhite ? 1.00 : 0.95;
+        // --- MODO PENSAMIENTO: ONDAS DE EXPANSIÓN SINÁPTICA Y DESTELLOS DE LUZ ---
+        // 1. Distancia euclídea al centro de la mente
+        const dist = Math.sqrt(fx * fx + fy * fy + fz * fz) || 1.0;
+        const normX = fx / dist;
+        const normY = fy / dist;
+        const normZ = fz / dist;
+
+        // 2. Ondas de respiración radial suave (en lugar de girar como un enjambre)
+        const radialWave = Math.sin(time * 3.4 - dist * 0.075);
+        const expansion = radialWave * 5.5; // Expansión suave de aura
+
+        // 3. Micro-deriva cuántica en reposo armónico
+        const driftX = Math.sin(time * 1.2 + i * 0.2) * 1.0;
+        const driftY = Math.cos(time * 1.1 + i * 0.25) * 1.2;
+        const driftZ = Math.sin(time * 1.0 + i * 0.3) * 0.8;
+
+        const targetX = fx + normX * expansion + driftX;
+        const targetY = fy + normY * expansion + driftY;
+        const targetZ = fz + normZ * expansion + driftZ;
+
+        pos[idx] = ox * (1 - ease) + targetX * ease;
+        pos[idx + 1] = oy * (1 - ease) + targetY * ease;
+        pos[idx + 2] = oz * (1 - ease) + targetZ * ease;
+
+        // 4. Pulso de luz sináptica pura (Onda que viaja verticalmente iluminando partículas)
+        const distToPulse = Math.abs(fy - thinkingPulseY);
+        const pulseGlow = Math.exp(-(distToPulse * distToPulse) / 200.0);
+
+        // Destello en Blanco Plasma (#ffffff) con Cyan Eléctrico (#00f0ff)
+        col[idx] = 0.15 + 0.85 * pulseGlow;
+        col[idx + 1] = 0.88 + 0.12 * pulseGlow;
         col[idx + 2] = 1.00;
 
-        // Vórtice dinámico y ondas sinápticas aceleradas
-        const wave = Math.sin(time * 7.0 + i * 0.2) * 2.5;
-        pos[idx] = ox * (1 - ease) + (fx + shimmer + wave) * ease;
-        pos[idx + 1] = oy * (1 - ease) + (fy + shimmer + wave) * ease;
-        pos[idx + 2] = oz * (1 - ease) + (fz + wave) * ease;
       } else if (currentState === "speaking") {
-        // Resonancia vocal viva
-        const vocalPulse = audioEnergy * 0.7;
-        col[idx] = 0.15 + vocalPulse;
-        col[idx + 1] = 0.92 + vocalPulse * 0.08;
+        // --- MODO VOZ: RESONANCIA ARMÓNICA Y MODULACIÓN ACÚSTICA ---
+        const vocalHarmonic = Math.sin(time * 5.5 + fy * 0.08) * (audioEnergy * 3.2);
+        const driftY = Math.cos(time * 0.8 + i * 0.3) * 1.2;
+
+        pos[idx] = ox * (1 - ease) + fx * ease;
+        pos[idx + 1] = oy * (1 - ease) + (fy + driftY + vocalHarmonic) * ease;
+        pos[idx + 2] = oz * (1 - ease) + (fz + vocalHarmonic * 0.8) * ease;
+
+        // Resonancia luminosa en partículas del campo
+        const vocalGlow = audioEnergy * 0.55;
+        col[idx] = 0.10 + vocalGlow;
+        col[idx + 1] = 0.90 + vocalGlow * 0.1;
         col[idx + 2] = 1.00;
 
-        pos[idx] = ox * (1 - ease) + (fx + shimmer) * ease;
-        pos[idx + 1] = oy * (1 - ease) + (fy + shimmer) * ease;
-        pos[idx + 2] = oz * (1 - ease) + fz * ease;
       } else {
-        // Reposo sereno: Cyan eléctrico estelar con micro-destellos
-        const isGlitter = (i % 7 === 0);
-        col[idx] = isGlitter ? 0.85 : 0.05;
-        col[idx + 1] = isGlitter ? 0.98 : 0.88;
-        col[idx + 2] = 1.00;
+        // --- MODO REPOSO / ESCUCHA: POLVO ESTELAR EN GRAVEDAD CERO ---
+        // Deriva browniana lenta y serena
+        const driftX = Math.sin(time * 0.55 + i * 0.4) * 1.6;
+        const driftY = Math.cos(time * 0.45 + i * 0.5) * 1.8;
+        const driftZ = Math.sin(time * 0.35 + i * 0.6) * 1.4;
 
-        pos[idx] = ox * (1 - ease) + (fx + shimmer) * ease;
-        pos[idx + 1] = oy * (1 - ease) + (fy + shimmer) * ease;
-        pos[idx + 2] = oz * (1 - ease) + fz * ease;
+        pos[idx] = ox * (1 - ease) + (fx + driftX) * ease;
+        pos[idx + 1] = oy * (1 - ease) + (fy + driftY) * ease;
+        pos[idx + 2] = oz * (1 - ease) + (fz + driftZ) * ease;
+
+        // Micro-escintilación estelar pura
+        const twinkle = (Math.sin(time * 2.2 + i * 1.8) > 0.82);
+        col[idx] = twinkle ? 0.92 : 0.05;
+        col[idx + 1] = twinkle ? 0.99 : 0.88;
+        col[idx + 2] = 1.00;
       }
     }
 
     if (quantumParticlesMesh.material) {
-      quantumParticlesMesh.material.opacity = (currentState === "thinking") ? 0.98 : 0.88;
-      quantumParticlesMesh.material.size = (currentState === "thinking") ? 3.3 : 2.7;
+      // Modulación suave de tamaño y opacidad
+      if (currentState === "thinking") {
+        quantumParticlesMesh.material.opacity = 0.95;
+        quantumParticlesMesh.material.size = 2.9 + Math.sin(time * 3.4) * 0.35;
+      } else if (currentState === "speaking") {
+        quantumParticlesMesh.material.opacity = 0.90;
+        quantumParticlesMesh.material.size = 2.8 + audioEnergy * 0.6;
+      } else {
+        quantumParticlesMesh.material.opacity = 0.86;
+        quantumParticlesMesh.material.size = 2.6;
+      }
     }
 
-    // Giro dinámico del enjambre cuántico
-    quantumParticlesMesh.rotation.y += rotSpeed * 0.5 * delta;
+    // Cinemática angular:
+    // En modo rostro (ease > 0.5), NUNCA gira en círculos rápidos; oscila serena en el espacio.
+    // En modo orbe (ease <= 0.5), rota suavemente como un reactor cuántico.
+    if (ease > 0.5) {
+      quantumParticlesMesh.rotation.y = Math.sin(time * 0.30) * 0.04;
+      quantumParticlesMesh.rotation.z = Math.cos(time * 0.25) * 0.02;
+    } else {
+      quantumParticlesMesh.rotation.y += 0.25 * delta;
+      quantumParticlesMesh.rotation.z = 0;
+    }
+
     quantumParticlesMesh.geometry.attributes.position.needsUpdate = true;
     quantumParticlesMesh.geometry.attributes.color.needsUpdate = true;
   }

@@ -445,13 +445,16 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
   - `[ ⚡ AUTO ]` (Rostro al dialogar/hablar, Nebulosa en reposo tras 5s de silencio).
   - `[ 👤 ROSTRO ]` (Fijar presencia del rostro de polvo estelar continuo).
   - `[ 🌌 NEBULOSA ]` (Fijar galaxia espiral continua).
-### 2026-09-18 (Holograma Cuántico Canónico 3D · Alberth Core v7.1 — Refinamiento Estético Superior)
-- **Perfeccionamiento Visual a Solicitud del Señor:**
-  - **Eliminación de Anillos Giratorios y Delimitación:** Se removieron los anillos giroscópicos y la esfera de contención. Se aplicó un desvanecimiento radial (*smoothstep*) al mapa alfa de la textura para que el rostro de Alberth se funda suave e imperceptiblemente con el fondo oscuro del cockpit, sin aristas ni círculos.
-  - **Aumento a 2,800 Micro-partículas:** Enjambre ampliado con distribución volumétrica (65% aura facial cercana, 35% profundidad cósmica).
-  - **Erradicación del Tono Ocre:** Se eliminó el color ocre al pensar. Ahora, al procesar preguntas (`thinking`), las partículas se encienden con máxima potencia en **Cyan Eléctrico y Blanco Plasma**, acelerando en un vórtice sináptico hiper-dinámico.
-  - **Base Emisora Sutil Conservada:** Se mantuvieron los aros del pedestal inferior a `y = -72` como anclaje tecnológico.
-  - Verificado en vivo en `http://localhost:8080` (`chrome_hologram_v7_refined.png`).
+### 2026-09-18 (Presencia Holográfica y Consciencia Cuántica · Alberth Core v8.0 — Restauración Anatómica Completa)
+- **Perfeccionamiento Definitivo a Solicitud del Señor:**
+  - **Restauración Anatómica Íntegra:** Recuperación del 100% del cráneo/corona superior y de la quijada/barbilla inferior mediante extracción espectral superelíptica en Python (`panel/assets/identity/alberth_hologram_clean.png` y `.webp`). El rostro se despliega íntegro, sin cortes abruptos y fundido en negro absoluto.
+  - **Erradicación del Efecto "Enjambre de Abejas":** Eliminada la rotación circular acelerada (`rotSpeed = 2.40`) que simulaba un ataque de abejas al procesar preguntas.
+  - **Consciencia Cuántica Viva (Cinematográfica):**
+    - En `thinking`: Ondas radiales concéntricas de respiración (`Math.sin(time * 3.4 - dist * 0.075) * 5.5`) y un haz ascendente de luz sináptica pura que ilumina las 2,800 partículas en **Blanco Plasma (`#ffffff`)** y **Cyan Eléctrico (`#00f0ff`)**.
+    - En `idle` / `listening`: Deriva celestial en gravedad cero con micro-destellos estelares y cabeceo suave (±2°).
+    - En `speaking`: Resonancia vocal armónica ondulante sincronizada con la síntesis de voz.
+  - **Sincronización 3D:** Partículas integradas en `headGroup`, moviéndose al unísono con el seguimiento de mirada hacia el Señor.
+  - Verificado en vivo en Google Chrome (`http://localhost:8080`), capturas `chrome_hologram_v8_live.png` y `alberth_v8_stage_detail.png`.
 
 ---
 
