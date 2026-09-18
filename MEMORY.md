@@ -1,5 +1,5 @@
 # 🧠 MEMORY — Proyecto ALBERTH NEXUS (Asistente Personal de IA)
-_Última actualización: 2026-09-15 20:20 GMT-5_
+_Última actualización: 2026-09-18 10:50 GMT-5_
 
 ## 🔗 Repositorio GitHub Oficial
 - **URL:** https://github.com/Danny3969/Alberth
@@ -422,7 +422,21 @@ _Última actualización: 2026-09-15 20:20 GMT-5_
 - **Integración Nativa con Obsidian (Bóveda Maestra de Novasyscom):** Instalación oficial de Obsidian en macOS (`/Applications/Obsidian.app`). Bóveda configurada en `/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth`, con Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`), pizarra infinita (`Novasyscom_Ecosistema.canvas`), comando `agc obsidian` / `agc vault` y botón `🧠 Obsidian` en el HUD.
 - **Identidad Facial 3D de Alberth (Conceptos & Corrección Visión):** Corrección en `alberth_web_server.py` (`is_alberth_identity_query`) para que consultas sobre la cara/rostro/avatar de Alberth no disparen falsas capturas de cámara web ni se corten a medias. Generación de 3 conceptos visuales en `panel/assets/identity/`: 1) Holograma Cuántico Volumétrico en nube de puntos 3D (`alberth_holograma_3d.jpg` - recomendada para evolucionar el Swarm Orb en Three.js con reactividad de audio), 2) Androide Ejecutivo Obsidiana (`alberth_androide_ejecutivo.jpg`), 3) Metahumano Digital Humanoide (`alberth_metahumano_digital.jpg`). Documentado en `identidad_visual_alberth_3d.md`.
 - **Integración Shell:** Alias `alias agc='python3 ~/alberth_cli/ag-console.py'` y script de autocompletado Zsh (`ag-complete.sh`) en `~/.zshrc`.
-- **Referencia Documental:** Ver bitácora `memory/2026-09-17.md` y `walkthrough.md`.
+### 2026-09-18 (Lanzamiento del Holograma Cuántico Volumétrico 3D · Rostro de Alberth en Three.js)
+- **Identidad Visual Oficial Implementada:** Despliegue de la Opción 1 (Holograma Cuántico Volumétrico 3D) en el escenario principal del Quantum HUD (`panel/index.html`).
+- **Arquitectura de Partículas Three.js v4.0 (3,400 puntos GPU):**
+  - Sistema dual con morphing suave (Smoothstep) entre el **Orbe Cuántico Fibonacci** (radio 64, dispersión áurea) y el **Rostro Holográfico 3D de Alberth**.
+  - Anatomía paramétrica tridimensional: bóveda craneal y red neural cerebral, ojos analíticos con iris concentrado y cejas en ángulo de autoridad, tabique y perfil nasal esculpido, labios con etiquetado fonético específico, mandíbula y mentón diamantino, y aura de polvo cuántico en órbita lenta.
+- **Sincronización Labial Reactiva en Tiempo Real (Lip-Sync):**
+  - Conexión dinámica a nodos Web Audio `micAnalyser` y `speakerAnalyser`.
+  - Cuando Alberth emite locución mediante Edge-TTS o el Señor habla por el micrófono, el labio inferior desciende orgánicamente y la comisura se ensancha según la energía acústica.
+- **Seguimiento de Mirada Parallax 3D (Gaze Tracking):**
+  - La cabeza holográfica de Alberth orienta su mirada y rota en tiempo real siguiendo el cursor del ratón con amortiguación inercial (`targetHeadRotY`, `targetHeadRotX`).
+- **Anillos Gimbal Adaptativos & Halo Cuántico:**
+  - En modo rostro, el anillo gimbal superior se desplaza hacia la coronilla en ángulo de 30° (`y = 18 * ease, tilt = PI/6`), formando un halo ceremonial flotante.
+- **Selector de Modos en el HUD (`#hologram-mode-selector`):**
+  - Botones pill en la esquina superior derecha del orbe: `[ ⚡ AUTO ]` (por defecto: rostro en diálogo/voz, orbe en reposo), `[ 👤 ROSTRO ]` (fija el rostro 3D permanentemente) y `[ 🌐 ORBE ]` (fija el orbe cuántico continuo).
+- **Referencia Documental:** Ver `memory/2026-09-18.md` y `walkthrough.md`.
 
 ---
 
@@ -434,14 +448,23 @@ Para conectarte o continuar este proyecto desde tu **MacBook Pro**:
    ```bash
    git pull origin main
    ```
-2. **Revisar MEMORY.md & MOC en Obsidian:**
+2. **Iniciar o Verificar los Servicios Locales:**
+   ```bash
+   pm2 start ecosystem.config.js
+   # o específicamente el servidor web:
+   pm2 restart alberth-web
+   ```
+3. **Acceder al Quantum HUD:**
+   - Abre `http://localhost:8080` en tu navegador.
+   - Observa la transición del Orbe al Rostro Holográfico de Alberth en tiempo real.
+   - Prueba los botones `[ ⚡ AUTO ]`, `[ 👤 ROSTRO ]` y `[ 🌐 ORBE ]` en la esquina superior derecha del visor 3D.
+   - Mueve el ratón para comprobar el seguimiento de mirada y habla por el micrófono para ver la modulación labial en vivo.
+4. **Revisar MEMORY.md & MOC en Obsidian:**
    - Abrir la carpeta `Alberth` en Obsidian para ver el grafo visual y el Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`).
-3. **Continuar el Desarrollo de la Cara 3D de Alberth:**
-   - Inspeccionar los conceptos en `panel/assets/identity/`.
-   - Modificar la clase `SwarmOrb` / `VolumetricHologram` en `panel/index.html` para implementar la transición del orbe a la nube de puntos del rostro holográfico de Alberth con shaders Three.js y reactividad por voz.
-4. **Sincronizar y Subir Cambios:**
+5. **Sincronizar y Subir Cambios:**
    ```bash
    git add .
    git commit -m "feat: actualización desde MacBook"
    git push origin main
    ```
+
