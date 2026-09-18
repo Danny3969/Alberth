@@ -2319,16 +2319,16 @@ header.hud-header {
     <div class="orb-stage" id="orb-container">
       <canvas id="hologram-canvas"></canvas>
 
-      <!-- Selector de Modo Holograma (Auto / Rostro / Nebulosa) -->
+      <!-- Selector de Modo Holograma (Rostro / Auto / Orbe) -->
       <div class="hologram-mode-selector" id="hologram-mode-selector">
-        <button class="holo-pill-btn active" id="btn-holo-auto" onclick="setHologramMode('auto')" title="Modo Dinámico: Rostro Estelar durante diálogo/voz, Nebulosa Cósmica en reposo">
-          ⚡ AUTO
-        </button>
-        <button class="holo-pill-btn" id="btn-holo-face" onclick="setHologramMode('face')" title="Fijar Rostro Estelar de Alberth continuo">
+        <button class="holo-pill-btn active" id="btn-holo-face" onclick="setHologramMode('face')" title="Fijar Holograma Cuántico de Alberth continuo">
           👤 ROSTRO
         </button>
-        <button class="holo-pill-btn" id="btn-holo-orb" onclick="setHologramMode('orb')" title="Fijar Nebulosa Cuántica continua">
-          🌌 NEBULOSA
+        <button class="holo-pill-btn" id="btn-holo-auto" onclick="setHologramMode('auto')" title="Modo Dinámico: Holograma de Alberth durante diálogo/voz, Orbe en reposo">
+          ⚡ AUTO
+        </button>
+        <button class="holo-pill-btn" id="btn-holo-orb" onclick="setHologramMode('orb')" title="Fijar Reactor: Orbe Cuántico continuo">
+          🌐 ORBE
         </button>
       </div>
 
@@ -5319,27 +5319,25 @@ function setHUDState(state, label) {
 }
 
 // ============================================================
-// THREE.JS 3D QUANTUM STARDUST IDENTITY · ALBERTH CORE v6.0
-// Inspirado en la Estética de Polvo Estelar y Nebulosa Cósmica (Yuichiro Chino)
-// 14,000 Micro-partículas de Luz Estelar: Nebulosa Espiral ⟷ Rostro Sereno
+// THREE.JS 3D QUANTUM HOLOGRAPHIC STAGE · ALBERTH CORE v7.0
+// Identidad Visual Canónica Oficial de Alberth: Holograma Cuántico 3D
+// Integración de Entidad Volumétrica, Enjambre Cuántico & Anillos Giroscópicos
 // ============================================================
 const canvas = document.getElementById("hologram-canvas");
 let scene, camera, renderer;
-let stageGroup, headGroup, orbitalGroup;
-let stardustPointsMesh;
-let celestialRing1, celestialRing2;
+let stageGroup, headGroup, gimbalGroup, particlesGroup, projectorGroup;
+let hologramMesh, containmentOrb;
+let ringMesh1, ringMesh2, ringMesh3;
+let quantumParticlesMesh;
 
-const PARTICLE_COUNT = 14000;
-let currentPositions, facePositions, nebulaPositions;
-let baseBrightness, baseSizes, vertexTags;
-let particleColors;
-let stardustLoaded = false;
+const PARTICLE_COUNT = 1200;
+let particlePositions, faceCloudPositions, orbCloudPositions, particleColors;
 
-// Modos de Visualización y Estados de Morphing
-let hologramDisplayMode = "auto"; // "auto" | "face" | "orb"
-let morphProgress = 0.0;          // 0.0 = Nebulosa Cósmica, 1.0 = Rostro de Polvo Estelar
-let targetMorph = 0.0;
-let lastUserVoiceActivity = 0;
+// Modos de Visualización y Morphing
+let hologramDisplayMode = "face"; // "face" | "auto" | "orb"
+let morphProgress = 1.0;          // 0.0 = Orbe Cuántico, 1.0 = Rostro Holográfico
+let targetMorph = 1.0;
+let lastUserVoiceActivity = Date.now();
 
 // Seguimiento Interactivo de Mirada (Cursor Parallax 3D)
 let mouseX = 0, mouseY = 0;
@@ -5349,11 +5347,11 @@ let currentHeadRotY = 0, currentHeadRotX = 0;
 window.addEventListener("mousemove", (e) => {
   mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
   mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  targetHeadRotY = mouseX * 0.32; // Yaw suave: ±18 grados
-  targetHeadRotX = mouseY * 0.16; // Pitch suave: ±9 grados
+  targetHeadRotY = mouseX * 0.28;  // Yaw: ±16 grados de giro digno
+  targetHeadRotX = -mouseY * 0.14; // Pitch: ±8 grados de inclinación
 });
 
-// Selector de Modo Holográfico en HUD
+// Selector de Modo en HUD
 function setHologramMode(mode) {
   hologramDisplayMode = mode;
   document.querySelectorAll(".holo-pill-btn").forEach(btn => btn.classList.remove("active"));
@@ -5365,130 +5363,80 @@ function setHologramMode(mode) {
   } else if (mode === "orb") {
     targetMorph = 0.0;
   } else {
-    // auto: activo con interacción o voz reciente
+    // auto: Rostro activo durante habla/escucha o reposo sereno
     const isEngaged = isRecording || currentState === "speaking" || currentState === "listening" || currentState === "thinking";
-    targetMorph = isEngaged ? 1.0 : 0.0;
+    targetMorph = (isEngaged || (Date.now() - lastUserVoiceActivity < 6000)) ? 1.0 : 0.85;
   }
 }
 
-// ── 1. Generador de Textura de Luz Estelar Difusa (Puro Polvo Cósmico) ─
-function createStardustTexture() {
-  const pTexCanvas = document.createElement("canvas");
-  pTexCanvas.width = 128;
-  pTexCanvas.height = 128;
-  const ctx = pTexCanvas.getContext("2d");
-
-  const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  grad.addColorStop(0.00, "rgba(255, 255, 255, 1.0)");      // Núcleo estelar blanco incandescente
-  grad.addColorStop(0.18, "rgba(220, 250, 255, 0.95)");     // Halo inmediato ultra-claro
-  grad.addColorStop(0.42, "rgba(0, 240, 255, 0.55)");       // Corona cyan estelar eléctrico
-  grad.addColorStop(0.70, "rgba(15, 80, 160, 0.18)");       // Velo azul celeste cósmico
-  grad.addColorStop(1.00, "rgba(0, 0, 0, 0.0)");            // Disolución total al vacío
-  
+// ── 1. Textura Suave de Micro-partículas Cuánticas ───────────────────
+function createParticleTexture() {
+  const pCanvas = document.createElement("canvas");
+  pCanvas.width = 64;
+  pCanvas.height = 64;
+  const ctx = pCanvas.getContext("2d");
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0.00, "rgba(255, 255, 255, 1.0)");
+  grad.addColorStop(0.25, "rgba(0, 240, 255, 0.90)");
+  grad.addColorStop(0.60, "rgba(0, 160, 255, 0.25)");
+  grad.addColorStop(1.00, "rgba(0, 0, 0, 0.0)");
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 128, 128);
-
-  const texture = new THREE.CanvasTexture(pTexCanvas);
-  texture.generateMipmaps = true;
-  return texture;
+  ctx.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(pCanvas);
 }
 
-// ── 2. Carga Asíncrona del Modelo de Polvo Estelar v6.0 (stardust_mesh.bin) ─
-async function loadStardustIdentity() {
-  try {
-    const res = await fetch("/panel/assets/identity/stardust_mesh.bin");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const buffer = await res.arrayBuffer();
+// ── 2. Coordenadas del Enjambre Cuántico (Dual: Halo ⟷ Orbe Fibonacci) ─
+function initParticlePositions() {
+  faceCloudPositions = new Float32Array(PARTICLE_COUNT * 3);
+  orbCloudPositions = new Float32Array(PARTICLE_COUNT * 3);
+  particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+  particleColors = new Float32Array(PARTICLE_COUNT * 3);
 
-    const view = new DataView(buffer);
-    // Validar Magic 'ALST'
-    const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
-    const count = view.getUint32(4, true);
-
-    if (magic !== "ALST" || count !== PARTICLE_COUNT) {
-      console.warn("ALBERTH: Header inesperado en stardust_mesh.bin, usando fallback.", magic, count);
-      setupProceduralFallback();
-      return;
-    }
-
-    const posOffset = 20;
-    const nebOffset = posOffset + count * 3 * 4;
-    const brightOffset = nebOffset + count * 3 * 4;
-    const sizesOffset = brightOffset + count * 4;
-    const tagsOffset = sizesOffset + count * 4;
-
-    facePositions = new Float32Array(buffer, posOffset, count * 3);
-    nebulaPositions = new Float32Array(buffer, nebOffset, count * 3);
-    baseBrightness = new Float32Array(buffer, brightOffset, count);
-    baseSizes = new Float32Array(buffer, sizesOffset, count);
-    vertexTags = new Uint8Array(buffer, tagsOffset, count);
-
-    // Inicializar posiciones actuales con la nebulosa
-    currentPositions = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i++) {
-      currentPositions[i] = nebulaPositions[i];
-    }
-
-    // Actualizar geometría de Three.js
-    if (stardustPointsMesh && stardustPointsMesh.geometry) {
-      const geo = stardustPointsMesh.geometry;
-      geo.setAttribute("position", new THREE.BufferAttribute(currentPositions, 3));
-      geo.attributes.position.needsUpdate = true;
-    }
-
-    stardustLoaded = true;
-    console.log("ALBERTH: Consciencia en Polvo Estelar v6.0 cargada exitosamente (" + count + " micro-partículas estelares).");
-  } catch (err) {
-    console.warn("ALBERTH: Error cargando stardust_mesh.bin:", err);
-    setupProceduralFallback();
-  }
-}
-
-// Fallback procedural de emergencia si el binario no está disponible
-function setupProceduralFallback() {
-  facePositions = new Float32Array(PARTICLE_COUNT * 3);
-  nebulaPositions = new Float32Array(PARTICLE_COUNT * 3);
-  currentPositions = new Float32Array(PARTICLE_COUNT * 3);
-  baseBrightness = new Float32Array(PARTICLE_COUNT);
-  baseSizes = new Float32Array(PARTICLE_COUNT);
-  vertexTags = new Uint8Array(PARTICLE_COUNT);
+  const phi = Math.PI * (3 - Math.sqrt(5)); // Ángulo áureo
 
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     const idx = i * 3;
-    const theta = Math.random() * Math.PI * 2;
-    const r = Math.pow(Math.random(), 0.5) * 55.0;
-    const phi = (Math.random() - 0.5) * Math.PI * 0.8;
 
-    const x = r * Math.cos(phi) * Math.cos(theta);
-    const y = r * Math.sin(phi);
-    const z = r * Math.cos(phi) * Math.sin(theta);
+    // A) Enjambre Volumétrico del Rostro (Flotando en torno a la cabeza en 3D)
+    const thetaF = Math.random() * Math.PI * 2;
+    const rF = 35.0 + Math.random() * 45.0;
+    const phiF = (Math.random() - 0.5) * Math.PI * 0.85;
 
-    nebulaPositions[idx] = x;
-    nebulaPositions[idx + 1] = y;
-    nebulaPositions[idx + 2] = z;
+    faceCloudPositions[idx] = rF * Math.cos(phiF) * Math.cos(thetaF);
+    faceCloudPositions[idx + 1] = rF * Math.sin(phiF) * 0.95;
+    // 50% de partículas delante (Z > 0) y 50% detrás (Z < 0)
+    faceCloudPositions[idx + 2] = rF * Math.cos(phiF) * Math.sin(thetaF) * 0.85;
 
-    facePositions[idx] = x * 0.85;
-    facePositions[idx + 1] = y * 1.1;
-    facePositions[idx + 2] = Math.abs(z) * 0.7;
+    // B) Orbe Cuántico Condensado (Reactor Fibonacci)
+    const yO = 1 - (i / (PARTICLE_COUNT - 1)) * 2;
+    const radO = Math.sqrt(Math.max(0, 1 - yO * yO));
+    const thetaO = phi * i;
+    const rOrb = 38.0 + (Math.random() - 0.5) * 6.0;
 
-    currentPositions[idx] = x;
-    currentPositions[idx + 1] = y;
-    currentPositions[idx + 2] = z;
+    orbCloudPositions[idx] = Math.cos(thetaO) * radO * rOrb;
+    orbCloudPositions[idx + 1] = yO * rOrb;
+    orbCloudPositions[idx + 2] = Math.sin(thetaO) * radO * rOrb;
 
-    baseBrightness[i] = 0.6 + Math.random() * 0.4;
-    baseSizes[i] = 1.8 + Math.random() * 1.5;
-    vertexTags[i] = (r < 25) ? 1 : 0;
+    // Semilla inicial
+    particlePositions[idx] = faceCloudPositions[idx];
+    particlePositions[idx + 1] = faceCloudPositions[idx + 1];
+    particlePositions[idx + 2] = faceCloudPositions[idx + 2];
+
+    // Color: Cyan Eléctrico con destellos estelares blancos
+    const isBright = Math.random() > 0.82;
+    particleColors[idx] = isBright ? 0.95 : 0.05;
+    particleColors[idx + 1] = isBright ? 1.00 : 0.88;
+    particleColors[idx + 2] = 1.00;
   }
-  stardustLoaded = true;
 }
 
-// ── 3. Inicialización del Escenario Holográfico Cósmico ──────────────
+// ── 3. Inicialización del Escenario Three.js ─────────────────────────
 function initThreeHologram() {
   scene = new THREE.Scene();
 
   const rect = canvas.getBoundingClientRect();
-  camera = new THREE.PerspectiveCamera(42, rect.width / (rect.height || 350), 0.1, 1000);
-  camera.position.z = 215; // Encuadre áureo del rostro y halo estelar
+  camera = new THREE.PerspectiveCamera(40, rect.width / (rect.height || 350), 0.1, 1000);
+  camera.position.z = 210;
 
   renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
   renderer.setSize(rect.width, rect.height || 350);
@@ -5500,73 +5448,132 @@ function initThreeHologram() {
   headGroup = new THREE.Group();
   stageGroup.add(headGroup);
 
-  // A) Nube de 14,000 Partículas de Polvo Estelar (Stardust Cloud)
-  const geometry = new THREE.BufferGeometry();
-  currentPositions = new Float32Array(PARTICLE_COUNT * 3);
-  particleColors = new Float32Array(PARTICLE_COUNT * 3);
+  gimbalGroup = new THREE.Group();
+  stageGroup.add(gimbalGroup);
 
-  // Semilla inicial estelar
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    const idx = i * 3;
-    currentPositions[idx] = (Math.random() - 0.5) * 60;
-    currentPositions[idx + 1] = (Math.random() - 0.5) * 60;
-    currentPositions[idx + 2] = (Math.random() - 0.5) * 60;
+  // A) Entidad Holográfica Maestra de Alberth (Imagen Canónica Oficial)
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.load(
+    "/panel/assets/identity/alberth_hologram_clean.png",
+    (texture) => {
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = true;
 
-    // Gradiente celeste inicial (Azul cósmico a cyan)
-    particleColors[idx] = 0.05;
-    particleColors[idx + 1] = 0.75;
-    particleColors[idx + 2] = 1.0;
-  }
+      const holoMat = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.96,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
 
-  geometry.setAttribute("position", new THREE.BufferAttribute(currentPositions, 3));
-  geometry.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
+      // Plano holográfico de alta definición perfectamente escalado
+      const holoGeo = new THREE.PlaneGeometry(134, 134);
+      hologramMesh = new THREE.Mesh(holoGeo, holoMat);
+      hologramMesh.position.set(0, 3.5, 0);
+      headGroup.add(hologramMesh);
 
-  const stardustTexture = createStardustTexture();
+      console.log("ALBERTH: Holograma Cuántico Canónico v7.0 desplegado con éxito.");
+    },
+    undefined,
+    (err) => console.warn("ALBERTH: Error cargando textura holográfica:", err)
+  );
 
-  const stardustMaterial = new THREE.PointsMaterial({
-    size: 2.3, // Micro-partículas de alta densidad según Imagen 2
-    map: stardustTexture,
+  // B) Enjambre Volumétrico Cuántico (1,200 Partículas 3D)
+  initParticlePositions();
+
+  const particleGeo = new THREE.BufferGeometry();
+  particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+  particleGeo.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
+
+  const pTexture = createParticleTexture();
+  const particleMat = new THREE.PointsMaterial({
+    size: 2.8,
+    map: pTexture,
     vertexColors: true,
     transparent: true,
-    opacity: 0.94,
+    opacity: 0.88,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   });
 
-  stardustPointsMesh = new THREE.Points(geometry, stardustMaterial);
-  headGroup.add(stardustPointsMesh);
+  quantumParticlesMesh = new THREE.Points(particleGeo, particleMat);
+  stageGroup.add(quantumParticlesMesh);
 
-  // B) Anillos Celestiales Orbitales Sutiles (Astrolabio Cósmico Fino)
-  // Sin mallas pesadas ni polígonos cerrados: líneas de coordenadas cósmicas
-  orbitalGroup = new THREE.Group();
-  stageGroup.add(orbitalGroup);
-
-  const ringGeo1 = new THREE.RingGeometry(88, 88.8, 96);
+  // C) Anillos Giroscópicos Gimbal 3D (Oro Ámbar & Cyan Eléctrico)
+  // Anillo 1: Oro Ámbar inclinado
+  const ringGeo1 = new THREE.RingGeometry(82, 84.2, 72);
   const ringMat1 = new THREE.MeshBasicMaterial({
+    color: 0xffb703,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.32,
+    wireframe: true,
+    blending: THREE.AdditiveBlending
+  });
+  ringMesh1 = new THREE.Mesh(ringGeo1, ringMat1);
+  ringMesh1.rotation.x = Math.PI * 0.35;
+  gimbalGroup.add(ringMesh1);
+
+  // Anillo 2: Cyan Eléctrico orbital
+  const ringGeo2 = new THREE.RingGeometry(94, 95.8, 64);
+  const ringMat2 = new THREE.MeshBasicMaterial({
     color: 0x00f0ff,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.12,
+    opacity: 0.25,
+    wireframe: true,
     blending: THREE.AdditiveBlending
   });
-  celestialRing1 = new THREE.Mesh(ringGeo1, ringMat1);
-  celestialRing1.rotation.x = Math.PI * 0.38;
-  orbitalGroup.add(celestialRing1);
+  ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
+  ringMesh2.rotation.y = -Math.PI * 0.28;
+  gimbalGroup.add(ringMesh2);
 
-  const ringGeo2 = new THREE.RingGeometry(104, 104.6, 96);
-  const ringMat2 = new THREE.MeshBasicMaterial({
-    color: 0x0f62fe,
+  // Anillo 3: Cinturón Ecuatorial de Datos
+  const ringGeo3 = new THREE.RingGeometry(75, 76.5, 64);
+  const ringMat3 = new THREE.MeshBasicMaterial({
+    color: 0x00d8f6,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.08,
+    opacity: 0.18,
+    wireframe: true,
     blending: THREE.AdditiveBlending
   });
-  celestialRing2 = new THREE.Mesh(ringGeo2, ringMat2);
-  celestialRing2.rotation.y = -Math.PI * 0.28;
-  orbitalGroup.add(celestialRing2);
+  ringMesh3 = new THREE.Mesh(ringGeo3, ringMat3);
+  ringMesh3.rotation.x = Math.PI / 2;
+  gimbalGroup.add(ringMesh3);
 
-  // C) Cargar el Modelo Binario de Polvo Estelar
-  loadStardustIdentity();
+  // D) Esfera de Contención Cuántica (Cristal / Plasma)
+  const orbGeo = new THREE.SphereGeometry(78, 36, 36);
+  const orbMat = new THREE.MeshBasicMaterial({
+    color: 0x00f0ff,
+    transparent: true,
+    opacity: 0.055,
+    wireframe: false,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+  containmentOrb = new THREE.Mesh(orbGeo, orbMat);
+  stageGroup.add(containmentOrb);
+
+  // E) Pedestal Emisor Holográfico (Base y = -72)
+  projectorGroup = new THREE.Group();
+  projectorGroup.position.y = -72;
+  stageGroup.add(projectorGroup);
+
+  const baseGeo1 = new THREE.RingGeometry(26, 29, 48);
+  const baseMat1 = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.40, wireframe: true });
+  const baseMesh1 = new THREE.Mesh(baseGeo1, baseMat1);
+  baseMesh1.rotation.x = Math.PI / 2;
+  projectorGroup.add(baseMesh1);
+
+  const baseGeo2 = new THREE.RingGeometry(38, 41, 48);
+  const baseMat2 = new THREE.MeshBasicMaterial({ color: 0x0077b6, side: THREE.DoubleSide, transparent: true, opacity: 0.22, wireframe: true });
+  const baseMesh2 = new THREE.Mesh(baseGeo2, baseMat2);
+  baseMesh2.rotation.x = Math.PI / 2;
+  projectorGroup.add(baseMesh2);
 
   window.addEventListener("resize", onHologramResize);
   animateHologram();
@@ -5584,7 +5591,7 @@ function onHologramResize() {
 
 let clock = new THREE.Clock();
 
-// ── 4. Ciclo de Animación y Renderizado Cósmico ─────────────────────
+// ── 4. Ciclo Principal de Renderizado 3D ─────────────────────────────
 function animateHologram() {
   requestAnimationFrame(animateHologram);
 
@@ -5607,152 +5614,130 @@ function animateHologram() {
     audioEnergy = (sum / data.length) / 128.0;
   }
 
-  // 2. Control de Modos (Auto / Rostro / Nebulosa) y Morphing
+  // 2. Control de Modos (Auto / Rostro / Orbe)
   const isEngaged = isRecording || currentState === "speaking" || currentState === "listening" || currentState === "thinking";
   if (isEngaged) {
     lastUserVoiceActivity = Date.now();
   }
 
   if (hologramDisplayMode === "auto") {
-    targetMorph = (isEngaged || (Date.now() - lastUserVoiceActivity < 5000)) ? 1.0 : 0.0;
+    targetMorph = (isEngaged || (Date.now() - lastUserVoiceActivity < 6000)) ? 1.0 : 0.85;
   } else if (hologramDisplayMode === "face") {
     targetMorph = 1.0;
   } else if (hologramDisplayMode === "orb") {
     targetMorph = 0.0;
   }
 
-  // Interpolación suave y orgánica (Smoothstep cúbico)
-  morphProgress += (targetMorph - morphProgress) * 0.055;
+  // Interpolación de morph suave (Smoothstep)
+  morphProgress += (targetMorph - morphProgress) * 0.06;
   const ease = morphProgress * morphProgress * (3 - 2 * morphProgress);
 
-  // 3. Seguimiento Interactivo de Mirada (Cursor Parallax)
-  currentHeadRotY += (targetHeadRotY - currentHeadRotY) * 0.06;
-  currentHeadRotX += (targetHeadRotX - currentHeadRotX) * 0.06;
+  // 3. Seguimiento Interactivo de Mirada (Parallax 3D)
+  currentHeadRotY += (targetHeadRotY - currentHeadRotY) * 0.07;
+  currentHeadRotX += (targetHeadRotX - currentHeadRotX) * 0.07;
 
-  // 4. Parámetros de Dinámica y Respiración Cósmica
-  let rotSpeed = 0.28;
-  let targetScale = 1.0;
-
+  // 4. Parámetros de Dinámica de Estado
+  let rotSpeed = 0.25;
   if (currentState === "listening") {
-    rotSpeed = 0.55;
-    targetScale = 0.96 + audioEnergy * 0.08;
+    rotSpeed = 0.50;
   } else if (currentState === "thinking") {
-    rotSpeed = 1.80; // La nebulosa cósmica acelera armónicamente
-    targetScale = 1.04 + Math.sin(time * 5.0) * 0.04;
+    rotSpeed = 1.60;
   } else if (currentState === "speaking") {
     rotSpeed = 0.35;
-    targetScale = 1.02 + audioEnergy * 0.15;
-  } else {
-    rotSpeed = 0.22;
-    targetScale = 1.0 + Math.sin(time * 1.6) * 0.02;
   }
 
-  // 5. Orientación de Cabeza vs Nebulosa
+  // 5. Orientación 3D del Rostro y Levitación Armónica
   if (headGroup) {
-    // En modo Nebulosa gira como galaxia espiral; en modo Rostro mira con serenidad al Señor
-    const nebulaSpin = headGroup.rotation.y + rotSpeed * delta;
-    headGroup.rotation.y = nebulaSpin * (1 - ease) + (currentHeadRotY + Math.sin(time * 0.7) * 0.02) * ease;
-    headGroup.rotation.x = (Math.sin(time * 0.35) * 0.08) * (1 - ease) + (currentHeadRotX + Math.sin(time * 1.1) * 0.015) * ease;
+    // Contacto visual con el Señor en modo Rostro
+    headGroup.rotation.y = currentHeadRotY * ease;
+    headGroup.rotation.x = currentHeadRotX * ease;
 
-    // Respiración cósmica y levitación armónica
-    headGroup.position.y = Math.sin(time * 1.4) * 2.2;
+    // Micro-levitación cuántica
+    headGroup.position.y = Math.sin(time * 1.5) * 2.8;
+
+    // Pulso de Escala con la Voz
+    const voiceScale = 1.0 + (currentState === "speaking" ? audioEnergy * 0.06 : 0.0);
+    headGroup.scale.setScalar(voiceScale);
   }
 
-  // 6. Animación y Dinámica Cuántica de las 14,000 Partículas
-  if (stardustPointsMesh && stardustLoaded) {
-    const pos = stardustPointsMesh.geometry.attributes.position.array;
-    const col = stardustPointsMesh.geometry.attributes.color.array;
+  // 6. Animación del Plano Holográfico Maestra
+  if (hologramMesh && hologramMesh.material) {
+    // Opacidad según modo y voz
+    const baseAlpha = 0.92;
+    const voiceBoost = (currentState === "speaking") ? audioEnergy * 0.15 : 0.0;
+    hologramMesh.material.opacity = Math.max(0.001, ease * (baseAlpha + voiceBoost));
 
-    // Resonancia vocal: onda de luz estelar expansiva durante el habla
-    const voiceWave = (currentState === "speaking") ? audioEnergy * 1.6 : 0.0;
+    // Paleta de Estado: Oro Cuántico al pensar, Cyan Límpido normal
+    if (currentState === "thinking") {
+      hologramMesh.material.color.setHex(0xffe082);
+    } else {
+      hologramMesh.material.color.setHex(0xffffff);
+    }
+  }
+
+  // 7. Enjambre Volumétrico Cuántico (Partículas 3D)
+  if (quantumParticlesMesh) {
+    const pos = quantumParticlesMesh.geometry.attributes.position.array;
+    const col = quantumParticlesMesh.geometry.attributes.color.array;
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const idx = i * 3;
-      const tag = vertexTags[i];
-      const bright = baseBrightness[i];
 
-      // A) Posición Nebulosa Cósmica (Giro espiral y deriva estelar)
-      const nx = nebulaPositions[idx];
-      const ny = nebulaPositions[idx + 1];
-      const nz = nebulaPositions[idx + 2];
+      // Coordenadas modo Rostro
+      const fx = faceCloudPositions[idx];
+      const fy = faceCloudPositions[idx + 1];
+      const fz = faceCloudPositions[idx + 2];
 
-      // B) Posición Rostro Sereno de Alberth
-      let fx = facePositions[idx];
-      let fy = facePositions[idx + 1];
-      let fz = facePositions[idx + 2];
+      // Coordenadas modo Orbe
+      const ox = orbCloudPositions[idx];
+      const oy = orbCloudPositions[idx + 1];
+      const oz = orbCloudPositions[idx + 2];
 
-      // Distancia euclídea al núcleo de los labios (origen de la voz)
-      const distToLips = Math.sqrt(fx * fx + (fy + 14.0) * (fy + 14.0));
+      // Micro-escintilación estelar
+      const shimmer = Math.sin(time * 3.2 + i * 0.8) * 0.8;
 
-      // Resonancia Orgánica Vocal: Ondas de luz y micro-vibración cuántica
-      let rippleGlow = 0.0;
-      if (voiceWave > 0.01 && (tag === 1 || tag === 2 || tag === 3)) {
-        const wavePhase = Math.sin(time * 12.0 - distToLips * 0.16);
-        if (wavePhase > 0) {
-          rippleGlow = wavePhase * voiceWave;
-          fz += wavePhase * voiceWave * 1.8; // Micro-ondulación hacia adelante
-        }
-      }
+      // LERP (Orbe ⟷ Rostro)
+      pos[idx] = ox * (1 - ease) + (fx + shimmer) * ease;
+      pos[idx + 1] = oy * (1 - ease) + (fy + shimmer) * ease;
+      pos[idx + 2] = oz * (1 - ease) + fz * ease;
 
-      // Micro-escintilación estelar constante (Titilar de estrellas)
-      const twinkle = Math.sin(time * 3.5 + i * 0.77) * 0.08;
-
-      // C) Interpolación LERP de Posición (Nebulosa ⟷ Rostro)
-      pos[idx] = (nx * targetScale) * (1 - ease) + (fx * targetScale) * ease;
-      pos[idx + 1] = (ny * targetScale) * (1 - ease) + (fy * targetScale) * ease;
-      pos[idx + 2] = (nz * targetScale) * (1 - ease) + ((fz + twinkle) * targetScale) * ease;
-
-      // D) Paleta Cromática de Polvo Estelar según Imagen 2
-      // Fondo: Azul celeste profundo (#0f4c81 / #0077b6)
-      // Rasgos: Cyan eléctrico puro (#00f0ff)
-      // Puntos Focales y Resonancia: Blanco estelar incandescente (#ffffff)
-      let r, g, b;
-
+      // Color dinámico según estado
       if (currentState === "thinking") {
-        // Nebulosa Dorada Cuántica de Alto Procesamiento
-        r = 0.95 * bright;
-        g = (0.75 + rippleGlow * 0.25) * bright;
-        b = 0.35 * bright;
-      } else if (tag === 2) {
-        // Labios y puente nasal: foco de luz brillante
-        r = 0.35 + rippleGlow * 0.65;
-        g = 0.92 + rippleGlow * 0.08;
-        b = 1.00;
-      } else if (tag === 3) {
-        // Rasgos centrales / ojos serenos: luz cyan blanca
-        r = 0.20 + rippleGlow * 0.70;
-        g = 0.88 + rippleGlow * 0.12;
-        b = 1.00;
-      } else if (tag === 0) {
-        // Halo de dispersión perimetral y estrellas cósmicas flotantes
-        // Azul profundo que se funde en la oscuridad del espacio
-        r = 0.04 * bright;
-        g = 0.45 * bright;
-        b = 0.88 * bright;
+        col[idx] = 0.95;
+        col[idx + 1] = 0.80;
+        col[idx + 2] = 0.25;
+      } else if (currentState === "speaking") {
+        col[idx] = 0.20 + audioEnergy * 0.6;
+        col[idx + 1] = 0.95;
+        col[idx + 2] = 1.00;
       } else {
-        // Rostro base: Cyan estelar límpido
-        r = 0.08 + rippleGlow * 0.50;
-        g = 0.82 + rippleGlow * 0.18;
-        b = 1.00;
+        col[idx] = 0.05;
+        col[idx + 1] = 0.88;
+        col[idx + 2] = 1.00;
       }
-
-      // Aplicar brillo base individual calibrado
-      const finalBright = Math.min(1.0, (bright + rippleGlow * 0.45));
-      col[idx] = r * finalBright;
-      col[idx + 1] = g * finalBright;
-      col[idx + 2] = b * finalBright;
     }
 
-    stardustPointsMesh.geometry.attributes.position.needsUpdate = true;
-    stardustPointsMesh.geometry.attributes.color.needsUpdate = true;
+    // Giro suave del enjambre cuántico
+    quantumParticlesMesh.rotation.y += rotSpeed * 0.5 * delta;
+    quantumParticlesMesh.geometry.attributes.position.needsUpdate = true;
+    quantumParticlesMesh.geometry.attributes.color.needsUpdate = true;
   }
 
-  // 7. Giro Armónico de los Anillos Celestiales
-  if (celestialRing1) {
-    celestialRing1.rotation.z += (rotSpeed * 0.4) * delta;
+  // 8. Anillos Giroscópicos Gimbal 3D
+  if (ringMesh1) {
+    ringMesh1.rotation.z += (rotSpeed * 0.65) * delta;
   }
-  if (celestialRing2) {
-    celestialRing2.rotation.z -= (rotSpeed * 0.3) * delta;
+  if (ringMesh2) {
+    ringMesh2.rotation.z -= (rotSpeed * 0.50) * delta;
+    ringMesh2.rotation.x += 0.20 * delta;
+  }
+  if (ringMesh3) {
+    ringMesh3.rotation.z += (rotSpeed * 0.30) * delta;
+  }
+
+  // 9. Esfera de Contención
+  if (containmentOrb) {
+    containmentOrb.rotation.y += 0.12 * delta;
   }
 
   renderer.render(scene, camera);
