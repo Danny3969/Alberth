@@ -54,3 +54,13 @@ projects:
     scripts:
       dev: npm run start:dev
       build: npm run build
+  macondo-express:
+    name: MACONDO EXPRESS
+    path: /Users/contabilidad/.gemini/antigravity-ide/scratch/MacondoExpress
+    category: Transport Cooperative & Logistics
+    description: "Cooperativa de Transporte Interurbano Puerta a Puerta (4 Asientos) & Encomiendas con QR"
+    port: 8092
+    scripts:
+      pasajero: flutter run -d chrome -t lib/main.dart (en macondo_pasajero)
+      conductor: flutter run -d chrome -t lib/main.dart (en macondo_conductor)
+

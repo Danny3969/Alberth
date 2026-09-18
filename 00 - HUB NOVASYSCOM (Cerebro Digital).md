@@ -25,19 +25,19 @@ Bienvenido a la Bóveda Maestra de **Novasyscom**. Esta base de conocimiento loc
                   │        CEO: El Señor          │
                   └──────────────┬────────────────┘
                                  │
-         ┌───────────────┬───────┴───────┬───────────────┐
-         │               │               │               │
-  ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐
-  │ 🚗 DRIVO    │ │ 🛵 DRIVO ONE│ │ 💱 VALEX    │ │ 📦 GLOBAL   │
-  │ Mobility P2P│ │ Quick-Comm  │ │ Fintech FX  │ │ Agro B2B    │
-  │ Puerto 8088 │ │ Puerto 8090 │ │ Puerto 4000 │ │ Puerto 3000 │
-  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
-                                 │
-                         ┌───────▼───────┐
-                         │ 🤖 ALBERTH    │
-                         │ AI Operations │
-                         │ Puerto 8080   │
-                         └───────────────┘
+          ┌───────────────┬───────┴───────┬───────────────┬───────────────┐
+          │               │               │               │               │
+   ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐
+   │ 🚗 DRIVO    │ │ 🛵 DRIVO ONE│ │ 💱 VALEX    │ │ 📦 GLOBAL   │ │ 🚐 MACONDO  │
+   │ Mobility P2P│ │ Quick-Comm  │ │ Fintech FX  │ │ Agro B2B    │ │ Coop Express│
+   │ Puerto 8088 │ │ Puerto 8090 │ │ Puerto 4000 │ │ Puerto 3000 │ │ Puerto 8092 │
+   └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+                                  │
+                          ┌───────▼───────┐
+                          │ 🤖 ALBERTH    │
+                          │ AI Operations │
+                          │ Puerto 8080   │
+                          └───────────────┘
 ```
 
 1. **[[PROJECT_DRIVO|🚗 DRIVO (Mobility P2P)]]**
@@ -57,7 +57,11 @@ Bienvenido a la Bóveda Maestra de **Novasyscom**. Esta base de conocimiento loc
    - **Enfoque:** Portal B2B de exportación agroalimentaria (banano, pitahaya) y Cloud Drive corporativo.
    - **Stack:** Next.js / Node.js, puerto `3000`.
 
-5. **[[MEMORY|🤖 ALBERTH NEXUS (AI Chief of Staff)]]**
+5. **[[PROJECT_MACONDO_EXPRESS|🚐 MACONDO EXPRESS (Transporte Puerta a Puerta & Encomiendas QR)]]**
+   - **Enfoque:** Cooperativa de transporte interurbano/interprovincial (autos y camionetas de 4 cupos) con recogida puerta a puerta, paquetería con confirmación QR y pagos 100% en efectivo.
+   - **Stack:** Flutter (Pasajero + Conductor/Despacho), Supabase PostgreSQL, Simulador interactivo en puerto `8092`.
+
+6. **[[MEMORY|🤖 ALBERTH NEXUS (AI Chief of Staff)]]**
    - **Enfoque:** Asistente ejecutivo, orquestador autónomo de hardware iMac/MacBook, visión, voz y telemetría.
    - **Stack:** FastAPI, Three.js 3D Quantum HUD, WebSockets en `http://localhost:8080`.
 

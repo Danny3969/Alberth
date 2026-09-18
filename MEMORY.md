@@ -456,6 +456,20 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
   - **Sincronización 3D:** Partículas integradas en `headGroup`, moviéndose al unísono con el seguimiento de mirada hacia el Señor.
   - Verificado en vivo en Google Chrome (`http://localhost:8080`), capturas `chrome_hologram_v8_live.png` y `alberth_v8_stage_detail.png`.
 
+### 2026-09-18 (Lanzamiento Proyecto "Macondo Express" · Arquitectura Flutter + Supabase)
+- **Creación de Nuevo Proyecto Corporativo a Solicitud del Señor:**
+  - **Identidad:** Macondo Express · Cooperativa de Transporte Puerta a Puerta & Encomiendas con QR.
+  - **Repositorio Dedicado:** `/Users/contabilidad/.gemini/antigravity-ide/scratch/MacondoExpress` (completamente aislado de Drivo).
+  - **Esquema Relacional PostgreSQL (Supabase):** `supabase/macondo_schema.sql` con funciones RPC atómicas:
+    - `reservar_cupos_atomico`: Bloqueo pesimista `FOR UPDATE` para garantizar un estricto máximo de 4 pasajeros por unidad (autos y camionetas).
+    - `confirmar_entrega_encomienda`: Validación criptográfica del Código QR y notificación instantánea al remitente.
+  - **Estructura Modular Flutter:**
+    - `macondo_core`: Modelos (`Usuario`, `Vehiculo`, `Ruta`, `TurnoViaje`, `ReservaPasajero`, `Encomienda`), colores corporativos (`AppColors`) y servicios Supabase CRUD/RPC.
+    - `macondo_pasajero`: Selección de puestos (1 a 4), punto de recogida puerta a puerta (dirección + GPS), envío de encomiendas con QR de entrega y pagos 100% en efectivo.
+    - `macondo_conductor`: Manifiesto ordenado de recogida puerta a puerta, enlace directo a Google Maps/Waze, lista de encomiendas, escáner QR de confirmación y módulo de Despacho/Administración.
+  - **Simulador Interactivo Dual en Vivo:** Desplegado en `http://localhost:8092` con PM2 (`macondo-express-web`).
+  - **Integración con Alberth CLI (AGC):** Registrado en `/Users/contabilidad/alberth_cli/ag-config.yaml` y documentado en Obsidian (`PROJECT_MACONDO_EXPRESS.md`).
+
 ---
 
 ## 🚀 Guía de Continuidad desde Otros Equipos (MacBook Pro)
