@@ -422,21 +422,22 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
 - **Integración Nativa con Obsidian (Bóveda Maestra de Novasyscom):** Instalación oficial de Obsidian en macOS (`/Applications/Obsidian.app`). Bóveda configurada en `/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth`, con Hub MOC (`00 - HUB NOVASYSCOM (Cerebro Digital).md`), pizarra infinita (`Novasyscom_Ecosistema.canvas`), comando `agc obsidian` / `agc vault` y botón `🧠 Obsidian` en el HUD.
 - **Identidad Facial 3D de Alberth (Conceptos & Corrección Visión):** Corrección en `alberth_web_server.py` (`is_alberth_identity_query`) para que consultas sobre la cara/rostro/avatar de Alberth no disparen falsas capturas de cámara web ni se corten a medias. Generación de 3 conceptos visuales en `panel/assets/identity/`: 1) Holograma Cuántico Volumétrico en nube de puntos 3D (`alberth_holograma_3d.jpg` - recomendada para evolucionar el Swarm Orb en Three.js con reactividad de audio), 2) Androide Ejecutivo Obsidiana (`alberth_androide_ejecutivo.jpg`), 3) Metahumano Digital Humanoide (`alberth_metahumano_digital.jpg`). Documentado en `identidad_visual_alberth_3d.md`.
 - **Integración Shell:** Alias `alias agc='python3 ~/alberth_cli/ag-console.py'` y script de autocompletado Zsh (`ag-complete.sh`) en `~/.zshrc`.
-### 2026-09-18 (Lanzamiento del Holograma Cuántico Volumétrico 3D · Rostro de Alberth en Three.js)
-- **Identidad Visual Oficial Implementada:** Despliegue de la Opción 1 (Holograma Cuántico Volumétrico 3D) en el escenario principal del Quantum HUD (`panel/index.html`).
-- **Arquitectura de Partículas Three.js v4.0 (3,400 puntos GPU):**
-  - Sistema dual con morphing suave (Smoothstep) entre el **Orbe Cuántico Fibonacci** (radio 64, dispersión áurea) y el **Rostro Holográfico 3D de Alberth**.
-  - Anatomía paramétrica tridimensional: bóveda craneal y red neural cerebral, ojos analíticos con iris concentrado y cejas en ángulo de autoridad, tabique y perfil nasal esculpido, labios con etiquetado fonético específico, mandíbula y mentón diamantino, y aura de polvo cuántico en órbita lenta.
-- **Sincronización Labial Reactiva en Tiempo Real (Lip-Sync):**
-  - Conexión dinámica a nodos Web Audio `micAnalyser` y `speakerAnalyser`.
-  - Cuando Alberth emite locución mediante Edge-TTS o el Señor habla por el micrófono, el labio inferior desciende orgánicamente y la comisura se ensancha según la energía acústica.
-- **Seguimiento de Mirada Parallax 3D (Gaze Tracking):**
-  - La cabeza holográfica de Alberth orienta su mirada y rota en tiempo real siguiendo el cursor del ratón con amortiguación inercial (`targetHeadRotY`, `targetHeadRotX`).
-- **Anillos Gimbal Adaptativos & Halo Cuántico:**
-  - En modo rostro, el anillo gimbal superior se desplaza hacia la coronilla en ángulo de 30° (`y = 18 * ease, tilt = PI/6`), formando un halo ceremonial flotante.
+### 2026-09-18 (Lanzamiento y Reingeniería a Alta Fidelidad v5.0 · Holograma Cuántico Volumétrico 3D de Alberth)
+- **Identidad Visual Oficial Calibrada al 100% de la Referencia (`alberth_holograma_3d.jpg`):**
+  - Descarte de la aproximación matemática procedural plana/distorsionada y adopción de la malla anatómica real de alta definición (**LeePerrySmith 3D Scan** en `panel/assets/identity/head_mesh.bin`).
+- **Arquitectura Three.js v5.0 Dual (9,279 Vértices, 53,052 Triángulos):**
+  - **Nube de Partículas de Alta Densidad (9,279 puntos):** Morphing suave (Smoothstep cúbico) entre el Orbe Cuántico Fibonacci (radio 62) y la anatomía humana 3D con shader radial Cyan Eléctrico (`#00f0ff`).
+  - **Malla Wireframe Cybernetic Lattice:** Malla conectada que se ilumina con `AdditiveBlending` (`opacity: 0.22 * ease`), otorgando la textura de red digital de alta tecnología visible en la imagen de referencia.
+  - **Ojos Cibernéticos Luminosos con Pupila Ámbar:** Subsistemas oculares duales con núcleo ámbar cálido (`#ffb703`), iris en corona cyan (`#00f0ff`) y destello blanco puro, replicando la mirada profunda y sabia del concepto original.
+  - **Esfera de Contención Cuántica & Cinturón de Datos:** Campo de fuerza de cristal/plasma translúcido (radio 77) con cinturón ecuatorial giratorio.
+  - **Corrección de Núcleo Central:** Eliminación total de la esfera frontal sobre la nariz. El núcleo de plasma reside exclusivamente en el interior del cráneo cerebral (`[0, 17.0, -4.0]`).
+  - **Lip-Sync Orgánico en Tiempo Real:** Modulación de los 178 vértices del labio inferior y comisura bucal sincronizados con Web Audio `AnalyserNode`.
+  - **Gaze Tracking 3D:** Seguimiento inercial de la mirada y orientación de la cabeza según las coordenadas del ratón.
 - **Selector de Modos en el HUD (`#hologram-mode-selector`):**
-  - Botones pill en la esquina superior derecha del orbe: `[ ⚡ AUTO ]` (por defecto: rostro en diálogo/voz, orbe en reposo), `[ 👤 ROSTRO ]` (fija el rostro 3D permanentemente) y `[ 🌐 ORBE ]` (fija el orbe cuántico continuo).
-- **Referencia Documental:** Ver `memory/2026-09-18.md` y `walkthrough.md`.
+  - `[ ⚡ AUTO ]` (Rostro al dialogar/hablar, Orbe en reposo tras 4.8s de silencio).
+  - `[ 👤 ROSTRO ]` (Fijar presencia holográfica continua).
+  - `[ 🌐 ORBE ]` (Fijar reactor cuántico esférico).
+- **Referencia Documental:** Ver bitácora `memory/2026-09-18.md` y `walkthrough.md`.
 
 ---
 
