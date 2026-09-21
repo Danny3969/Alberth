@@ -60,6 +60,7 @@ Bienvenido a la Bóveda Maestra de **Novasyscom**. Esta base de conocimiento loc
 5. **[[PROJECT_MACONDO_EXPRESS|🚐 MACONDO EXPRESS (Transporte Puerta a Puerta & Encomiendas QR)]]**
    - **Enfoque:** Cooperativa de transporte interurbano/interprovincial (autos y camionetas de 4 cupos) con recogida puerta a puerta, paquetería con confirmación QR y pagos 100% en efectivo.
    - **Stack:** Flutter (Pasajero + Conductor/Despacho), Supabase PostgreSQL, Simulador interactivo en puerto `8092`.
+   - **GitHub:** [https://github.com/Danny3969/MacondoExpress](https://github.com/Danny3969/MacondoExpress)
 
 6. **[[MEMORY|🤖 ALBERTH NEXUS (AI Chief of Staff)]]**
    - **Enfoque:** Asistente ejecutivo, orquestador autónomo de hardware iMac/MacBook, visión, voz y telemetría.
