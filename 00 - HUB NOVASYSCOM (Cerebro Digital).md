@@ -62,13 +62,15 @@ Bienvenido a la Bóveda Maestra de **Novasyscom**. Esta base de conocimiento loc
    - **Stack:** Flutter (Pasajero + Conductor/Despacho), Supabase PostgreSQL, Simulador interactivo en puerto `8092`.
    - **GitHub:** [https://github.com/Danny3969/MacondoExpress](https://github.com/Danny3969/MacondoExpress)
 
-6. **[[MEMORY|🤖 ALBERTH NEXUS (AI Chief of Staff)]]**
-   - **Enfoque:** Asistente ejecutivo, orquestador autónomo de hardware iMac/MacBook, visión, voz y telemetría.
-   - **Stack:** FastAPI, Three.js 3D Quantum HUD, WebSockets en `http://localhost:8080`.
+6. **[[ALBERTH_V4_SISTEMA_ORQUESTADOR|🤖 ALBERTH v4.0 (Orquestador Multi-Agente & Búnker Cognitivo)]]**
+   - **Enfoque:** Enrutador tálamico <1ms, Swarm LangGraph (Planner, Investigator, Adversarial Critic, Synthesizer).
+   - **Ecosistema:** 13 Skills modulares, Hindsight Memory 4-redes, Cloudflare Security Audit, OpenSEO Suite.
+   - **Telemetría & Visión:** Ojo de Dios Cesium 3D (`http://localhost:4173`), Servidor Visión (`http://localhost:8765`), Panel HUD (`http://localhost:8000`).
 
 ---
 
 ## 📅 3. Bitácoras Recientes & Decisiones de Sesión
+- [[memory/2026-09-30|Bitácora 2026-09-30 — Alberth v4.0: Swarm Multi-Agente, Tálamo, Hindsight, Cloudflare Security, OpenSEO y Gods-Eye]]
 - [[memory/2026-09-18|Bitácora 2026-09-18 — Presencia Holográfica Cuántica v8.0 de Alberth (Restauración Anatómica & Consciencia Etérea)]]
 - [[memory/2026-09-17|Bitácora 2026-09-17 — Consola Maestra Unificada AGC v2.0 & Integración Antigravity]]
 - [[memory/2026-09-16|Bitácora 2026-09-16 — Gabinete Multi-Agente The Agency & Plan de Monetización Autónoma ($500/sem)]]
@@ -77,19 +79,21 @@ Bienvenido a la Bóveda Maestra de **Novasyscom**. Esta base de conocimiento loc
 
 ---
 
-## 💡 4. Identidad Visual 3D & Pizarra de Estrategia
-- **Identidad Facial 3D Oficial (Aprobada por el Señor):** [[identidad_visual_alberth_3d|identidad_visual_alberth_3d — Holograma Cuántico Canónico v8.0 (Opción 1 Oficial)]]
-- **Lienzo Visual Canvas:** `Novasyscom_Ecosistema.canvas`
-- **Assets de Concepto en Alta Definición:** `panel/assets/identity/` (`alberth_hologram_clean.png` v8.0, WebP, Holograma 3D original)
+## 💡 4. Identidad Visual 3D & Pizarras de Estrategia (Canvas)
+- **Documento Arquitectónico Central:** [[ALBERTH_V4_SISTEMA_ORQUESTADOR|ALBERTH v4.0 — Búnker de Orquestación Multi-Agente]]
+- **Lienzo Visual del Holding:** `Novasyscom_Ecosistema.canvas`
+- **Lienzo Visual Multi-Agente v4:** `Alberth_v4_Arquitectura_MultiAgente.canvas`
+- **Identidad Facial 3D Oficial:** [[identidad_visual_alberth_3d|identidad_visual_alberth_3d — Holograma Cuántico Canónico v8.0]]
 
 ---
 
 ## ⚡ 5. Atajos Rápidos para el Señor
-- Para abrir esta bóveda en Obsidian desde la terminal:
+- Para abrir esta bóveda en Obsidian:
   ```bash
-  agc obsidian
+  open -a "/Applications/Obsidian.app" "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth"
   ```
 - Para consultar el estado de todos los proyectos de Novasyscom:
   ```bash
-  agc list
+  pm2 status
   ```
+

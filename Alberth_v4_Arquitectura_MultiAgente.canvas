@@ -1,0 +1,186 @@
+{
+  "nodes": [
+    {
+      "id": "node-senor",
+      "x": 600,
+      "y": -350,
+      "width": 380,
+      "height": 140,
+      "type": "text",
+      "text": "# 👤 EL SEÑOR\n**CEO & Máxima Autoridad de Novasyscom**\n- Instrucción directa y asignación de misiones\n- Bóveda: [[00 - HUB NOVASYSCOM (Cerebro Digital)]]",
+      "color": "5"
+    },
+    {
+      "id": "node-talamo",
+      "x": 600,
+      "y": -150,
+      "width": 380,
+      "height": 160,
+      "type": "text",
+      "text": "## ⚡ TÁLAMO ROUTER (<1ms)\n`alberth_talamo.py`\n- Heurística regex instantánea\n- Despacho a Bash directo o Swarm Multi-Agente\n- Enrutador de SEO, Seguridad y Memoria",
+      "color": "3"
+    },
+    {
+      "id": "node-swarm",
+      "x": 600,
+      "y": 100,
+      "width": 420,
+      "height": 260,
+      "type": "text",
+      "text": "## 🐝 SWARM MULTI-AGENTE (LangGraph)\n`alberth_multi_agent.py`\n1. **Planner Node:** Desglose AIDA de la misión\n2. **Investigator Node:** Ejecución multi-herramienta concurrente\n3. **Adversarial Critic Node:** Auditor inflexible de alucinaciones\n4. **Synthesizer Node:** Informe ejecutivo final al Señor",
+      "color": "4"
+    },
+    {
+      "id": "node-hindsight",
+      "x": 60,
+      "y": 80,
+      "width": 380,
+      "height": 240,
+      "type": "text",
+      "text": "## 🧠 HINDSIGHT MEMORY\n`alberth_hindsight.py`\n- **Inspiración:** vectorize-io/hindsight\n- **4 Redes Mentales:** Mundo, Experiencia, Observación, Opinión\n- **Ciclos:** Retain, Recall, Reflect\n- **DB:** `memory/alberth_hindsight.db`",
+      "color": "6"
+    },
+    {
+      "id": "node-cloudflare",
+      "x": 1140,
+      "y": 40,
+      "width": 380,
+      "height": 220,
+      "type": "text",
+      "text": "## 🛡️ CLOUDFLARE SECURITY AUDIT\n`alberth_cloudflare_security.py`\n- **Inspiración:** cloudflare/security-audit-skill\n- 6 fases de auditoría con validación adversaria\n- Prevención de falsos positivos con agente atacante\n- Salida en `memory/security_reports/`",
+      "color": "1"
+    },
+    {
+      "id": "node-openseo",
+      "x": 1140,
+      "y": 300,
+      "width": 380,
+      "height": 200,
+      "type": "text",
+      "text": "## 🔍 OPENSEO TECHNICAL SUITE\n`alberth_open_seo.py`\n- **Inspiración:** every-app/open-seo\n- Auditoría On-Page nativa sin librerías pesadas\n- Metatags, OpenGraph, Jerarquía H1-H6, Imágenes\n- Health Score de 0 a 100",
+      "color": "2"
+    },
+    {
+      "id": "node-skills",
+      "x": 580,
+      "y": 450,
+      "width": 460,
+      "height": 260,
+      "type": "text",
+      "text": "## 🧰 CATÁLOGO DE 13 SKILLS (`alberth_skills/`)\n- `cloudflare_security` | `open_seo` | `hindsight`\n- `web_search` | `osint` | `websec` | `vision`\n- `rag` | `system` | `architect` | `code_audit`\n- `tester` | `devops`\n*Ejecución paralela mediante ThreadPoolExecutor*",
+      "color": "4"
+    },
+    {
+      "id": "node-memory-layers",
+      "x": 60,
+      "y": 380,
+      "width": 380,
+      "height": 240,
+      "type": "text",
+      "text": "## 💾 MEMORIA JERÁRQUICA DE 4 CAPAS\n`alberth_memory_orchestrator.py`\n- **HOT RAM:** Caché volátil en memoria\n- **WARM SQLite:** FTS5 BM25 léxico (`alberth_episodic_memory.db`)\n- **COLD RAG:** Vectorial semántico\n- **ARCHIVE Gzip:** Bitácoras > 60 días",
+      "color": "5"
+    },
+    {
+      "id": "node-gods-eye",
+      "x": 1140,
+      "y": 550,
+      "width": 380,
+      "height": 200,
+      "type": "text",
+      "text": "## 🌍 OJO DE DIOS (GODS-EYE-VIEW)\n`http://localhost:4173`\n- **Motor:** Cesium 3D Photorealistic Tiles\n- **Telemetría:** Satélites, Clima, Flotas Drivo/Macondo\n- **Daemon:** `alberth-gods-eye` en PM2",
+      "color": "3"
+    },
+    {
+      "id": "node-hud",
+      "x": 600,
+      "y": 770,
+      "width": 420,
+      "height": 180,
+      "type": "text",
+      "text": "## 🎛️ COCKPIT HUD & WEBSOCKETS\n`http://localhost:8000`\n- Cajón Multi-Agente en tiempo real\n- Telemetría de hardware, daemons y memoria\n- Visualizador de misiones en vivo",
+      "color": "5"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-senor-talamo",
+      "fromNode": "node-senor",
+      "fromSide": "bottom",
+      "toNode": "node-talamo",
+      "toSide": "top",
+      "label": "Misión"
+    },
+    {
+      "id": "edge-talamo-swarm",
+      "fromNode": "node-talamo",
+      "fromSide": "bottom",
+      "toNode": "node-swarm",
+      "toSide": "top",
+      "label": "Misión Compleja"
+    },
+    {
+      "id": "edge-talamo-hindsight",
+      "fromNode": "node-talamo",
+      "fromSide": "left",
+      "toNode": "node-hindsight",
+      "toSide": "top",
+      "label": "Reflect/Recall"
+    },
+    {
+      "id": "edge-talamo-cloudflare",
+      "fromNode": "node-talamo",
+      "fromSide": "right",
+      "toNode": "node-cloudflare",
+      "toSide": "top",
+      "label": "Audit Código"
+    },
+    {
+      "id": "edge-talamo-openseo",
+      "fromNode": "node-talamo",
+      "fromSide": "right",
+      "toNode": "node-openseo",
+      "toSide": "top",
+      "label": "Audit SEO"
+    },
+    {
+      "id": "edge-swarm-skills",
+      "fromNode": "node-swarm",
+      "fromSide": "bottom",
+      "toNode": "node-skills",
+      "toSide": "top",
+      "label": "Investigador invoca"
+    },
+    {
+      "id": "edge-hindsight-memory",
+      "fromNode": "node-hindsight",
+      "fromSide": "bottom",
+      "toNode": "node-memory-layers",
+      "toSide": "top",
+      "label": "Destila modelos"
+    },
+    {
+      "id": "edge-skills-memory",
+      "fromNode": "node-skills",
+      "fromSide": "left",
+      "toNode": "node-memory-layers",
+      "toSide": "right",
+      "label": "Consulta RAG/FTS5"
+    },
+    {
+      "id": "edge-skills-hud",
+      "fromNode": "node-skills",
+      "fromSide": "bottom",
+      "toNode": "node-hud",
+      "toSide": "top",
+      "label": "Telemetría WS"
+    },
+    {
+      "id": "edge-swarm-hud",
+      "fromNode": "node-skills",
+      "fromSide": "right",
+      "toNode": "node-gods-eye",
+      "toSide": "left",
+      "label": "Geolocalización"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "topology_version": "4.0.0",
+  "active_node": {
+    "hostname": "localhost",
+    "role": "master",
+    "description": "Nodo principal de orquestación, inferencia y servicios PM2"
+  },
+  "nodes": [
+    {
+      "id": "node_imac",
+      "name": "iMac Contabilidad",
+      "role": "worker_client",
+      "ip": "127.0.0.1",
+      "port": 8000,
+      "services": ["hud_cockpit", "webcam_vision", "local_audio"],
+      "enabled": true
+    },
+    {
+      "id": "node_macbook",
+      "name": "MacBook Pro M-Series",
+      "role": "master_ai",
+      "ip": "192.168.1.150",
+      "port": 8000,
+      "services": ["langgraph_orchestrator", "ollama_heavy", "pm2_ecosystem"],
+      "enabled": false
+    },
+    {
+      "id": "node_mobile",
+      "name": "Dispositivos Móviles (iOS / Android)",
+      "role": "edge_client",
+      "services": ["pwa_hud", "remote_voice"],
+      "enabled": true
+    }
+  ],
+  "failover": {
+    "auto_switch": true,
+    "ping_interval_seconds": 15,
+    "fallback_to_local": true
+  }
+}

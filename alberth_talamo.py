@@ -91,6 +91,62 @@ def _fast_heuristic_classifier(query: str) -> Optional[Dict[str, Any]]:
     """Enrutamiento heurístico en <1 milisegundo para patrones inequívocos."""
     q = query.lower().strip()
 
+    # 0. MISIÓN COMPLEJA — Activa el orquestador Multi-Agente (LangGraph)
+    _complex_triggers = [
+        "investiga y", "analiza y", "escanea y", "busca y crea", "haz un reporte de",
+        "investiga sobre", "genera un reporte", "crea un informe", "haz un análisis de",
+        "misión:", "tarea compleja", "multi-paso", "en varios pasos",
+        "primero investiga", "luego genera", "paso a paso", "automatiza",
+        "analiza la empresa", "analiza el sitio", "analiza el dominio",
+    ]
+    if any(k in q for k in _complex_triggers):
+        log(f"Misión compleja detectada → COMPLEX_MISSION")
+        return {"tipo_tarea": "COMPLEX_MISSION", "habilidad_requerida": "multi_agent", "argumentos": {"mission": query}}
+
+    # 0b. OSINT / Huella Digital
+    _osint_triggers = [
+        "rastrea a", "busca el usuario", "huella digital de", "perfil de",
+        "investiga a", "quién es", "busca en redes", "find username", "osint de",
+        "busca el correo de", "brechas de", "datos de la persona",
+    ]
+    if any(k in q for k in _osint_triggers):
+        # Extraer objetivo del query
+        target = re.sub(r"^(rastrea a|busca el usuario|osint de|investiga a|quién es|perfil de)\s*", "", q, flags=re.I).strip()
+        log(f"OSINT detectado → objetivo: {target}")
+        return {"tipo_tarea": "OSINT_SCAN", "habilidad_requerida": "osint", "argumentos": {"target": target or query}}
+
+    # 0c. Escáner de Seguridad Web
+    _websec_triggers = [
+        "escanea la web", "escanea el sitio", "analiza la seguridad de", "vulnerabilidades de",
+        "headers de seguridad", "escanea puertos", "seguridad web de", "websec",
+        "qué tan seguro es", "analiza https", "ssl de", "certificado de",
+    ]
+    if any(k in q for k in _websec_triggers):
+        url_match = re.search(r'(https?://[\w./-]+|[\w.-]+\.[a-z]{2,})', q)
+        target_url = url_match.group(0) if url_match else query
+        if not target_url.startswith("http"):
+            target_url = "https://" + target_url
+        log(f"WebSec detectado → URL: {target_url}")
+        return {"tipo_tarea": "WEBSEC_SCAN", "habilidad_requerida": "websec", "argumentos": {"url": target_url}}
+
+    # 0d. Auditoría SEO (OpenSEO)
+    _seo_triggers = ["auditoría seo", "auditoria seo", "posicionamiento seo", "analiza el seo", "seo de", "meta tags de"]
+    if any(k in q for k in _seo_triggers):
+        log("SEO Audit detectado → OpenSEO")
+        return {"tipo_tarea": "SEO_AUDIT", "habilidad_requerida": "open_seo", "argumentos": {"query": query}}
+
+    # 0e. Auditoría de Código y Seguridad Profunda (Cloudflare Grade)
+    _cf_triggers = ["cloudflare audit", "auditoría de código", "auditoria de codigo", "vulnerabilidades en el código", "auditar código"]
+    if any(k in q for k in _cf_triggers):
+        log("Cloudflare Security Audit detectado")
+        return {"tipo_tarea": "CODE_SECURITY_AUDIT", "habilidad_requerida": "cloudflare_security", "argumentos": {"query": query}}
+
+    # 0f. Memoria Evolutiva (Hindsight)
+    _hs_triggers = ["aprende que", "recuerda que", "reflexiona sobre", "lección aprendida", "leccion aprendida"]
+    if any(k in q for k in _hs_triggers):
+        log("Hindsight Memory detectado")
+        return {"tipo_tarea": "HINDSIGHT_MEMORY", "habilidad_requerida": "hindsight", "argumentos": {"query": query}}
+
     # 1. Finanzas / Ticker
     if any(k in q for k in ["bitcoin", "ethereum", "solana", "crypto", "cripto", "dólar", "dolar", "euro"]) or (
         any(k in q for k in ["precio de", "cuánto vale", "cuanto vale", "cotización de", "cotizacion de"]) and
@@ -142,6 +198,10 @@ def _fast_heuristic_classifier(query: str) -> Optional[Dict[str, Any]]:
     # 9. Clima / Búsqueda Web
     if any(k in q for k in ["clima en", "clima de", "temperatura en", "qué tiempo hace", "busca en internet", "busca en google"]):
         return {"tipo_tarea": "WEB_SEARCH", "habilidad_requerida": "search", "argumentos": {"query": query}}
+
+    # 10. Reconocimiento Facial / Vision de personas
+    if any(k in q for k in ["quién es esta persona", "reconoce a", "identifica a", "registra a", "guarda esta cara", "reconocimiento facial"]):
+        return {"tipo_tarea": "FACE_RECOGNITION", "habilidad_requerida": "vision", "argumentos": {"query": query}}
 
     return None
 

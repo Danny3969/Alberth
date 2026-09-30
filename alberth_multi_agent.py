@@ -27,6 +27,7 @@ import sys
 import json
 import time
 import subprocess
+import concurrent.futures
 from pathlib import Path
 from typing import Dict, List, Any, Optional, TypedDict
 
@@ -45,6 +46,27 @@ try:
 except ImportError:
     rag_memory = None
 
+# ── Módulos de Inteligencia (cargados opcionalmente) ———————————————————
+try:
+    import alberth_osint as osint_module
+except ImportError:
+    osint_module = None
+
+try:
+    import alberth_websec_scanner as websec_module
+except ImportError:
+    websec_module = None
+
+try:
+    import alberth_face_recognition as face_module
+except ImportError:
+    face_module = None
+
+try:
+    import alberth_skills
+except ImportError:
+    alberth_skills = None
+
 WORKSPACE_DIR = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or Path(__file__).parent.resolve())
 
 
@@ -53,6 +75,9 @@ WORKSPACE_DIR = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALB
 class AlberthAgentState(TypedDict):
     mission: str
     plan: List[str]
+    critic_feedback: str
+    critic_approved: bool
+    critic_rounds: int
     research_findings: str
     code_artifacts: Dict[str, str]
     execution_output: str
@@ -68,12 +93,25 @@ def strategist_node(state: AlberthAgentState) -> Dict[str, Any]:
     """
     Nodo 1: Estratega (DeepSeek R1 / V3)
     Analiza la misión global del Señor y formula un plan de pasos estructurado.
+    Si el Crítico rechazó un plan previo, incorpora su retroalimentación para reformularlo.
     """
     mission = state.get("mission", "")
-    print(f"\n[Multi-Agente] 🧠 Estratega (DeepSeek) planificando misión...")
+    critic_feedback = state.get("critic_feedback", "")
+    rounds = state.get("critic_rounds", 0)
+
+    print(f"\n[Multi-Agente] 🧠 Estratega (DeepSeek) planificando misión{' (Revisión tras Crítica)' if rounds > 0 else ''}...")
 
     prompt = (
         f"Misión solicitada por el Señor:\n\"{mission}\"\n\n"
+    )
+    if critic_feedback and rounds > 0:
+        prompt += (
+            f"El Crítico Adversarial ha observado el plan anterior con estas indicaciones:\n"
+            f"\"{critic_feedback}\"\n\n"
+            "Corrige y optimiza el plan resolviendo estas objeciones con máxima precisión.\n\n"
+        )
+
+    prompt += (
         "Eres el Agente Estratega de Alberth. Desglosa esta misión en 2 a 4 pasos concisos de acción. "
         "Indica qué datos investigar y qué archivo o script se debe construir y ejecutar. "
         "Devuelve exclusivamente una lista numerada en español sin introducciones superfluas."
@@ -90,62 +128,228 @@ def strategist_node(state: AlberthAgentState) -> Dict[str, Any]:
         steps = [plan_text.strip()]
 
     print(f"   Plan generado ({model_used}): {len(steps)} pasos definidos.")
-    return {"plan": steps}
+    return {
+        "plan": steps,
+        "critic_approved": False,
+        "critic_rounds": rounds,
+        "critic_feedback": critic_feedback
+    }
+
+
+def critic_node(state: AlberthAgentState) -> Dict[str, Any]:
+    """
+    Nodo 1.5: Crítico Adversarial (Llama 3.3 / Fallback DeepSeek)
+    Debate y audita el plan del Estratega antes de autorizar la ejecución.
+    Aplica el principio de Devil's Advocate para detectar omisiones, riesgos y viabilidad.
+    """
+    mission = state.get("mission", "")
+    plan = state.get("plan", [])
+    rounds = state.get("critic_rounds", 0)
+
+    print(f"\n[Multi-Agente] ⚖️ Crítico Adversarial auditando plan (Ronda {rounds + 1})...")
+
+    # Si ya superó 2 rondas de debate, auto-aprobar para evitar bloqueos
+    if rounds >= 2:
+        print("   [Crítico] Límite de rondas de debate alcanzado. Plan aprobado con observaciones.")
+        return {"critic_approved": True, "critic_rounds": rounds + 1}
+
+    plan_str = "\n".join(f"- {p}" for p in plan)
+    prompt = (
+        f"Misión del Señor:\n\"{mission}\"\n\n"
+        f"Plan propuesto por el Estratega:\n{plan_str}\n\n"
+        "Eres el Agente Crítico Adversarial de Alberth. Tu rol es auditar con rigor extremo este plan.\n"
+        "Pregúntate: ¿Es viable? ¿Falta recopilar datos esenciales? ¿Hay riesgos de ejecución o ambigüedad?\n"
+        "Reglas de respuesta:\n"
+        "- Si el plan es claro, seguro y accionable para cumplir la misión, responde EXACTAMENTE:\n"
+        "  APROBADO: <breve justificación>\n"
+        "- Si el plan tiene omisiones graves o requiere ajustes importantes, responde:\n"
+        "  RECHAZADO: <explicación concisa de qué debe corregir el Estratega>"
+    )
+
+    review_text, model_used = models.query_llama_vision(
+        prompt=prompt,
+        max_tokens=250
+    )
+
+    is_approved = "APROBADO" in review_text.upper()
+    print(f"   Veredicto Crítico ({model_used}): {'✅ APROBADO' if is_approved else '❌ RECHAZADO'}")
+
+    return {
+        "critic_approved": is_approved,
+        "critic_feedback": review_text.strip(),
+        "critic_rounds": rounds + 1
+    }
+
+
+def should_revise_plan(state: AlberthAgentState) -> str:
+    """
+    Condicional del Crítico:
+    - Si el Crítico aprueba (o rounds >= 2) -> avanzar a 'investigator'.
+    - Si el Crítico rechaza -> volver a 'strategist' para replanificar.
+    """
+    if state.get("critic_approved", False) or state.get("critic_rounds", 0) >= 2:
+        return "investigator"
+    return "strategist"
 
 
 def investigator_node(state: AlberthAgentState) -> Dict[str, Any]:
     """
-    Nodo 2: Investigador (Meta Llama 3.2 Vision + DuckDuckGo + RAG)
-    Recolecta datos externos o locales si la misión o el plan lo requieren.
+    Nodo 2: Investigador ELITE Paralelo (R6)
+    Recolecta datos externos o locales ejecutando múltiples fuentes de inteligencia en paralelo
+    mediante ThreadPoolExecutor (OSINT, WebSec, Playwright, Search, RAG y alberth_skills).
     """
     mission = state.get("mission", "")
     plan = state.get("plan", [])
-    print(f"\n[Multi-Agente] 👁️ Investigador (Llama Vision / Web) buscando evidencia...")
+    print(f"\n[Multi-Agente] 👁️ Investigador Elite buscando evidencia en paralelo...")
 
     findings = []
-    combined_query = f"{mission} {' '.join(plan)}"
+    combined_query = f"{mission} {' '.join(plan)}".lower()
 
-    # 0. Navegación Web Autónoma con Playwright si la misión requiere interactuar con páginas o portales
-    if any(w in combined_query.lower() for w in ["navega", "entra a la web", "abre la pagina", "portal", "mercadolibre", "wikipedia", "formulario", "pagina web"]):
+    tasks_to_run = []
+
+    # 1. Definir funciones de herramientas
+    def _run_osint(target: str) -> Optional[str]:
+        if not osint_module or not target:
+            return None
+        print(f"[Investigador ⚡ Paralelo] 🔍 OSINT activo → objetivo: {target}")
+        osint_res = osint_module.search_username(target)
+        if osint_res:
+            hits = [p for p in osint_res if p.get("found")]
+            return f"OSINT — Perfiles encontrados para '{target}':\n" + json.dumps(hits[:10], ensure_ascii=False, indent=2)
+        return None
+
+    def _run_websec(target_url: str) -> Optional[str]:
+        if not websec_module or not target_url:
+            return None
+        print(f"[Investigador ⚡ Paralelo] 🛡️ WebSec Scanner activo → URL: {target_url}")
+        sec_res = websec_module.analyze_headers(target_url)
+        if sec_res:
+            return (
+                f"Análisis de Seguridad Web — {target_url}:\n"
+                f"Score: {sec_res.get('security_score', '?')}/100\n"
+                + json.dumps(sec_res.get('headers_analysis', [])[:5], ensure_ascii=False, indent=2)
+            )
+        return None
+
+    def _run_playwright(q_mission: str) -> Optional[str]:
         try:
             import alberth_playwright_agent as pw_agent
-            print(f"[Investigador] 🌐 Desplegando Navegador Playwright en segundo plano...")
-            pw_res = pw_agent.run_autonomous_browser_mission(mission=mission, max_steps=4)
+            print(f"[Investigador ⚡ Paralelo] 🌐 Playwright navegando...")
+            pw_res = pw_agent.run_autonomous_browser_mission(mission=q_mission, max_steps=4)
             if pw_res and pw_res.get("success") and pw_res.get("summary"):
-                findings.append(f"Resultados de Navegación Playwright:\n{pw_res['summary']}")
-        except Exception as pwe:
-            print(f"[Investigador] Error Playwright: {pwe}")
+                return f"Navegación Web Playwright:\n{pw_res['summary']}"
+        except Exception as e:
+            print(f"[Investigador] Playwright error: {e}")
+        return None
 
-    # 1. Búsqueda Web en tiempo real si requiere noticias, clima o datos externos
-    if not findings and any(w in combined_query.lower() for w in ["clima", "tiempo", "noticia", "precio", "buscar", "investiga", "web"]):
+    def _run_duckduckgo(q: str) -> Optional[str]:
         if search_helper:
             try:
-                # Extraer posible ciudad o tema usando el método correcto search_duckduckgo_live
-                search_res = search_helper.search_duckduckgo_live(mission, max_results=3)
+                print(f"[Investigador ⚡ Paralelo] 🦆 DuckDuckGo buscando...")
+                search_res = search_helper.search_duckduckgo_live(q, max_results=3)
                 if search_res:
-                    findings.append(f"Resultados de Búsqueda Web:\n{json.dumps(search_res, ensure_ascii=False)}")
+                    return f"Resultados de Búsqueda Web:\n{json.dumps(search_res, ensure_ascii=False)}"
             except Exception as e:
-                print(f"[Investigador] Error búsqueda: {e}")
+                print(f"[Investigador] DuckDuckGo error: {e}")
+        return None
 
-    # 2. Búsqueda RAG en documentos locales si se mencionan archivos
-    if any(w in combined_query.lower() for w in ["documento", "pdf", "manual", "archivo local", "rag"]):
+    def _run_rag(q: str) -> Optional[str]:
         if rag_memory:
             try:
-                rag_res = rag_memory.search_documents(mission, limit=2)
+                print(f"[Investigador ⚡ Paralelo] 📚 RAG consultando base documental...")
+                rag_res = rag_memory.search_documents(q, limit=2)
                 if rag_res and rag_res.get("resultados"):
-                    findings.append(f"Documentos Locales (RAG):\n{json.dumps(rag_res['resultados'], ensure_ascii=False)}")
+                    return f"Documentos Locales (RAG):\n{json.dumps(rag_res['resultados'], ensure_ascii=False)}"
             except Exception as e:
-                print(f"[Investigador] Error RAG: {e}")
+                print(f"[Investigador] RAG error: {e}")
+        return None
 
-    # 3. Síntesis investigativa con Meta Llama 3.2
+    def _run_discovered_skill(q: str) -> Optional[str]:
+        if alberth_skills:
+            try:
+                matched_skill = alberth_skills.find_skill_for(q)
+                if matched_skill:
+                    s_name = getattr(matched_skill, "NAME", "skill")
+                    print(f"[Investigador ⚡ Paralelo] 🧩 Skill descubierta: {s_name}")
+                    res = matched_skill.execute({"query": q, "mission": q})
+                    if res:
+                        return f"Habilidad Modular ({s_name}):\n{json.dumps(res, ensure_ascii=False, indent=2)}"
+            except Exception as e:
+                print(f"[Investigador] Error ejecutando skill modular: {e}")
+        return None
+
+    # 2. Planificar qué herramientas lanzar
+    import re as _re
+
+    # TOOL A: OSINT
+    _osint_kw = ["usuario", "perfil", "rastrea", "huella digital", "redes sociales",
+                 "quién es", "quien es", "email", "correo", "persona", "osint"]
+    if osint_module and any(k in combined_query for k in _osint_kw):
+        target = _re.sub(
+            r'(rastrea a|perfil de|osint de|investiga a|qu\w+ es)\s*', '',
+            mission, flags=_re.I
+        ).strip().split()[0] if mission.strip() else ""
+        if target:
+            tasks_to_run.append((_run_osint, (target,), "OSINT"))
+
+    # TOOL B: WebSec Scanner
+    _websec_kw = ["seguridad", "vulnerabilidad", "headers", "ssl", "https",
+                  "sitio web", "dominio", "url", "website", "escanea", "escanear"]
+    if websec_module and any(k in combined_query for k in _websec_kw):
+        url_match = _re.search(r'(https?://[\w./-]+|[\w.-]+\.[a-z]{2,})', mission)
+        if url_match:
+            t_url = url_match.group(0)
+            if not t_url.startswith("http"):
+                t_url = "https://" + t_url
+            tasks_to_run.append((_run_websec, (t_url,), "WebSec"))
+
+    # TOOL C: Playwright
+    _pw_kw = ["navega", "entra a la web", "abre la pagina", "portal",
+              "mercadolibre", "wikipedia", "formulario", "pagina web"]
+    if any(w in combined_query for w in _pw_kw):
+        tasks_to_run.append((_run_playwright, (mission,), "Playwright"))
+
+    # TOOL D: DuckDuckGo
+    if any(w in combined_query for w in ["clima", "tiempo", "noticia", "precio", "buscar", "investiga", "web"]):
+        tasks_to_run.append((_run_duckduckgo, (mission,), "DuckDuckGo"))
+
+    # TOOL E: RAG Local
+    if any(w in combined_query for w in ["documento", "pdf", "manual", "archivo local", "rag"]):
+        tasks_to_run.append((_run_rag, (mission,), "RAG"))
+
+    # TOOL F: Modular Skills Registry
+    if alberth_skills and not tasks_to_run:
+        tasks_to_run.append((_run_discovered_skill, (combined_query,), "Skills"))
+
+    # 3. Ejecución Paralela con ThreadPoolExecutor
+    if tasks_to_run:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(tasks_to_run), 5)) as executor:
+            future_to_name = {executor.submit(fn, *args): name for fn, args, name in tasks_to_run}
+            for fut in concurrent.futures.as_completed(future_to_name):
+                t_name = future_to_name[fut]
+                try:
+                    res_val = fut.result()
+                    if res_val:
+                        findings.append(res_val)
+                except Exception as exc:
+                    print(f"[Investigador] ⚠️ Excepción en tool {t_name}: {exc}")
+
+    # Fallback si no hubo tareas o findings y se solicitaba información
+    if not findings and any(w in combined_query for w in ["buscar", "que es", "qué es", "como", "cómo", "info"]):
+        fallback_res = _run_duckduckgo(mission)
+        if fallback_res:
+            findings.append(fallback_res)
+
+    # 4. Síntesis investigativa con Meta Llama 3.2
+    tools_used = len(findings)
     raw_findings = "\n\n".join(findings) if findings else "No se requirieron fuentes externas para esta tarea."
     prompt_inv = (
         f"Misión: {mission}\n"
-        f"Datos encontrados:\n{raw_findings[:1500]}\n\n"
+        f"Datos encontrados ({tools_used} fuentes de inteligencia concurrentes):\n{raw_findings[:2000]}\n\n"
         "Resume de forma concisa los datos clave que el Agente Ingeniero necesitará para escribir el código o reporte."
     )
-    summary, model_used = models.query_llama_vision(prompt=prompt_inv, max_tokens=300)
-    print(f"   Investigación completada ({model_used}).")
+    summary, model_used = models.query_llama_vision(prompt=prompt_inv, max_tokens=400)
+    print(f"   Investigación paralela completada ({model_used}) — {tools_used} fuente(s) integradas.")
     return {"research_findings": summary}
 
 
@@ -337,35 +541,54 @@ def should_continue(state: AlberthAgentState) -> str:
 # ── Construcción del Grafo StateGraph de LangGraph ───────────────────────────
 
 def build_alberth_multi_agent_graph():
-    """Construye y compila el grafo cíclico multi-agente en LangGraph."""
+    """Construye y compila el grafo cíclico multi-agente en LangGraph.
+    
+    Flujo con debate adversarial (R4):
+    
+        Estratega → Crítico → (si rechazado → Estratega) | (si aprobado → Investigador)
+                                       Investigador → Ingeniero → Auditor QA
+                                                    (si rechazado → Ingeniero x3)
+                                                         ↓
+                                                    Sintetizador → FIN
+    """
     workflow = StateGraph(AlberthAgentState)
 
     # 1. Agregar Nodos
-    workflow.add_node("strategist", strategist_node)
+    workflow.add_node("strategist",  strategist_node)
+    workflow.add_node("critic",      critic_node)        # ◄ nuevo nodo adversarial
     workflow.add_node("investigator", investigator_node)
-    workflow.add_node("engineer", engineer_node)
-    workflow.add_node("auditor", auditor_node)
+    workflow.add_node("engineer",    engineer_node)
+    workflow.add_node("auditor",     auditor_node)
     workflow.add_node("synthesizer", synthesizer_node)
 
-    # 2. Definir Aristas y Flujo
+    # 2. Definir Aristas
     workflow.set_entry_point("strategist")
-    workflow.add_edge("strategist", "investigator")
+    workflow.add_edge("strategist", "critic")            # ◄ Estratega → Crítico
+
+    # 3. Arista Condicional: Crítico → Investigador | Estratega (debate)
+    workflow.add_conditional_edges(
+        "critic",
+        should_revise_plan,
+        {
+            "investigator": "investigator",
+            "strategist":   "strategist",
+        }
+    )
+
     workflow.add_edge("investigator", "engineer")
     workflow.add_edge("engineer", "auditor")
 
-    # 3. Arista Condicional Cíclica (Auto-Corrección)
+    # 4. Arista Condicional Cíclica (Auto-Corrección del Ingeniero)
     workflow.add_conditional_edges(
         "auditor",
         should_continue,
         {
-            "engineer": "engineer",
-            "synthesizer": "synthesizer"
+            "engineer":     "engineer",
+            "synthesizer":  "synthesizer"
         }
     )
 
     workflow.add_edge("synthesizer", END)
-
-    # Compilar el grafo
     return workflow.compile()
 
 
@@ -385,6 +608,9 @@ def run_multi_agent_mission(mission: str) -> Dict[str, Any]:
     initial_state: AlberthAgentState = {
         "mission": mission,
         "plan": [],
+        "critic_feedback": "",
+        "critic_approved": False,
+        "critic_rounds": 0,
         "research_findings": "",
         "code_artifacts": {},
         "execution_output": "",
@@ -403,10 +629,18 @@ def run_multi_agent_mission(mission: str) -> Dict[str, Any]:
         "elapsed_seconds": round(elapsed, 2),
         "mission": mission,
         "iterations": final_state.get("iterations", 1),
+        "critic_rounds": final_state.get("critic_rounds", 0),
+        "critic_feedback": final_state.get("critic_feedback", ""),
         "plan": final_state.get("plan", []),
         "output": final_state.get("execution_output", ""),
-        "final_summary": final_state.get("final_summary", "")
+        "final_summary": final_state.get("final_summary", ""),
+        # Alias para compatibilidad con alberth_master.sh
+        "final_response": final_state.get("final_summary", ""),
     }
+
+
+# Alias de conveniencia e integración directa
+run_mission = run_multi_agent_mission
 
 
 # ── Ejecución CLI ─────────────────────────────────────────────────────────────

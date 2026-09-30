@@ -16,7 +16,7 @@ from typing import Optional, List, Dict, Any
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException, Header, Depends
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -105,6 +105,146 @@ async def get_floating_bar():
         return FileResponse(str(floating_file))
     raise HTTPException(status_code=404, detail="floating.html no encontrado")
 
+# ── Integración Ojo de Dios (God's Eye View) ───────────────────────────────────
+@app.get("/godseye")
+async def redirect_to_gods_eye():
+    return RedirectResponse("http://localhost:4173")
+
+@app.get("/api/gods-eye/status")
+async def get_gods_eye_status():
+    try:
+        from alberth_gods_eye_helper import status as get_status
+        return JSONResponse(get_status())
+    except Exception as e:
+        return JSONResponse({"active": False, "error": str(e)})
+
+@app.post("/api/gods-eye/start")
+async def start_gods_eye_service():
+    try:
+        from alberth_gods_eye_helper import start as start_service
+        return JSONResponse({"success": start_service()})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.post("/api/gods-eye/stop")
+async def stop_gods_eye_service():
+    try:
+        from alberth_gods_eye_helper import stop as stop_service
+        return JSONResponse({"success": stop_service()})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+
+# ── OSINT API ─────────────────────────────────────────────────────────────────
+class OsintRequest(BaseModel):
+    mode: str          # "username" | "email" | "domain" | "report"
+    target: str
+
+@app.post("/api/osint/scan")
+async def run_osint(req: OsintRequest):
+    """Ejecuta un análisis OSINT en segundo plano y devuelve resultados."""
+    import asyncio, concurrent.futures
+    try:
+        from alberth_osint import search_username, check_email_breach, lookup_domain, generate_html_report
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            if req.mode == "username":
+                results = await loop.run_in_executor(pool, lambda: search_username(req.target, verbose=False))
+                found = [r for r in results if r["found"]]
+                return JSONResponse({"success": True, "target": req.target, "mode": req.mode,
+                                     "found_count": len(found), "results": found[:50]})
+            elif req.mode == "email":
+                result = await loop.run_in_executor(pool, lambda: check_email_breach(req.target))
+                return JSONResponse({"success": True, **result})
+            elif req.mode == "domain":
+                result = await loop.run_in_executor(pool, lambda: lookup_domain(req.target))
+                return JSONResponse({"success": True, **result})
+            elif req.mode == "report":
+                results = await loop.run_in_executor(pool, lambda: search_username(req.target, verbose=False))
+                html_path = generate_html_report(req.target, results)
+                return JSONResponse({"success": True, "report_path": str(html_path)})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/osint/reports")
+async def list_osint_reports():
+    osint_dir = WORKSPACE / "memory" / "osint"
+    if not osint_dir.exists():
+        return JSONResponse({"reports": []})
+    files = sorted(osint_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)[:20]
+    return JSONResponse({"reports": [f.name for f in files]})
+
+# ── Web Security Scanner API ───────────────────────────────────────────────────
+class WebSecRequest(BaseModel):
+    url: str
+    mode: str = "scan"   # "scan" | "headers" | "ports" | "report"
+
+@app.post("/api/websec/scan")
+async def run_websec(req: WebSecRequest):
+    import asyncio, concurrent.futures
+    try:
+        from alberth_websec_scanner import analyze_headers, full_scan, scan_ports, generate_html_report as gen_html
+        import urllib.parse
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            if req.mode == "headers":
+                result = await loop.run_in_executor(pool, lambda: analyze_headers(req.url))
+            elif req.mode == "ports":
+                host = urllib.parse.urlparse(req.url).netloc or req.url
+                result = await loop.run_in_executor(pool, lambda: scan_ports(host))
+            elif req.mode == "report":
+                report = await loop.run_in_executor(pool, lambda: full_scan(req.url))
+                html_path = gen_html(req.url, report)
+                result = {"report_path": str(html_path), **report}
+            else:
+                result = await loop.run_in_executor(pool, lambda: full_scan(req.url))
+        return JSONResponse({"success": True, **result})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+# ── Face Recognition API ───────────────────────────────────────────────────────
+@app.get("/api/faces/list")
+async def list_faces():
+    try:
+        from alberth_face_recognition import FaceDatabase
+        db = FaceDatabase()
+        return JSONResponse({"success": True, "people": db.list_people()})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.delete("/api/faces/{name}")
+async def forget_face(name: str):
+    try:
+        from alberth_face_recognition import FaceDatabase
+        db = FaceDatabase()
+        success = db.forget(name)
+        return JSONResponse({"success": success})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/faces/status")
+async def faces_status():
+    """Estado del servicio de reconocimiento facial (servidor WebSocket en :8765)."""
+    import socket as sock
+    active = False
+    try:
+        with sock.create_connection(("localhost", 8765), timeout=0.5):
+            active = True
+    except Exception:
+        pass
+    return JSONResponse({"service_active": active, "port": 8765, "ws_url": "ws://localhost:8765"})
+
+@app.post("/api/faces/server/start")
+async def start_face_server():
+    """Lanza el servidor WebSocket de reconocimiento facial como proceso separado."""
+    import subprocess
+    python = str(WORKSPACE / "venv" / "bin" / "python3")
+    script = str(WORKSPACE / "alberth_face_recognition.py")
+    log = str(WORKSPACE / "logs" / "face_recognition.log")
+    Path(log).parent.mkdir(parents=True, exist_ok=True)
+    with open(log, "a") as f:
+        subprocess.Popen([python, script, "server"], stdout=f, stderr=f, start_new_session=True)
+    return JSONResponse({"success": True, "message": "Servidor de reconocimiento facial iniciado en ws://localhost:8765"})
 
 # ── WebSocket Manager ──────────────────────────────────────────────────────────
 class ConnectionManager:
@@ -125,6 +265,62 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 history: list[dict] = []
+
+# ── API Multi-Agente Autónomo (LangGraph + R4 Debate + R6 Paralelo + R8 HUD) ──
+class MultiAgentMissionRequest(BaseModel):
+    mission: str
+
+_latest_multiagent_state = {
+    "status": "idle",
+    "mission": "",
+    "plan": [],
+    "critic_feedback": "",
+    "critic_approved": False,
+    "critic_rounds": 0,
+    "current_agent": "idle",
+    "elapsed_seconds": 0,
+    "last_result": ""
+}
+
+@app.get("/api/multiagent/status")
+async def get_multiagent_status():
+    """Retorna el estado en tiempo real del equipo multi-agente."""
+    return JSONResponse({"success": True, "state": _latest_multiagent_state})
+
+@app.post("/api/multiagent/mission")
+async def post_multiagent_mission(req: MultiAgentMissionRequest):
+    """Ejecuta una misión multi-agente en segundo plano notificando por WebSocket."""
+    global _latest_multiagent_state
+    import asyncio
+    import alberth_multi_agent
+
+    _latest_multiagent_state["status"] = "running"
+    _latest_multiagent_state["mission"] = req.mission
+    _latest_multiagent_state["current_agent"] = "strategist"
+    await manager.broadcast({"type": "multiagent_status", "data": _latest_multiagent_state})
+
+    def _run():
+        return alberth_multi_agent.run_multi_agent_mission(req.mission)
+
+    loop = asyncio.get_event_loop()
+    try:
+        res = await loop.run_in_executor(None, _run)
+        _latest_multiagent_state["status"] = "completed"
+        _latest_multiagent_state["current_agent"] = "finished"
+        _latest_multiagent_state["plan"] = res.get("plan", [])
+        _latest_multiagent_state["critic_feedback"] = res.get("critic_feedback", "")
+        _latest_multiagent_state["critic_approved"] = bool(res.get("critic_feedback", "").startswith("APROBADO") or res.get("critic_rounds", 0) > 0)
+        _latest_multiagent_state["critic_rounds"] = res.get("critic_rounds", 0)
+        _latest_multiagent_state["elapsed_seconds"] = res.get("elapsed_seconds", 0)
+        _latest_multiagent_state["last_result"] = res.get("final_summary", "")
+        await manager.broadcast({"type": "multiagent_status", "data": _latest_multiagent_state})
+        return JSONResponse({"success": True, "result": res})
+    except Exception as e:
+        _latest_multiagent_state["status"] = "error"
+        _latest_multiagent_state["current_agent"] = "error"
+        _latest_multiagent_state["last_result"] = str(e)
+        await manager.broadcast({"type": "multiagent_status", "data": _latest_multiagent_state})
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 def add_history(role: str, content: str) -> dict:
     e = {"role": role, "content": content, "ts": time.strftime("%H:%M")}

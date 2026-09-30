@@ -41,6 +41,27 @@ module.exports = {
       interpreter: "none",
       autorestart: true,
       watch: false
+    },
+    {
+      name: "alberth-gods-eye",
+      cwd: path.join(__dirname, 'gods-eye-view'),
+      script: "npx",
+      args: "vite preview --port 4173 --host 0.0.0.0",
+      interpreter: "none",
+      autorestart: true,
+      watch: false
+    },
+    {
+      name: "alberth-vision",
+      cwd: __dirname,
+      script: pythonBin,
+      args: "alberth_face_recognition.py server",
+      interpreter: "none",
+      autorestart: true,
+      watch: false,
+      env: {
+        ALBERTH_WORKSPACE: __dirname
+      }
     }
   ]
 };

@@ -28,3 +28,10 @@ scratch/
 # Alberth Dev Console CLI logs
 alberth_cli/logs/*
 !alberth_cli/logs/.gitkeep
+
+# Módulos externos
+gods-eye-view/node_modules/
+
+# Obsidian local workspace state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json

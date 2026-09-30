@@ -493,7 +493,148 @@ Usa esta información de forma analítica para responder al Señor con precisió
         else
             log "WARN: Falló la búsqueda web."
         fi
+
+    # ── Rama COMPLEX_MISSION — Orquestador Multi-Agente LangGraph ─────────
+    elif [[ "$talamo_tipo" == "COMPLEX_MISSION" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → MISIÓN COMPLEJA detectada → Orquestador Multi-Agente..."
+        local mission_out
+        mission_out=$(python3 -c "
+import sys, json
+sys.path.insert(0, '$WORKSPACE_DIR')
+try:
+    import alberth_multi_agent as ma
+    result = ma.run_mission('$query')
+    print(json.dumps({'resultado': result.get('final_response', ''), 'status': 'ok'}))
+except Exception as e:
+    print(json.dumps({'resultado': f'Error en orquestador: {e}', 'status': 'error'}))
+" 2>>"$LOGFILE")
+        local mission_resultado
+        mission_resultado=$(echo "$mission_out" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('resultado',''))" 2>/dev/null)
+        if [[ -n "$mission_resultado" ]]; then
+            log "MULTI-AGENT OK → Misión completada (${#mission_resultado} chars)"
+            search_context="[RESULTADO DEL ORQUESTADOR MULTI-AGENTE (Estratega+Investigador+Ingeniero+QA):
+${mission_resultado}
+Presenta este resultado al Señor con claridad, añadiendo tu análisis y recomendaciones según corresponda.] "
+        else
+            log "WARN: Orquestador multi-agente no retornó resultado."
+            search_context="[SISTEMA: El orquestador multi-agente procesó la misión pero no generó un resultado claro. Indica al Señor que la tarea fue iniciada y que puede revisar los logs para detalles.] "
+        fi
+
+    # ── Rama OSINT_SCAN — Rastreo OSINT & Huella Digital ─────────────────
+    elif [[ "$talamo_tipo" == "OSINT_SCAN" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → OSINT_SCAN → rastreando huella digital..."
+        local osint_target
+        osint_target=$(echo "$talamo_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('argumentos',{}).get('target',''))" 2>/dev/null)
+        [[ -z "$osint_target" ]] && osint_target="$query"
+        local osint_out
+        osint_out=$(python3 "$WORKSPACE_DIR/alberth_osint.py" "$osint_target" 2>>"$LOGFILE")
+        local osint_res
+        osint_res=$(echo "$osint_out" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d, ensure_ascii=False, indent=2))" 2>/dev/null || echo "$osint_out")
+        if [[ -n "$osint_res" ]]; then
+            log "OSINT OK → Resultado para: $osint_target"
+            search_context="[RESULTADO DE INVESTIGACIÓN OSINT para '$osint_target':
+${osint_res}
+Analiza esta huella digital y presenta al Señor un resumen estratégico de los perfiles encontrados, brechas de datos y riesgos de privacidad, con tu tono analítico y directo.] "
+        else
+            log "WARN: OSINT sin resultados para: $osint_target"
+            search_context="[SISTEMA: La búsqueda OSINT para '$osint_target' no arrojó resultados en las plataformas consultadas. Informa al Señor y sugiere alternativas.] "
+        fi
+
+    # ── Rama WEBSEC_SCAN — Escáner de Seguridad Web ───────────────────────
+    elif [[ "$talamo_tipo" == "WEBSEC_SCAN" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → WEBSEC_SCAN → escaneando seguridad web..."
+        local websec_url
+        websec_url=$(echo "$talamo_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('argumentos',{}).get('url',''))" 2>/dev/null)
+        [[ -z "$websec_url" ]] && websec_url="$query"
+        local websec_out
+        websec_out=$(python3 "$WORKSPACE_DIR/alberth_websec_scanner.py" "$websec_url" 2>>"$LOGFILE")
+        local websec_res
+        websec_res=$(echo "$websec_out" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d, ensure_ascii=False, indent=2))" 2>/dev/null || echo "$websec_out")
+        if [[ -n "$websec_res" ]]; then
+            log "WEBSEC OK → Escaneo completado para: $websec_url"
+            search_context="[RESULTADO DE ESCANEO DE SEGURIDAD WEB para '$websec_url':
+${websec_res}
+Analiza estos resultados de seguridad y presenta al Señor un reporte ejecutivo: score de seguridad, vulnerabilidades críticas, headers inseguros y recomendaciones prioritarias.] "
+        else
+            log "WARN: WebSec Scanner sin resultados para: $websec_url"
+            search_context="[SISTEMA: El escáner de seguridad no pudo analizar '$websec_url'. El sitio puede estar offline o bloquear el escaneo. Informa al Señor.] "
+        fi
+
+    # ── Rama FACE_RECOGNITION — Reconocimiento y Registro Facial ──────────
+    elif [[ "$talamo_tipo" == "FACE_RECOGNITION" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → FACE_RECOGNITION → activando módulo de visión..."
+        local person_name=""
+        if [[ "$query_lower" =~ (registra a|guarda a|te presento a|guarda esta cara de)\ ([a-zA-ZáéíóúñÁÉÍÓÚÑ ]+) ]]; then
+            person_name="${BASH_REMATCH[2]}"
+        fi
+        local vision_out
+        if [[ -n "$person_name" ]]; then
+            vision_out=$(python3 "$WORKSPACE_DIR/alberth_face_recognition.py" --enroll "$person_name" 2>>"$LOGFILE")
+            visual_context="[RECONOCIMIENTO FACIAL: Se registró el rostro de '$person_name' en la base de datos de personas conocidas. Confirma al Señor de forma cálida que Alberth ahora reconocerá a esta persona automáticamente en futuras sesiones.] "
+        else
+            vision_out=$(python3 "$WORKSPACE_DIR/alberth_face_recognition.py" --identify 2>>"$LOGFILE")
+            local identified
+            identified=$(echo "$vision_out" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('name','Persona desconocida'))" 2>/dev/null || echo "resultado no disponible")
+            visual_context="[RECONOCIMIENTO FACIAL: Resultado del análisis de la cámara: ${identified}. Informa al Señor de forma directa sobre quién está frente a la cámara.] "
+        fi
+
+    # ── Rama SEO_AUDIT — Auditoría SEO Técnica (OpenSEO) ──────────────────
+    elif [[ "$talamo_tipo" == "SEO_AUDIT" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → SEO_AUDIT → auditando posicionamiento web con OpenSEO..."
+        local seo_out
+        seo_out=$(python3 "$WORKSPACE_DIR/alberth_open_seo.py" "$query" 2>>"$LOGFILE")
+        if [[ -n "$seo_out" ]]; then
+            log "OPENSEO OK → Auditoría completada"
+            search_context="[RESULTADO DE AUDITORÍA SEO TÉCNICA (OPENSEO):
+${seo_out}
+Presenta al Señor un resumen ejecutivo de las métricas clave, el score de salud SEO y la lista priorizada de correcciones técnicas para mejorar el posicionamiento en Google.] "
+        fi
+
+    # ── Rama CODE_SECURITY_AUDIT — Auditoría de Seguridad Cloudflare ──────
+    elif [[ "$talamo_tipo" == "CODE_SECURITY_AUDIT" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → CODE_SECURITY_AUDIT → ejecutando auditoría en 6 fases..."
+        local sec_out
+        sec_out=$(python3 "$WORKSPACE_DIR/alberth_cloudflare_security.py" "$WORKSPACE_DIR" 2>>"$LOGFILE")
+        if [[ -n "$sec_out" ]]; then
+            log "CLOUDFLARE AUDIT OK → Auditoría completada"
+            search_context="[RESULTADO DE AUDITORÍA DE SEGURIDAD (PROTOCOLO CLOUDFLARE 6 FASES):
+${sec_out}
+Presenta al Señor los hallazgos confirmados, descartando los falsos positivos validados por el agente adversarial, e indica las acciones preventivas inmediatas.] "
+        fi
+
+    # ── Rama HINDSIGHT_MEMORY — Memoria Evolutiva (Retain/Recall/Reflect) ──
+    elif [[ "$talamo_tipo" == "HINDSIGHT_MEMORY" ]]; then
+        is_talamo_routed=true
+        log "Tálamo → HINDSIGHT_MEMORY → actualizando memoria evolutiva..."
+        local hs_out
+        hs_out=$(python3 -c "
+import sys, json
+sys.path.insert(0, '$WORKSPACE_DIR')
+try:
+    import alberth_hindsight as hs
+    if 'reflexiona' in '$query_lower':
+        res = hs.reflect(topic='$query')
+    else:
+        mem_id = hs.retain('$query', memory_type='observation')
+        res = {'status': 'retained', 'id': mem_id, 'learned': '$query'}
+    print(json.dumps(res, ensure_ascii=False))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+" 2>>"$LOGFILE")
+        if [[ -n "$hs_out" ]]; then
+            log "HINDSIGHT OK → Memoria actualizada"
+            search_context="[ACTUALIZACIÓN DE MEMORIA EVOLUTIVA (HINDSIGHT):
+${hs_out}
+Confirma al Señor que has registrado este conocimiento o reflexión en tu subconsciente operativo y que lo aplicarás en futuras interacciones.] "
+        fi
     fi
+
 
     local soul_context=""
     if [[ -f "$WORKSPACE_DIR/SOUL.md" ]]; then
