@@ -322,11 +322,106 @@ async def post_multiagent_mission(req: MultiAgentMissionRequest):
         await manager.broadcast({"type": "multiagent_status", "data": _latest_multiagent_state})
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
+# ── Estado de Consciencia, Tono y Sentinel de Alberth (v4.0) ───────────────────
+_operational_mode: str = "auto"  # "auto", "bunker", "executive", "engineer"
+_sentinel_state: dict = {
+    "active_app": "Unknown",
+    "active_window": "",
+    "meeting_mode": False,
+    "last_check": 0.0,
+    "uncommitted_projects": []
+}
+_active_whisper: Optional[dict] = None
+
+def get_operational_mode() -> str:
+    global _operational_mode, _sentinel_state
+    if _operational_mode == "auto":
+        if _sentinel_state.get("meeting_mode"):
+            return "bunker"
+        app = _sentinel_state.get("active_app", "").lower()
+        if any(dev in app for dev in ["electron", "code", "cursor", "terminal", "iterm", "antigravity", "xcode"]):
+            return "engineer"
+        return "executive"
+    return _operational_mode
+
+def sanitize_and_qa_response(text: str) -> str:
+    if not text:
+        return text
+    # 1. Asegurar tratamiento exclusivo como 'Señor'
+    text = re.sub(r'\bSeñor\s+(?:Danny|Daniel)\b', 'Señor', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bSr\.?\s+(?:Danny|Daniel)\b', 'Señor', text, flags=re.IGNORECASE)
+    # 2. Si el modo es búnker, recortar a máximo 3 oraciones principales
+    if get_operational_mode() == "bunker":
+        sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
+        if len(sents) > 3:
+            text = " ".join(sents[:3])
+    return text.strip()
+
+class ModeRequest(BaseModel):
+    mode: str
+
+@app.get("/api/context/mode")
+async def get_mode_endpoint():
+    return {
+        "mode": _operational_mode,
+        "resolved_mode": get_operational_mode(),
+        "sentinel_state": _sentinel_state
+    }
+
+@app.post("/api/context/mode")
+async def set_mode_endpoint(req: ModeRequest):
+    global _operational_mode
+    valid_modes = ["auto", "bunker", "executive", "engineer"]
+    if req.mode.lower() not in valid_modes:
+        raise HTTPException(status_code=400, detail=f"Modo no válido. Opciones: {valid_modes}")
+    _operational_mode = req.mode.lower()
+    await manager.broadcast({"type": "mode_changed", "mode": _operational_mode, "resolved_mode": get_operational_mode()})
+    return {"success": True, "mode": _operational_mode, "resolved_mode": get_operational_mode()}
+
+@app.get("/api/sentinel/status")
+async def get_sentinel_status():
+    return {
+        "state": _sentinel_state,
+        "active_whisper": _active_whisper,
+        "mode": get_operational_mode()
+    }
+
+@app.post("/api/sentinel/state")
+async def update_sentinel_state(payload: dict):
+    global _sentinel_state
+    _sentinel_state.update(payload)
+    _sentinel_state["last_check"] = time.time()
+    await manager.broadcast({"type": "sentinel_state", "data": _sentinel_state})
+    return {"success": True}
+
+@app.post("/api/sentinel/whisper")
+async def post_sentinel_whisper(payload: dict):
+    global _active_whisper
+    _active_whisper = {
+        "id": f"wh_{int(time.time())}",
+        "title": payload.get("title", "Sugerencia de Alberth"),
+        "message": payload.get("message", ""),
+        "type": payload.get("type", "hint"),
+        "action": payload.get("action", ""),
+        "project": payload.get("project", ""),
+        "timestamp": time.time()
+    }
+    await manager.broadcast({"type": "proactive_whisper", "data": _active_whisper})
+    return {"success": True, "whisper": _active_whisper}
+
+@app.post("/api/sentinel/dismiss")
+async def dismiss_sentinel_whisper():
+    global _active_whisper
+    _active_whisper = None
+    await manager.broadcast({"type": "dismiss_whisper"})
+    return {"success": True}
+
 def add_history(role: str, content: str) -> dict:
     e = {"role": role, "content": content, "ts": time.strftime("%H:%M")}
     history.append(e)
     if len(history) > 100: history.pop(0)
     return e
+
 
 # ── Pipeline de Alberth ────────────────────────────────────────────────────────
 # Contexto de conversación en memoria (para dar contexto al gateway)
@@ -701,10 +796,48 @@ def run_alberth_full(text: str) -> dict:
         except Exception as em_err:
             pass
 
+        # ── Memoria Evolutiva Hindsight (Modelos Mentales, Preferencias, Experiencia) ──
+        hindsight_context = ""
+        try:
+            import alberth_hindsight
+            h_recalled = alberth_hindsight.recall(q_clean, limit=4)
+            if h_recalled:
+                h_lines = ["\n[MEMORIA EVOLUTIVA HINDSIGHT — MODELOS MENTALES Y OPINIONES DEL SEÑOR]:"]
+                for hm in h_recalled:
+                    m_type = hm.get("memory_type", "general").upper()
+                    m_cnt = hm.get("content", "").strip()
+                    h_lines.append(f"- [{m_type}] {m_cnt}")
+                hindsight_context = "\n".join(h_lines) + "\n"
+        except Exception:
+            pass
+
+        # ── Modulación Dinámica de Tono (Búnker / Gabinete / Ingeniero / Auto) ──
+        active_mode = get_operational_mode()
+        if active_mode == "bunker":
+            tone_instruction = (
+                "\n[MODO ACTIVO: BÚNKER / REUNIÓN / TELEGRÁFICO]:\n"
+                "- El Señor se encuentra en alta concentración o en reunión. Responde de forma ULTRA-CONCISA (máximo 2 a 3 oraciones).\n"
+                "- Directo al resultado, métricas o comandos de acción. Elimina cualquier preámbulo o cortesía redundante."
+            )
+        elif active_mode == "engineer":
+            tone_instruction = (
+                "\n[MODO ACTIVO: INGENIERO SENIOR (TDD / ANTIGRAVITY)]:\n"
+                "- Enfoque 100% técnico, arquitectónico y riguroso.\n"
+                "- Sugiere pruebas unitarias (TDD), especificaciones de interfaces, validación de sintaxis y rutas exactas con enlaces clicables."
+            )
+        else:
+            tone_instruction = (
+                "\n[MODO ACTIVO: GABINETE ESTRATÉGICO & CHIEF OF STAFF]:\n"
+                "- Pensamiento estructurado de alto nivel para decisiones de negocio, holding Novasyscom y tecnología.\n"
+                "- TRANSPARENCIA Y RAZONAMIENTO EXPLICABLE: Cuando propongas soluciones, cita brevemente el porqué: 'Le propongo esto porque [razón] y considerando que usted prefirió [preferencia previa]'."
+            )
+
         system_prompt = (
             f"HORA Y FECHA EXACTA EN VIVO DEL SISTEMA OPERATIVO MAC (LOCAL): {now_formatted}\n\n"
             f"AGENTE ORQUESTADOR CORE (OPENCLAW):\n{orq_prompt}\n\n"
             f"{episodic_context}\n"
+            f"{hindsight_context}\n"
+            f"{tone_instruction}\n\n"
             f"INSTRUCCIONES DE PERSONALIDAD (SOUL.md):\n{soul_content}\n\n"
             f"MEMORIA TÉCNICA Y DE PROYECTOS PERSISTENTE (MEMORY.md):\n{mem_summary}\n\n"
             "DIRECTRICES OBLIGATORIAS DE INTELIGENCIA Y COHERENCIA:\n"
@@ -716,6 +849,7 @@ def run_alberth_full(text: str) -> dict:
             "- SAFETY GUARD: Nunca ejecutes comandos destructivos en la terminal ni modifiques código de proyectos del Señor sin su confirmación explícita previa.\n"
             "- AUTOEVALUACIÓN: Si se te pide un autodiagnóstico o auditoría técnica de ti mismo, básate en el estado real de tus herramientas, procesos PM2 y hardware."
         )
+
         messages = [{"role": "system", "content": system_prompt}] + _conv_history[-16:] + [{"role": "user", "content": q_clean}]
 
         # ── Contexto Adicional: Q&A de Video Activo o URLs Web ───────────────
@@ -832,17 +966,31 @@ def run_alberth_full(text: str) -> dict:
             resp_text = "Señor, en este momento todos los proveedores de IA están experimentando alta demanda. Por favor intente de nuevo en unos segundos."
 
         resp_text = resp_text.strip()
+        resp_text = sanitize_and_qa_response(resp_text)
+
+        # ── Aprendizaje Autónomo Hindsight (Retain Automático) ──
+        def _bg_retain(query_txt, resp_txt, mode_txt):
+            try:
+                import alberth_hindsight
+                q_l = query_txt.lower()
+                if any(w in q_l for w in ["prefiero", "me gusta", "no me gusta", "usa siempre", "nunca uses", "recuerda que", "regla", "cambia"]):
+                    alberth_hindsight.retain(f"Preferencia del Señor: {query_txt}", memory_type="opinion", context=f"Modo {mode_txt}")
+                else:
+                    alberth_hindsight.retain(f"Consulta: {query_txt[:120]}", memory_type="experience", outcome=f"Respuesta generada en modo {mode_txt}")
+            except Exception:
+                pass
+        threading.Thread(target=_bg_retain, args=(q_clean, resp_text, active_mode), daemon=True).start()
 
     # Guardar en memoria de conversación
     _conv_history.append({"role": "user", "content": q_clean})
     _conv_history.append({"role": "assistant", "content": resp_text})
+
     if len(_conv_history) > 30:
         _conv_history.pop(0)
         _conv_history.pop(0)
 
     # ── 5. Síntesis de Voz Streaming por Chunks de Frases (Latencia <600ms) ──
     try:
-        import threading
         ts = time.strftime("%Y%m%d_%H%M%S")
         VOICE_OUTPUT.mkdir(parents=True, exist_ok=True)
         venv_py = WORKSPACE / "venv" / "bin" / "python3"
@@ -1222,12 +1370,47 @@ async def console_chat_endpoint(req: ConsoleChatRequest):
             f"[Contexto Operativo Antigravity: Modo Global Novasyscom / Consultas Libres sin proyecto atado]\n"
         )
         
+    # ── Enrutamiento Inteligente con Tálamo y Enjambre Multi-Agente ──────────
+    try:
+        import alberth_talamo
+        route_res = alberth_talamo.clasificar_orden(msg)
+        tipo_tarea = route_res.get("tipo_tarea", "")
+        if tipo_tarea in ["MULTI_AGENT_SWARM", "SEO_AUDIT", "CODE_SECURITY_AUDIT"] or mode == "multiagent":
+            import alberth_multi_agent
+            await manager.broadcast({"type": "multiagent_status", "data": {"status": "running", "current_agent": "planner", "mission": msg}})
+            mission_res = await asyncio.get_event_loop().run_in_executor(None, alberth_multi_agent.run_multi_agent_mission, msg)
+            resp_text = mission_res.get("final_summary", "")
+            await manager.broadcast({"type": "multiagent_status", "data": {"status": "idle", "current_agent": "complete", "last_result": resp_text[:100]}})
+            evt = {
+                "project": project_key,
+                "action": "multiagent_mission",
+                "command": msg,
+                "status": "SUCCESS",
+                "output": resp_text,
+                "timestamp": time.time(),
+                "type": "ai"
+            }
+            console_logs_history.append(evt)
+            return {
+                "type": "ai",
+                "ok": True,
+                "status": "SUCCESS",
+                "prompt": msg,
+                "text": resp_text,
+                "project": project_key,
+                "critic_rounds": mission_res.get("iterations", 1),
+                "multiagent": True
+            }
+    except Exception as te:
+        print(f"[Talamo/Multiagent Chat Error] {te}")
+
     ai_prompt = f"{context_header}\nEl Señor dice: {msg}\nResponde de manera ejecutiva, útil y clara con formato Markdown profesional."
     
     try:
         await manager.broadcast({"type": "thinking", "active": True})
         full_resp = await run_alberth_pipeline_async(ai_prompt)
         await manager.broadcast({"type": "thinking", "active": False})
+
         
         resp_text = full_resp.get("text", "")
         evt = {

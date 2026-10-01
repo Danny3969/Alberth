@@ -62,6 +62,15 @@ module.exports = {
       env: {
         ALBERTH_WORKSPACE: __dirname
       }
+    },
+    {
+      name: "alberth-sentinel",
+      cwd: __dirname,
+      script: pythonBin,
+      args: "alberth_sentinel.py",
+      interpreter: "none",
+      autorestart: true,
+      watch: false
     }
   ]
 };

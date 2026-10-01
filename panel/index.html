@@ -279,6 +279,160 @@ header.hud-header {
   100% { box-shadow: 0 0 24px rgba(0, 240, 255, 0.9), 0 0 35px rgba(0, 119, 255, 0.6); }
 }
 
+/* ─── Mode / Context Selector Header Pills ─── */
+.mode-selector-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(10, 25, 45, 0.7);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 8px;
+  padding: 2px 4px;
+  gap: 3px;
+}
+.mode-pill-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #88a0bc;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.mode-pill-btn:hover {
+  color: #fff;
+  background: rgba(0, 240, 255, 0.12);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+.mode-pill-btn.active {
+  background: rgba(0, 240, 255, 0.22);
+  color: var(--cyan);
+  font-weight: 700;
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* ─── Proactive Whisper Banner (Sentinela Autónomo) ─── */
+.proactive-whisper-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-130%);
+  z-index: 1000;
+  width: min(720px, 92vw);
+  background: rgba(10, 22, 40, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 24px rgba(0, 240, 255, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 18px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.proactive-whisper-banner.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.proactive-whisper-banner.type-alert {
+  border-color: rgba(255, 77, 77, 0.65);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 24px rgba(255, 77, 77, 0.35);
+}
+.proactive-whisper-banner.type-recommendation {
+  border-color: rgba(56, 249, 215, 0.55);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 24px rgba(56, 249, 215, 0.25);
+}
+.whisper-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.whisper-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.whisper-header-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.whisper-badge {
+  font-size: 9px;
+  font-family: var(--font-data);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--cyan);
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.whisper-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.whisper-text {
+  font-size: 12px;
+  color: #c0d8f0;
+  line-height: 1.4;
+  margin: 0;
+}
+.whisper-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.whisper-btn-act {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(0, 119, 255, 0.3));
+  border: 1px solid var(--cyan);
+  color: #fff;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.whisper-btn-act:hover {
+  background: var(--cyan);
+  color: var(--bg-dark);
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+.whisper-btn-close {
+  background: transparent;
+  border: none;
+  color: #8899aa;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.whisper-btn-close:hover {
+  color: #fff;
+}
+
+
 /* ─── Main Cockpit View Container ─── */
 .cockpit-view {
   flex: 1;
@@ -2442,6 +2596,14 @@ header.hud-header {
     </div>
 
     <div class="header-actions">
+      <!-- Selector de Modo / Tono Contextual -->
+      <div class="mode-selector-wrap" id="hud-mode-selector" title="Modulación Dinámica de Tono y Contexto">
+        <button class="mode-pill-btn active" data-mode="auto" onclick="setOperationalMode('auto')" title="Automático: Adapta tono según entorno detectado">🤖 Auto</button>
+        <button class="mode-pill-btn" data-mode="bunker" onclick="setOperationalMode('bunker')" title="Búnker / Reunión: Telegráfico (2-3 frases), cero ruido">🛡️ Búnker</button>
+        <button class="mode-pill-btn" data-mode="executive" onclick="setOperationalMode('executive')" title="Gabinete Estratégico: Análisis de impacto, ROI y justificación">👔 Gabinete</button>
+        <button class="mode-pill-btn" data-mode="engineer" onclick="setOperationalMode('engineer')" title="Ingeniero Senior TDD: Rigor de código y arquitectura">⚙️ Ingeniero</button>
+      </div>
+
       <button class="hud-btn" id="btn-ultra-live" onclick="toggleUltraLiveMode()" title="Alternar Modo Ultra-Live Bidireccional (<400ms)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span id="btn-live-txt">ULTRA-LIVE</span>
@@ -2482,6 +2644,22 @@ header.hud-header {
 
   <!-- ── Main Cockpit View ── -->
   <main class="cockpit-view">
+
+    <!-- ── Proactive Whisper Banner (Sentinela Autónomo Alberth) ── -->
+    <div id="proactive-whisper-banner" class="proactive-whisper-banner">
+      <div class="whisper-icon" id="whisper-icon">✨</div>
+      <div class="whisper-content">
+        <div class="whisper-header-line">
+          <span class="whisper-badge" id="whisper-badge">SENTINELA</span>
+          <span class="whisper-title" id="whisper-title">Sugerencia Proactiva</span>
+        </div>
+        <p class="whisper-text" id="whisper-text">Alberth ha detectado una oportunidad de optimización en el entorno.</p>
+      </div>
+      <div class="whisper-actions">
+        <button class="whisper-btn-act" id="whisper-act-btn" onclick="executeWhisperAction()">Atender</button>
+        <button class="whisper-btn-close" onclick="dismissWhisper()" title="Descartar">✕</button>
+      </div>
+    </div>
     
     <!-- 3D Hologram Swarm Orb Stage -->
     <div class="orb-stage" id="orb-container">
@@ -3250,6 +3428,12 @@ function connectWS() {
         handleDevConsoleEvent(msg.payload);
       } else if (msg.type === "multiagent_status") {
         handleMultiAgentStatus(msg.data);
+      } else if (msg.type === "proactive_whisper") {
+        handleProactiveWhisper(msg.data);
+      } else if (msg.type === "dismiss_whisper") {
+        hideProactiveWhisper(msg.whisper_id);
+      } else if (msg.type === "mode_changed") {
+        updateOperationalModeUI(msg.mode);
       } else if (msg.type === "system") {
         showToast(msg.text, 3000);
       }
@@ -3824,6 +4008,120 @@ function openGodsEye() {
     .catch(() => {
       window.open('http://localhost:4173', '_blank');
     });
+}
+
+// ─── Alberth Sentinel Proactive Whispers & Modos Operativos ─────
+let currentProactiveWhisper = null;
+let currentOperationalMode = "auto";
+
+function handleProactiveWhisper(whisper) {
+  if (!whisper) return;
+  currentProactiveWhisper = whisper;
+  const banner = document.getElementById("proactive-whisper-banner");
+  const icon = document.getElementById("whisper-icon");
+  const badge = document.getElementById("whisper-badge");
+  const title = document.getElementById("whisper-title");
+  const text = document.getElementById("whisper-text");
+  const actBtn = document.getElementById("whisper-act-btn");
+
+  if (!banner) return;
+
+  banner.className = "proactive-whisper-banner visible";
+  if (whisper.type === "alert") {
+    banner.classList.add("type-alert");
+    if (icon) icon.textContent = "🚨";
+    if (badge) badge.textContent = "ALERTA";
+  } else if (whisper.type === "recommendation") {
+    banner.classList.add("type-recommendation");
+    if (icon) icon.textContent = "⚡";
+    if (badge) badge.textContent = "SUGERENCIA";
+  } else {
+    if (icon) icon.textContent = "✨";
+    if (badge) badge.textContent = "PROACTIVO";
+  }
+
+  if (title) title.textContent = whisper.title || "Sugerencia del Sentinela";
+  if (text) text.textContent = whisper.message || "";
+  
+  if (actBtn) {
+    if (whisper.action) {
+      actBtn.style.display = "inline-block";
+      actBtn.textContent = whisper.action.length > 25 ? "Atender Orden" : whisper.action;
+    } else {
+      actBtn.style.display = "none";
+    }
+  }
+}
+
+function hideProactiveWhisper(whisperId) {
+  const banner = document.getElementById("proactive-whisper-banner");
+  if (banner) {
+    banner.classList.remove("visible");
+  }
+  if (!whisperId || (currentProactiveWhisper && currentProactiveWhisper.id === whisperId)) {
+    currentProactiveWhisper = null;
+  }
+}
+
+function dismissWhisper() {
+  if (currentProactiveWhisper && currentProactiveWhisper.id) {
+    fetch("/api/sentinel/dismiss", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ whisper_id: currentProactiveWhisper.id })
+    }).catch(err => console.warn("Error dismissing whisper:", err));
+  }
+  hideProactiveWhisper();
+}
+
+function executeWhisperAction() {
+  if (!currentProactiveWhisper) return;
+  const act = currentProactiveWhisper.action || currentProactiveWhisper.message;
+  dismissWhisper();
+  if (act) {
+    if (!isChatOpen) toggleChatDrawer();
+    sendQuick(act);
+  }
+}
+
+async function setOperationalMode(mode) {
+  currentOperationalMode = mode;
+  updateOperationalModeUI(mode);
+  try {
+    const res = await fetch("/api/context/mode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode })
+    });
+    const data = await res.json();
+    showToast(`Modo cambiado: ${data.mode_label || mode}`, 2000);
+  } catch (err) {
+    console.warn("Error updating mode:", err);
+  }
+}
+
+function updateOperationalModeUI(mode) {
+  currentOperationalMode = mode;
+  const buttons = document.querySelectorAll(".mode-pill-btn");
+  buttons.forEach(btn => {
+    if (btn.getAttribute("data-mode") === mode) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+}
+
+async function initOperationalMode() {
+  try {
+    const res = await fetch("/api/context/mode");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.mode) {
+        updateOperationalModeUI(data.mode);
+      }
+    }
+  } catch(e) {}
 }
 
 // ─── UI Actions & Chat Drawer ───────────────────────────────
@@ -6057,6 +6355,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(initThreeHologram, 100);
   setTimeout(fetchInitialCanvas, 400);
   setTimeout(initWakeWordEngine, 1000);
+  setTimeout(initOperationalMode, 300);
 });
 </script>
 
