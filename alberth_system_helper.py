@@ -615,7 +615,7 @@ def handle_system_info(query, query_lower):
         if ok:
             return {"accion": "consulta_volumen", "resultado": f"El volumen actual es {out}%.", "exito": True}
 
-    if re.search(r'\b(memoria|ram|cpu|procesador|uso\s+de\s+(cpu|ram|memoria))\b', query_lower):
+    if re.search(r'\b(cu[aá]nto\s+(uso|consumo)\s+de\s+(cpu|ram|memoria)|uso\s+de\s+(cpu|ram|memoria)|consumo\s+de\s+(cpu|ram|memoria)|estado\s+del?\s+(procesador|cpu|ram))\b', query_lower):
         ok_cpu, cpu_out = run_shell(["bash", "-c", "top -l 1 -s 0 | grep 'CPU usage'"])
         ok_mem, mem_out = run_shell(["bash", "-c", "top -l 1 -s 0 | grep 'PhysMem'"])
         resultado = ""
@@ -1280,6 +1280,14 @@ def handle_self_audit(query, query_lower):
 # ══════════════════════════════════════════════════════════════════════════════
 def dispatch(query):
     query_lower = query.lower()
+
+    # 0. Salvaguarda: Si es un prompt largo (>100 caracteres), contiene saltos de línea (tablas/reportes)
+    # o intenciones analíticas/reflexivas ("analiza", "audita", "recomienda", "qué opinas", etc.),
+    # NUNCA debe ser interceptado por utilidades cortas de sistema; debe procesarlo el LLM/Agentes.
+    is_terminal_explicit = query_lower.startswith(("ejecuta en terminal", "ejecuta bash", "terminal:", "comando:"))
+    has_analysis_intent = any(w in query_lower for w in ["analiz", "audit", "recomiend", "mejoras", "qué opinas", "que opinas", "evalú", "evalu", "explica", "implementamos"])
+    if (len(query.strip()) > 100 or "\n" in query.strip() or has_analysis_intent) and not is_terminal_explicit:
+        return None
 
     # 0. Ignorar peticiones de video o URLs de plataformas de video para que las maneje la Suite de Video
     video_indicators = ["tiktok.com", "youtube.com", "youtu.be", "instagram.com/reel", "vimeo.com", "x.com/i/status", "twitter.com/i/status"]
