@@ -47,7 +47,8 @@ import { androidSystemHelper } from './android_system_helper';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // ─── CONFIGURACIÓN PREDETERMINADA DE FÁBRICA ─────────────────────────────────
-const DEFAULT_SERVER_URL = 'https://knee-valium-vegetarian-ethernet.trycloudflare.com';
+// ─── CONFIGURACIÓN PREDETERMINADA DE FÁBRICA ─────────────────────────────────
+const DEFAULT_SERVER_URL = 'http://192.168.0.41:8080';
 const DEFAULT_GATEWAY_TOKEN = 'token-seguro-1781561473';
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 2500;
@@ -58,6 +59,21 @@ interface Message {
   content: string;
   ts: string;
 }
+
+export interface ProactiveWhisper {
+  id: string;
+  title: string;
+  message?: string;
+  text?: string;
+  suggestion?: string;
+  type?: 'hint' | 'alert' | 'recommendation';
+  urgency?: 'low' | 'normal' | 'high' | 'critical';
+  action?: string;
+  project?: string;
+  timestamp?: number;
+}
+
+export type OperationalMode = 'auto' | 'bunker' | 'gabinete' | 'ingeniero';
 
 type AssistantState = 'IDLE' | 'LISTENING' | 'THINKING' | 'SPEAKING';
 
@@ -71,6 +87,10 @@ export default function App() {
   const [statusMessage, setStatusMessage] = useState('Iniciando Quantum Core...');
   const [assistantState, setAssistantState] = useState<AssistantState>('IDLE');
 
+  // Estados del Sentinela y Modos Operativos
+  const [activeWhisper, setActiveWhisper] = useState<ProactiveWhisper | null>(null);
+  const [currentMode, setCurrentMode] = useState<OperationalMode>('auto');
+
   // Estados de Permisos y Sistema OS
   const [isAccessibilityActive, setIsAccessibilityActive] = useState(false);
   const [isDefaultAssistActive, setIsDefaultAssistActive] = useState(false);
@@ -80,7 +100,7 @@ export default function App() {
     {
       id: 'welcome',
       role: 'alberth',
-      content: '⚡ Quantum Core en línea, Señor Danny. Alberth v4.0 listo como su Asistente de Sistema total. Conexión automática establecida.',
+      content: '⚡ Quantum Core v4.5 en línea, Señor Danny. Alberth listo en red local (192.168.0.41) y túnel seguro. Modo Proactivo activo.',
       ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -171,7 +191,7 @@ export default function App() {
       try {
         // Cargar o autoconfigurar URL del servidor
         let storedUrl = await AsyncStorage.getItem('@alberth_server_url');
-        if (!storedUrl || storedUrl.trim() === '') {
+        if (!storedUrl || storedUrl.includes('knee-valium-vegetarian-ethernet') || storedUrl.trim() === '') {
           storedUrl = DEFAULT_SERVER_URL;
           await AsyncStorage.setItem('@alberth_server_url', DEFAULT_SERVER_URL);
         }
@@ -196,6 +216,9 @@ export default function App() {
 
         // Verificar estado de Asistente de IA y Accesibilidad
         checkSystemServices();
+
+        // Obtener modo operativo inicial
+        fetchInitialOperationalMode(storedUrl);
 
         // Conectar WebSocket con URL y Token precargados
         connectWebSocket(storedUrl, storedToken);
@@ -296,6 +319,33 @@ export default function App() {
                 ts: m.ts || '',
               }));
               setMessages(loaded);
+            }
+          } else if (data.type === 'proactive_whisper') {
+            if (data.data) {
+              const whisper = data.data as ProactiveWhisper;
+              setActiveWhisper(whisper);
+              Haptics.notificationAsync(
+                whisper.type === 'alert' || whisper.urgency === 'high'
+                  ? Haptics.NotificationFeedbackType.Warning
+                  : Haptics.NotificationFeedbackType.Success
+              );
+              if (!isMuted) {
+                const textToSpeak = whisper.title ? `Atención Señor: ${whisper.title}. ${whisper.message || whisper.text || ''}` : (whisper.message || whisper.text || '');
+                if (textToSpeak) {
+                  Speech.speak(textToSpeak, {
+                    language: 'es-ES',
+                    pitch: 1.0,
+                    rate: 1.0,
+                  });
+                }
+              }
+            }
+          } else if (data.type === 'dismiss_whisper') {
+            setActiveWhisper(null);
+          } else if (data.type === 'mode_changed') {
+            if (data.mode) {
+              setCurrentMode(data.mode);
+              appendSystemLog(`Modo operativo sincronizado: ${String(data.mode).toUpperCase()}`);
             }
           }
         } catch (e) {
@@ -476,6 +526,66 @@ export default function App() {
           })
         );
       }
+    }
+  };
+
+  // ─── CONTROL DE SENTINELA Y MODOS OPERATIVOS ────────────────────────────────
+  const fetchInitialOperationalMode = async (targetUrl?: string) => {
+    try {
+      const baseUrl = (targetUrl ?? serverUrl).replace(/\/$/, '');
+      const res = await fetch(`${baseUrl}/api/context/mode`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.mode) {
+          setCurrentMode(data.mode);
+        }
+      }
+    } catch (e) {
+      console.log('[Mode] No se pudo obtener el modo inicial:', e);
+    }
+  };
+
+  const setOperationalMode = async (mode: OperationalMode) => {
+    setCurrentMode(mode);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    appendSystemLog(`Modo operativo solicitado: ${mode.toUpperCase()}`);
+
+    try {
+      const baseUrl = serverUrl.replace(/\/$/, '');
+      await fetch(`${baseUrl}/api/context/mode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode }),
+      });
+    } catch {}
+
+    ws.current?.send(JSON.stringify({ type: 'set_mode', mode }));
+  };
+
+  const dismissWhisper = async () => {
+    if (!activeWhisper) return;
+    const whisperId = activeWhisper.id;
+    setActiveWhisper(null);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      const baseUrl = serverUrl.replace(/\/$/, '');
+      await fetch(`${baseUrl}/api/sentinel/dismiss`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: whisperId }),
+      });
+    } catch {}
+
+    ws.current?.send(JSON.stringify({ type: 'dismiss_whisper', id: whisperId }));
+  };
+
+  const executeWhisperAction = () => {
+    if (!activeWhisper) return;
+    const actionPrompt = activeWhisper.action || activeWhisper.suggestion || activeWhisper.message || activeWhisper.text || '';
+    dismissWhisper();
+    if (actionPrompt) {
+      handleSendMessage(`Procede con la sugerencia: ${actionPrompt}`);
     }
   };
 
@@ -671,6 +781,71 @@ export default function App() {
           <Text style={styles.telemetryText}>{statusMessage}</Text>
         </View>
       </View>
+
+      {/* ── SELECTOR DE MODOS OPERATIVOS // SENTINEL CORE ──────────────── */}
+      <View style={styles.modeSelectorBar}>
+        {(['auto', 'bunker', 'gabinete', 'ingeniero'] as OperationalMode[]).map((mode) => {
+          const isActive = currentMode === mode;
+          const label =
+            mode === 'auto'
+              ? '⚡ AUTO'
+              : mode === 'bunker'
+              ? '🛡️ BÚNKER'
+              : mode === 'gabinete'
+              ? '🏛️ GABINETE'
+              : '⚙️ INGENIERO';
+          return (
+            <TouchableOpacity
+              key={mode}
+              onPress={() => setOperationalMode(mode)}
+              style={[styles.modePill, isActive && styles.modePillActive]}
+            >
+              <Text style={[styles.modePillText, isActive && styles.modePillTextActive]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* ── BANNER DE SUSURROS PROACTIVOS (SENTINELA AUTÓNOMO) ──────────── */}
+      {activeWhisper && (
+        <View style={[styles.whisperBanner, activeWhisper.type === 'alert' && styles.whisperBannerAlert]}>
+          <View style={styles.whisperHeaderRow}>
+            <View style={styles.whisperTitleGroup}>
+              <AlertCircle
+                size={14}
+                color={activeWhisper.type === 'alert' ? '#FF0055' : '#00FFA3'}
+                style={{ marginRight: 6 }}
+              />
+              <Text style={styles.whisperTitle}>
+                {activeWhisper.title.toUpperCase()}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={dismissWhisper} style={styles.whisperCloseBtn}>
+              <Text style={styles.whisperCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.whisperContent}>
+            {activeWhisper.message || activeWhisper.text || ''}
+          </Text>
+
+          <View style={styles.whisperActionsRow}>
+            <TouchableOpacity onPress={executeWhisperAction} style={styles.whisperActionBtn}>
+              <Check size={14} color="#040711" style={{ marginRight: 4 }} />
+              <Text style={styles.whisperActionBtnText}>
+                {activeWhisper.action && activeWhisper.action.length < 24
+                  ? activeWhisper.action.toUpperCase()
+                  : 'ATENDER'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={dismissWhisper} style={styles.whisperDismissBtn}>
+              <Text style={styles.whisperDismissBtnText}>Ignorar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* ── QUANTUM ARC REACTOR ORB ────────────────────────────────────── */}
       <View style={styles.reactorSection}>
@@ -878,13 +1053,42 @@ export default function App() {
               <Text style={styles.modalFieldLabel}>DIRECCIÓN DEL SERVIDOR (URL):</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="https://su-tunel.trycloudflare.com"
+                placeholder="http://192.168.0.41:8080"
                 placeholderTextColor="#64748B"
                 value={serverUrl}
                 onChangeText={setServerUrl}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
+              {/* Presets Rápidos */}
+              <View style={styles.presetsRow}>
+                <TouchableOpacity
+                  style={[styles.presetBtn, serverUrl.includes('192.168.0.41') && styles.presetBtnActive]}
+                  onPress={() => setServerUrl('http://192.168.0.41:8080')}
+                >
+                  <Radio size={11} color={serverUrl.includes('192.168.0.41') ? '#00FFA3' : '#00F0FF'} style={{ marginRight: 4 }} />
+                  <Text style={[styles.presetBtnText, serverUrl.includes('192.168.0.41') && styles.presetBtnTextActive]}>WiFi Local iMac</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.presetBtn}
+                  onPress={async () => {
+                    try {
+                      const res = await fetch('http://192.168.0.41:8080/api/status');
+                      const data = await res.json();
+                      if (data.tunnel_url) {
+                        setServerUrl(data.tunnel_url);
+                        Alert.alert('Túnel Detectado', `Conectando a: ${data.tunnel_url}`);
+                        return;
+                      }
+                    } catch {}
+                    Alert.alert('Túnel Cloudflare', 'No se detectó un túnel activo en el puerto 8080. Utilizando URL local.');
+                  }}
+                >
+                  <Sparkles size={11} color="#BD00FF" style={{ marginRight: 4 }} />
+                  <Text style={styles.presetBtnText}>Autodetectar Túnel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Token de Gateway */}
@@ -1424,5 +1628,152 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 1,
+  },
+
+  // ── Modos Operativos
+  modeSelectorBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(6, 11, 25, 0.7)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 240, 255, 0.08)',
+  },
+  modePill: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modePillActive: {
+    backgroundColor: 'rgba(0, 240, 255, 0.15)',
+    borderColor: '#00F0FF',
+  },
+  modePillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+  },
+  modePillTextActive: {
+    color: '#00F0FF',
+    fontWeight: '900',
+  },
+
+  // ── Susurros Proactivos (Sentinel Banner)
+  whisperBanner: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: 'rgba(10, 30, 45, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 163, 0.4)',
+    shadowColor: '#00FFA3',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  whisperBannerAlert: {
+    borderColor: 'rgba(255, 0, 85, 0.5)',
+    shadowColor: '#FF0055',
+  },
+  whisperHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  whisperTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  whisperTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#E0E7FF',
+    letterSpacing: 0.8,
+  },
+  whisperCloseBtn: {
+    padding: 2,
+    marginLeft: 6,
+  },
+  whisperCloseText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: 'bold',
+  },
+  whisperContent: {
+    fontSize: 11,
+    color: '#CBD5E1',
+    lineHeight: 15,
+    marginBottom: 8,
+  },
+  whisperActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  whisperActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#00FFA3',
+    borderRadius: 6,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginRight: 6,
+  },
+  whisperActionBtnText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#040711',
+    letterSpacing: 0.5,
+  },
+  whisperDismissBtn: {
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+  },
+  whisperDismissBtnText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+
+  // ── Presets Rápidos
+  presetsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  presetBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 3,
+  },
+  presetBtnActive: {
+    borderColor: '#00FFA3',
+    backgroundColor: 'rgba(0, 255, 163, 0.1)',
+  },
+  presetBtnText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  presetBtnTextActive: {
+    color: '#00FFA3',
+    fontWeight: '800',
   },
 });

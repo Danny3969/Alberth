@@ -1629,12 +1629,21 @@ async def exec_cmd(req: CmdReq, _: None = Depends(require_token)):
 
 # ── Status ─────────────────────────────────────────────────────────────────────
 @app.get("/status")
+@app.get("/api/status")
 async def get_status():
     status = {
         "ok": True, "time": time.strftime("%H:%M:%S"),
         "date": time.strftime("%A %d de %B"), "messages": len(history),
-        "server": "Alberth Panel v3.0"
+        "server": "Alberth Panel v4.5"
     }
+    tunnel_file = WORKSPACE / "panel" / "tunnel_status.json"
+    if tunnel_file.exists():
+        try:
+            with open(tunnel_file, "r", encoding="utf-8") as tf:
+                tdata = json.load(tf)
+                status["tunnel_url"] = tdata.get("url")
+        except Exception:
+            pass
     try:
         v = subprocess.run(
             ["python3", str(SYSTEM_HELPER), "volume", "--action", "get"],

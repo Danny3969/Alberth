@@ -179,6 +179,16 @@ graph TD
 >   - **`engineer` (⚙️):** Modo Ingeniero Senior TDD con rigor de verificación y estándares de código de ECC.
 > - **Gobernanza:** Tratamiento exclusivo como "Señor" garantizado en todos los modos por el filtro de verificación de salida.
 
+> [!TIP] **Punto 8: Alberth Android Quantum App v4.5 (`alberth-android`)**
+> - **Framework & Arquitectura:** React Native (`0.85.3`) + Expo (`56.0.12`) con módulos nativos Kotlin (`AlberthAssistantModule`, `AlberthAccessibilityService`, `AlberthVoiceInteractionService`).
+> - **Conectividad Dual Inteligente:**
+>   - **WiFi Local Predeterminado:** Conexión directa a `http://192.168.0.41:8080` con latencia instantánea (<10ms) en la red del iMac.
+>   - **Túnel Seguro Cloudflare:** Presets de conexión rápida con detección automática del túnel activo (`/api/status`).
+> - **Integración Sentinela en Tiempo Real:**
+>   - Susurros Proactivos (`proactive_whisper`) desplegados en tarjeta HUD superior con feedback háptico, síntesis por voz y botón de atención inmediata.
+>   - Selector de Modos Operativos en cabecera (`AUTO`, `BÚNKER`, `GABINETE`, `INGENIERO`).
+>   - Control de sistema Android total: Lectura de pantalla mediante accesibilidad, lanzamiento de apps, click y swipe coordinados.
+
 ---
 
 ## 🖥️ Matriz de Servicios y Daemons Activos en PM2
@@ -187,13 +197,14 @@ graph TD
 ┌────┬─────────────────────┬─────────┬────────┬───────────┬────────┬──────────────┐
 │ id │ name                │ status  │ cpu    │ memory    │ port   │ role         │
 ├────┼─────────────────────┼─────────┼────────┼───────────┼────────┼──────────────┤
-│ 0  │ alberth-gods-eye    │ online  │ 0.0%   │ 58.1 MB   │ 4173   │ Cesium 3D    │
-│ 1  │ alberth-web         │ online  │ 0.0%   │ 25.0 MB   │ 8080   │ Core API/HUD │
-│ 2  │ alberth-voice       │ online  │ 0.0%   │ 12.6 MB   │ 8001   │ Voice VAD    │
-│ 3  │ alberth-reminders   │ online  │ 0.0%   │ 7.8 MB    │ -      │ Cron Ops     │
-│ 4  │ alberth-qa-watcher  │ online  │ 0.0%   │ 8.2 MB    │ -      │ QA Watch     │
-│ 5  │ alberth-vision      │ online  │ 0.0%   │ 5.2 MB    │ 8765   │ Vision (OCR) │
-│ 6  │ alberth-sentinel    │ online  │ 0.0%   │ 4.4 MB    │ -      │ Sentinela BG │
+│ 0  │ alberth-gods-eye    │ online  │ 0.0%   │ 36.9 MB   │ 4173   │ Cesium 3D    │
+│ 1  │ alberth-web         │ online  │ 0.0%   │ 16.0 MB   │ 8080   │ Core API/HUD │
+│ 2  │ alberth-voice       │ online  │ 0.0%   │ 16.1 MB   │ 8001   │ Voice VAD    │
+│ 3  │ alberth-reminders   │ online  │ 0.0%   │ 4.6 MB    │ -      │ Cron Ops     │
+│ 4  │ alberth-qa-watcher  │ online  │ 0.0%   │ 3.0 MB    │ -      │ QA Watch     │
+│ 5  │ alberth-vision      │ stopped │ 0.0%   │ 0 MB      │ -      │ Optimizado   │
+│ 6  │ alberth-sentinel    │ online  │ 0.0%   │ 8.3 MB    │ -      │ Sentinela BG │
+│ 7  │ alberth-tunnel      │ online  │ 0.0%   │ 1.5 MB    │ 8080   │ Cloudflare   │
 └────┴─────────────────────┴─────────┴────────┴───────────┴────────┴──────────────┘
 ```
 

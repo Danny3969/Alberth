@@ -71,6 +71,15 @@ module.exports = {
       interpreter: "none",
       autorestart: true,
       watch: false
+    },
+    {
+      name: "alberth-tunnel",
+      cwd: __dirname,
+      script: pythonBin,
+      args: "alberth_tunnel_daemon.py",
+      interpreter: "none",
+      autorestart: true,
+      watch: false
     }
   ]
 };
