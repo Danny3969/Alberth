@@ -90,6 +90,12 @@ app.mount("/output", StaticFiles(directory=str(VOICE_OUTPUT)), name="output")
 app.mount("/assets", StaticFiles(directory=str(WORKSPACE)), name="assets")
 if (PANEL_DIR / "assets").exists():
     app.mount("/panel/assets", StaticFiles(directory=str(PANEL_DIR / "assets")), name="panel_assets")
+if (PANEL_DIR / "hyperframes").exists():
+    app.mount("/panel/hyperframes", StaticFiles(directory=str(PANEL_DIR / "hyperframes")), name="panel_hyperframes")
+creative_exports_dir = PANEL_DIR / "creative_exports"
+creative_exports_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/panel/creative_exports", StaticFiles(directory=str(creative_exports_dir)), name="panel_creative_exports")
+
 
 @app.get("/three.min.js", response_class=FileResponse)
 async def get_three_js():
@@ -1481,6 +1487,13 @@ async def ws_chat(ws: WebSocket):
                     msg_dict["audio_url"] = full_resp["audio_url"]
 
                 await manager.broadcast({"type": "message", "message": msg_dict})
+
+                # Auto-evolución de memoria episódica en segundo plano (Pilar 2)
+                try:
+                    from alberth_episodic_memory import auto_extract_facts_from_turn
+                    asyncio.get_event_loop().run_in_executor(None, auto_extract_facts_from_turn, txt, full_resp.get("text", ""))
+                except Exception:
+                    pass
             elif t == "console_cmd":
                 raw_c = data.get("command", "").strip()
                 if raw_c:
@@ -2097,7 +2110,121 @@ async def get_design():
     contract["skills"] = list_design_skills()
     return contract
 
+# ── Hyperframes Video Engine (Code-as-Video) ──────────────────────────────────
+@app.get("/api/hyperframes/templates")
+async def get_hyperframes_templates():
+    try:
+        from alberth_hyperframes import TEMPLATES, PRESETS
+        return {"ok": True, "templates": list(TEMPLATES.values()), "presets": PRESETS}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.get("/api/hyperframes/list")
+async def get_hyperframes_list():
+    try:
+        from alberth_hyperframes import list_generated_hyperframes
+        return {"ok": True, "videos": list_generated_hyperframes()}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+class HyperframeGenerateRequest(BaseModel):
+    prompt: str = "Briefing Matutino Alberth"
+    template: str = "quantum_hud"
+    aspect_ratio: str = "16:9"
+
+@app.post("/api/hyperframes/generate")
+async def generate_hyperframe(req: HyperframeGenerateRequest):
+    try:
+        from alberth_hyperframes import generate_hyperframe_from_prompt
+        res = generate_hyperframe_from_prompt(req.prompt, req.template, req.aspect_ratio)
+        return res
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+# ── Alberth Creative Studio Endpoints (Branding, Neuromarketing, Banners) ────
+@app.get("/api/creative/palettes")
+async def get_creative_palettes():
+    try:
+        from alberth_creative_studio import NEURO_PALETTES
+        return {"ok": True, "palettes": NEURO_PALETTES}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.get("/api/creative/fonts")
+async def get_creative_fonts():
+    try:
+        from alberth_creative_studio import FONT_PAIRINGS
+        return {"ok": True, "fonts": FONT_PAIRINGS}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.get("/api/creative/formats")
+async def get_creative_formats():
+    try:
+        from alberth_creative_studio import BANNER_SPECS
+        return {"ok": True, "formats": BANNER_SPECS}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+class BrandKitRequest(BaseModel):
+    brand_name: str = "Novasyscom AI"
+    industry: str = "Tecnología de Inteligencia Artificial"
+    audience: str = "Líderes de Empresa y Ejecutivos"
+    tone: str = "innovador"
+    palette_id: str = "fintech_cyber"
+    font_id: str = "tech_avionics"
+
+@app.post("/api/creative/brand-identity")
+async def create_brand_identity(req: BrandKitRequest):
+    try:
+        from alberth_creative_studio import generate_brand_identity_kit
+        res = generate_brand_identity_kit(
+            brand_name=req.brand_name,
+            industry=req.industry,
+            audience=req.audience,
+            tone=req.tone,
+            palette_id=req.palette_id,
+            font_id=req.font_id
+        )
+        return res
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+class BannerRequest(BaseModel):
+    headline: str = "El Futuro de la Empresa Autónoma"
+    subtext: str = "Inteligencia artificial táctica con visión, voz y arquitectura modular."
+    cta_text: str = "ACTIVAR AHORA"
+    format_id: str = "instagram_post"
+    palette_id: str = "fintech_cyber"
+    font_id: str = "tech_avionics"
+
+@app.post("/api/creative/banner")
+async def create_banner(req: BannerRequest):
+    try:
+        from alberth_creative_studio import generate_banner_artwork
+        res = generate_banner_artwork(
+            headline=req.headline,
+            subtext=req.subtext,
+            cta_text=req.cta_text,
+            format_id=req.format_id,
+            palette_id=req.palette_id,
+            font_id=req.font_id
+        )
+        return res
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+# ── Executive Briefing Endpoint ───────────────────────────────────────────────
+@app.get("/api/briefing")
+async def get_briefing():
+    try:
+        from alberth_briefing import generate_executive_briefing
+        return generate_executive_briefing()
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
 # ── Servir Panel ───────────────────────────────────────────────────────────────
+
 @app.get("/")
 async def serve_panel():
     f = PANEL_DIR / "index.html"

@@ -254,6 +254,49 @@ def delete_fact(fact_id: int) -> bool:
         return cur.rowcount > 0
 
 
+def auto_extract_facts_from_turn(user_msg: str, assistant_resp: str = "") -> List[Dict[str, Any]]:
+    """
+    Motor Auto-Evolutivo (Estilo MemGPT):
+    Examina de forma silenciosa y no bloqueante cada turno conversacional.
+    Detecta automáticamente directrices permanentes, hechos de proyectos o preferencias del Señor
+    y los almacena de forma persistente en SQLite FTS5 sin requerir comandos manuales.
+    """
+    if not user_msg or len(user_msg.strip()) < 8:
+        return []
+
+    learned = []
+    text = user_msg.strip()
+
+    # Patrones de captura heurística
+    intent_patterns = [
+        (r'\b(?:recuerda\s+que|no\s+olvides\s+que|aprende\s+que|ten\s+en\s+cuenta\s+que|guarda\s+que|anota\s+que)\s+(.+)', "directiva"),
+        (r'\b(?:a\s+partir\s+de\s+ahora|de\s+aqu[ií]\s+en\s+adelante|cada\s+vez\s+que)\s+(.+)', "preferencias"),
+        (r'\b(?:prefiero|no\s+me\s+gusta|siempre\s+usa|nunca\s+hagas|mi\s+estilo\s+es)\s+(.+)', "preferencias"),
+        (r'\b(?:mi\s+empresa\s+es|en\s+novasyscom|nuestro\s+cliente\s+es|el\s+proyecto\s+\w+\s+es|mi\s+socio\s+es)\s+(.+)', "proyectos"),
+        (r'\b(?:el\s+(?:pr[oó]ximo|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s+(?:tengo|viajo|reuni[oó]n|cita))\s+(.+)', "fechas_clave")
+    ]
+
+    for pat, cat_hint in intent_patterns:
+        match = re.search(pat, text, re.IGNORECASE)
+        if match:
+            extracted_fact = match.group(0).strip()
+            extracted_fact = re.sub(r'[\.\,\;]+$', '', extracted_fact)
+            
+            cat = cat_hint
+            if any(w in extracted_fact.lower() for w in ["proyecto", "cliente", "empresa", "novasyscom", "desarrollo", "software"]):
+                cat = "proyectos"
+            elif any(w in extracted_fact.lower() for w in ["preferencia", "estilo", "tono", "diseño", "botón", "interfaz"]):
+                cat = "preferencias"
+            elif any(w in extracted_fact.lower() for w in ["viaje", "reunión", "reunion", "cita", "fecha", "mañana", "semana"]):
+                cat = "fechas_clave"
+
+            res = learn_fact(extracted_fact, category=cat)
+            if res.get("ok"):
+                learned.append(res)
+
+    return learned
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Motor de Memoria Episódica Autonómica de Alberth")
     parser.add_argument("--learn", type=str, help="Hecho o preferencia a aprender")

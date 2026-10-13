@@ -8,6 +8,8 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
 ## 👤 Preferencias Permanentes del Usuario (Memoria Viva)
 - **Tratamiento Formal y Exclusivo:** Alberth debe dirigirse al usuario SIEMPRE y ÚNICAMENTE como **"Señor"**. Está estrictamente prohibido usar "Señor Danny" o "Danny".
 - **Reproductor Multimedia Predeterminado:** **Echo Music** (`echo.music.iad1tya`) en el teléfono móvil y **Echo Music Quantum Streaming (YouTube Music)** en el panel web de iMac y MacBook Pro (con selector multi-playlist, shuffle, repeat y gestión modal de listas). Spotify queda completamente desvinculado.
+- **Disciplina Estética y Ergonómica de la UI (Cero Desbordes y Bento Grid Balanceado):** En cualquier desarrollo futuro, cada botón o módulo que se agregue a la interfaz de Alberth DEBE auditarse rigurosamente para encajar dentro de los márgenes, preservar los clústeres ergonómicos, respetar los códigos cromáticos y mantener la simetría absoluta del Bento Grid (sin vacíos ni desbordes). La cabina canónica actual de Octubre 2026 es el estándar de oro.
+
 
 ---
 
@@ -28,11 +30,16 @@ _Última actualización: 2026-09-18 10:50 GMT-5_
 │   ├── index.tsx       → GlobalErrorBoundary & ErrorUtils Exception Shield
 │   └── android/        → Proyecto Android nativo (Integración directa con Echo Music `echo.music.iad1tya`)
 ├── DESIGN.md           → Contrato de Diseño Oficial y Brand Tokens OpenDesign (Quantum HUD / Cyber Cyan)
+├── alberth_briefing.py      → Motor de Executive Briefing Proactivo (macOS Calendar, Apple Reminders, Telemetría y Clima)
+├── alberth_macro_modes.py   → Orquestador de Macro-Modos Tácticos (Modo Enfoque, Reunión, Cierre, Creativo)
+├── alberth_telegram_bridge.py → Pasarela de Comunicación Omnipresente (Telegram Executive Bot texto + voz)
+├── alberth_creative_studio.py → Motor de Branding, Neuromarketing, Psicología del Color, Tipografías y Banners
+├── alberth_hyperframes.py   → Generador de Videos Motion Design HTML-to-MP4 (Templates Quantum HUD, Terminal, Luxury)
 ├── alberth_openpage.py     → Motor de UI Declarativa OpenPage (AST JSON, Validación Pydantic, Compilador Canónico A2UI)
 ├── alberth_opendesign.py → Módulo y CLI de Tokens y Directrices de Craft de OpenDesign
 ├── alberth_music_player.py → Motor de Streaming y Gestión de Playlists de YouTube Music / Echo Music (yt-dlp + caché 4h)
 ├── alberth_live_bridge.py → Bridge WebSocket Ultra-Live Bidireccional (<300ms) con Gemini Live API (Voz Charon, Streaming PCM 16/24kHz, Barge-in)
-├── alberth_episodic_memory.py → Motor de Memoria Episódica y Hechos Persistentes con SQLite FTS5 (Ranking BM25)
+├── alberth_episodic_memory.py → Motor de Memoria Episódica Auto-Evolutiva (MemGPT Style) con SQLite FTS5 (BM25)
 ├── alberth_apple_vision.py  → OCR Local Nativo macOS con Apple Vision Framework (<50ms, 0 tokens, $0.00)
 ├── alberth_playwright_agent.py → Agente Web Autónomo (Playwright Headless + Marcadores DOM [data-alberth-id])
 ├── alberth_multi_agent.py  → Framework Multi-Agente Cíclico (LangGraph + DeepSeek + Qwen + Llama + QA Auditor)

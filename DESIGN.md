@@ -84,3 +84,18 @@
 3. **Keep micro-animations snappy:** All hover, transition, and expand durations between `150ms` and `250ms` with `cubic-bezier(0.16, 1, 0.3, 1)`.
 4. **WCAG AA Compliance:** Ensure minimum 4.5:1 text-to-background contrast on all informational readouts.
 5. **No decorative dead ends:** Every interactive element in the HUD must provide visual feedback (glow, haptic sound, or tooltip).
+
+---
+
+## 6. Regla de Oro Ergonómica y Anti-Desborde de Botones (Estética Cockpit HUD)
+1. **Preservación Estricta de la Geometría y Cero Desbordes**:
+   - Jamás agregar botones lineales sin agrupar en el cabezal superior.
+   - Todo botón nuevo debe integrarse dentro de clústeres ergonómicos (`.action-group-prime` para operaciones críticas o `.action-group` para utilidades de entorno), con padding controlado (`5px 9px`), tipografía compacta (`11.5px`) y `@media` wrap preventivo.
+2. **Equilibrio y Simetría en el Bento Grid**:
+   - Ningún cuadrante de la pantalla debe quedar vacío ni desbalanceado.
+   - En el piso inferior, las tarjetas de inteligencia (`.intel-cards-grid`) deben mantener alineación simétrica en múltiplos armónicos frente a las tarjetas del Mac (`.actions-cards-grid`), acompañando armónicamente al reproductor `ECHO MUSIC`.
+3. **Jerarquía Visual y Código Cromático**:
+   - Cada botón debe expresar su función con su color semántico del contrato de diseño (Cian para entorno, Verde Esmeralda para Live/Multi-Agente, Naranja/Ámbar para OSINT/SecScan, Púrpura para Visión, Oro Neón `#e2b774` para Hyperframes).
+4. **Validación Visual Previa**:
+   - Cada nueva adición debe auditarse contra la imagen canónica de la cabina de Alberth para certificar que realce la estética y nunca rompa el encuadre.
+

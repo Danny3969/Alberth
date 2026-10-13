@@ -116,8 +116,9 @@ html, body {
   flex-direction: column;
   height: 100%;
   height: 100dvh;
-  padding: 10px 16px 12px;
-  max-width: 1400px;
+  padding: 8px 16px 10px;
+  max-width: 1720px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -126,25 +127,35 @@ header.hud-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 18px;
+  padding: 8px 16px;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 0 15px var(--cyan-soft);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 1360px) {
+  header.hud-header {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+  }
 }
 
 .brand-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .arc-reactor-logo {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   position: relative;
   display: flex;
   align-items: center;
@@ -160,8 +171,8 @@ header.hud-header {
 }
 
 .reactor-core {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   background: var(--cyan);
   border-radius: 50%;
   box-shadow: 0 0 14px var(--cyan), 0 0 24px var(--cyan);
@@ -175,42 +186,50 @@ header.hud-header {
 
 .brand-name {
   font-family: var(--font-hud);
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: 2px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
   color: var(--cyan);
-  text-shadow: 0 0 10px var(--cyan-glow);
+  text-shadow: 0 0 12px var(--cyan-glow);
+  line-height: 1.1;
 }
 
 .brand-sub {
   font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: 1.5px;
   color: var(--text-dim);
   text-transform: uppercase;
 }
 
-/* Central Telemetry Readout */
+/* ─── Central Telemetry & Mode Hub ─── */
+.hud-center-hub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .telemetry-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: rgba(0, 240, 255, 0.05);
+  gap: 12px;
+  background: rgba(0, 240, 255, 0.04);
   border: 1px solid rgba(0, 240, 255, 0.15);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 8px;
 }
 
 .telemetry-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-family: var(--font-data);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-dim);
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .telemetry-item .t-val {
@@ -220,74 +239,23 @@ header.hud-header {
 
 .status-indicator {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 8px var(--green);
   animation: pulseDot 2s infinite;
 }
 
-/* Header Buttons */
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.hud-btn {
-  background: rgba(0, 240, 255, 0.08);
-  border: 1px solid var(--panel-border);
-  color: var(--cyan);
-  font-family: var(--font-data);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  text-transform: uppercase;
-}
-
-.hud-btn:hover {
-  background: rgba(0, 240, 255, 0.18);
-  border-color: var(--cyan);
-  box-shadow: 0 0 14px var(--cyan-glow);
-  transform: translateY(-1px);
-}
-
-.hud-btn.active {
-  background: var(--cyan);
-  color: var(--bg-dark);
-  box-shadow: 0 0 16px var(--cyan-glow);
-}
-
-#btn-ultra-live.active {
-  background: linear-gradient(135deg, #00f0ff, #0077ff);
-  color: #050b14;
-  font-weight: 700;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.7), 0 0 40px rgba(0, 119, 255, 0.4);
-  animation: livePulseGlow 1.5s infinite alternate ease-in-out;
-}
-
-@keyframes livePulseGlow {
-  0% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
-  100% { box-shadow: 0 0 24px rgba(0, 240, 255, 0.9), 0 0 35px rgba(0, 119, 255, 0.6); }
-}
-
-/* ─── Mode / Context Selector Header Pills ─── */
+/* ─── Mode Selector (Operational Switch) ─── */
 .mode-selector-wrap {
   display: flex;
   align-items: center;
   background: rgba(10, 25, 45, 0.7);
-  border: 1px solid rgba(0, 240, 255, 0.25);
+  border: 1px solid rgba(0, 240, 255, 0.22);
   border-radius: 8px;
-  padding: 2px 4px;
-  gap: 3px;
+  padding: 2px 3px;
+  gap: 2px;
 }
 .mode-pill-btn {
   background: transparent;
@@ -296,8 +264,8 @@ header.hud-header {
   font-family: var(--font-data);
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 3px 7px;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
@@ -313,6 +281,102 @@ header.hud-header {
   font-weight: 700;
   border-color: rgba(0, 240, 255, 0.5);
   box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* ─── Header Action Clusters (Anti-Overflow) ─── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 240, 255, 0.03);
+  border: 1px solid rgba(0, 240, 255, 0.12);
+  border-radius: 8px;
+  padding: 3px 5px;
+}
+
+.action-group-prime {
+  background: rgba(56, 249, 215, 0.04);
+  border-color: rgba(56, 249, 215, 0.25);
+}
+
+.hud-btn {
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  color: var(--cyan);
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hud-btn:hover {
+  background: rgba(0, 240, 255, 0.18);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan-glow);
+  transform: translateY(-1px);
+}
+
+.hud-btn.active {
+  background: var(--cyan);
+  color: var(--bg-dark);
+  box-shadow: 0 0 16px var(--cyan-glow);
+}
+
+.hud-btn-prime {
+  color: #38f9d7;
+  border-color: rgba(56, 249, 215, 0.35);
+  background: rgba(56, 249, 215, 0.08);
+}
+.hud-btn-prime:hover {
+  border-color: #38f9d7;
+  box-shadow: 0 0 14px rgba(56, 249, 215, 0.4);
+}
+
+.hud-btn-god {
+  color: #00f0ff;
+  border-color: rgba(0, 240, 255, 0.35);
+}
+.hud-btn-god:hover {
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+}
+
+.badge-dot-prime {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38f9d7;
+  box-shadow: 0 0 6px #38f9d7;
+  animation: pulseDot 2s infinite;
+}
+
+#btn-ultra-live.active {
+  background: linear-gradient(135deg, #00f0ff, #0077ff);
+  color: #050b14;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.7), 0 0 40px rgba(0, 119, 255, 0.4);
+  animation: livePulseGlow 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes livePulseGlow {
+  0% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
+  100% { box-shadow: 0 0 24px rgba(0, 240, 255, 0.9), 0 0 35px rgba(0, 119, 255, 0.6); }
 }
 
 /* ─── Proactive Whisper Banner (Sentinela Autónomo) ─── */
@@ -540,37 +604,73 @@ header.hud-header {
   top: 14px;
   right: 18px;
   display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(4, 10, 24, 0.78);
-  border: 1px solid rgba(0, 240, 255, 0.28);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 240, 255, 0.05);
-  padding: 4px 6px;
-  border-radius: 18px;
-  backdrop-filter: blur(10px);
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(4, 10, 24, 0.82);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 240, 255, 0.08);
+  padding: 5px 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   z-index: 25;
   transition: all 0.3s ease;
 }
 
 .hologram-mode-selector:hover {
-  border-color: rgba(0, 240, 255, 0.5);
-  box-shadow: 0 4px 22px rgba(0, 240, 255, 0.25);
+  border-color: rgba(0, 240, 255, 0.55);
+  box-shadow: 0 6px 24px rgba(0, 240, 255, 0.25);
+}
+
+.holo-selector-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 2px 2px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+}
+
+.holo-selector-pulse {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  animation: pulseDot 2s infinite;
+}
+
+.holo-selector-tag {
+  font-family: var(--font-hud);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--cyan);
+  opacity: 0.8;
+}
+
+.holo-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .holo-pill-btn {
   background: transparent;
   border: 1px solid transparent;
   color: var(--cyan);
-  opacity: 0.65;
+  opacity: 0.7;
   font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1px;
-  padding: 4px 10px;
-  border-radius: 14px;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: all 0.2s ease;
   outline: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .holo-pill-btn:hover {
@@ -581,7 +681,7 @@ header.hud-header {
 
 .holo-pill-btn.active {
   opacity: 1;
-  background: rgba(0, 240, 255, 0.22);
+  background: rgba(0, 240, 255, 0.24);
   color: #fff;
   border-color: var(--cyan);
   box-shadow: 0 0 12px var(--cyan-glow);
@@ -591,13 +691,13 @@ header.hud-header {
 .hud-deck {
   width: 100%;
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 350px 1fr;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   z-index: 20;
 }
 
-@media (max-width: 880px) {
+@media (max-width: 980px) {
   .hud-deck {
     grid-template-columns: 1fr;
   }
@@ -1045,37 +1145,348 @@ header.hud-header {
   box-shadow: 0 0 6px var(--cyan);
 }
 
-/* ─── Tactical Quick Actions Grid ─── */
-.apps-grid {
+/* ─── Unified Tactical Command Center (Right of Media Card) ─── */
+.tactical-command-center {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.intel-subdeck, .actions-subdeck {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.deck-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px;
+}
+
+.deck-section-title {
+  font-family: var(--font-data);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--cyan);
+  opacity: 0.85;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.deck-section-badge {
+  font-family: var(--font-hud);
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--green);
+  background: rgba(0, 255, 170, 0.12);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+.deck-section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(0, 240, 255, 0.25), transparent);
+}
+
+/* 4 Intelligence Cards Row */
+.intel-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
+}
+
+@media (max-width: 1200px) {
+  .intel-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.intel-card-osint {
+  border-color: rgba(255, 102, 0, 0.3) !important;
+  background: linear-gradient(135deg, rgba(255, 102, 0, 0.08), rgba(6, 12, 26, 0.85)) !important;
+}
+.intel-card-osint:hover {
+  border-color: #ff6600 !important;
+  box-shadow: 0 0 16px rgba(255, 102, 0, 0.35) !important;
+}
+
+.intel-card-secscan {
+  border-color: rgba(255, 170, 0, 0.3) !important;
+  background: linear-gradient(135deg, rgba(255, 170, 0, 0.08), rgba(6, 12, 26, 0.85)) !important;
+}
+.intel-card-secscan:hover {
+  border-color: #ffaa00 !important;
+  box-shadow: 0 0 16px rgba(255, 170, 0, 0.35) !important;
+}
+
+.intel-card-vision {
+  border-color: rgba(204, 102, 255, 0.3) !important;
+  background: linear-gradient(135deg, rgba(204, 102, 255, 0.08), rgba(6, 12, 26, 0.85)) !important;
+}
+.intel-card-vision:hover {
+  border-color: #cc66ff !important;
+  box-shadow: 0 0 16px rgba(204, 102, 255, 0.35) !important;
+}
+
+.intel-card-hyperframes {
+  border-color: rgba(226, 183, 116, 0.35) !important;
+  background: linear-gradient(135deg, rgba(226, 183, 116, 0.08), rgba(6, 12, 26, 0.85)) !important;
+}
+.intel-card-hyperframes:hover {
+  border-color: #e2b774 !important;
+  box-shadow: 0 0 16px rgba(226, 183, 116, 0.4) !important;
+}
+
+/* ─── Hyperframes Video Studio Drawer Styles ─── */
+.hyperframes-drawer {
+  position: fixed;
+  top: 75px;
+  right: -720px;
+  width: 680px;
+  max-width: 96vw;
+  bottom: 80px;
+  background: rgba(6, 11, 24, 0.98);
+  border: 1px solid rgba(226, 183, 116, 0.45);
+  border-radius: 16px;
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(226, 183, 116, 0.08);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  z-index: 104;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.hyperframes-drawer.open {
+  right: 16px;
+}
+.hf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(226, 183, 116, 0.2);
+  background: rgba(226, 183, 116, 0.04);
+}
+.hf-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-hud);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #e2b774;
+  text-shadow: 0 0 12px rgba(226, 183, 116, 0.4);
+}
+.hf-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.hf-section-title {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #88a0bc;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hf-presets-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.hf-preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #c0d0e0;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hf-preset-btn:hover {
+  background: rgba(226, 183, 116, 0.15);
+  border-color: #e2b774;
+  color: #ffffff;
+}
+.hf-prompt-input {
+  width: 100%;
+  background: rgba(10, 20, 38, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: var(--font-data);
+  font-size: 12px;
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  min-height: 52px;
+  transition: border-color 0.2s;
+}
+.hf-prompt-input:focus {
+  border-color: #e2b774;
+  box-shadow: 0 0 12px rgba(226, 183, 116, 0.25);
+}
+.hf-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.hf-select {
+  width: 100%;
+  background: rgba(10, 20, 38, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #e0e8f0;
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+}
+.hf-select:focus {
+  border-color: #e2b774;
+}
+.hf-generate-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(226, 183, 116, 0.25), rgba(255, 51, 102, 0.2));
+  border: 1px solid #e2b774;
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: var(--font-hud);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 0 20px rgba(226, 183, 116, 0.2);
+  transition: all 0.25s;
+}
+.hf-generate-btn:hover {
+  background: linear-gradient(135deg, rgba(226, 183, 116, 0.45), rgba(255, 51, 102, 0.35));
+  box-shadow: 0 0 25px rgba(226, 183, 116, 0.4);
+  transform: translateY(-1px);
+}
+.hf-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.hf-player-wrap {
+  width: 100%;
+  background: #000000;
+  border: 1px solid rgba(226, 183, 116, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.8);
+}
+.hf-player-iframe {
+  width: 100%;
+  height: 310px;
+  border: none;
+  display: block;
+}
+.hf-player-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(10, 16, 30, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.hf-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.hf-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+.hud-btn-hf {
+  color: #e2b774 !important;
+  border-color: rgba(226, 183, 116, 0.35) !important;
+  background: rgba(226, 183, 116, 0.08) !important;
+}
+.hud-btn-hf:hover {
+  border-color: #e2b774 !important;
+  box-shadow: 0 0 10px rgba(226, 183, 116, 0.4) !important;
+  color: #ffffff !important;
+}
+
+
+/* 7 Tactical Mac Actions Row */
+.actions-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 1200px) {
+  .actions-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  }
 }
 
 .app-card {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 6px 9px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(12px);
 }
 
 .app-card:hover {
-  background: rgba(0, 240, 255, 0.12);
+  background: rgba(0, 240, 255, 0.14);
   border-color: var(--cyan);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 240, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(0, 240, 255, 0.22);
 }
 
 .app-card .app-icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1085,19 +1496,28 @@ header.hud-header {
 .app-card .app-details {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-card .app-name {
   font-family: var(--font-data);
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--text-main);
   letter-spacing: 0.5px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-card .app-action {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-dim);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ─── Bottom Sci-Fi Command Bar ─── */
@@ -1339,20 +1759,20 @@ header.hud-header {
   color: var(--text-dim, #8ba2b8);
 }
 
-/* ─── Live Canvas A2UI Drawer (OpenPage Protocol) ─── */
+/* ─── Live Canvas A2UI & Creative Studio Drawer ─── */
 .canvas-drawer {
   position: fixed;
   top: 75px;
-  left: -540px;
-  width: 510px;
-  max-width: 92vw;
+  left: -620px;
+  width: 580px;
+  max-width: 95vw;
   bottom: 80px;
-  background: rgba(6, 12, 26, 0.96);
+  background: rgba(6, 12, 26, 0.97);
   border: 1px solid var(--panel-border-bright);
   border-radius: 16px;
-  box-shadow: 10px 0 40px rgba(0,0,0,0.85), inset 0 0 20px var(--cyan-soft);
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
+  box-shadow: 10px 0 45px rgba(0,0,0,0.92), inset 0 0 25px rgba(0, 240, 255, 0.08);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -1362,10 +1782,58 @@ header.hud-header {
 .canvas-drawer.open {
   left: 16px;
 }
+.canvas-nav-tabs {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.16);
+  padding: 4px 8px 0;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.canvas-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+.canvas-nav-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim, #8ba2b8);
+  font-family: var(--font-hud, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 8px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border-radius: 4px 4px 0 0;
+}
+.canvas-nav-tab:hover {
+  color: #fff;
+  background: rgba(0, 240, 255, 0.05);
+}
+.canvas-nav-tab.active {
+  color: var(--cyan, #00f0ff);
+  border-bottom-color: var(--cyan, #00f0ff);
+  background: rgba(0, 240, 255, 0.09);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+}
+.canvas-tab-pane {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  flex-direction: column;
+  gap: 14px;
+}
+.canvas-tab-pane.active {
+  display: flex;
+}
 .canvas-drawer-body {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1386,6 +1854,84 @@ header.hud-header {
   background: rgba(0, 240, 255, 0.2);
   border-color: var(--cyan);
   transform: translateY(-1px);
+}
+/* Estilos Form Studio */
+.studio-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.studio-label {
+  font-family: var(--font-hud, monospace);
+  font-size: 9.5px;
+  color: var(--text-dim, #8ba2b8);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.studio-input, .studio-select, .studio-textarea {
+  background: rgba(3, 7, 18, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #ffffff;
+  font-family: var(--font-main, sans-serif);
+  font-size: 11.5px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.studio-input:focus, .studio-select:focus, .studio-textarea:focus {
+  border-color: var(--cyan, #00f0ff);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+}
+.studio-btn-primary {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.22), rgba(0, 119, 255, 0.35));
+  border: 1px solid var(--cyan, #00f0ff);
+  color: var(--cyan, #00f0ff);
+  border-radius: 6px;
+  padding: 9px 14px;
+  font-family: var(--font-hud, monospace);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.12);
+}
+.studio-btn-primary:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.38), rgba(0, 119, 255, 0.55));
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+  transform: translateY(-1px);
+  color: #fff;
+}
+.studio-result-card {
+  background: rgba(2, 6, 14, 0.9);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.studio-color-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 10px;
+  font-family: var(--font-hud, monospace);
+}
+.studio-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 /* ─── Alberth Dev Console (AGC) & Antigravity Drawer v2.0 ─── */
@@ -2572,30 +3118,31 @@ header.hud-header {
       </div>
       <div class="brand-title">
         <span class="brand-name">ALBERTH</span>
-        <span class="brand-sub">QUANTUM HUD · NOVASYSCOM</span>
+        <span class="brand-sub">QUANTUM HUD // NOVASYSCOM</span>
       </div>
     </div>
 
-    <div class="telemetry-bar">
-      <div class="telemetry-item">
-        <span class="status-indicator"></span>
-        <span id="telemetry-node">ONLINE</span>
+    <!-- Central Hub: Telemetría + Selector de Modo -->
+    <div class="hud-center-hub">
+      <div class="telemetry-bar">
+        <div class="telemetry-item">
+          <span class="status-indicator"></span>
+          <span id="telemetry-node">ONLINE</span>
+        </div>
+        <div class="telemetry-item">
+          <span>TIME:</span>
+          <span class="t-val" id="telemetry-clock">--:--:--</span>
+        </div>
+        <div class="telemetry-item">
+          <span>CORE:</span>
+          <span class="t-val" id="telemetry-core">ACTIVE</span>
+        </div>
+        <div class="telemetry-item">
+          <span>PING:</span>
+          <span class="t-val" id="telemetry-ping">12ms</span>
+        </div>
       </div>
-      <div class="telemetry-item">
-        <span>TIME:</span>
-        <span class="t-val" id="telemetry-clock">--:--:--</span>
-      </div>
-      <div class="telemetry-item">
-        <span>CORE:</span>
-        <span class="t-val" id="telemetry-core">ACTIVE</span>
-      </div>
-      <div class="telemetry-item">
-        <span>PING:</span>
-        <span class="t-val" id="telemetry-ping">12ms</span>
-      </div>
-    </div>
 
-    <div class="header-actions">
       <!-- Selector de Modo / Tono Contextual -->
       <div class="mode-selector-wrap" id="hud-mode-selector" title="Modulación Dinámica de Tono y Contexto">
         <button class="mode-pill-btn active" data-mode="auto" onclick="setOperationalMode('auto')" title="Automático: Adapta tono según entorno detectado">🤖 Auto</button>
@@ -2603,42 +3150,59 @@ header.hud-header {
         <button class="mode-pill-btn" data-mode="executive" onclick="setOperationalMode('executive')" title="Gabinete Estratégico: Análisis de impacto, ROI y justificación">👔 Gabinete</button>
         <button class="mode-pill-btn" data-mode="engineer" onclick="setOperationalMode('engineer')" title="Ingeniero Senior TDD: Rigor de código y arquitectura">⚙️ Ingeniero</button>
       </div>
+    </div>
 
-      <button class="hud-btn" id="btn-ultra-live" onclick="toggleUltraLiveMode()" title="Alternar Modo Ultra-Live Bidireccional (<400ms)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span id="btn-live-txt">ULTRA-LIVE</span>
-      </button>
-      <button class="hud-btn" id="btn-floating-widget" onclick="openFloatingWidget()" title="Abrir Widget Flotante de Pantalla">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg>
-        <span>Widget</span>
-      </button>
-      <button class="hud-btn" id="btn-toggle-canvas" onclick="toggleCanvasDrawer()" title="Lienzo Dinámico A2UI / OpenPage">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        <span id="btn-canvas-txt">Canvas</span>
-        <span id="canvas-badge-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);margin-left:4px;"></span>
-      </button>
-      <button class="hud-btn" id="btn-toggle-chat" onclick="toggleChatDrawer()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span id="btn-chat-txt">Consola</span>
-      </button>
-      <button class="hud-btn" id="btn-toggle-dev-console" onclick="toggleDevConsoleDrawer()" title="Alberth Dev Console (AGC) & Antigravity [Ctrl+Alt+C]">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-        <span id="btn-dev-console-txt">AGC Dev</span>
-        <span id="dev-console-dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-left:4px;"></span>
-      </button>
-      <button class="hud-btn" id="btn-toggle-multiagent" onclick="toggleMultiAgentDrawer()" title="Centro de Operaciones Multi-Agente (LangGraph + Debate Adversarial)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        <span style="color:#38f9d7;font-weight:600;">Multi-Agente</span>
-        <span id="multiagent-dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#38f9d7;box-shadow:0 0 6px #38f9d7;margin-left:4px;"></span>
-      </button>
-      <button class="hud-btn" id="btn-gods-eye" onclick="openGodsEye()" title="Ojo de Dios: Consola de Inteligencia Geoespacial 3D (Satélite, Vuelos, Barcos)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
-        <span style="color:#00f0ff;font-weight:600;">Ojo de Dios</span>
-      </button>
-      <button class="hud-btn" onclick="toggleSysModal()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-        <span>Sistema</span>
-      </button>
+    <!-- Clústeres de Acciones Ergonómicos y Anti-Desborde -->
+    <div class="header-actions">
+      <!-- Clúster Alpha: Operaciones Prime -->
+      <div class="action-group action-group-prime">
+        <button class="hud-btn hud-btn-prime" id="btn-toggle-multiagent" onclick="toggleMultiAgentDrawer()" title="Centro de Operaciones Multi-Agente (LangGraph + Debate Adversarial)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>Multi-Agente</span>
+          <span id="multiagent-dot" class="badge-dot-prime"></span>
+        </button>
+
+        <button class="hud-btn hud-btn-god" id="btn-gods-eye" onclick="openGodsEye()" title="Ojo de Dios: Consola de Inteligencia Geoespacial 3D (Satélite, Vuelos, Barcos)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+          <span>Ojo de Dios</span>
+        </button>
+
+        <button class="hud-btn" id="btn-ultra-live" onclick="toggleUltraLiveMode()" title="Alternar Modo Ultra-Live Bidireccional (<400ms)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span id="btn-live-txt">Live</span>
+        </button>
+      </div>
+
+      <!-- Clúster Beta: Paneles y Workspace -->
+      <div class="action-group">
+        <button class="hud-btn" id="btn-toggle-canvas" onclick="toggleCanvasDrawer()" title="Lienzo Dinámico A2UI / OpenPage">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span id="btn-canvas-txt">Canvas</span>
+          <span id="canvas-badge-dot" style="display:none;width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);margin-left:3px;"></span>
+        </button>
+
+        <button class="hud-btn" id="btn-toggle-chat" onclick="toggleChatDrawer()" title="Consola Interactiva">
+
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span id="btn-chat-txt">Consola</span>
+        </button>
+
+        <button class="hud-btn" id="btn-toggle-dev-console" onclick="toggleDevConsoleDrawer()" title="Alberth Dev Console (AGC) & Antigravity [Ctrl+Alt+C]">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span id="btn-dev-console-txt">AGC Dev</span>
+          <span id="dev-console-dot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-left:3px;"></span>
+        </button>
+
+        <button class="hud-btn" id="btn-floating-widget" onclick="openFloatingWidget()" title="Abrir Widget Flotante de Pantalla">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+          <span>Widget</span>
+        </button>
+
+        <button class="hud-btn" onclick="toggleSysModal()" title="Configuración de Sistema">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          <span>Sistema</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -2667,15 +3231,21 @@ header.hud-header {
 
       <!-- Selector de Modo Holograma (Rostro / Auto / Orbe) -->
       <div class="hologram-mode-selector" id="hologram-mode-selector">
-        <button class="holo-pill-btn active" id="btn-holo-face" onclick="setHologramMode('face')" title="Fijar Holograma Cuántico de Alberth continuo">
-          👤 ROSTRO
-        </button>
-        <button class="holo-pill-btn" id="btn-holo-auto" onclick="setHologramMode('auto')" title="Modo Dinámico: Holograma de Alberth durante diálogo/voz, Orbe en reposo">
-          ⚡ AUTO
-        </button>
-        <button class="holo-pill-btn" id="btn-holo-orb" onclick="setHologramMode('orb')" title="Fijar Reactor: Orbe Cuántico continuo">
-          🌐 ORBE
-        </button>
+        <div class="holo-selector-header">
+          <span class="holo-selector-pulse"></span>
+          <span class="holo-selector-tag">PROYECCIÓN 3D</span>
+        </div>
+        <div class="holo-pills-row">
+          <button class="holo-pill-btn active" id="btn-holo-face" onclick="setHologramMode('face')" title="Fijar Holograma Cuántico de Alberth continuo">
+            <span>👤 ROSTRO</span>
+          </button>
+          <button class="holo-pill-btn" id="btn-holo-auto" onclick="setHologramMode('auto')" title="Modo Dinámico: Holograma de Alberth durante diálogo/voz, Orbe en reposo">
+            <span>⚡ AUTO</span>
+          </button>
+          <button class="holo-pill-btn" id="btn-holo-orb" onclick="setHologramMode('orb')" title="Fijar Reactor: Orbe Cuántico continuo">
+            <span>🌐 ORBE</span>
+          </button>
+        </div>
       </div>
 
       <!-- Central State Pill -->
@@ -2790,122 +3360,146 @@ header.hud-header {
         </div>
       </div>
 
-      <!-- Tactical Quick Action Grid -->
-      <div class="apps-grid">
-        <div class="app-card" onclick="sendQuick('abre el Finder')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div class="app-details">
-            <span class="app-name">FINDER</span>
-            <span class="app-action">Explorador Mac</span>
-          </div>
-        </div>
+      <!-- ── Centro Táctico y de Inteligencia Unificado (Sin Huecos ni Desbordes) ── -->
+      <div class="tactical-command-center">
 
-        <div class="app-card" onclick="sendQuick('Alberth, mírame por la cámara y describe lo que ves')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <!-- Sub-Deck 1: Módulos de Inteligencia de Alberth (3 Tarjetas Prominentes) -->
+        <div class="intel-subdeck">
+          <div class="deck-section-header">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4-4-4 4-4z"/></svg>
+            <span class="deck-section-title">MÓDULOS DE INTELIGENCIA DE ALBERTH</span>
+            <span class="deck-section-badge">ONLINE</span>
+            <div class="deck-section-line"></div>
           </div>
-          <div class="app-details">
-            <span class="app-name">VERME</span>
-            <span class="app-action">Cámara HD</span>
-          </div>
-        </div>
-
-        <div class="app-card" onclick="sendQuick('Analiza lo que hay en mi pantalla')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <div class="app-details">
-            <span class="app-name">PANTALLA</span>
-            <span class="app-action">Visión Mac</span>
-          </div>
-        </div>
-
-        <div class="app-card" onclick="sendQuick('abre YouTube en el navegador')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
-          </div>
-          <div class="app-details">
-            <span class="app-name">YOUTUBE</span>
-            <span class="app-action">Abrir navegador</span>
-          </div>
-        </div>
-
-        <div class="app-card" onclick="sendQuick('cuál es el estado de la batería del Mac')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/></svg>
-          </div>
-          <div class="app-details">
-            <span class="app-name">BATERÍA</span>
-            <span class="app-action">Telemetría Mac</span>
-          </div>
-        </div>
-
-        <div class="app-card" onclick="sendQuick('Dame el briefing del día y mis recordatorios')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          </div>
-          <div class="app-details">
-            <span class="app-name">BRIEFING</span>
-            <span class="app-action">Agenda y estado</span>
-          </div>
-        </div>
-
-        <div class="app-card" onclick="sendQuick('¿Qué aplicaciones están abiertas en el Mac?')">
-          <div class="app-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          </div>
-          <div class="app-details">
-            <span class="app-name">APPS ACTIVAS</span>
-            <span class="app-action">Gestor de tareas</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── INTELLIGENCE MODULES SECTION ── -->
-      <div style="margin-top:18px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 2px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4-4-4 4-4z"/></svg>
-          <span style="font-family:var(--font-data);font-size:10px;letter-spacing:2px;color:var(--cyan);opacity:0.7;">MÓDULOS DE INTELIGENCIA</span>
-          <div style="flex:1;height:1px;background:linear-gradient(to right,rgba(0,240,255,0.3),transparent);"></div>
-        </div>
-        <div class="apps-grid" id="intel-grid">
-
-          <!-- OSINT: Rastreo de Huella Digital -->
-          <div class="app-card" id="card-osint" onclick="openOsintPanel()" title="Rastrear huella digital en redes sociales">
-            <div class="app-icon" style="color:#ff6600;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+          <div class="intel-cards-grid" id="intel-grid">
+            <!-- OSINT: Rastreo de Huella Digital -->
+            <div class="app-card intel-card-osint" id="card-osint" onclick="openOsintPanel()" title="Rastrear huella digital en redes sociales">
+              <div class="app-icon" style="color:#ff6600;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name" style="color:#ff6600;">OSINT // RADAR</span>
+                <span class="app-action">Huella Digital</span>
+              </div>
             </div>
-            <div class="app-details">
-              <span class="app-name" style="color:#ff6600;">OSINT</span>
-              <span class="app-action">Huella Digital</span>
-            </div>
-          </div>
 
-          <!-- Web Security Scanner -->
-          <div class="app-card" id="card-websec" onclick="openWebSecPanel()" title="Escáner de seguridad web y vulnerabilidades">
-            <div class="app-icon" style="color:#ffaa00;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></svg>
+            <!-- Web Security Scanner -->
+            <div class="app-card intel-card-secscan" id="card-websec" onclick="openWebSecPanel()" title="Escáner de seguridad web y vulnerabilidades">
+              <div class="app-icon" style="color:#ffaa00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name" style="color:#ffaa00;">SECSCAN // CLOUD</span>
+                <span class="app-action">Vulnerabilidades</span>
+              </div>
             </div>
-            <div class="app-details">
-              <span class="app-name" style="color:#ffaa00;">SECSCAN</span>
-              <span class="app-action">Vulnerabilidades</span>
-            </div>
-          </div>
 
-          <!-- Face Recognition -->
-          <div class="app-card" id="card-vision" onclick="openVisionPanel()" title="Reconocimiento facial en tiempo real">
-            <div class="app-icon" style="color:#cc66ff;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M12 5v2M12 17v2M5 12H3M21 12h-2"/></svg>
+            <!-- Face Recognition -->
+            <div class="app-card intel-card-vision" id="card-vision" onclick="openVisionPanel()" title="Reconocimiento facial en tiempo real">
+              <div class="app-icon" style="color:#cc66ff;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M12 5v2M12 17v2M5 12H3M21 12h-2"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name" style="color:#cc66ff;">VISION // FACIAL</span>
+                <span class="app-action" id="vision-status-label">Reconoc. Facial</span>
+              </div>
             </div>
-            <div class="app-details">
-              <span class="app-name" style="color:#cc66ff;">VISION</span>
-              <span class="app-action" id="vision-status-label">Reconoc. Facial</span>
+
+            <!-- Hyperframes: Video Cinemático en Código -->
+            <div class="app-card intel-card-hyperframes" id="card-hyperframes" onclick="toggleHyperframesDrawer()" title="Hyperframes: Generador de Video Cinemático en Código">
+              <div class="app-icon" style="color:#e2b774;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name" style="color:#e2b774;">HYPERFRAMES // STUDIO</span>
+                <span class="app-action">Video Cinemático</span>
+              </div>
+
             </div>
           </div>
 
         </div>
+
+        <!-- Sub-Deck 2: Acciones Tácticas del Mac (7 Tarjetas Compactas) -->
+        <div class="actions-subdeck">
+          <div class="deck-section-header">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38f9d7" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span class="deck-section-title" style="color:#38f9d7;">ACCIONES RÁPIDAS DEL MAC</span>
+            <div class="deck-section-line"></div>
+          </div>
+          <div class="actions-cards-grid">
+            <div class="app-card" onclick="sendQuick('abre el Finder')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">FINDER</span>
+                <span class="app-action">Explorador</span>
+              </div>
+            </div>
+
+            <div class="app-card" onclick="sendQuick('Alberth, mírame por la cámara y describe lo que ves')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">VERME</span>
+                <span class="app-action">Cámara HD</span>
+              </div>
+            </div>
+
+            <div class="app-card" onclick="sendQuick('Analiza lo que hay en mi pantalla')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">PANTALLA</span>
+                <span class="app-action">Visión Mac</span>
+              </div>
+            </div>
+
+            <div class="app-card" onclick="sendQuick('abre YouTube en el navegador')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">YOUTUBE</span>
+                <span class="app-action">Navegador</span>
+              </div>
+            </div>
+
+            <div class="app-card" onclick="sendQuick('cuál es el estado de la batería del Mac')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">BATERÍA</span>
+                <span class="app-action">Telemetría</span>
+              </div>
+            </div>
+
+            <div class="app-card" onclick="sendQuick('Dame el briefing del día y mis recordatorios')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">BRIEFING</span>
+                <span class="app-action">Agenda</span>
+              </div>
+            </div>
+
+            <div class="app-card" onclick="sendQuick('¿Qué aplicaciones están abiertas en el Mac?')">
+              <div class="app-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name">APPS</span>
+                <span class="app-action">Gestor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -2942,26 +3536,193 @@ header.hud-header {
 
 </div>
 
-<!-- ── Live Canvas A2UI Drawer (OpenPage Protocol) ── -->
+<!-- ── Live Canvas & Creative Studio Drawer ── -->
 <div class="canvas-drawer" id="canvas-drawer">
   <div class="drawer-header">
     <div class="drawer-title">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-      <span id="canvas-drawer-title-txt">CANVAS A2UI · OPENPAGE</span>
+      <span id="canvas-drawer-title-txt">CANVAS &amp; CREATIVE STUDIO</span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;">
-      <button class="canvas-preset-pill" onclick="loadCanvasPreset('system')" title="Telemetría de Sistema">⚡ Sistema</button>
-      <button class="canvas-preset-pill" onclick="loadCanvasPreset('finance')" title="Tablero Contable">💰 Finanzas</button>
-      <button class="canvas-preset-pill" onclick="loadCanvasPreset('tasks')" title="Tareas Tácticas">📋 Tareas</button>
       <button class="drawer-close-btn" onclick="toggleCanvasDrawer()">✕</button>
     </div>
   </div>
-  <div class="canvas-drawer-body" id="canvas-drawer-body">
-    <div style="text-align:center;padding:30px;color:var(--text-dim);font-family:var(--font-data);">
-      Cargando componentes OpenPage...
+
+  <!-- Barra de Pestañas del Estudio Creativo -->
+  <div class="canvas-nav-tabs">
+    <button class="canvas-nav-tab active" id="tab-btn-a2ui" onclick="switchCanvasTab('tab-a2ui')">📑 Lienzo A2UI</button>
+    <button class="canvas-nav-tab" id="tab-btn-brand" onclick="switchCanvasTab('tab-brand')">🏷️ Brand &amp; Logo</button>
+    <button class="canvas-nav-tab" id="tab-btn-neuro" onclick="switchCanvasTab('tab-neuro')">🧠 Neuro-Color</button>
+    <button class="canvas-nav-tab" id="tab-btn-banner" onclick="switchCanvasTab('tab-banner')">📐 Banners &amp; Ads</button>
+    <button class="canvas-nav-tab" id="tab-btn-photo" onclick="switchCanvasTab('tab-photo')">📸 Photo Lab</button>
+  </div>
+
+  <!-- Pestaña 1: Lienzo A2UI / OpenPage (Preservado 100%) -->
+  <div class="canvas-tab-pane active" id="pane-tab-a2ui">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid rgba(0,240,255,0.12);">
+      <span style="font-family:var(--font-hud);font-size:10px;color:var(--text-dim);letter-spacing:0.06em;">PRESETS TÁCTICOS OPENPAGE:</span>
+      <div style="display:flex;gap:6px;">
+        <button class="canvas-preset-pill" onclick="loadCanvasPreset('system')" title="Telemetría de Sistema">⚡ Sistema</button>
+        <button class="canvas-preset-pill" onclick="loadCanvasPreset('finance')" title="Tablero Contable">💰 Finanzas</button>
+        <button class="canvas-preset-pill" onclick="loadCanvasPreset('tasks')" title="Tareas Tácticas">📋 Tareas</button>
+      </div>
+    </div>
+    <div class="canvas-drawer-body" id="canvas-drawer-body">
+      <div style="text-align:center;padding:30px;color:var(--text-dim);font-family:var(--font-data);">
+        Cargando componentes OpenPage...
+      </div>
     </div>
   </div>
+
+  <!-- Pestaña 2: Brand Identity & Logo Vectorial -->
+  <div class="canvas-tab-pane" id="pane-tab-brand">
+    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">FORJA DE IDENTIDAD CORPORATIVA Y LOGOTIPO</div>
+    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Sintetiza la personalidad de marca, arquetipo de Jung, ganchos de neuromarketing y genera un isotipo/logotipo vectorial interactivo.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+      <div class="studio-field">
+        <label class="studio-label">Nombre de Marca</label>
+        <input type="text" id="brand-input-name" class="studio-input" placeholder="Ej. Novasyscom AI" value="Novasyscom AI">
+      </div>
+      <div class="studio-field">
+        <label class="studio-label">Sector / Industria</label>
+        <input type="text" id="brand-input-industry" class="studio-input" placeholder="Ej. Tecnología & Software" value="Tecnología de Inteligencia Artificial">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="studio-field">
+        <label class="studio-label">Público Objetivo</label>
+        <input type="text" id="brand-input-audience" class="studio-input" placeholder="Ej. CEOs y Directores" value="Líderes de Empresa y Ejecutivos">
+      </div>
+      <div class="studio-field">
+        <label class="studio-label">Tono de Voz</label>
+        <input type="text" id="brand-input-tone" class="studio-input" placeholder="Ej. Vanguardista, sobrio" value="Vanguardista y Táctico">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="studio-field">
+        <label class="studio-label">Paleta Neuro-Cromática</label>
+        <select id="brand-select-palette" class="studio-select"></select>
+      </div>
+      <div class="studio-field">
+        <label class="studio-label">Emparejamiento Tipográfico</label>
+        <select id="brand-select-font" class="studio-select"></select>
+      </div>
+    </div>
+
+    <button class="studio-btn-primary" onclick="generateBrandKitUI()" id="btn-generate-brand">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>SINTETIZAR IDENTIDAD &amp; LOGO VECTORIAL</span>
+    </button>
+
+    <!-- Resultado Brandkit -->
+    <div id="brand-result-area" style="display:none;" class="studio-result-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,240,255,0.15);padding-bottom:8px;">
+        <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;" id="brand-res-archetype">ARQUETIPO</span>
+        <button class="canvas-preset-pill" onclick="copyBrandSvg()">📋 Copiar SVG</button>
+      </div>
+      <div id="brand-res-logo-box" style="display:flex;justify-content:center;padding:8px 0;"></div>
+      <div style="font-family:var(--font-hud);font-size:10.5px;color:#fff;letter-spacing:0.04em;" id="brand-res-tagline">TAGLINE</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.75);line-height:1.4;" id="brand-res-trigger">DISPARADOR</div>
+      <div style="font-size:10.5px;color:var(--text-dim);font-style:italic;" id="brand-res-concept">CONCEPTO</div>
+    </div>
+  </div>
+
+  <!-- Pestaña 3: Neuro-Color & Tipografías -->
+  <div class="canvas-tab-pane" id="pane-tab-neuro">
+    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">CIENCIA DEL COLOR &amp; JERARQUÍA TIPOGRÁFICA</div>
+    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Paletas calibradas basadas en neuromarketing y emparejamientos tipográficos profesionales aprobados por las directrices de diseño.</div>
+    <div id="neuro-palettes-container" style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+      <!-- Rellenado dinámicamente -->
+    </div>
+    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-top:10px;">CATÁLOGO TIPOGRÁFICO DE CONVERSIÓN</div>
+    <div id="neuro-fonts-container" style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+      <!-- Rellenado dinámicamente -->
+    </div>
+  </div>
+
+  <!-- Pestaña 4: Banners & Ads Forge -->
+  <div class="canvas-tab-pane" id="pane-tab-banner">
+    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">FORJA DE BANNERS &amp; PIEZAS PUBLICITARIAS</div>
+    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Genera creatividades multi-formato con safe-zones, contrastes calibrados y tipografía de alto impacto.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+      <div class="studio-field">
+        <label class="studio-label">Formato de Salida</label>
+        <select id="banner-select-format" class="studio-select"></select>
+      </div>
+      <div class="studio-field">
+        <label class="studio-label">Paleta de Conversión</label>
+        <select id="banner-select-palette" class="studio-select"></select>
+      </div>
+    </div>
+
+    <div class="studio-field">
+      <label class="studio-label">Titular Principal (Headline)</label>
+      <input type="text" id="banner-input-headline" class="studio-input" placeholder="Ej. Lanza tu Empresa al Futuro" value="EL PODER DE LA INTELIGENCIA AUTÓNOMA">
+    </div>
+
+    <div class="studio-field">
+      <label class="studio-label">Subtexto de Valor / Beneficio</label>
+      <input type="text" id="banner-input-subtext" class="studio-input" placeholder="Ej. Automatización táctica con visión y voz ultrarrápida." value="Automatización táctica con visión en tiempo real y arquitectura de soberanía total.">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="studio-field">
+        <label class="studio-label">Texto del Botón CTA</label>
+        <input type="text" id="banner-input-cta" class="studio-input" placeholder="Ej. DESCUBRIR AHORA" value="ACTIVAR AHORA">
+      </div>
+      <div class="studio-field">
+        <label class="studio-label">Familia Tipográfica</label>
+        <select id="banner-select-font" class="studio-select"></select>
+      </div>
+    </div>
+
+    <button class="studio-btn-primary" onclick="generateBannerUI()" id="btn-generate-banner">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>🚀 FORJAR PIEZA PUBLICITARIA</span>
+    </button>
+
+    <!-- Resultado Banner -->
+    <div id="banner-result-area" style="display:none;" class="studio-result-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;" id="banner-res-dims">DIMENSIONES</span>
+        <a id="banner-res-link" href="#" target="_blank" class="canvas-preset-pill" style="text-decoration:none;">↗ Abrir Completo</a>
+      </div>
+      <div style="width:100%;height:280px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.25);background:#000;">
+        <iframe id="banner-preview-frame" style="width:100%;height:100%;border:none;pointer-events:auto;" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pestaña 5: Photo Lab & Reglas de Imagen -->
+  <div class="canvas-tab-pane" id="pane-tab-photo">
+    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">LABORATORIO FOTOGRÁFICO &amp; OPTIMIZACIÓN</div>
+    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Estándares tácticos de pre-procesamiento para activos publicitarios y de diseño en alta fidelidad.</div>
+
+    <div class="studio-result-card" style="margin-top:6px;">
+      <div style="font-family:var(--font-hud);font-size:10.5px;color:var(--cyan);font-weight:700;">📐 ESPECIFICACIONES DE SAFE ZONE &amp; FORMATOS</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.85);display:flex;flex-direction:column;gap:6px;">
+        <div>• <b>Stories &amp; Reels (9:16):</b> Mantener titulares y logotipos dentro de los 1080x1420px centrales para evitar cortes con la interfaz de usuario.</div>
+        <div>• <b>Feed Cuadrado (1:1):</b> Safe zone de 8% de margen perimetral. Texto con ratio de ocupación visual &lt; 20% para máximo rendimiento publicitario.</div>
+        <div>• <b>Contraste WCAG AAA:</b> Relación de luminosidad mínima 7:1 en titulares y 4.5:1 en cuerpo de texto.</div>
+      </div>
+    </div>
+
+    <div class="studio-result-card">
+      <div style="font-family:var(--font-hud);font-size:10.5px;color:var(--cyan);font-weight:700;">🔍 RECOMENDACIONES DE RETOQUE &amp; EDICIÓN</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.85);display:flex;flex-direction:column;gap:6px;">
+        <div>• <b>Separación de Fondo:</b> Preferir iluminación de contorno (rim light) con tinte cian o ámbar para recortar figuras oscuras sobre fondos negros.</div>
+        <div>• <b>Temperatura de Color:</b> Frío (6500K) para transmitir precisión analítica y seguridad; Cálido (3200K) para gastronomía y prestigio.</div>
+        <div>• <b>Exportación sin Pérdida:</b> Las piezas vectoriales y tipográficas de Alberth se renderizan en HTML5 dinámico con tipografías web nativas.</div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
 
 <!-- ── Chat Console Drawer ── -->
 <div class="chat-drawer" id="chat-drawer">
@@ -3238,7 +3999,95 @@ header.hud-header {
   </div>
 </div>
 
+<!-- ── Hyperframes Video Studio Drawer (Code-as-Video) ── -->
+<div class="hyperframes-drawer" id="hyperframes-drawer">
+  <div class="hf-header">
+    <div class="hf-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+      <span>HYPERFRAMES // CODE-TO-VIDEO STUDIO</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="hud-tag" style="font-size:9px;background:rgba(226,183,116,0.15);color:#e2b774;border:1px solid rgba(226,183,116,0.4);padding:2px 6px;border-radius:4px;">ENGINE: 60 FPS</span>
+      <button class="drawer-close-btn" onclick="toggleHyperframesDrawer()">✕</button>
+    </div>
+  </div>
+
+  <div class="hf-body">
+    <!-- Presets Rápidos -->
+    <div>
+      <div class="hf-section-title">
+        <span>⚡ PRESETS RÁPIDOS EN 1-CLIC</span>
+      </div>
+      <div class="hf-presets-row">
+        <button class="hf-preset-btn" onclick="setHyperframePreset('Briefing Matutino Alberth', 'quantum_hud')">☀️ Briefing Matutino</button>
+        <button class="hf-preset-btn" onclick="setHyperframePreset('Radar de Ciberseguridad y Perímetro', 'cyber_radar')">🛡️ Radar Seguridad</button>
+        <button class="hf-preset-btn" onclick="setHyperframePreset('Ecosistema Novasyscom Alberth V4', 'dark_editorial')">🚀 Ecosistema Novasyscom</button>
+      </div>
+    </div>
+
+    <!-- Prompt / Contenido -->
+    <div>
+      <div class="hf-section-title">
+        <span>📝 CONTENIDO / TEMA DEL VIDEO</span>
+      </div>
+      <textarea id="hf-prompt-input" class="hf-prompt-input" rows="2" placeholder="Describa el tema, resumen o briefing para sintetizar en video determinista..."></textarea>
+    </div>
+
+    <!-- Configuración: Plantilla y Formato -->
+    <div class="hf-config-grid">
+      <div>
+        <div class="hf-section-title"><span>🎨 PLANTILLA ESTÉTICA</span></div>
+        <select id="hf-template-select" class="hf-select">
+          <option value="quantum_hud">Quantum Cockpit (HUD Sci-Fi)</option>
+          <option value="dark_editorial">Dark Luxury (Alta Costura)</option>
+          <option value="retro_8bit">8-Bit Orbit (Arcade Retro)</option>
+          <option value="cyber_radar">Cyber Radar (Terminal Táctica)</option>
+        </select>
+      </div>
+      <div>
+        <div class="hf-section-title"><span>📐 FORMATO / ASPECTO</span></div>
+        <select id="hf-aspect-select" class="hf-select">
+          <option value="16:9">16:9 Horizontal (YouTube / PC)</option>
+          <option value="9:16">9:16 Vertical (Reels / TikTok)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Botón de Generación -->
+    <button class="hf-generate-btn" id="btn-generate-hf" onclick="generateHyperframeVideo()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span id="btn-generate-hf-txt">GENERAR COMPOSICIÓN HYPERFRAME</span>
+    </button>
+
+    <!-- Reproductor en Tiempo Real -->
+    <div>
+      <div class="hf-section-title" style="justify-content:space-between;">
+        <span>🎬 VISTA PREVIA DETERMINISTA EN TIEMPO REAL</span>
+        <button class="hf-preset-btn" id="btn-hf-open-ext" onclick="openCurrentHyperframeExternal()" style="padding:2px 8px;font-size:10px;">Abrir Pestaña ↗</button>
+      </div>
+      <div class="hf-player-wrap">
+        <iframe id="hf-player-iframe" class="hf-player-iframe" src="/panel/hyperframes/hf_1791914927_quantum_hud_horiz.html"></iframe>
+        <div class="hf-player-bar">
+          <span style="font-size:10px;font-family:var(--font-data);color:#88a0bc;" id="hf-player-status">Reproduciendo: Quantum HUD Briefing</span>
+          <span style="font-size:10px;font-family:var(--font-hud);color:#e2b774;">GSAP 3 TIMELINE · 60 FPS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial de Videos Generados -->
+    <div>
+      <div class="hf-section-title">
+        <span>📂 HISTORIAL DE VIDEOS RECIENTES</span>
+      </div>
+      <div class="hf-history-list" id="hf-history-list">
+        <!-- Renderizado dinámico -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Toast Alert Notification ── -->
+
 <div class="hud-toast" id="toast"></div>
 
 <!-- ── Modal de Control del Sistema Mac ── -->
@@ -4701,8 +5550,11 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-// ─── Live Canvas Drawer & OpenPage Management ───────────────
+// ─── Live Canvas & Creative Studio Management ───────────────
 let isCanvasOpen = false;
+let creativeStudioLoaded = false;
+let lastBrandSvg = "";
+
 function toggleCanvasDrawer() {
   isCanvasOpen = !isCanvasOpen;
   const drawer = document.getElementById("canvas-drawer");
@@ -4712,6 +5564,230 @@ function toggleCanvasDrawer() {
   if (drawer) drawer.classList.toggle("open", isCanvasOpen);
   if (btn) btn.classList.toggle("active", isCanvasOpen);
   if (isCanvasOpen && dot) dot.style.display = "none";
+
+  if (isCanvasOpen && !creativeStudioLoaded) {
+    loadCreativeStudioMeta();
+  }
+}
+
+function switchCanvasTab(tabId) {
+  document.querySelectorAll(".canvas-tab-pane").forEach(pane => pane.classList.remove("active"));
+  document.querySelectorAll(".canvas-nav-tab").forEach(tab => tab.classList.remove("active"));
+  
+  const targetPane = document.getElementById(`pane-${tabId}`);
+  const targetBtn = document.getElementById(`tab-btn-${tabId.replace('tab-', '')}`);
+  
+  if (targetPane) targetPane.classList.add("active");
+  if (targetBtn) targetBtn.classList.add("active");
+
+  if (!creativeStudioLoaded) {
+    loadCreativeStudioMeta();
+  }
+}
+
+async function loadCreativeStudioMeta() {
+  try {
+    const [palettesRes, fontsRes, formatsRes] = await Promise.all([
+      fetch('/api/creative/palettes').then(r => r.json()),
+      fetch('/api/creative/fonts').then(r => r.json()),
+      fetch('/api/creative/formats').then(r => r.json())
+    ]);
+
+    if (palettesRes.ok && palettesRes.palettes) {
+      window._creativePalettes = palettesRes.palettes;
+      populatePaletteSelects(palettesRes.palettes);
+      renderNeuroPalettes(palettesRes.palettes);
+    }
+    if (fontsRes.ok && fontsRes.fonts) {
+      window._creativeFonts = fontsRes.fonts;
+      populateFontSelects(fontsRes.fonts);
+      renderNeuroFonts(fontsRes.fonts);
+    }
+    if (formatsRes.ok && formatsRes.formats) {
+      window._creativeFormats = formatsRes.formats;
+      populateFormatSelects(formatsRes.formats);
+    }
+
+    creativeStudioLoaded = true;
+  } catch(e) {
+    console.error("Error al cargar metadatos de Creative Studio:", e);
+  }
+}
+
+function populatePaletteSelects(palettes) {
+  const brandSel = document.getElementById("brand-select-palette");
+  const bannerSel = document.getElementById("banner-select-palette");
+  if (!brandSel && !bannerSel) return;
+  const opts = palettes.map(p => `<option value="${p.id}">${p.name} (${p.archetype})</option>`).join("");
+  if (brandSel) brandSel.innerHTML = opts;
+  if (bannerSel) bannerSel.innerHTML = opts;
+}
+
+function populateFontSelects(fonts) {
+  const brandSel = document.getElementById("brand-select-font");
+  const bannerSel = document.getElementById("banner-select-font");
+  if (!brandSel && !bannerSel) return;
+  const opts = fonts.map(f => `<option value="${f.id}">${f.name} [${f.header_font} / ${f.body_font}]</option>`).join("");
+  if (brandSel) brandSel.innerHTML = opts;
+  if (bannerSel) bannerSel.innerHTML = opts;
+}
+
+function populateFormatSelects(formats) {
+  const sel = document.getElementById("banner-select-format");
+  if (!sel) return;
+  const opts = Object.entries(formats).map(([k, v]) => `<option value="${k}">${v.name} (${v.w}x${v.h} · ${v.ratio})</option>`).join("");
+  sel.innerHTML = opts;
+}
+
+function renderNeuroPalettes(palettes) {
+  const cont = document.getElementById("neuro-palettes-container");
+  if (!cont) return;
+  cont.innerHTML = palettes.map(p => `
+    <div class="studio-result-card" style="gap:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;">${p.name}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.6);">${p.archetype}</span>
+      </div>
+      <div style="font-size:10.5px;color:rgba(255,255,255,0.8);">${p.emotion}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;">
+        ${p.colors.map(c => `
+          <div class="studio-color-pill" title="${c.role}">
+            <span class="studio-color-dot" style="background:${c.hex};"></span>
+            <span>${c.hex}</span>
+            <span style="color:var(--text-dim);font-size:8.5px;">${c.name}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderNeuroFonts(fonts) {
+  const cont = document.getElementById("neuro-fonts-container");
+  if (!cont) return;
+  cont.innerHTML = fonts.map(f => `
+    <div class="studio-result-card" style="gap:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:var(--font-hud);font-size:11px;color:#fff;font-weight:700;">${f.name}</span>
+        <span class="canvas-preset-pill">${f.category}</span>
+      </div>
+      <div style="font-size:10.5px;color:var(--cyan);">Titulares: <b>${f.header_font}</b> · Cuerpo: <b>${f.body_font}</b></div>
+      <div style="font-size:10.5px;color:var(--text-dim);">🎯 <i>${f.ideal_for}</i></div>
+    </div>
+  `).join("");
+}
+
+async function generateBrandKitUI() {
+  const name = document.getElementById("brand-input-name")?.value.trim() || "Novasyscom AI";
+  const industry = document.getElementById("brand-input-industry")?.value.trim() || "Tecnología";
+  const audience = document.getElementById("brand-input-audience")?.value.trim() || "Líderes B2B";
+  const tone = document.getElementById("brand-input-tone")?.value.trim() || "Vanguardista";
+  const palette_id = document.getElementById("brand-select-palette")?.value || "fintech_cyber";
+  const font_id = document.getElementById("brand-select-font")?.value || "tech_avionics";
+
+  const btn = document.getElementById("btn-generate-brand");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span>⚡ SINTETIZANDO BRANDKIT...</span>`;
+  }
+
+  try {
+    const res = await fetch('/api/creative/brand-identity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brand_name: name,
+        industry: industry,
+        audience: audience,
+        tone: tone,
+        palette_id: palette_id,
+        font_id: font_id
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      lastBrandSvg = data.logo_svg;
+      const resArea = document.getElementById("brand-result-area");
+      document.getElementById("brand-res-archetype").textContent = data.archetype.toUpperCase();
+      document.getElementById("brand-res-tagline").textContent = `“${data.tagline}”`;
+      document.getElementById("brand-res-trigger").textContent = `🧠 Neuro-Gatillo: ${data.neuro_trigger}`;
+      document.getElementById("brand-res-concept").textContent = `📐 Concepto Geométrico: ${data.logo_concept}`;
+      document.getElementById("brand-res-logo-box").innerHTML = data.logo_svg;
+      if (resArea) resArea.style.display = "flex";
+      showToast("🏷️ Brand Identity & Logo Vectorial sintetizados", 2500);
+    } else {
+      showToast("⚠️ Error: " + (data.error || "No se pudo generar brandkit"), 3000);
+    }
+  } catch(e) {
+    console.error("Error al generar brandkit:", e);
+    showToast("⚠️ Error de conexión con Creative Studio", 2500);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>SINTETIZAR IDENTIDAD & LOGO VECTORIAL</span>`;
+    }
+  }
+}
+
+function copyBrandSvg() {
+  if (!lastBrandSvg) {
+    showToast("⚠️ No hay SVG para copiar", 2000);
+    return;
+  }
+  navigator.clipboard.writeText(lastBrandSvg).then(() => {
+    showToast("📋 Logotipo SVG vectorial copiado al portapapeles", 2500);
+  });
+}
+
+async function generateBannerUI() {
+  const headline = document.getElementById("banner-input-headline")?.value.trim() || "EL PODER DE LA IA AUTÓNOMA";
+  const subtext = document.getElementById("banner-input-subtext")?.value.trim() || "Tecnología táctica en tiempo real.";
+  const cta_text = document.getElementById("banner-input-cta")?.value.trim() || "ACTIVAR AHORA";
+  const format_id = document.getElementById("banner-select-format")?.value || "instagram_post";
+  const palette_id = document.getElementById("banner-select-palette")?.value || "fintech_cyber";
+  const font_id = document.getElementById("banner-select-font")?.value || "tech_avionics";
+
+  const btn = document.getElementById("btn-generate-banner");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span>🚀 FORJANDO PIEZA...</span>`;
+  }
+
+  try {
+    const res = await fetch('/api/creative/banner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        headline: headline,
+        subtext: subtext,
+        cta_text: cta_text,
+        format_id: format_id,
+        palette_id: palette_id,
+        font_id: font_id
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const resArea = document.getElementById("banner-result-area");
+      document.getElementById("banner-res-dims").textContent = `${data.dimensions} · ${data.format.toUpperCase()}`;
+      const link = document.getElementById("banner-res-link");
+      if (link) link.href = data.url;
+      const iframe = document.getElementById("banner-preview-frame");
+      if (iframe) iframe.src = data.url;
+      if (resArea) resArea.style.display = "flex";
+      showToast("🚀 Banner forjado con éxito", 2500);
+    } else {
+      showToast("⚠️ Error: " + (data.error || "No se pudo generar banner"), 3000);
+    }
+  } catch(e) {
+    console.error("Error al forjar banner:", e);
+    showToast("⚠️ Error de conexión con Creative Studio", 2500);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>🚀 FORJAR PIEZA PUBLICITARIA</span>`;
+    }
+  }
 }
 
 function handleCanvasUpdate(canvasData) {
@@ -6817,7 +7893,113 @@ function handleMultiAgentStatus(state) {
     if (out) consoleBox.textContent = out;
   }
 }
+
+// ─── Hyperframes Video Studio Client Logic ────────────────────────────────────
+let isHyperframesOpen = false;
+let currentHyperframeUrl = "/panel/hyperframes/hf_1791914927_quantum_hud_horiz.html";
+
+function toggleHyperframesDrawer() {
+  const d = document.getElementById("hyperframes-drawer");
+  if (!d) return;
+  isHyperframesOpen = !isHyperframesOpen;
+  d.classList.toggle("open", isHyperframesOpen);
+  if (isHyperframesOpen) {
+    loadHyperframesList();
+  }
+}
+
+function setHyperframePreset(prompt, template) {
+  const input = document.getElementById("hf-prompt-input");
+  const selTpl = document.getElementById("hf-template-select");
+  if (input) input.value = prompt;
+  if (selTpl) selTpl.value = template;
+}
+
+function openCurrentHyperframeExternal() {
+  if (currentHyperframeUrl) {
+    window.open(currentHyperframeUrl, "_blank");
+  } else {
+    showToast("⚠️ No hay video activo cargado", 2000);
+  }
+}
+
+function loadHyperframeIntoPlayer(url, title) {
+  currentHyperframeUrl = url;
+  const ifr = document.getElementById("hf-player-iframe");
+  const statusLbl = document.getElementById("hf-player-status");
+  if (ifr) ifr.src = url;
+  if (statusLbl) statusLbl.textContent = `Reproduciendo: ${title || url.split('/').pop()}`;
+}
+
+async function loadHyperframesList() {
+  const listEl = document.getElementById("hf-history-list");
+  if (!listEl) return;
+  try {
+    const res = await fetch("/api/hyperframes/list");
+    const json = await res.json();
+    if (json.ok && json.videos && json.videos.length > 0) {
+      listEl.innerHTML = json.videos.map(v => `
+        <div class="hf-history-item">
+          <div>
+            <div style="font-weight:700;color:#e2b774;">${v.filename}</div>
+            <div style="font-size:10px;color:#88a0bc;">${v.created_at} · ${(v.size_bytes/1024).toFixed(1)} KB</div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="hf-preset-btn" style="padding:2px 8px;font-size:10px;" onclick="loadHyperframeIntoPlayer('${v.url}', '${v.filename}')">Cargar ▶</button>
+            <button class="hf-preset-btn" style="padding:2px 8px;font-size:10px;" onclick="window.open('${v.url}', '_blank')">↗</button>
+          </div>
+        </div>
+      `).join("");
+    } else {
+      listEl.innerHTML = `<div style="font-size:11px;color:#88a0bc;padding:8px;">No hay videos generados aún. Genere uno arriba.</div>`;
+    }
+  } catch(e) {
+    console.warn("Error loading hyperframes list:", e);
+  }
+}
+
+async function generateHyperframeVideo() {
+  const input = document.getElementById("hf-prompt-input");
+  const selTpl = document.getElementById("hf-template-select");
+  const selAspect = document.getElementById("hf-aspect-select");
+  const btn = document.getElementById("btn-generate-hf");
+  const btnTxt = document.getElementById("btn-generate-hf-txt");
+
+  const prompt = input ? input.value.trim() : "";
+  if (!prompt) {
+    showToast("⚠️ Ingrese un tema o seleccione un preset", 2500);
+    return;
+  }
+
+  const template = selTpl ? selTpl.value : "quantum_hud";
+  const aspect_ratio = selAspect ? selAspect.value : "16:9";
+
+  if (btn) btn.disabled = true;
+  if (btnTxt) btnTxt.textContent = "COMPILANDO FOTOGRAMAS GSAP...";
+
+  try {
+    const res = await fetch("/api/hyperframes/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, template, aspect_ratio })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast("🎬 Video Hyperframe generado con éxito", 3000);
+      loadHyperframeIntoPlayer(data.url, data.filename);
+      loadHyperframesList();
+    } else {
+      showToast("❌ Error al generar video: " + (data.error || "Desconocido"), 3500);
+    }
+  } catch(err) {
+    showToast("❌ Fallo de comunicación con el motor de video", 3000);
+  } finally {
+    if (btn) btn.disabled = false;
+    if (btnTxt) btnTxt.textContent = "GENERAR COMPOSICIÓN HYPERFRAME";
+  }
+}
 </script>
+
 
 </body>
 </html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1080">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 1080px;
+            height: 1080px;
+            background: #040c1a;
+            font-family: 'Chakra Petch', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .banner-art {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 80% 20%, #00f0ff22 0%, transparent 60%),
+                radial-gradient(circle at 20% 80%, #0077ff18 0%, transparent 60%),
+                #040c1a;
+        }
+        .grid-texture {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        .safe-zone {
+            position: relative;
+            z-index: 10;
+            width: 86%;
+            height: 86%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .brand-pill {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.18);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #00f0ff;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00f0ff;
+            box-shadow: 0 0 10px #00f0ff;
+        }
+        .content-body {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 95%;
+        }
+        .headline {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 54px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+        }
+        .headline span {
+            color: #00f0ff;
+            background: linear-gradient(90deg, #00f0ff, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtext {
+            font-size: 22px;
+            line-height: 1.4;
+            color: rgba(255,255,255,0.82);
+            font-weight: 400;
+        }
+        .cta-btn {
+            align-self: flex-start;
+            background: linear-gradient(135deg, #00f0ff, #0077ff);
+            color: #030814;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            padding: 16px 36px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 0 35px #00f0ff66;
+            margin-top: 10px;
+        }
+        .footer-tag {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 1.5px;
+            font-family: 'Orbitron', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner-art"></div>
+    <div class="grid-texture"></div>
+    <div class="safe-zone">
+        <div class="brand-pill">
+            <span class="dot"></span>
+            <span>ALBERTH CREATIVE // NOVASYSCOM</span>
+        </div>
+        <div class="content-body">
+            <h1 class="headline">Potencia Tu Negocio</h1>
+            <p class="subtext">Con Alberth OS</p>
+            <a href="#" class="cta-btn">
+                <span>ACTIVAR AHORA</span>
+                <span>➔</span>
+            </a>
+        </div>
+        <div class="footer-tag">AUTONOMOUS MARKETING SUITE · VERIFIED CONVERSION SPEC</div>
+    </div>
+</body>
+</html>

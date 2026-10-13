@@ -46,9 +46,8 @@ import { androidSystemHelper } from './android_system_helper';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// ─── CONFIGURACIÓN PREDETERMINADA DE FÁBRICA ─────────────────────────────────
-// ─── CONFIGURACIÓN PREDETERMINADA DE FÁBRICA ─────────────────────────────────
-const DEFAULT_SERVER_URL = 'http://192.168.0.41:8080';
+// ─── CONFIGURACIÓN PREDETERMINADA DE FÁBRICA (TÚNEL REMOTO SEGURO) ─────────
+const DEFAULT_SERVER_URL = 'https://interact-deeply-asn-tracy.trycloudflare.com';
 const DEFAULT_GATEWAY_TOKEN = 'token-seguro-1781561473';
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 2500;
@@ -100,7 +99,7 @@ export default function App() {
     {
       id: 'welcome',
       role: 'alberth',
-      content: '⚡ Quantum Core v4.5 en línea, Señor Danny. Alberth listo en red local (192.168.0.41) y túnel seguro. Modo Proactivo activo.',
+      content: '⚡ Quantum Core v5.0 en línea, Señor Danny. Alberth conectado vía Túnel Remoto Seguro. Todos los sistemas operativos.',
       ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -189,11 +188,13 @@ export default function App() {
   useEffect(() => {
     async function initializeApp() {
       try {
-        // Cargar o autoconfigurar URL del servidor
+        // Cargar o autoconfigurar URL del servidor con migración a v5.0.0
+        const appVersionCheck = await AsyncStorage.getItem('@alberth_app_version');
         let storedUrl = await AsyncStorage.getItem('@alberth_server_url');
-        if (!storedUrl || storedUrl.includes('knee-valium-vegetarian-ethernet') || storedUrl.trim() === '') {
+        if (appVersionCheck !== '5.0.0' || !storedUrl || storedUrl.includes('knee-valium-vegetarian-ethernet') || storedUrl.startsWith('http://192.168.') || storedUrl.trim() === '') {
           storedUrl = DEFAULT_SERVER_URL;
           await AsyncStorage.setItem('@alberth_server_url', DEFAULT_SERVER_URL);
+          await AsyncStorage.setItem('@alberth_app_version', '5.0.0');
         }
         setServerUrl(storedUrl);
 
@@ -738,7 +739,7 @@ export default function App() {
               <Text style={styles.statusPillText}>{isConnected ? 'ONLINE' : 'OFFLINE'}</Text>
             </View>
           </View>
-          <Text style={styles.hudBrandSubtitle}>QUANTUM AI // OS ASSISTANT v4.0</Text>
+          <Text style={styles.hudBrandSubtitle}>QUANTUM AI // OS ASSISTANT v5.0</Text>
         </View>
 
         <View style={styles.hudControlsRow}>

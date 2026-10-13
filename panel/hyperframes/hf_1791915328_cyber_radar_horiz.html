@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+    <title>RADAR DE CIBERSEGURIDAD // OSINT · Hyperframes Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #031109;
+            --col-primary: #00ff88;
+            --col-accent: #ffb700;
+            --font-display: 'Share Tech Mono', monospace;
+            --font-body: 'JetBrains Mono', monospace;
+            --stage-w: 1920px;
+            --stage-h: 1080px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+        }
+        
+        /* ─── Stage Contenedor 1:1 Determinista ─── */
+        #hyperframe-stage {
+            position: relative;
+            width: var(--stage-w);
+            height: var(--stage-h);
+            background: var(--bg-base);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 80px rgba(0,0,0,0.9);
+        }
+
+        /* ─── Encabezado Táctico de Composición ─── */
+        .stage-header {
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            right: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 40;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding-bottom: 18px;
+        }
+        .stage-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .brand-core-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--col-primary);
+            box-shadow: 0 0 16px var(--col-primary);
+            animation: pulseDot 2s infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+        .brand-titles {
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-main {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            color: var(--col-primary);
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+        .brand-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .telemetry-tag {
+            font-size: 12px;
+            font-family: var(--font-display);
+            color: var(--col-accent);
+            border: 1px solid rgba(56, 249, 215, 0.3);
+            background: rgba(56, 249, 215, 0.08);
+            padding: 4px 12px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+        }
+
+        /* ─── Escenas ─── */
+        .scene {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 100px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .scene.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .scene-inner {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        .scene-badge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .scene-badge {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--col-accent);
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--col-accent);
+            padding: 4px 14px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .scene-index {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            font-family: var(--font-display);
+        }
+        .scene-title {
+            font-family: var(--font-display);
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1.12;
+            color: #ffffff;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+        }
+        .scene-sub {
+            font-size: 26px;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.82);
+            font-weight: 400;
+            max-width: 90%;
+        }
+        
+        /* ─── Métricas e Infografía de Escena ─── */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
+        }
+        .metric-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 3px solid var(--col-primary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+        }
+        .metric-lbl {
+            font-size: 11px;
+            font-family: var(--font-display);
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .metric-val {
+            font-size: 32px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            color: var(--col-primary);
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        /* ─── Barra de Progreso y Timeline Inferior ─── */
+        .stage-footer {
+            position: absolute;
+            bottom: 35px;
+            left: 50px;
+            right: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 40;
+        }
+        .timeline-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .timeline-bar-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: linear-gradient(90deg, var(--col-primary), var(--col-accent));
+            box-shadow: 0 0 10px var(--col-primary);
+        }
+        .timeline-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: var(--font-display);
+            letter-spacing: 1px;
+        }
+
+        /* ─── Controles Flotantes Intercativos ─── */
+        .interactive-dock {
+            position: absolute;
+            bottom: 80px;
+            right: 50px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 6px 12px;
+            backdrop-filter: blur(14px);
+        }
+        .dock-btn {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 6px 10px;
+            font-size: 14px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .dock-btn:hover {
+            color: var(--col-primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ─── Efectos de Grano / Scanlines ─── */
+        .scanlines-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            background: repeating-linear-gradient(180deg, transparent 0 2px, rgba(0, 240, 255, 0.03) 2px 4px);
+            mix-blend-mode: overlay;
+        }
+        .grain-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0.12;
+            background-image: radial-gradient(#ffffff 0.8px, transparent 0.8px);
+            background-size: 4px 4px;
+        }
+        .radar-grid-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 25;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0,255,136,0.06) 95%),
+                        linear-gradient(rgba(0,255,136,0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,255,136,0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hyperframe-stage">
+        <div class="radar-grid-overlay"><div class="radar-sweep"></div></div>
+
+        <!-- Header -->
+        <header class="stage-header">
+            <div class="stage-brand">
+                <div class="brand-core-dot"></div>
+                <div class="brand-titles">
+                    <span class="brand-main">RADAR DE CIBERSEGURIDAD // OSINT</span>
+                    <span class="brand-sub">INFORME DE VULNERABILIDADES Y PERÍMETRO</span>
+                </div>
+            </div>
+            <div class="telemetry-tag">HYPERFRAMES // 60 FPS</div>
+        </header>
+
+        <!-- Escenas -->
+        
+        <!-- frame:1 duration:3200 transition:zoom-fade -->
+        <section class="scene" id="scene-1" data-scene="0">
+            <div class="scene-inner">
+                <div class="scene-badge-row">
+                    <span class="scene-badge">DEFENSA CLOUD</span>
+                    <span class="scene-index">01 / 03</span>
+                </div>
+                <h1 class="scene-title">PERÍMETRO DIGITAL MONITOREADO</h1>
+                <p class="scene-sub">Escaneo continuo de activos de red, certificados SSL y telemetría de túneles.</p>
+                <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="metric-lbl">PUERTOS SEGUROS</span>
+                    <span class="metric-val">OK</span>
+                </div>
+                
+                <div class="metric-box">
+                    <span class="metric-lbl">FIREWALL</span>
+                    <span class="metric-val">ACTIVO</span>
+                </div>
+                
+                <div class="metric-box">
+                    <span class="metric-lbl">ENCRIPTACIÓN</span>
+                    <span class="metric-val">AES-256</span>
+                </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- frame:2 duration:3200 transition:zoom-fade -->
+        <section class="scene" id="scene-2" data-scene="1">
+            <div class="scene-inner">
+                <div class="scene-badge-row">
+                    <span class="scene-badge">RADAR GLOBAL</span>
+                    <span class="scene-index">02 / 03</span>
+                </div>
+                <h1 class="scene-title">OSINT DIGITAL FOOTPRINT</h1>
+                <p class="scene-sub">Vigilancia de exposición de credenciales y reputación de infraestructura.</p>
+                <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="metric-lbl">HUELLA</span>
+                    <span class="metric-val">BAJO RIESGO</span>
+                </div>
+                
+                <div class="metric-box">
+                    <span class="metric-lbl">FILTRACIONES</span>
+                    <span class="metric-val">0 DETECTADAS</span>
+                </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- frame:3 duration:3200 transition:zoom-fade -->
+        <section class="scene" id="scene-3" data-scene="2">
+            <div class="scene-inner">
+                <div class="scene-badge-row">
+                    <span class="scene-badge">CONTENCIÓN</span>
+                    <span class="scene-index">03 / 03</span>
+                </div>
+                <h1 class="scene-title">PROTOCOLO BÚNKER DISPONIBLE</h1>
+                <p class="scene-sub">En caso de intrusión, aislamiento hermético de servicios en 1 segundo.</p>
+                <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="metric-lbl">TIEMPO REACCIÓN</span>
+                    <span class="metric-val">&lt; 1s</span>
+                </div>
+                
+                <div class="metric-box">
+                    <span class="metric-lbl">RESPALDO</span>
+                    <span class="metric-val">ENCRIPTO</span>
+                </div>
+                </div>
+            </div>
+        </section>
+        
+
+        <!-- Footer Timeline -->
+        <footer class="stage-footer">
+            <div class="timeline-bar-bg">
+                <div class="timeline-bar-fill" id="timeline-fill"></div>
+            </div>
+            <div class="timeline-info-row">
+                <span id="time-readout">00.0s / 09.6s</span>
+                <span id="frame-readout">FRAME 01 / 03</span>
+                <span>TECLAS: ESPACIO (PAUSA) · 1-3 · R (REINICIAR)</span>
+            </div>
+        </footer>
+
+        <!-- Dock Interactivo -->
+        <div class="interactive-dock">
+            <button class="dock-btn" id="btn-play-pause" onclick="togglePlayPause()" title="Reproducir / Pausar">⏸ Pausa</button>
+            <button class="dock-btn" onclick="prevFrame()" title="Cuadro Anterior">⏮</button>
+            <button class="dock-btn" onclick="nextFrame()" title="Siguiente Cuadro">⏭</button>
+            <button class="dock-btn" onclick="restartVideo()" title="Reiniciar">🔄</button>
+        </div>
+    </div>
+
+    <!-- ── GSAP Deterministic Animation Script ── -->
+    <script>
+        const SCENES_COUNT = 3;
+        const DURATION_PER_SCENE = 3.2;
+        const TOTAL_DURATION = 9.600000000000001;
+        let currentSceneIndex = 0;
+        let isPlaying = true;
+
+        const scenes = document.querySelectorAll('.scene');
+        const fillBar = document.getElementById('timeline-fill');
+        const timeReadout = document.getElementById('time-readout');
+        const frameReadout = document.getElementById('frame-readout');
+        const btnPlay = document.getElementById('btn-play-pause');
+
+        // Master Timeline GSAP
+        const masterTl = gsap.timeline({
+            paused: false,
+            repeat: -1,
+            onUpdate: onTimelineUpdate
+        });
+
+        // Construir secuencias de cada escena
+        scenes.forEach((sceneEl, i) => {
+            const tStart = i * DURATION_PER_SCENE;
+            const tEnd = (i + 1) * DURATION_PER_SCENE;
+            const title = sceneEl.querySelector('.scene-title');
+            const sub = sceneEl.querySelector('.scene-sub');
+            const badge = sceneEl.querySelector('.scene-badge');
+            const metrics = sceneEl.querySelectorAll('.metric-box');
+
+            // Entrada
+            masterTl.add(() => {
+                activateScene(i);
+            }, tStart);
+
+            masterTl.fromTo(sceneEl, 
+                { opacity: 0 }, 
+                { opacity: 1, duration: 0.35, ease: 'power2.out' }, 
+                tStart
+            );
+
+            masterTl.fromTo(title, 
+                { y: 35, opacity: 0, scale: 0.94 }, 
+                { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)' }, 
+                tStart + 0.1
+            );
+
+            if (sub) {
+                masterTl.fromTo(sub, 
+                    { y: 25, opacity: 0 }, 
+                    { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 
+                    tStart + 0.25
+                );
+            }
+
+            if (metrics.length) {
+                masterTl.fromTo(metrics, 
+                    { y: 20, opacity: 0, scale: 0.92 }, 
+                    { y: 0, opacity: 1, scale: 1, stagger: 0.08, duration: 0.45, ease: 'back.out(1.6)' }, 
+                    tStart + 0.35
+                );
+            }
+
+            // Salida antes del siguiente corte (excepto última antes de loop)
+            masterTl.to(sceneEl, 
+                { opacity: 0, y: -15, duration: 0.3, ease: 'power2.in' }, 
+                tEnd - 0.3
+            );
+        });
+
+        function activateScene(index) {
+            currentSceneIndex = index;
+            scenes.forEach((el, idx) => {
+                el.classList.toggle('active', idx === index);
+            });
+            frameReadout.textContent = `FRAME ${String(index + 1).padStart(2, '0')} / ${String(SCENES_COUNT).padStart(2, '0')}`;
+        }
+
+        function onTimelineUpdate() {
+            const curTime = masterTl.time() % TOTAL_DURATION;
+            const pct = (curTime / TOTAL_DURATION) * 100;
+            fillBar.style.width = pct + '%';
+            timeReadout.textContent = `${curTime.toFixed(1).padStart(4, '0')}s / ${TOTAL_DURATION.toFixed(1)}s`;
+        }
+
+        function togglePlayPause() {
+            if (masterTl.paused()) {
+                masterTl.play();
+                btnPlay.textContent = "⏸ Pausa";
+            } else {
+                masterTl.pause();
+                btnPlay.textContent = "▶ Reanudar";
+            }
+        }
+
+        function jumpToScene(idx) {
+            if (idx >= 0 && idx < SCENES_COUNT) {
+                masterTl.seek(idx * DURATION_PER_SCENE);
+                activateScene(idx);
+            }
+        }
+
+        function nextFrame() {
+            jumpToScene((currentSceneIndex + 1) % SCENES_COUNT);
+        }
+
+        function prevFrame() {
+            jumpToScene((currentSceneIndex - 1 + SCENES_COUNT) % SCENES_COUNT);
+        }
+
+        function restartVideo() {
+            masterTl.restart();
+            activateScene(0);
+        }
+
+        // Atajos de teclado
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlayPause();
+            } else if (e.key >= '1' && e.key <= String(SCENES_COUNT)) {
+                jumpToScene(parseInt(e.key) - 1);
+            } else if (e.key.toLowerCase() === 'r') {
+                restartVideo();
+            } else if (e.key === 'ArrowRight') {
+                nextFrame();
+            } else if (e.key === 'ArrowLeft') {
+                prevFrame();
+            }
+        });
+
+        // Inicializar escena 0
+        activateScene(0);
+    </script>
+
+    <!-- 
+    HYPERFRAMES_META:
+    {
+  "version": "1.0.0",
+  "title": "RADAR DE CIBERSEGURIDAD // OSINT",
+  "template": "cyber_radar",
+  "aspectRatio": "16:9",
+  "fps": 60,
+  "totalDurationSec": 9.600000000000001,
+  "scenes": [
+    {
+      "index": 1,
+      "durationMs": 3200,
+      "hook": "PER\u00cdMETRO DIGITAL MONITOREADO",
+      "badge": "DEFENSA CLOUD"
+    },
+    {
+      "index": 2,
+      "durationMs": 3200,
+      "hook": "OSINT DIGITAL FOOTPRINT",
+      "badge": "RADAR GLOBAL"
+    },
+    {
+      "index": 3,
+      "durationMs": 3200,
+      "hook": "PROTOCOLO B\u00daNKER DISPONIBLE",
+      "badge": "CONTENCI\u00d3N"
+    }
+  ]
+}
+    -->
+</body>
+</html>

@@ -80,6 +80,15 @@ module.exports = {
       interpreter: "none",
       autorestart: true,
       watch: false
+    },
+    {
+      name: "alberth-telegram",
+      cwd: __dirname,
+      script: pythonBin,
+      args: "alberth_telegram_bridge.py",
+      interpreter: "none",
+      autorestart: true,
+      watch: false
     }
   ]
 };

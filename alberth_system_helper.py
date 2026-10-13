@@ -589,10 +589,14 @@ def handle_keyboard(query, query_lower):
 # ══════════════════════════════════════════════════════════════════════════════
 def handle_system_info(query, query_lower):
     if any(kw in query_lower for kw in ("briefing", "agenda", "resumen de hoy", "resumen del día", "qué tengo hoy", "que tengo hoy", "mis tareas", "agenda de hoy")):
-        date_str = time.strftime("%d/%m/%Y")
-        time_str = time.strftime("%H:%M")
-        msg = f"📋 Briefing Alberth ({date_str} {time_str}): Todos los módulos activos y nominales en Novasyscom. Sin alertas pendientes."
-        return {"accion": "briefing", "resultado": msg, "exito": True}
+        try:
+            import alberth_briefing
+            b_data = alberth_briefing.generate_executive_briefing()
+            return {"accion": "briefing", "resultado": b_data["markdown"], "spoken": b_data["spoken"], "exito": True}
+        except Exception as be:
+            date_str = time.strftime("%d/%m/%Y")
+            time_str = time.strftime("%H:%M")
+            return {"accion": "briefing", "resultado": f"📋 Briefing Ejecutivo ({date_str} {time_str}): Sistemas nominales. {be}", "exito": True}
 
     if re.search(r'\b(bater[ií]a|battery|carga\s+del?\s+(equipo|mac|computador))\b', query_lower):
         ok, out = run_shell(["pmset", "-g", "batt"])
@@ -999,6 +1003,21 @@ def handle_files(query, query_lower):
 # ══════════════════════════════════════════════════════════════════════════════
 def handle_system_utils(query, query_lower):
     """Clipboard, notificaciones macOS, brillo y apariencia del sistema."""
+
+    # ── MACRO-MODOS TÁCTICOS DEL SISTEMA (Pilar 4) ───────────────────────
+    if re.search(r'\b(?:activa\s+(?:el\s+)?modo|modo|inicia\s+modo|cambia\s+a\s+modo)\s+(enfoque|trabajo\s+profundo|concentraci[oó]n|reuni[oó]n|silencio|cierre|cierre\s+de\s+jornada|fin\s+de\s+jornada|buenas\s+noches|creativo|diseño)\b', query_lower) or any(k in query_lower for k in ["modo enfoque", "modo reunion", "modo reunión", "modo cierre", "modo creativo"]):
+        try:
+            import alberth_macro_modes
+            m_res = alberth_macro_modes.dispatch_mode(query_lower)
+            if m_res and m_res.get("ok"):
+                return {
+                    "accion": f"macro_modo_{m_res.get('modo')}",
+                    "resultado": m_res["mensaje"],
+                    "exito": True,
+                    "music_action": m_res.get("music_action")
+                }
+        except Exception as me:
+            print(f"[Macro Mode Error] {me}")
 
     # ── MODO WAKE WORD (MANOS LIBRES / ACTIVACION POR VOZ) ─────────────────
     if re.search(r'\b(activa|desactiva|pon|apaga|enciende)\b.*\b(wake\s*word|activación\s*por\s*voz|modo\s*manos\s*libres|activacion\s*por\s*voz)\b', query_lower):
