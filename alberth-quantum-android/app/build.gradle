@@ -10,8 +10,8 @@ android {
         applicationId "com.novasyscom.alberth"
         minSdk 24
         targetSdk 35
-        versionCode 7
-        versionName "6.1-Quantum"
+        versionCode 8
+        versionName "6.2-Quantum"
     }
 
     buildTypes {

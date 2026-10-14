@@ -312,27 +312,14 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     isListening = false;
-                    // Pausa controlada (1.8s) para no saturar el sistema ni parpadear el icono del micrófono
-                    if (isAppInForeground) {
-                        voiceHandler.postDelayed(() -> {
-                            if (isAppInForeground && !isListening) {
-                                startListeningSafely();
-                            }
-                        }, 1800);
-                    }
+                    // NO relanzar en bucle continuo: evita que Android emita pitidos constantes y parpadee el icono verde
                 }
 
                 @Override
                 public void onResults(Bundle results) {
                     isListening = false;
                     processVoiceResults(results);
-                    if (isAppInForeground) {
-                        voiceHandler.postDelayed(() -> {
-                            if (isAppInForeground && !isListening) {
-                                startListeningSafely();
-                            }
-                        }, 1000);
-                    }
+                    // Sesión completada: no relanzar en bucle para mantener el teléfono en silencio como ChatGPT/Gemini
                 }
 
                 @Override
@@ -343,10 +330,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onEvent(int eventType, Bundle params) {}
             });
-
-            if (isAppInForeground) {
-                startListeningSafely();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -439,9 +422,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         isAppInForeground = true;
-        if (speechRecognizer != null && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            voiceHandler.postDelayed(this::startListeningSafely, 500);
-        }
     }
 
     @Override
