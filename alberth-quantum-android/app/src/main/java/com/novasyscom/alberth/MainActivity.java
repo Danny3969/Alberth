@@ -3,13 +3,19 @@ package com.novasyscom.alberth;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -33,7 +39,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_TUNNEL_URL = "https://interact-deeply-asn-tracy.trycloudflare.com/";
     private static final int PERMISSION_REQ_CODE = 101;
 
+    private View rootLayout;
     private WebView webView;
     private SwipeRefreshLayout swipeRefresh;
     private LinearLayout offlineOverlay;
@@ -49,17 +62,25 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private long backPressedTime = 0;
 
+    // Asistente Nativo de Voz y Detección de Wake Word ("Alberth")
+    private SpeechRecognizer speechRecognizer;
+    private Intent speechIntent;
+    private boolean isAppInForeground = false;
+    private boolean isListening = false;
+    private final Handler voiceHandler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Barra de estado y navegación en tema oscuro Sci-Fi
+        // Barra de estado y navegación en color Sci-Fi oscuro (#040711)
         configureSystemBars();
 
         setContentView(R.layout.activity_main);
 
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
+        rootLayout = findViewById(R.id.rootLayout);
         webView = findViewById(R.id.webView);
         swipeRefresh = findViewById(R.id.swipeRefresh);
         offlineOverlay = findViewById(R.id.offlineOverlay);
@@ -67,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnRetry = findViewById(R.id.btnRetry);
         Button btnConfig = findViewById(R.id.btnConfig);
 
+        applyWindowInsetsPadding();
         setupSwipeRefresh();
         setupWebView();
         requestHardwarePermissions();
@@ -75,6 +97,24 @@ public class MainActivity extends AppCompatActivity {
         btnConfig.setOnClickListener(v -> showConfigDialog());
 
         loadActiveUrl();
+        handleAssistantIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleAssistantIntent(intent);
+    }
+
+    private void handleAssistantIntent(Intent intent) {
+        if (intent != null) {
+            String action = intent.getAction();
+            if (Intent.ACTION_ASSIST.equals(action) || Intent.ACTION_VOICE_COMMAND.equals(action)) {
+                triggerHapticFeedback(90);
+                notifyWebWakeWordActivated();
+            }
+        }
     }
 
     private void configureSystemBars() {
@@ -83,6 +123,22 @@ public class MainActivity extends AppCompatActivity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.parseColor("#040711"));
             window.setNavigationBarColor(Color.parseColor("#040711"));
+        }
+    }
+
+    /**
+     * Aplica padding exacto para la barra de estado superior y la barra de navegación inferior,
+     * garantizando que el HUD de Alberth encuadre al 100% sin ser tapado por el reloj, batería o botones.
+     */
+    private void applyWindowInsetsPadding() {
+        if (rootLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()
+                );
+                v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return windowInsets;
+            });
         }
     }
 
@@ -189,6 +245,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (needed) {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQ_CODE);
+        } else {
+            initNativeVoiceAssistant();
         }
     }
 
@@ -205,9 +263,212 @@ public class MainActivity extends AppCompatActivity {
             }
             if (allGranted) {
                 Toast.makeText(this, "🎙️ Permisos de audio y visión activados", Toast.LENGTH_SHORT).show();
+                initNativeVoiceAssistant();
             }
         }
     }
+
+    // ─── Reconocimiento de Voz Nativo & Wake Word ("Alberth") ───────
+
+    private void initNativeVoiceAssistant() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        try {
+            if (speechRecognizer != null) {
+                speechRecognizer.destroy();
+            }
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES");
+            speechIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+            speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+
+            speechRecognizer.setRecognitionListener(new RecognitionListener() {
+                @Override
+                public void onReadyForSpeech(Bundle params) {
+                    isListening = true;
+                }
+
+                @Override
+                public void onBeginningOfSpeech() {}
+
+                @Override
+                public void onRmsChanged(float rmsdB) {}
+
+                @Override
+                public void onBufferReceived(byte[] buffer) {}
+
+                @Override
+                public void onEndOfSpeech() {
+                    isListening = false;
+                }
+
+                @Override
+                public void onError(int error) {
+                    isListening = false;
+                    // Pausa controlada (1.8s) para no saturar el sistema ni parpadear el icono del micrófono
+                    if (isAppInForeground) {
+                        voiceHandler.postDelayed(() -> {
+                            if (isAppInForeground && !isListening) {
+                                startListeningSafely();
+                            }
+                        }, 1800);
+                    }
+                }
+
+                @Override
+                public void onResults(Bundle results) {
+                    isListening = false;
+                    processVoiceResults(results);
+                    if (isAppInForeground) {
+                        voiceHandler.postDelayed(() -> {
+                            if (isAppInForeground && !isListening) {
+                                startListeningSafely();
+                            }
+                        }, 1000);
+                    }
+                }
+
+                @Override
+                public void onPartialResults(Bundle partialResults) {
+                    processPartialVoiceResults(partialResults);
+                }
+
+                @Override
+                public void onEvent(int eventType, Bundle params) {}
+            });
+
+            if (isAppInForeground) {
+                startListeningSafely();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private synchronized void startListeningSafely() {
+        if (!isAppInForeground || speechRecognizer == null || speechIntent == null) return;
+        try {
+            speechRecognizer.startListening(speechIntent);
+        } catch (Exception ignored) {}
+    }
+
+    private void processVoiceResults(Bundle results) {
+        if (results == null) return;
+        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        if (matches == null || matches.isEmpty()) return;
+
+        for (String match : matches) {
+            String lower = match.toLowerCase(Locale.ROOT).trim();
+            if (isWakeWordMatch(lower)) {
+                triggerHapticFeedback(70);
+                String cmd = extractCommand(lower);
+                if (cmd.length() >= 2) {
+                    dispatchVoiceCommandToWeb(cmd);
+                } else {
+                    notifyWebWakeWordActivated();
+                }
+                return;
+            }
+        }
+    }
+
+    private void processPartialVoiceResults(Bundle partialResults) {
+        if (partialResults == null) return;
+        ArrayList<String> matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        if (matches == null || matches.isEmpty()) return;
+
+        for (String match : matches) {
+            String lower = match.toLowerCase(Locale.ROOT).trim();
+            if (isWakeWordMatch(lower)) {
+                triggerHapticFeedback(60);
+                notifyWebWakeWordActivated();
+                return;
+            }
+        }
+    }
+
+    private boolean isWakeWordMatch(String text) {
+        return text.contains("alberth") || text.contains("alberto") ||
+               text.contains("albert")  || text.contains("álbert")  ||
+               text.contains("álberth") || text.contains("alverth") ||
+               text.contains("alverto");
+    }
+
+    private String extractCommand(String text) {
+        return text.replaceAll("^.*?(alberth|alberto|albert|álbert|álberth|alverth|alverto)\\s*", "").trim();
+    }
+
+    private void triggerHapticFeedback(int ms) {
+        try {
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (v != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    v.vibrate(ms);
+                }
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void dispatchVoiceCommandToWeb(String cmd) {
+        runOnUiThread(() -> {
+            if (webView != null) {
+                String safeCmd = cmd.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ");
+                webView.evaluateJavascript("if (window.onNativeVoiceCommand) { window.onNativeVoiceCommand(\"" + safeCmd + "\"); }", null);
+            }
+        });
+    }
+
+    private void notifyWebWakeWordActivated() {
+        runOnUiThread(() -> {
+            if (webView != null) {
+                webView.evaluateJavascript("if (window.onNativeWakeWord) { window.onNativeWakeWord(); }", null);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isAppInForeground = true;
+        if (speechRecognizer != null && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            voiceHandler.postDelayed(this::startListeningSafely, 500);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isAppInForeground = false;
+        voiceHandler.removeCallbacksAndMessages(null);
+        if (speechRecognizer != null) {
+            try {
+                speechRecognizer.stopListening();
+                speechRecognizer.cancel();
+            } catch (Exception ignored) {}
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (speechRecognizer != null) {
+            try {
+                speechRecognizer.destroy();
+            } catch (Exception ignored) {}
+            speechRecognizer = null;
+        }
+    }
+
+    // ─── Navegación y URLs ──────────────────────────────────────────
 
     private void loadActiveUrl() {
         String url = prefs.getString(KEY_SERVER_URL, DEFAULT_TUNNEL_URL);
@@ -264,23 +525,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Bridge de JavaScript para comunicación bidireccional
+    // ─── Bridge de JavaScript (window.AlberthAndroid) ───────────────
+
     public class AlberthBridge {
         @JavascriptInterface
         public String getAppVersion() {
-            return "6.0-Quantum";
+            return "6.1-Quantum";
         }
 
         @JavascriptInterface
         public void vibrateDevice(int durationMs) {
-            try {
-                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                if (v != null) {
-                    v.vibrate(durationMs > 0 ? durationMs : 50);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            triggerHapticFeedback(durationMs > 0 ? durationMs : 50);
         }
 
         @JavascriptInterface
@@ -291,6 +546,15 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void showNativeToast(String msg) {
             runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
+        }
+
+        @JavascriptInterface
+        public void restartVoiceAssistant() {
+            runOnUiThread(() -> {
+                if (isAppInForeground) {
+                    startListeningSafely();
+                }
+            });
         }
     }
 }

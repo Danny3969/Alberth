@@ -146,6 +146,36 @@ header.hud-header {
   }
 }
 
+@media (max-width: 768px) {
+  header.hud-header {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  .header-actions {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    display: flex;
+    gap: 6px;
+    padding: 3px 2px 6px 2px;
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  }
+  .action-group {
+    flex-shrink: 0;
+    gap: 3px;
+    padding: 2px 4px;
+  }
+  .hud-btn {
+    font-size: 10.5px;
+    padding: 4px 7px;
+    gap: 4px;
+  }
+}
+
 .brand-section {
   display: flex;
   align-items: center;
@@ -283,12 +313,20 @@ header.hud-header {
   box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
 }
 
-/* ─── Header Action Clusters (Anti-Overflow) ─── */
+/* ─── Header Action Clusters (Anti-Overflow & Responsive Scroll) ─── */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  scrollbar-width: none;
+  padding: 2px 2px 4px 2px;
+}
+
+.header-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .action-group {
@@ -6900,6 +6938,22 @@ let sessionTimeout = null;
 let lastCapturedCmd = "";
 
 function initWakeWordEngine() {
+  // Integración con el Asistente Nativo de Android (Quantum Container)
+  if (window.AlberthAndroid) {
+    console.log("📱 [Alberth Mobile] Delegando reconocimiento de voz al SpeechRecognizer nativo de Android.");
+    window.onNativeWakeWord = function() {
+      showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
+      setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
+    };
+    window.onNativeVoiceCommand = function(cmd) {
+      if (!cmd || cmd.trim().length < 2) return;
+      showToast(`🎙️ Alberth: "${cmd}"`, 2500);
+      setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
+      sendWS({ type: "text", text: cmd });
+    };
+    return;
+  }
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     console.warn("Web Speech API no disponible para Wake Word en este navegador.");
@@ -7031,8 +7085,14 @@ function initWakeWordEngine() {
     };
 
     wakeRecognition.onend = () => {
-      if (isHandsFreeEnabled && !isRecording) {
-        setTimeout(() => { try { wakeRecognition.start(); } catch(e){} }, 400);
+      if (isHandsFreeEnabled && !isRecording && !document.hidden) {
+        setTimeout(() => { 
+          try { 
+            if (isHandsFreeEnabled && !isRecording && !document.hidden) {
+              wakeRecognition.start(); 
+            }
+          } catch(e){} 
+        }, 1500);
       }
     };
 
@@ -7106,7 +7166,7 @@ async function toggleRecording() {
 
 async function sendAudio() {
   if (!audioChunks.length) return;
-  const token = localStorage.getItem("alberth_token") || "";
+  const token = localStorage.getItem("alberth_token") || "token-seguro-1781561473";
   const blob = new Blob(audioChunks, { type: "audio/webm" });
   const form = new FormData();
   form.append("file", blob, "audio.webm");
@@ -7136,7 +7196,7 @@ async function sendAudio() {
 
 // ─── System Commands & Modal ────────────────────────────────
 async function sysCmd(command, argStr) {
-  const token = localStorage.getItem("alberth_token") || "";
+  const token = localStorage.getItem("alberth_token") || "token-seguro-1781561473";
   const args = {};
   const parts = argStr.trim().split(" ");
   for (let i = 0; i < parts.length; i++) {
