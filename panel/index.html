@@ -1195,14 +1195,20 @@ header.hud-header {
   background: linear-gradient(to right, rgba(0, 240, 255, 0.25), transparent);
 }
 
-/* 4 Intelligence Cards Row */
+/* 5 Intelligence Cards Row */
 .intel-cards-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1350px) {
+  .intel-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 850px) {
   .intel-cards-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1242,6 +1248,15 @@ header.hud-header {
 .intel-card-hyperframes:hover {
   border-color: #e2b774 !important;
   box-shadow: 0 0 16px rgba(226, 183, 116, 0.4) !important;
+}
+
+.intel-card-rea {
+  border-color: rgba(0, 255, 163, 0.35) !important;
+  background: linear-gradient(135deg, rgba(0, 255, 163, 0.08), rgba(6, 12, 26, 0.85)) !important;
+}
+.intel-card-rea:hover {
+  border-color: #00ffa3 !important;
+  box-shadow: 0 0 16px rgba(0, 255, 163, 0.4) !important;
 }
 
 /* ─── Hyperframes Video Studio Drawer Styles ─── */
@@ -3414,7 +3429,17 @@ header.hud-header {
                 <span class="app-name" style="color:#e2b774;">HYPERFRAMES // STUDIO</span>
                 <span class="app-action">Video Cinemático</span>
               </div>
+            </div>
 
+            <!-- Arquitectura REA: Ingeniería Inversa & Clean-Room -->
+            <div class="app-card intel-card-rea" id="card-rea" onclick="openReaStudio()" title="Arquitectura REA: Ingeniería Inversa, Auditoría de Código y Clean-Room">
+              <div class="app-icon" style="color:#00ffa3;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name" style="color:#00ffa3;">ARQUITECTURA // REA</span>
+                <span class="app-action">Ingeniería Inversa</span>
+              </div>
             </div>
           </div>
 
@@ -5598,6 +5623,15 @@ function toggleCanvasDrawer() {
   if (isCanvasOpen && !creativeStudioLoaded) {
     loadCreativeStudioMeta();
   }
+}
+
+function openReaStudio() {
+  const drawer = document.getElementById("canvas-drawer");
+  const btn = document.getElementById("btn-toggle-canvas");
+  isCanvasOpen = true;
+  if (drawer) drawer.classList.add("open");
+  if (btn) btn.classList.add("active");
+  switchCanvasTab('tab-rea');
 }
 
 function switchCanvasTab(tabId) {
