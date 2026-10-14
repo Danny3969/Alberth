@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alberth · Suite de Neuromarketing, Branding & Ads</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #040711;
+      --bg-secondary: #080f1d;
+      --bg-card: rgba(12, 22, 40, 0.75);
+      --border-color: rgba(0, 240, 255, 0.18);
+      --border-glow: rgba(0, 240, 255, 0.45);
+      --text-main: #f0f6fc;
+      --text-dim: #8b9bb4;
+      --cyan-bright: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --green-accent: #00ffa3;
+      --purple-accent: #a855f7;
+      --amber-accent: #ffaa00;
+      --card-radius: 14px;
+      --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, #0d1b33 0%, #040711 80%);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 36px 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(0, 240, 255, 0.2));
+      border: 1px solid var(--purple-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--purple-accent);
+      box-shadow: 0 0 24px rgba(168, 85, 247, 0.4);
+    }
+
+    .brand-titles h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ffffff 40%, var(--purple-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-titles p {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Tabs Bar */
+    .tabs-bar {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      margin-bottom: 32px;
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      background: rgba(12, 22, 40, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-dim);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      color: #ffffff;
+      background: rgba(168, 85, 247, 0.15);
+      border-color: var(--purple-accent);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.3);
+    }
+
+    /* Grids */
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+      margin-bottom: 36px;
+    }
+
+    /* Cards */
+    .suite-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .suite-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 10px 32px rgba(0, 240, 255, 0.12);
+      transform: translateY(-4px);
+    }
+
+    .suite-card.card-purple:hover {
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 10px 32px rgba(168, 85, 247, 0.2);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-badge {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-neuro { background: rgba(168, 85, 247, 0.15); color: var(--purple-accent); border: 1px solid rgba(168, 85, 247, 0.3); }
+    .badge-brand { background: rgba(0, 240, 255, 0.15); color: var(--cyan-bright); border: 1px solid rgba(0, 240, 255, 0.3); }
+    .badge-social { background: rgba(0, 255, 163, 0.15); color: var(--green-accent); border: 1px solid rgba(0, 255, 163, 0.3); }
+    .badge-ads { background: rgba(255, 170, 0, 0.15); color: var(--amber-accent); border: 1px solid rgba(255, 170, 0, 0.3); }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .card-text {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+
+    .card-list {
+      list-style: none;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-list li {
+      font-size: 13px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-list li::before {
+      content: "▹";
+      color: var(--cyan-bright);
+      font-weight: bold;
+    }
+
+    .card-action-btn {
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: rgba(0, 240, 255, 0.08);
+      color: var(--cyan-bright);
+      transition: var(--transition);
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .card-action-btn:hover {
+      background: var(--cyan-bright);
+      color: #040711;
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 18px var(--cyan-glow);
+    }
+
+    .card-action-btn.btn-purple {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.3);
+      color: var(--purple-accent);
+    }
+
+    .card-action-btn.btn-purple:hover {
+      background: var(--purple-accent);
+      color: #040711;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.5);
+    }
+
+    /* Live Generator Modal / Workspace Box */
+    .generator-box {
+      background: linear-gradient(180deg, rgba(16, 28, 52, 0.7) 0%, rgba(8, 15, 29, 0.8) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--card-radius);
+      padding: 28px;
+      margin-top: 36px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .generator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .generator-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #060a14;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: #ffffff;
+      font-size: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: var(--transition);
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .btn-submit-generator {
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff 0%, #a855f7 100%);
+      color: #040711;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-submit-generator:hover {
+      box-shadow: 0 0 32px rgba(168, 85, 247, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .output-area {
+      margin-top: 24px;
+      background: #03060c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+            <path d="M12 2a10 10 0 0 1 10 10h-10V2z" opacity="0.5"></path>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>Alberth · Suite de Neuromarketing, Branding & Redes Sociales</h1>
+          <p>Motor de Inteligencia Conductual, Campañas Publicitarias y Creación de Marcas</p>
+        </div>
+      </div>
+      <div>
+        <a href="tech_radar.html" class="tab-btn" style="border-color:var(--cyan-bright); color:var(--cyan-bright);">
+          &larr; Volver al Tech Radar
+        </a>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchSection('all')">Todos los Módulos</button>
+      <button class="tab-btn" onclick="switchSection('neuro')">🧠 Neuromarketing & Psicología</button>
+      <button class="tab-btn" onclick="switchSection('brand')">💎 Branding & Arquetipos</button>
+      <button class="tab-btn" onclick="switchSection('social')">📱 Redes Sociales & Viralidad</button>
+      <button class="tab-btn" onclick="switchSection('ads')">🎯 Paid Media & Campañas Ads</button>
+      <button class="tab-btn" onclick="switchSection('tools')">⚡ Herramientas IA Conectadas</button>
+    </div>
+
+    <!-- SECCIÓN: NEUROMARKETING -->
+    <div class="section-container" id="sec-neuro">
+      <h2 style="font-size: 20px; margin-bottom: 18px; color: var(--purple-accent); display:flex; align-items:center; gap:8px;">
+        🧠 1. Neuromarketing y Psicología del Consumidor
+      </h2>
+      <div class="section-grid">
+        <div class="suite-card card-purple">
+          <div class="card-header">
+            <span class="card-badge badge-neuro">Neurociencia</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Sistema 1 vs 2</span>
+          </div>
+          <h3 class="card-title">Arquitectura de Persuasión Subconsciente</h3>
+          <p class="card-text">Activación del Sistema 1 (decisiones inmediatas por emoción y familiaridad) antes de apelar a la justificación lógica del Sistema 2.</p>
+          <ul class="card-list">
+            <li><strong>Aversión a la pérdida:</strong> Framing enfocado en lo que el cliente perderá si no actúa hoy.</li>
+            <li><strong>Efecto Anclaje:</strong> Presentación previa de valor para maximizar percepción de oferta.</li>
+            <li><strong>Prueba social cuantificada:</strong> Disipación de riesgo con métricas exactas.</li>
+          </ul>
+          <button class="card-action-btn btn-purple" onclick="presetNeuromarketing('persuasion')">Aplicar Gatillos Persuasivos</button>
+        </div>
+
+        <div class="suite-card card-purple">
+          <div class="card-header">
+            <span class="card-badge badge-neuro">Saliencia Visual</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Eye-Tracking AI</span>
+          </div>
+          <h3 class="card-title">Jerarquía Óptica y Mapas de Calor</h3>
+          <p class="card-text">Diseño de banners y portadas siguiendo los patrones F-Pattern y Z-Pattern para capturar el punto de fijación en los primeros 50 milisegundos.</p>
+          <ul class="card-list">
+            <li><strong>Mirada dirigida:</strong> Rostros mirando al CTA aumentan clics en un +34%.</li>
+            <li><strong>Efecto Von Restorff:</strong> Botones y ofertas en contraste extremo de color.</li>
+            <li><strong>Reducción de carga cognitiva:</strong> 1 solo objetivo de atención por pantalla.</li>
+          </ul>
+          <button class="card-action-btn btn-purple" onclick="presetNeuromarketing('visual')">Optimizar Jerarquía Visual</button>
+        </div>
+
+        <div class="suite-card card-purple">
+          <div class="card-header">
+            <span class="card-badge badge-neuro">Dopamina</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Retención</span>
+          </div>
+          <h3 class="card-title">Bucles de Curiosidad y Recompensa</h3>
+          <p class="card-text">Creación de ganchos (hooks) con brechas de información ("Information Gap") que obligan al cerebro a completar la historia hasta el final.</p>
+          <ul class="card-list">
+            <li><strong>Interrupción de patrón:</strong> Movimiento inicial atípico o afirmación chocante.</li>
+            <li><strong>Recompensa escalonada:</strong> Entregar micro-soluciones cada 15 segundos.</li>
+            <li><strong>Micro-compromisos:</strong> Preguntas de "Sí o No" que facilitan la conversión final.</li>
+          </ul>
+          <button class="card-action-btn btn-purple" onclick="presetNeuromarketing('dopamine')">Crear Bucle de Retención</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: BRANDING & IDENTIDAD -->
+    <div class="section-container" id="sec-brand">
+      <h2 style="font-size: 20px; margin-bottom: 18px; color: var(--cyan-bright); display:flex; align-items:center; gap:8px;">
+        💎 2. Branding 360° y Creación de Marcas
+      </h2>
+      <div class="section-grid">
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-brand">Identidad</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Carl Jung</span>
+          </div>
+          <h3 class="card-title">Arquetipos de Marca & Personalidad</h3>
+          <p class="card-text">Definición psicológica del rol que ocupará su marca en la mente colectiva del mercado (El Sabio, El Gobernante, El Mago, El Héroe o El Rebelde).</p>
+          <ul class="card-list">
+            <li><strong>Brand Voice:</strong> Matriz de adjetivos (Lo que somos vs lo que jamás seremos).</li>
+            <li><strong>Narrativa de Origen:</strong> El viaje del héroe aplicado al cliente de la marca.</li>
+            <li><strong>Posicionamiento defensible:</strong> La Promesa Única de Valor (UVP) inigualable.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetBranding('archetype')">Definir Arquetipo de Marca</button>
+        </div>
+
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-brand">Visual Design</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Tokens & Style</span>
+          </div>
+          <h3 class="card-title">Manual de Identidad & Design System</h3>
+          <p class="card-text">Sistemas cromáticos accesibles (OKLCH), jerarquía tipográfica, directrices de imagotipo y diseño de empaques o mockups fotorrealistas con IA.</p>
+          <ul class="card-list">
+            <li><strong>Tokens de color:</strong> Primario, Secundario, Neutros oscuros y Acentos.</li>
+            <li><strong>Tipografías complementarias:</strong> Display con carácter + sans-serif legible.</li>
+            <li><strong>Prompts para Midjourney/Flux:</strong> Generación de fotografía publicitaria de estudio.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetBranding('manual')">Generar Manual de Identidad</button>
+        </div>
+
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-brand">GEO / AEO</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">AI Visibility</span>
+          </div>
+          <h3 class="card-title">Optimización para Motores Generativos</h3>
+          <p class="card-text">Estrategia para que inteligencias artificiales (ChatGPT, Perplexity, Gemini, Claude) recomienden su marca cuando los usuarios busquen soluciones en su nicho.</p>
+          <ul class="card-list">
+            <li><strong>Semántica de entidad:</strong> Estructuración de datos para indexación por LLMs.</li>
+            <li><strong>Citación de autoridad:</strong> Publicaciones en foros y repositorios de referencia.</li>
+            <li><strong>Auditoría de sentimiento:</strong> Monitoreo de cómo la IA describe a su marca.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetBranding('geo')">Estrategia de Visibilidad IA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: REDES SOCIALES -->
+    <div class="section-container" id="sec-social">
+      <h2 style="font-size: 20px; margin-bottom: 18px; color: var(--green-accent); display:flex; align-items:center; gap:8px;">
+        📱 3. Administración y Creación de Redes Sociales
+      </h2>
+      <div class="section-grid">
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-social">Estructura</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Viral Loops</span>
+          </div>
+          <h3 class="card-title">Guiones "Hook · Story · Offer"</h3>
+          <p class="card-text">Guiones optimizados para Reels, TikTok y YouTube Shorts con retención superior al 70% mediante cambios de plano cada 2.5 segundos.</p>
+          <ul class="card-list">
+            <li><strong>Ganchos de 3 segundos:</strong> 5 variantes de apertura por cada idea central.</li>
+            <li><strong>Visual B-Roll:</strong> Instrucciones de encuadres, gráficos y efectos sonoros.</li>
+            <li><strong>Llamados a la acción de baja fricción:</strong> "Comenta la palabra X para enviarte el PDF".</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetSocial('reels')">Diseñar Guión de Reel/TikTok</button>
+        </div>
+
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-social">Planificación</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Calendario 30D</span>
+          </div>
+          <h3 class="card-title">Calendario Editorial Multiplataforma</h3>
+          <p class="card-text">Matriz estratégica que distribuye el contenido en 4 pilares: Atracción (viral), Autoridad (educación técnica), Afinidad (detrás de cámaras) y Conversión.</p>
+          <ul class="card-list">
+            <li><strong>Pacing semanal:</strong> 3 Reels + 2 Carruseles + 1 Live + Stories diarias.</li>
+            <li><strong>Hilos de X / Twitter:</strong> Condensación de valor en micro-lecciones.</li>
+            <li><strong>LinkedIn Thought Leadership:</strong> Ensayos ejecutivos orientados a tomadores de decisión.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetSocial('calendar')">Crear Calendario de 30 Días</button>
+        </div>
+
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-social">Engagement</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Fidelización</span>
+          </div>
+          <h3 class="card-title">Carruseles Educativos de Alto Guardado</h3>
+          <p class="card-text">Diseño de diapositivas tipo infografía densa de conocimiento que incentivan el botón "Guardar", la métrica más premiada por el algoritmo de Instagram.</p>
+          <ul class="card-list">
+            <li><strong>Slide 1 (Portada):</strong> Pregunta chocante o promesa cuantificable.</li>
+            <li><strong>Slides 2-7 (Framework):</strong> Pasos ejecutables sin palabrería.</li>
+            <li><strong>Slide 8 (Resumen & CTA):</strong> Invitación a guardar para referencia futura.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetSocial('carousel')">Redactar Carrusel Completo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: CAMPAÑAS Y PUBLICIDAD (PAID MEDIA) -->
+    <div class="section-container" id="sec-ads">
+      <h2 style="font-size: 20px; margin-bottom: 18px; color: var(--amber-accent); display:flex; align-items:center; gap:8px;">
+        🎯 4. Campañas Publicitarias y Paid Media (Meta, Google, TikTok)
+      </h2>
+      <div class="section-grid">
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-ads">Meta & TikTok</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Advantage+</span>
+          </div>
+          <h3 class="card-title">Arquitectura Full-Funnel (TOF, MOF, BOF)</h3>
+          <p class="card-text">Estructura de pauta profesional con segmentación algorítmica por creativos, pruebas de ángulo publicitario y presupuesto unificado (CBO/Advantage+).</p>
+          <ul class="card-list">
+            <li><strong>TOF (Prospección Fría):</strong> Creativos de problema-solución y desmitificación.</li>
+            <li><strong>MOF (Consideración):</strong> Demostraciones de producto y casos de éxito.</li>
+            <li><strong>BOF (Conversión):</strong> Ofertas irresistibles y garantías de reembolso.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetAds('meta')">Estructurar Campaña de Meta/TikTok</button>
+        </div>
+
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-ads">Google Ads</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">RSA 15 Titulares</span>
+          </div>
+          <h3 class="card-title">Responsive Search Ads & Performance Max</h3>
+          <p class="card-text">Generación de la matriz de 15 titulares y 4 descripciones garantizando coherencia lógica en cualquier permutación algorítmica de Google con Ad Strength Excelente.</p>
+          <ul class="card-list">
+            <li><strong>Titulares 1-5:</strong> Palabras clave exactas e intención de compra.</li>
+            <li><strong>Titulares 6-10:</strong> Beneficios tangibles y prueba social.</li>
+            <li><strong>Titulares 11-15:</strong> Urgencia, exclusividad y llamadas a la acción directas.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetAds('google')">Generar Set de 15 Titulares RSA</button>
+        </div>
+
+        <div class="suite-card">
+          <div class="card-header">
+            <span class="card-badge badge-ads">Testing</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono'">Fatigue Defense</span>
+          </div>
+          <h3 class="card-title">Matriz de Pruebas A/B & Fatiga Creativa</h3>
+          <p class="card-text">Sistema de rotación continua para reemplazar anuncios antes de que el CTR decaiga y el Costo por Adquisición (CPA) se dispare.</p>
+          <ul class="card-list">
+            <li><strong>Variables aisladas:</strong> Testear 1 solo elemento por tanda (Hook vs Visual).</li>
+            <li><strong>Criterio de parada:</strong> Umbrales estadísticos claros para apagar anuncios.</li>
+            <li><strong>Escalado vertical y horizontal:</strong> Aumento de presupuesto sin reiniciar fase de aprendizaje.</li>
+          </ul>
+          <button class="card-action-btn" onclick="presetAds('testing')">Diseñar Plan de Testing A/B</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERADOR INTERACTIVO ALBERTH -->
+    <div class="generator-box">
+      <div class="generator-header">
+        <h3>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Consola Estratégica: Generar con Alberth
+        </h3>
+        <span style="font-size:12px; font-family:'JetBrains Mono'; color:var(--cyan-bright);">MOTOR CONDUCTUAL ACTIVO</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre de la Marca o Proyecto:</label>
+          <input type="text" id="brand-name" class="form-input" placeholder="Ej: Quantum Logistics, Nova Coffee, Elite Consulting...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Objetivo Principal:</label>
+          <select id="campaign-goal" class="form-select">
+            <option value="ads">Campaña Publicitaria de Conversión (Meta/Google Ads)</option>
+            <option value="branding">Creación de Marca & Brand Kit Completo</option>
+            <option value="neuro">Estrategia de Neuromarketing & Saliencia Visual</option>
+            <option value="social">Calendario y Guiones de Redes Sociales (Reels/TikTok)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cliente Ideal (ICP) / Público Objetivo:</label>
+          <input type="text" id="target-audience" class="form-input" placeholder="Ej: Empresarios de 30-50 años, estudiantes universitarios, dueños de eCommerce...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gatillo Psicológico Principal:</label>
+          <select id="neuro-trigger" class="form-select">
+            <option value="loss_aversion">Aversión a la Pérdida (Miedo a perder ventajas/dinero)</option>
+            <option value="social_proof">Prueba Social & Autoridad (Validación por pares)</option>
+            <option value="scarcity">Escasez y Exclusividad (Acceso limitado)</option>
+            <option value="anchoring">Efecto Anclaje (Percepción de valor masivo vs precio)</option>
+            <option value="curiosity">Bucle de Curiosidad (Interrupción de patrón)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Detalles del Producto, Oferta o Servicio:</label>
+        <textarea id="product-details" class="form-textarea" rows="3" placeholder="Describe qué vende, cuál es el precio aproximado o la promesa central..."></textarea>
+      </div>
+
+      <button class="btn-submit-generator" onclick="generateMarketingBrief()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Generar Estrategia Ejecutiva con Alberth
+      </button>
+
+      <div id="output-brief" class="output-area"></div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchSection(cat) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const sections = {
+        'neuro': 'sec-neuro',
+        'brand': 'sec-brand',
+        'social': 'sec-social',
+        'ads': 'sec-ads'
+      };
+
+      if (cat === 'all') {
+        Object.values(sections).forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'block';
+        });
+      } else {
+        Object.keys(sections).forEach(key => {
+          const el = document.getElementById(sections[key]);
+          if (el) {
+            el.style.display = (key === cat) ? 'block' : 'none';
+          }
+        });
+      }
+    }
+
+    function presetNeuromarketing(type) {
+      document.getElementById('campaign-goal').value = 'neuro';
+      document.getElementById('neuro-trigger').value = (type === 'persuasion') ? 'loss_aversion' : (type === 'visual') ? 'social_proof' : 'curiosity';
+      window.scrollTo({ top: document.querySelector('.generator-box').offsetTop - 40, behavior: 'smooth' });
+    }
+
+    function presetBranding(type) {
+      document.getElementById('campaign-goal').value = 'branding';
+      window.scrollTo({ top: document.querySelector('.generator-box').offsetTop - 40, behavior: 'smooth' });
+    }
+
+    function presetSocial(type) {
+      document.getElementById('campaign-goal').value = 'social';
+      window.scrollTo({ top: document.querySelector('.generator-box').offsetTop - 40, behavior: 'smooth' });
+    }
+
+    function presetAds(type) {
+      document.getElementById('campaign-goal').value = 'ads';
+      window.scrollTo({ top: document.querySelector('.generator-box').offsetTop - 40, behavior: 'smooth' });
+    }
+
+    function generateMarketingBrief() {
+      const brand = document.getElementById('brand-name').value.trim() || "Marca Confidencial";
+      const goal = document.getElementById('campaign-goal').value;
+      const audience = document.getElementById('target-audience').value.trim() || "Público objetivo calificado";
+      const trigger = document.getElementById('neuro-trigger').options[document.getElementById('neuro-trigger').selectedIndex].text;
+      const details = document.getElementById('product-details').value.trim() || "Solución de alto valor y diferenciación competitiva.";
+
+      const out = document.getElementById('output-brief');
+      out.style.display = 'block';
+      
+      let template = `══════════════════════════════════════════════════════════════════════════════
+ESTRATEGIA GENERADA POR ALBERTH · DIVISIÓN DE MARKETING & NEUROMARKETING
+══════════════════════════════════════════════════════════════════════════════
+MARCA: ${brand.toUpperCase()}
+OBJETIVO: ${goal.toUpperCase()}
+ICP / AUDIENCIA: ${audience}
+GATILLO DE NEUROMARKETING: ${trigger}
+OFERTA / SERVICIO: ${details}
+
+──────────────────────────────────────────────────────────────────────────────
+1. GANCHO DE ATENCIÓN (HOOK - PRIMEROS 3 SEGUNDOS):
+   • Variante A (Controversia/Quiebre): "¿Por qué el 90% de ${audience} comete este error garrafal al elegir su solución?"
+   • Variante B (Aversión a la Pérdida): "Cada día que sigues sin resolver esto, tu negocio pierde clientes frente a competidores más rápidos."
+   • Variante C (Resultado Cuantificable): "El método exacto que permitió a ${brand} multiplicar los resultados en solo 14 días."
+
+2. DESARROLLO NARRATIVO (STORY & BODY):
+   • Agitación del Problema: Visibilizar el síntoma visible y revelar la causa raíz oculta.
+   • Introducción de la Mecánica Única: Por qué las soluciones tradicionales fallan y cómo ${brand} elimina la fricción.
+   • Prueba Social & Autoridad: Integrar métricas exactas y validación empírica para silenciar las objeciones del Sistema 2.
+
+3. ARQUITECTURA DE LLAMADO A LA ACCIÓN (MICRO-CTA):
+   • CTA Principal: "Haga clic abajo para acceder al informe exclusivo y asegurar su plaza antes de que se agoten los cupos."
+   • Gatillo de Cierre: Escasez verificable con garantía de satisfacción 100% libre de riesgo.
+
+4. ESPECIFICACIÓN VISUAL (STUDIO PROMPT PARA IA):
+   "High-end commercial photography, sleek minimalist aesthetic, premium studio lighting, dramatic contrast, elegant composition representing ${brand}, cinematic depth of field, 8k resolution, photorealistic."
+══════════════════════════════════════════════════════════════════════════════`;
+
+      out.textContent = template;
+      out.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
