@@ -16,6 +16,7 @@ import android.os.Vibrator;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     // Asistente Nativo de Voz y Detección de Wake Word ("Alberth")
     private SpeechRecognizer speechRecognizer;
     private Intent speechIntent;
+    private TextToSpeech tts;
     private boolean isAppInForeground = false;
     private boolean isListening = false;
     private final Handler voiceHandler = new Handler(Looper.getMainLooper());
@@ -91,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         applyWindowInsetsPadding();
         setupSwipeRefresh();
         setupWebView();
+        initTextToSpeech();
         requestHardwarePermissions();
 
         btnRetry.setOnClickListener(v -> loadActiveUrl());
@@ -112,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             if (Intent.ACTION_ASSIST.equals(action) || Intent.ACTION_VOICE_COMMAND.equals(action)) {
                 triggerHapticFeedback(90);
+                speakNativeText("Dígame, Señor");
                 notifyWebWakeWordActivated();
             }
         }
@@ -381,11 +385,12 @@ public class MainActivity extends AppCompatActivity {
         return text.contains("alberth") || text.contains("alberto") ||
                text.contains("albert")  || text.contains("álbert")  ||
                text.contains("álberth") || text.contains("alverth") ||
-               text.contains("alverto");
+               text.contains("alverto") || text.contains("albeth")  ||
+               text.contains("albet")   || text.contains("alber");
     }
 
     private String extractCommand(String text) {
-        return text.replaceAll("^.*?(alberth|alberto|albert|álbert|álberth|alverth|alverto)\\s*", "").trim();
+        return text.replaceAll("^.*?(alberth|alberto|albert|álbert|álberth|alverth|alverto|albeth|albet|alber)\\s*", "").trim();
     }
 
     private void triggerHapticFeedback(int ms) {
@@ -446,6 +451,30 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
             speechRecognizer = null;
         }
+        if (tts != null) {
+            try {
+                tts.stop();
+                tts.shutdown();
+            } catch (Exception ignored) {}
+            tts = null;
+        }
+    }
+
+    private void initTextToSpeech() {
+        tts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(new Locale("es", "ES"));
+                tts.setSpeechRate(1.05f);
+            }
+        });
+    }
+
+    public void speakNativeText(String text) {
+        runOnUiThread(() -> {
+            if (tts != null) {
+                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "AlberthTTS_" + System.currentTimeMillis());
+            }
+        });
     }
 
     // ─── Navegación y URLs ──────────────────────────────────────────
@@ -510,7 +539,7 @@ public class MainActivity extends AppCompatActivity {
     public class AlberthBridge {
         @JavascriptInterface
         public String getAppVersion() {
-            return "6.1-Quantum";
+            return "6.3-Quantum";
         }
 
         @JavascriptInterface
@@ -526,6 +555,41 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void showNativeToast(String msg) {
             runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
+        }
+
+        @JavascriptInterface
+        public void speakNative(String text) {
+            speakNativeText(text);
+        }
+
+        @JavascriptInterface
+        public void startCopilotService() {
+            runOnUiThread(() -> {
+                try {
+                    Intent serviceIntent = new Intent(MainActivity.this, CopilotService.class);
+                    serviceIntent.setAction(CopilotService.ACTION_START_COPILOT);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(serviceIntent);
+                    } else {
+                        startService(serviceIntent);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopCopilotService() {
+            runOnUiThread(() -> {
+                try {
+                    Intent serviceIntent = new Intent(MainActivity.this, CopilotService.class);
+                    serviceIntent.setAction(CopilotService.ACTION_STOP_COPILOT);
+                    startService(serviceIntent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
         @JavascriptInterface

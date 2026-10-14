@@ -386,6 +386,24 @@ header.hud-header {
   box-shadow: 0 0 14px rgba(56, 249, 215, 0.4);
 }
 
+.hud-btn-copilot {
+  color: #ffaa00;
+  border-color: rgba(255, 170, 0, 0.45);
+  background: rgba(255, 170, 0, 0.08);
+}
+.hud-btn-copilot:hover {
+  border-color: #ffaa00;
+  box-shadow: 0 0 14px rgba(255, 170, 0, 0.5);
+  transform: translateY(-1px);
+}
+.hud-btn-copilot.active {
+  background: #ffaa00;
+  color: #040711;
+  font-weight: 800;
+  border-color: #ffaa00;
+  box-shadow: 0 0 18px rgba(255, 170, 0, 0.8);
+}
+
 .hud-btn-god {
   color: #00f0ff;
   border-color: rgba(0, 240, 255, 0.35);
@@ -3370,6 +3388,12 @@ header.hud-header {
     <div class="header-actions">
       <!-- Clúster Alpha: Operaciones Prime -->
       <div class="action-group action-group-prime">
+        <button class="hud-btn hud-btn-copilot" id="btn-copilot" onclick="toggleCopilotMode()" title="Modo Copiloto Manos Libres (Auto y Moto)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+          <span id="btn-copilot-txt">Copiloto</span>
+          <span id="copilot-dot" class="badge-dot-prime" style="background:#ffaa00;display:none;margin-left:2px;"></span>
+        </button>
+
         <button class="hud-btn hud-btn-prime" id="btn-toggle-multiagent" onclick="toggleMultiAgentDrawer()" title="Centro de Operaciones Multi-Agente (LangGraph + Debate Adversarial)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           <span>Multi-Agente</span>
@@ -5104,6 +5128,9 @@ async function connectLiveWS() {
         handleLiveInterruption();
       } else if (data.type === "user_transcript") {
         renderLiveTranscript("user", data.text);
+        if (isCopilotActive) {
+          handleCopilotVoiceStep(data.text);
+        }
       } else if (data.type === "ai_transcript") {
         renderLiveTranscript("alberth", data.text);
       } else if (data.type === "turn_complete") {
@@ -5155,6 +5182,164 @@ function toggleUltraLiveMode() {
     }
     showToast("🟢 Modo Estándar restablecido", 2500);
     setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODO COPILOTO / MANOS LIBRES (AUTO Y MOTO)
+// ═══════════════════════════════════════════════════════════════
+let isCopilotActive = false;
+let copilotWakeStep = 0; // 0 = Standby, 1 = Esperando "Activa modo copiloto", 2 = Conversación activa
+let copilotStepTimeout = null;
+let copilotWakeLock = null;
+
+function speakAlberthVoicePrompt(text) {
+  if (window.AlberthAndroid && window.AlberthAndroid.speakNative) {
+    window.AlberthAndroid.speakNative(text);
+  } else if ('speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'es-ES';
+      u.rate = 1.05;
+      window.speechSynthesis.speak(u);
+    } catch(e) {}
+  }
+}
+
+function handleCopilotVoiceStep(transcript) {
+  if (!transcript) return false;
+  const t = transcript.toLowerCase().trim();
+
+  // Caso A: Si ya estamos en conversación activa, escuchar frase de cierre
+  if (isCopilotActive && isLiveModeActive) {
+    if (/\b(gracias\s+alberth\s*,?\s*es\s+todo|gracias\s+alberth|es\s+todo\s+alberth|alberth\s+descansar|alberth\s+es\s+todo|cerrar\s+copiloto)\b/i.test(t)) {
+      console.log("🛑 Frase de cierre detectada en Copiloto:", t);
+      stopCopilotMode(true);
+      return true;
+    }
+    return false;
+  }
+
+  // Caso B: Paso 1 — Detección de 'Alberth' / 'Albeth'
+  if (copilotWakeStep === 0) {
+    if (/\b(alberth|albert|alberto|albeth|álberth|álbert|alverth)\b/i.test(t)) {
+      copilotWakeStep = 1;
+      setHUDState("listening", "🎙️ ALBERTH: 'DÍGAME, SEÑOR'...");
+      showToast("🎙️ Alberth: 'Dígame, Señor'", 3000);
+      speakAlberthVoicePrompt("Dígame, Señor");
+
+      // Si el usuario dijo la frase completa de corrido (ej. "Alberth activa modo copiloto")
+      if (/\b(activa|activar|pon|inicia|iniciar)\b.*\b(copiloto|modo\s+copiloto)\b/i.test(t)) {
+        setTimeout(() => startCopilotMode(true), 1200);
+        return true;
+      }
+
+      // En Android, activar escucha para el paso 2 tras pronunciar "Dígame, Señor"
+      if (window.AlberthAndroid && window.AlberthAndroid.restartVoiceAssistant) {
+        setTimeout(() => {
+          if (copilotWakeStep === 1) {
+            window.AlberthAndroid.restartVoiceAssistant();
+          }
+        }, 1400);
+      }
+
+      // Esperar hasta 8 segundos para el Paso 2
+      clearTimeout(copilotStepTimeout);
+      copilotStepTimeout = setTimeout(() => {
+        if (copilotWakeStep === 1) {
+          copilotWakeStep = 0;
+          setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        }
+      }, 8000);
+      return true;
+    }
+  }
+
+  // Caso C: Paso 2 — Esperando confirmación "Activa modo copiloto"
+  if (copilotWakeStep === 1) {
+    if (/\b(activa|activar|pon|inicia|iniciar|abrir|abre|modo)\b.*\b(copiloto|modo\s+copiloto)\b/i.test(t) || /\b(copiloto)\b/i.test(t)) {
+      clearTimeout(copilotStepTimeout);
+      startCopilotMode(true);
+      return true;
+    } else {
+      clearTimeout(copilotStepTimeout);
+      copilotWakeStep = 0;
+      sendWS({ type: "text", text: t });
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function startCopilotMode(fromVoice = false) {
+  isCopilotActive = true;
+  copilotWakeStep = 2;
+  const btn = document.getElementById("btn-copilot");
+  const dot = document.getElementById("copilot-dot");
+  if (btn) btn.classList.add("active");
+  if (dot) dot.style.display = "inline-block";
+
+  speakAlberthVoicePrompt("Modo Copiloto activado. A sus órdenes, Señor.");
+  showToast("🚗 Modo Copiloto Activo · Manos Libres", 4000);
+  setHUDState("speaking", "🚗 MODO COPILOTO ACTIVO");
+
+  if (window.AlberthAndroid && window.AlberthAndroid.startCopilotService) {
+    window.AlberthAndroid.startCopilotService();
+  }
+
+  try {
+    if ('wakeLock' in navigator && !copilotWakeLock) {
+      copilotWakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+
+  setTimeout(() => {
+    if (!isLiveModeActive) {
+      toggleUltraLiveMode();
+    }
+  }, 1200);
+}
+
+function stopCopilotMode(withFarewell = true) {
+  isCopilotActive = false;
+  copilotWakeStep = 0;
+  clearTimeout(copilotStepTimeout);
+
+  const btn = document.getElementById("btn-copilot");
+  const dot = document.getElementById("copilot-dot");
+  if (btn) btn.classList.remove("active");
+  if (dot) dot.style.display = "none";
+
+  if (withFarewell) {
+    speakAlberthVoicePrompt("Entendido Señor, que tenga un excelente viaje.");
+    showToast("🚗 Modo Copiloto finalizado. Buen viaje, Señor.", 4000);
+  }
+
+  if (isLiveModeActive) {
+    toggleUltraLiveMode();
+  }
+
+  if (window.AlberthAndroid && window.AlberthAndroid.stopCopilotService) {
+    setTimeout(() => {
+      window.AlberthAndroid.stopCopilotService();
+    }, 2500);
+  }
+
+  if (copilotWakeLock) {
+    try { copilotWakeLock.release(); } catch(e){}
+    copilotWakeLock = null;
+  }
+
+  setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+}
+
+function toggleCopilotMode() {
+  if (isCopilotActive) {
+    stopCopilotMode(false);
+  } else {
+    startCopilotMode(false);
   }
 }
 
@@ -6940,16 +7125,18 @@ let lastCapturedCmd = "";
 function initWakeWordEngine() {
   // Integración con el Asistente Nativo de Android (Quantum Container)
   if (window.AlberthAndroid) {
-    console.log("📱 [Alberth Mobile] Delegando reconocimiento de voz al SpeechRecognizer nativo de Android.");
+    console.log("📱 [Alberth Mobile] Integración con contenedor Android y Modo Copiloto.");
     window.onNativeWakeWord = function() {
-      showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
-      setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
+      handleCopilotVoiceStep("alberth");
     };
     window.onNativeVoiceCommand = function(cmd) {
       if (!cmd || cmd.trim().length < 2) return;
-      showToast(`🎙️ Alberth: "${cmd}"`, 2500);
-      setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
-      sendWS({ type: "text", text: cmd });
+      const handled = handleCopilotVoiceStep(cmd);
+      if (!handled) {
+        showToast(`🎙️ Alberth: "${cmd}"`, 2500);
+        setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
+        sendWS({ type: "text", text: cmd });
+      }
     };
     return;
   }
