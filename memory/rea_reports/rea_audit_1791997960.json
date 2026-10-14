@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "type": "single_file",
+  "name": "alberth_rea_engine.py",
+  "path": "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth/alberth_rea_engine.py",
+  "size_kb": 21.87,
+  "lines": 488,
+  "language": "Python",
+  "components": [],
+  "imports": [
+    "__future__",
+    "ast",
+    "json",
+    "os",
+    "pathlib",
+    "re",
+    "shutil",
+    "sys",
+    "time",
+    "typing",
+    "zipfile"
+  ],
+  "endpoints": [
+    "/api/{target_name.lower().replace("
+  ],
+  "secrets_detected": [],
+  "summary": "Archivo alberth_rea_engine.py (Python): 488 líneas, 9 funciones, 1 clases, 1 rutas/endpoints detectados.",
+  "classes": [
+    {
+      "name": "AlberthREAEngine",
+      "methods": [
+        "inspect_code_architecture",
+        "_inspect_single_file",
+        "_inspect_directory",
+        "_parse_python_ast",
+        "_parse_js_ts",
+        "_detect_language",
+        "inspect_package_bundle",
+        "_inspect_zip_or_apk",
+        "generate_clean_room_specification"
+      ],
+      "line": 26
+    }
+  ],
+  "functions": [
+    {
+      "name": "inspect_code_architecture",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 30
+    },
+    {
+      "name": "_inspect_single_file",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 68
+    },
+    {
+      "name": "_inspect_directory",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 124
+    },
+    {
+      "name": "_parse_python_ast",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 226
+    },
+    {
+      "name": "_parse_js_ts",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 263
+    },
+    {
+      "name": "_detect_language",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 278
+    },
+    {
+      "name": "inspect_package_bundle",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 292
+    },
+    {
+      "name": "_inspect_zip_or_apk",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 327
+    },
+    {
+      "name": "generate_clean_room_specification",
+      "async": false,
+      "decorators": [
+        "staticmethod"
+      ],
+      "line": 412
+    }
+  ],
+  "execution_time_ms": 19.26,
+  "timestamp": "2026-10-14 12:12:40"
+}

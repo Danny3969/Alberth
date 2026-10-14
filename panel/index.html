@@ -1282,6 +1282,167 @@ header.hud-header {
 .hyperframes-drawer.open {
   right: 16px;
 }
+
+/* ─── REA Reverse Engineering Console Drawer Styles ─── */
+.rea-drawer {
+  position: fixed;
+  top: 75px;
+  right: -720px;
+  width: 680px;
+  max-width: 96vw;
+  bottom: 80px;
+  background: rgba(6, 12, 26, 0.98);
+  border: 1px solid rgba(0, 255, 163, 0.45);
+  border-radius: 16px;
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(0, 255, 163, 0.08);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  z-index: 104;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.rea-drawer.open {
+  right: 16px;
+}
+.rea-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(0, 255, 163, 0.2);
+  background: rgba(0, 255, 163, 0.04);
+}
+.rea-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-hud);
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #00ffa3;
+  text-shadow: 0 0 12px rgba(0, 255, 163, 0.4);
+}
+.rea-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Canvas Prompt Footer & Living Workspace Styles ─── */
+.canvas-prompt-footer {
+  background: rgba(4, 9, 20, 0.96);
+  border-top: 1px solid rgba(0, 240, 255, 0.22);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+.canvas-prompt-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.canvas-prompt-input {
+  flex: 1;
+  background: rgba(0, 16, 32, 0.75);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-data, sans-serif);
+  font-size: 11.5px;
+  padding: 9px 12px;
+  resize: none;
+  outline: none;
+  transition: all 0.2s ease;
+  min-height: 38px;
+  max-height: 90px;
+}
+.canvas-prompt-input:focus {
+  border-color: var(--cyan, #00f0ff);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+  background: rgba(0, 20, 42, 0.92);
+}
+.canvas-prompt-send-btn {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(0, 130, 255, 0.35));
+  border: 1px solid var(--cyan, #00f0ff);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-hud, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0 15px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.canvas-prompt-send-btn:hover {
+  background: var(--cyan, #00f0ff);
+  color: #000;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.6);
+}
+.canvas-quick-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.canvas-quick-chips::-webkit-scrollbar {
+  display: none;
+}
+.canvas-chip {
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  color: var(--text-dim, #8ba2b8);
+  font-family: var(--font-hud, monospace);
+  font-size: 9.5px;
+  padding: 4px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.canvas-chip:hover {
+  color: var(--cyan, #00f0ff);
+  border-color: var(--cyan, #00f0ff);
+  background: rgba(0, 240, 255, 0.15);
+}
+.studio-collapsible-params {
+  background: rgba(0, 10, 25, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+}
+.studio-collapsible-params[open] {
+  border-color: rgba(0, 240, 255, 0.35);
+  background: rgba(0, 10, 25, 0.8);
+}
+.studio-collapsible-summary {
+  cursor: pointer;
+  font-family: var(--font-hud, monospace);
+  font-size: 10px;
+  color: var(--cyan, #00f0ff);
+  letter-spacing: 0.06em;
+  outline: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
 .hf-header {
   display: flex;
   align-items: center;
@@ -3432,7 +3593,7 @@ header.hud-header {
             </div>
 
             <!-- Arquitectura REA: Ingeniería Inversa & Clean-Room -->
-            <div class="app-card intel-card-rea" id="card-rea" onclick="openReaStudio()" title="Arquitectura REA: Ingeniería Inversa, Auditoría de Código y Clean-Room">
+            <div class="app-card intel-card-rea" id="card-rea" onclick="toggleReaDrawer()" title="Arquitectura REA: Consola Independiente de Ingeniería Inversa y Clean-Room">
               <div class="app-icon" style="color:#00ffa3;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
               </div>
@@ -3580,7 +3741,6 @@ header.hud-header {
     <button class="canvas-nav-tab" id="tab-btn-neuro" onclick="switchCanvasTab('tab-neuro')">🧠 Neuro-Color</button>
     <button class="canvas-nav-tab" id="tab-btn-banner" onclick="switchCanvasTab('tab-banner')">📐 Banners &amp; Ads</button>
     <button class="canvas-nav-tab" id="tab-btn-photo" onclick="switchCanvasTab('tab-photo')">📸 Photo Lab</button>
-    <button class="canvas-nav-tab" id="tab-btn-rea" onclick="switchCanvasTab('tab-rea')">🔬 Arquitectura REA</button>
   </div>
 
   <!-- Pestaña 1: Lienzo A2UI / OpenPage (Preservado 100%) -->
@@ -3600,60 +3760,92 @@ header.hud-header {
     </div>
   </div>
 
-  <!-- Pestaña 2: Brand Identity & Logo Vectorial -->
+  <!-- Pestaña 2: Brand Identity & Logo Vectorial (Live Living Canvas) -->
   <div class="canvas-tab-pane" id="pane-tab-brand">
-    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">FORJA DE IDENTIDAD CORPORATIVA Y LOGOTIPO</div>
-    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Sintetiza la personalidad de marca, arquetipo de Jung, ganchos de neuromarketing y genera un isotipo/logotipo vectorial interactivo.</div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
-      <div class="studio-field">
-        <label class="studio-label">Nombre de Marca</label>
-        <input type="text" id="brand-input-name" class="studio-input" placeholder="Ej. Novasyscom AI" value="Novasyscom AI">
-      </div>
-      <div class="studio-field">
-        <label class="studio-label">Sector / Industria</label>
-        <input type="text" id="brand-input-industry" class="studio-input" placeholder="Ej. Tecnología & Software" value="Tecnología de Inteligencia Artificial">
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:var(--font-hud);font-size:10.5px;color:var(--cyan);letter-spacing:0.08em;">FORJA DE IDENTIDAD CORPORATIVA // LIVE VECTOR CANVAS</div>
+      <span class="hud-tag" style="font-size:9px;background:rgba(0,240,255,0.15);color:var(--cyan);border:1px solid rgba(0,240,255,0.4);padding:2px 6px;border-radius:4px;">RENDER: VECTORIAL SVG</span>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="studio-field">
-        <label class="studio-label">Público Objetivo</label>
-        <input type="text" id="brand-input-audience" class="studio-input" placeholder="Ej. CEOs y Directores" value="Líderes de Empresa y Ejecutivos">
-      </div>
-      <div class="studio-field">
-        <label class="studio-label">Tono de Voz</label>
-        <input type="text" id="brand-input-tone" class="studio-input" placeholder="Ej. Vanguardista, sobrio" value="Vanguardista y Táctico">
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="studio-field">
-        <label class="studio-label">Paleta Neuro-Cromática</label>
-        <select id="brand-select-palette" class="studio-select"></select>
-      </div>
-      <div class="studio-field">
-        <label class="studio-label">Emparejamiento Tipográfico</label>
-        <select id="brand-select-font" class="studio-select"></select>
-      </div>
-    </div>
-
-    <button class="studio-btn-primary" onclick="generateBrandKitUI()" id="btn-generate-brand">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      <span>SINTETIZAR IDENTIDAD &amp; LOGO VECTORIAL</span>
-    </button>
-
-    <!-- Resultado Brandkit -->
-    <div id="brand-result-area" style="display:none;" class="studio-result-card">
+    <!-- Lienzo Interactivo en Vivo del Logo (Siempre Activo y Visible) -->
+    <div id="brand-result-area" class="studio-result-card" style="display:flex;flex-direction:column;gap:8px;border-color:rgba(0,240,255,0.35);background:linear-gradient(135deg,rgba(0,240,255,0.06),rgba(6,12,26,0.92));">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,240,255,0.15);padding-bottom:8px;">
-        <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;" id="brand-res-archetype">ARQUETIPO</span>
-        <button class="canvas-preset-pill" onclick="copyBrandSvg()">📋 Copiar SVG</button>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;" id="brand-res-archetype">SABIO / GOBERNANTE</span>
+          <span style="font-size:9.5px;color:var(--text-dim);font-family:monospace;" id="brand-res-palette-badge">Fintech Cyber</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="canvas-preset-pill" onclick="copyBrandSvg()">📋 Copiar SVG</button>
+          <button class="canvas-preset-pill" onclick="downloadBrandSvg()">⬇️ Descargar SVG</button>
+        </div>
       </div>
-      <div id="brand-res-logo-box" style="display:flex;justify-content:center;padding:8px 0;"></div>
-      <div style="font-family:var(--font-hud);font-size:10.5px;color:#fff;letter-spacing:0.04em;" id="brand-res-tagline">TAGLINE</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.75);line-height:1.4;" id="brand-res-trigger">DISPARADOR</div>
-      <div style="font-size:10.5px;color:var(--text-dim);font-style:italic;" id="brand-res-concept">CONCEPTO</div>
+      
+      <!-- Visualizador Central de Logotipo Vectorial -->
+      <div id="brand-res-logo-box" style="display:flex;justify-content:center;align-items:center;min-height:180px;background:radial-gradient(circle at center, rgba(0,240,255,0.14) 0%, rgba(3,7,18,0.92) 80%);border:1px solid rgba(0,240,255,0.22);border-radius:10px;padding:16px;box-shadow:inset 0 0 25px rgba(0,240,255,0.08);">
+        <!-- Logo SVG vectorial interactivo renderizado por defecto -->
+        <svg width="220" height="150" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="110" cy="65" r="45" stroke="#00f0ff" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+          <circle cx="110" cy="65" r="32" stroke="#00ffa3" stroke-width="1.8" opacity="0.8"/>
+          <polygon points="110,35 136,80 84,80" stroke="#00f0ff" stroke-width="2.5" fill="rgba(0,240,255,0.12)"/>
+          <circle cx="110" cy="65" r="7" fill="#00ffa3"/>
+          <text x="110" y="132" text-anchor="middle" fill="#ffffff" font-family="'Orbitron', monospace" font-size="14" font-weight="800" letter-spacing="4">NOVASYSCOM</text>
+          <text x="110" y="145" text-anchor="middle" fill="#00f0ff" font-family="'Chakra Petch', monospace" font-size="8.5" font-weight="600" letter-spacing="2">QUANTUM INTELLIGENCE</text>
+        </svg>
+      </div>
+      
+      <div style="display:flex;flex-direction:column;gap:4px;padding:4px 2px;">
+        <div style="font-family:var(--font-hud);font-size:11px;color:#fff;letter-spacing:0.04em;" id="brand-res-tagline">“Soberanía y Automatización Táctica”</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);line-height:1.4;" id="brand-res-trigger">🧠 Neuro-Gatillo: Transmite autoridad absoluta y precisión de grado militar.</div>
+        <div style="font-size:10.5px;color:var(--text-dim);font-style:italic;" id="brand-res-concept">📐 Concepto: Poliedro hiperdimensional con balance áureo y núcleo de energía cuántica.</div>
+      </div>
     </div>
+
+    <!-- Parámetros Manuales de Precisión (Acordeón Desplegable) -->
+    <details class="studio-collapsible-params">
+      <summary class="studio-collapsible-summary">
+        <span>⚙️ PARÁMETROS MANUALES DE PRECISIÓN (OPCIONAL)</span>
+        <span style="font-size:11px;">▾</span>
+      </summary>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="studio-field">
+            <label class="studio-label">Nombre de Marca</label>
+            <input type="text" id="brand-input-name" class="studio-input" placeholder="Ej. Novasyscom AI" value="Novasyscom AI">
+          </div>
+          <div class="studio-field">
+            <label class="studio-label">Sector / Industria</label>
+            <input type="text" id="brand-input-industry" class="studio-input" placeholder="Ej. Tecnología & Software" value="Tecnología de Inteligencia Artificial">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="studio-field">
+            <label class="studio-label">Público Objetivo</label>
+            <input type="text" id="brand-input-audience" class="studio-input" placeholder="Ej. CEOs y Directores" value="Líderes de Empresa y Ejecutivos">
+          </div>
+          <div class="studio-field">
+            <label class="studio-label">Tono de Voz</label>
+            <input type="text" id="brand-input-tone" class="studio-input" placeholder="Ej. Vanguardista, sobrio" value="Vanguardista y Táctico">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="studio-field">
+            <label class="studio-label">Paleta Neuro-Cromática</label>
+            <select id="brand-select-palette" class="studio-select"></select>
+          </div>
+          <div class="studio-field">
+            <label class="studio-label">Emparejamiento Tipográfico</label>
+            <select id="brand-select-font" class="studio-select"></select>
+          </div>
+        </div>
+
+        <button class="studio-btn-primary" onclick="generateBrandKitUI()" id="btn-generate-brand">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>RE-SINTETIZAR MANUALMENTE</span>
+        </button>
+      </div>
+    </details>
   </div>
 
   <!-- Pestaña 3: Neuro-Color & Tipografías -->
@@ -3669,58 +3861,69 @@ header.hud-header {
     </div>
   </div>
 
-  <!-- Pestaña 4: Banners & Ads Forge -->
+  <!-- Pestaña 4: Banners & Ads Forge (Live Studio) -->
   <div class="canvas-tab-pane" id="pane-tab-banner">
-    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">FORJA DE BANNERS &amp; PIEZAS PUBLICITARIAS</div>
-    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Genera creatividades multi-formato con safe-zones, contrastes calibrados y tipografía de alto impacto.</div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
-      <div class="studio-field">
-        <label class="studio-label">Formato de Salida</label>
-        <select id="banner-select-format" class="studio-select"></select>
-      </div>
-      <div class="studio-field">
-        <label class="studio-label">Paleta de Conversión</label>
-        <select id="banner-select-palette" class="studio-select"></select>
-      </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:var(--font-hud);font-size:10.5px;color:var(--cyan);letter-spacing:0.08em;">FORJA DE BANNERS &amp; PIEZAS PUBLICITARIAS // LIVE STUDIO</div>
+      <span class="hud-tag" style="font-size:9px;background:rgba(0,240,255,0.15);color:var(--cyan);border:1px solid rgba(0,240,255,0.4);padding:2px 6px;border-radius:4px;">MULTI-FORMATO</span>
     </div>
 
-    <div class="studio-field">
-      <label class="studio-label">Titular Principal (Headline)</label>
-      <input type="text" id="banner-input-headline" class="studio-input" placeholder="Ej. Lanza tu Empresa al Futuro" value="EL PODER DE LA INTELIGENCIA AUTÓNOMA">
-    </div>
-
-    <div class="studio-field">
-      <label class="studio-label">Subtexto de Valor / Beneficio</label>
-      <input type="text" id="banner-input-subtext" class="studio-input" placeholder="Ej. Automatización táctica con visión y voz ultrarrápida." value="Automatización táctica con visión en tiempo real y arquitectura de soberanía total.">
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="studio-field">
-        <label class="studio-label">Texto del Botón CTA</label>
-        <input type="text" id="banner-input-cta" class="studio-input" placeholder="Ej. DESCUBRIR AHORA" value="ACTIVAR AHORA">
-      </div>
-      <div class="studio-field">
-        <label class="studio-label">Familia Tipográfica</label>
-        <select id="banner-select-font" class="studio-select"></select>
-      </div>
-    </div>
-
-    <button class="studio-btn-primary" onclick="generateBannerUI()" id="btn-generate-banner">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <span>🚀 FORJAR PIEZA PUBLICITARIA</span>
-    </button>
-
-    <!-- Resultado Banner -->
-    <div id="banner-result-area" style="display:none;" class="studio-result-card">
+    <!-- Lienzo Interactivo en Vivo del Banner (Siempre Activo y Visible) -->
+    <div id="banner-result-area" class="studio-result-card" style="display:flex;flex-direction:column;gap:8px;border-color:rgba(0,240,255,0.35);">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;" id="banner-res-dims">DIMENSIONES</span>
-        <a id="banner-res-link" href="#" target="_blank" class="canvas-preset-pill" style="text-decoration:none;">↗ Abrir Completo</a>
+        <span style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;" id="banner-res-dims">1080x1080 · FEED CUADRADO</span>
+        <a id="banner-res-link" href="/panel/creative_exports/banner_1791923712_instagram_post.html" target="_blank" class="canvas-preset-pill" style="text-decoration:none;">↗ Abrir Completo</a>
       </div>
-      <div style="width:100%;height:280px;border-radius:6px;overflow:hidden;border:1px solid rgba(0,240,255,0.25);background:#000;">
-        <iframe id="banner-preview-frame" style="width:100%;height:100%;border:none;pointer-events:auto;" sandbox="allow-scripts allow-same-origin"></iframe>
+      <div style="width:100%;height:270px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,240,255,0.25);background:#000;box-shadow:inset 0 0 20px rgba(0,0,0,0.8);">
+        <iframe id="banner-preview-frame" src="/panel/creative_exports/banner_1791923712_instagram_post.html" style="width:100%;height:100%;border:none;pointer-events:auto;" sandbox="allow-scripts allow-same-origin"></iframe>
       </div>
     </div>
+
+    <!-- Parámetros Manuales de Banner (Acordeón Desplegable) -->
+    <details class="studio-collapsible-params">
+      <summary class="studio-collapsible-summary">
+        <span>⚙️ PARÁMETROS MANUALES DE BANNERS (OPCIONAL)</span>
+        <span style="font-size:11px;">▾</span>
+      </summary>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="studio-field">
+            <label class="studio-label">Formato de Salida</label>
+            <select id="banner-select-format" class="studio-select"></select>
+          </div>
+          <div class="studio-field">
+            <label class="studio-label">Paleta de Conversión</label>
+            <select id="banner-select-palette" class="studio-select"></select>
+          </div>
+        </div>
+
+        <div class="studio-field">
+          <label class="studio-label">Titular Principal (Headline)</label>
+          <input type="text" id="banner-input-headline" class="studio-input" placeholder="Ej. Lanza tu Empresa al Futuro" value="EL PODER DE LA INTELIGENCIA AUTÓNOMA">
+        </div>
+
+        <div class="studio-field">
+          <label class="studio-label">Subtexto de Valor / Beneficio</label>
+          <input type="text" id="banner-input-subtext" class="studio-input" placeholder="Ej. Automatización táctica con visión y voz ultrarrápida." value="Automatización táctica con visión en tiempo real y arquitectura de soberanía total.">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="studio-field">
+            <label class="studio-label">Texto del Botón CTA</label>
+            <input type="text" id="banner-input-cta" class="studio-input" placeholder="Ej. DESCUBRIR AHORA" value="ACTIVAR AHORA">
+          </div>
+          <div class="studio-field">
+            <label class="studio-label">Familia Tipográfica</label>
+            <select id="banner-select-font" class="studio-select"></select>
+          </div>
+        </div>
+
+        <button class="studio-btn-primary" onclick="generateBannerUI()" id="btn-generate-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>🚀 RE-FORJAR PIEZA PUBLICITARIA</span>
+        </button>
+      </div>
+    </details>
   </div>
 
   <!-- Pestaña 5: Photo Lab & Reglas de Imagen -->
@@ -3747,35 +3950,23 @@ header.hud-header {
     </div>
   </div>
 
-  <!-- Pestaña 6: Arquitectura REA & Reverse Engineering -->
-  <div class="canvas-tab-pane" id="pane-tab-rea">
-    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">ALBERTH REA · INGENIERÍA INVERSA &amp; ARQUITECTURA</div>
-    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Auditoría estructural de software, análisis de paquetes (.apk/.zip) y recreación limpia de funcionalidades.</div>
-
-    <!-- Barra de Control REA -->
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;background:rgba(0,10,25,0.6);padding:12px;border-radius:8px;border:1px solid rgba(0,240,255,0.15);">
-      <div style="display:flex;gap:8px;">
-        <input type="text" id="rea-target-input" value="." placeholder="Ruta local (ej: . o alberth_briefing.py o panel/assets/Alberth_v5.0_Quantum.apk)" 
-          style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(0,240,255,0.3);color:#fff;padding:8px 12px;border-radius:6px;font-family:var(--font-data);font-size:11px;outline:none;" />
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="canvas-preset-pill" onclick="runReaInspectCode()" style="background:rgba(0,240,255,0.15);border-color:var(--cyan);color:var(--cyan);">🔍 Auditar Código / Proyecto</button>
-        <button class="canvas-preset-pill" onclick="runReaInspectPackage()" style="background:rgba(255,184,0,0.15);border-color:var(--gold);color:var(--gold);">📦 Inspeccionar Paquete / APK</button>
-        <button class="canvas-preset-pill" onclick="runReaCleanRoom()" style="background:rgba(0,255,163,0.15);border-color:var(--green);color:var(--green);">🛠️ Plan Clean-Room</button>
-      </div>
+  <!-- Barra de Creación Interactiva en Lenguaje Natural del Canvas -->
+  <div class="canvas-prompt-footer">
+    <div class="canvas-quick-chips">
+      <button class="canvas-chip" onclick="quickFillCanvasPrompt('🏷️ Logo minimalista y futurista para una marca de IA llamada Novasyscom')">🏷️ Logo IA</button>
+      <button class="canvas-chip" onclick="quickFillCanvasPrompt('📐 Banner 1:1 para Instagram con titular de alto impacto y fondo cyber')">📐 Banner Post</button>
+      <button class="canvas-chip" onclick="quickFillCanvasPrompt('📱 Story 9:16 para lanzamiento exclusivo de software')">📱 Story 9:16</button>
+      <button class="canvas-chip" onclick="quickFillCanvasPrompt('⚡ Widget interactivo de telemetría y salud del sistema')">⚡ Widget Sistema</button>
+      <button class="canvas-chip" onclick="quickFillCanvasPrompt('💰 Tablero financiero de ingresos y flujo contable')">💰 Widget Finanzas</button>
     </div>
-
-    <!-- Resultados REA -->
-    <div id="rea-output-container" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
-      <div class="studio-result-card">
-        <div style="font-family:var(--font-hud);font-size:10.5px;color:var(--cyan);font-weight:700;">🔬 ESTADO DEL MOTOR REA</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.85);line-height:1.4;">
-          Motor nativo de ingeniería inversa activo y enlazado al núcleo. Puede auditar cualquier archivo, directorio o APK del sistema con consumo mínimo de RAM (&lt; 20 MB) y sin bloqueos de seguridad.
-        </div>
-      </div>
+    <div class="canvas-prompt-input-row">
+      <textarea id="canvas-ai-prompt" class="canvas-prompt-input" rows="1" placeholder="✨ Escribe lo que deseas que Alberth cree o transforme en el Canvas..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();executeCanvasPrompt();}"></textarea>
+      <button class="canvas-prompt-send-btn" onclick="executeCanvasPrompt()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>CREAR ✨</span>
+      </button>
     </div>
   </div>
-
 </div>
 
 
@@ -4136,6 +4327,76 @@ header.hud-header {
       </div>
       <div class="hf-history-list" id="hf-history-list">
         <!-- Renderizado dinámico -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Arquitectura REA Console Drawer (Reverse Engineering & Clean-Room) ── -->
+<div class="rea-drawer" id="rea-drawer">
+  <div class="rea-header">
+    <div class="rea-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
+      <span>ARQUITECTURA // REA · INGENIERÍA INVERSA</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="hud-tag" style="font-size:9px;background:rgba(0,255,163,0.15);color:#00ffa3;border:1px solid rgba(0,255,163,0.4);padding:2px 6px;border-radius:4px;">ENGINE: AST / DEX / CLEAN-ROOM</span>
+      <button class="drawer-close-btn" onclick="toggleReaDrawer()">✕</button>
+    </div>
+  </div>
+
+  <div class="rea-body">
+    <!-- Objetivo de Inspección & Chips de Acceso Rápido -->
+    <div>
+      <div style="font-family:var(--font-hud);font-size:10px;color:#00ffa3;letter-spacing:0.08em;margin-bottom:4px;">🎯 OBJETIVO DE INSPECCIÓN / RUTA O ARCHIVO</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="rea-main-target-input" class="studio-input" style="flex:1;border-color:rgba(0,255,163,0.35);color:#fff;" placeholder="Ruta a inspeccionar (ej: . o panel/assets/Alberth_v5.0_Quantum.apk)" value="panel/assets/Alberth_v5.0_Quantum.apk">
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+        <button class="canvas-chip" style="border-color:rgba(0,255,163,0.3);color:#00ffa3;" onclick="setReaTarget('panel/assets/Alberth_v5.0_Quantum.apk')">📦 APK Alberth v5.0</button>
+        <button class="canvas-chip" style="border-color:rgba(0,255,163,0.3);color:#00ffa3;" onclick="setReaTarget('.')">🌐 Todo el Proyecto Alberth</button>
+        <button class="canvas-chip" style="border-color:rgba(0,255,163,0.3);color:#00ffa3;" onclick="setReaTarget('alberth_web_server.py')">⚙️ Core Server (alberth_web_server.py)</button>
+        <button class="canvas-chip" style="border-color:rgba(0,255,163,0.3);color:#00ffa3;" onclick="setReaTarget('alberth_rea_engine.py')">🧠 Motor REA (alberth_rea_engine.py)</button>
+        <button class="canvas-chip" style="border-color:rgba(0,255,163,0.3);color:#00ffa3;" onclick="setReaTarget('panel/index.html')">🎨 Frontend HUD (index.html)</button>
+      </div>
+    </div>
+
+    <!-- Acciones Tácticas REA -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="studio-btn-primary" style="border-color:#00ffa3;color:#00ffa3;background:rgba(0,255,163,0.08);" onclick="runReaInspectCodeMain()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>🔬 AUDITAR CÓDIGO (AST)</span>
+      </button>
+      <button class="studio-btn-primary" style="border-color:#e2b774;color:#e2b774;background:rgba(226,183,116,0.08);" onclick="runReaInspectPackageMain()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span>📦 DESENSAMBLAR APK</span>
+      </button>
+      <button class="studio-btn-primary" style="border-color:#00e5ff;color:#00e5ff;background:rgba(0,229,255,0.08);" onclick="runReaCleanRoomMain()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span>🛠️ BLUEPRINT CLEAN-ROOM</span>
+      </button>
+      <button class="studio-btn-primary" style="border-color:#b388ff;color:#b388ff;background:rgba(179,136,255,0.08);" onclick="runReaListReportsMain()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>📂 AUDITORÍAS GUARDADAS</span>
+      </button>
+    </div>
+
+    <!-- Viewport de Resultados y Telemetría -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-family:var(--font-hud);font-size:10px;color:#00ffa3;letter-spacing:0.08em;">📊 TELEMETRÍA Y ARQUITECTURA DECONSTRUIDA</span>
+        <span id="rea-status-pill" style="font-size:9.5px;color:var(--text-dim);font-family:monospace;">LISTO</span>
+      </div>
+      <div id="rea-main-output-container" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="studio-result-card" style="border-color:rgba(0,255,163,0.3);background:rgba(0,255,163,0.03);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="color:#00ffa3;font-family:var(--font-hud);font-size:11px;font-weight:700;">MOTOR DE INGENIERÍA INVERSA &amp; CLEAN-ROOM ONLINE</div>
+            <span style="font-size:9px;color:var(--gold);font-family:monospace;">STANDBY</span>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:4px;line-height:1.4;">
+            Seleccione un objetivo (APK o ruta de código) y ejecute una acción para deconstruir la arquitectura, extraer dependencias y generar planos limpios de software soberano.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -5607,6 +5868,7 @@ window.addEventListener("keydown", (e) => {
 
 // ─── Live Canvas & Creative Studio Management ───────────────
 let isCanvasOpen = false;
+let isReaOpen = false;
 let creativeStudioLoaded = false;
 let lastBrandSvg = "";
 
@@ -5625,13 +5887,23 @@ function toggleCanvasDrawer() {
   }
 }
 
+function toggleReaDrawer(forceState = null) {
+  if (forceState !== null) {
+    isReaOpen = forceState;
+  } else {
+    isReaOpen = !isReaOpen;
+  }
+  const drawer = document.getElementById("rea-drawer");
+  const card = document.getElementById("card-rea");
+  if (drawer) drawer.classList.toggle("open", isReaOpen);
+  if (card) card.classList.toggle("active", isReaOpen);
+  if (isReaOpen) {
+    showToast("🔬 Consola REA Online: Ingeniería Inversa & Clean-Room", 2000);
+  }
+}
+
 function openReaStudio() {
-  const drawer = document.getElementById("canvas-drawer");
-  const btn = document.getElementById("btn-toggle-canvas");
-  isCanvasOpen = true;
-  if (drawer) drawer.classList.add("open");
-  if (btn) btn.classList.add("active");
-  switchCanvasTab('tab-rea');
+  toggleReaDrawer(true);
 }
 
 function switchCanvasTab(tabId) {
@@ -5795,12 +6067,42 @@ async function generateBrandKitUI() {
 
 function copyBrandSvg() {
   if (!lastBrandSvg) {
+    const box = document.getElementById("brand-res-logo-box");
+    if (box && box.querySelector("svg")) {
+      lastBrandSvg = box.innerHTML;
+    }
+  }
+  if (!lastBrandSvg) {
     showToast("⚠️ No hay SVG para copiar", 2000);
     return;
   }
   navigator.clipboard.writeText(lastBrandSvg).then(() => {
     showToast("📋 Logotipo SVG vectorial copiado al portapapeles", 2500);
   });
+}
+
+function downloadBrandSvg() {
+  let svgContent = lastBrandSvg;
+  if (!svgContent) {
+    const box = document.getElementById("brand-res-logo-box");
+    if (box && box.querySelector("svg")) {
+      svgContent = box.innerHTML;
+    }
+  }
+  if (!svgContent) {
+    showToast("⚠️ No hay logotipo SVG disponible", 2000);
+    return;
+  }
+  const blob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `brand_logo_${Date.now()}.svg`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("⬇️ Logotipo SVG descargado exitosamente", 2500);
 }
 
 async function generateBannerUI() {
@@ -6015,6 +6317,340 @@ async function runReaCleanRoom() {
   } catch(e) {
     out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error al generar Clean-Room: ${e}</div></div>`;
   }
+}
+
+// ── Handlers de Consola REA Independiente ──────────────────────────
+function setReaTarget(target) {
+  const input = document.getElementById("rea-main-target-input");
+  const pill = document.getElementById("rea-status-pill");
+  if (input) input.value = target;
+  if (pill) pill.textContent = "OBJETIVO FIJADO";
+  showToast(`🎯 Objetivo REA: ${target}`, 1800);
+}
+
+async function runReaInspectCodeMain() {
+  const target = document.getElementById("rea-main-target-input")?.value?.trim() || ".";
+  const out = document.getElementById("rea-main-output-container");
+  const pill = document.getElementById("rea-status-pill");
+  if (!out) return;
+  if (pill) pill.textContent = "AUDITANDO...";
+  out.innerHTML = `
+    <div class="studio-result-card" style="border-color:rgba(0,255,163,0.5);">
+      <div style="color:#00ffa3;font-family:var(--font-hud);font-size:11px;">⏳ AUDITANDO CÓDIGO &amp; ARQUITECTURA...</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Inspeccionando "${target}" con AST e introspección estática...</div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/rea/inspect-path', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: target })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      if (pill) pill.textContent = "ERROR";
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;font-weight:700;">⚠️ ERROR EN AUDITORÍA REA</div><div style="font-size:11px;color:#fff;">${d.error}</div></div>`;
+      return;
+    }
+
+    if (pill) pill.textContent = "COMPLETADO";
+    let detailsHtml = "";
+    if (d.type === "single_file") {
+      detailsHtml = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;border:1px solid rgba(0,255,163,0.15);">
+            <div style="color:var(--text-dim);font-size:9px;">LENGUAJE / TAMAÑO</div>
+            <div style="color:#fff;font-weight:700;">${d.language} · ${d.lines} líneas (${d.size_kb} KB)</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;border:1px solid rgba(0,255,163,0.15);">
+            <div style="color:var(--text-dim);font-size:9px;">TIEMPO DE INSPECCIÓN</div>
+            <div style="color:#00ffa3;font-weight:700;">${d.execution_time_ms} ms</div>
+          </div>
+        </div>
+        ${d.functions?.length ? `<div style="margin-top:8px;font-size:10.5px;color:rgba(255,255,255,0.85);"><b>Funciones Detectadas (${d.functions.length}):</b><div style="margin-top:3px;">${d.functions.slice(0, 10).map(f => `<span style="background:rgba(0,255,163,0.1);color:#00ffa3;padding:2px 5px;border-radius:3px;margin:2px;display:inline-block;font-size:9.5px;font-family:monospace;">${f.name}()</span>`).join(" ")}</div></div>` : ''}
+        ${d.endpoints?.length ? `<div style="margin-top:8px;font-size:10.5px;color:var(--gold);"><b>Endpoints API Identificados (${d.endpoints.length}):</b><div style="font-family:monospace;font-size:9.5px;margin-top:4px;background:rgba(0,0,0,0.4);padding:6px;border-radius:4px;max-height:80px;overflow-y:auto;">${d.endpoints.slice(0, 8).join("<br>")}</div></div>` : ''}
+      `;
+    } else {
+      detailsHtml = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;border:1px solid rgba(0,255,163,0.15);">
+            <div style="color:var(--text-dim);font-size:9px;">PATRÓN DE ARQUITECTURA</div>
+            <div style="color:#00ffa3;font-weight:700;">${d.architecture_pattern}</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;border:1px solid rgba(0,255,163,0.15);">
+            <div style="color:var(--text-dim);font-size:9px;">TOTAL ARCHIVOS / LÍNEAS</div>
+            <div style="color:#fff;font-weight:700;">${d.total_files} archivos · ~${(d.total_lines_approx || 0).toLocaleString()} líneas</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10.5px;color:rgba(255,255,255,0.85);">
+          <b>Frameworks Detectados:</b> ${d.frameworks_detected?.join(", ") || "Estándar"}
+        </div>
+        ${d.entry_points?.length ? `<div style="margin-top:6px;font-size:10.5px;color:var(--green);"><b>Puntos de Entrada:</b> ${d.entry_points.join(", ")}</div>` : ''}
+      `;
+    }
+
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:#00ffa3;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-hud);font-size:11px;color:#00ffa3;font-weight:700;">🔬 AUDITORÍA REA: ${d.name}</div>
+          <span style="font-size:9px;color:var(--gold);font-family:monospace;">${d.execution_time_ms} ms</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:4px;">${d.summary}</div>
+        ${detailsHtml}
+      </div>
+    `;
+    showToast("🔬 Auditoría de código completada", 2200);
+  } catch(e) {
+    if (pill) pill.textContent = "ERROR";
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error de conexión con Alberth REA: ${e}</div></div>`;
+  }
+}
+
+async function runReaInspectPackageMain() {
+  const target = document.getElementById("rea-main-target-input")?.value?.trim() || "panel/assets/Alberth_v5.0_Quantum.apk";
+  const out = document.getElementById("rea-main-output-container");
+  const pill = document.getElementById("rea-status-pill");
+  if (!out) return;
+  if (pill) pill.textContent = "DESENSAMBLANDO...";
+  out.innerHTML = `
+    <div class="studio-result-card" style="border-color:rgba(226,183,116,0.5);">
+      <div style="color:#e2b774;font-family:var(--font-hud);font-size:11px;">⏳ DESENSAMBLANDO PAQUETE / APK...</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Analizando contenedores DEX, librerías nativas y manifiesto de "${target}"...</div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/rea/inspect-package', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: target })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      if (pill) pill.textContent = "ERROR";
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;font-weight:700;">⚠️ ERROR EN INSPECCIÓN DE PAQUETE</div><div style="font-size:11px;color:#fff;">${d.error}</div></div>`;
+      return;
+    }
+
+    if (pill) pill.textContent = "COMPLETADO";
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:#e2b774;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-hud);font-size:11px;color:#e2b774;font-weight:700;">📦 INSPECCIÓN DE PAQUETE: ${d.name}</div>
+          <span style="font-size:9px;color:var(--cyan);font-family:monospace;">${d.size_mb} MB · ${d.execution_time_ms} ms</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:4px;">${d.summary}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;border:1px solid rgba(226,183,116,0.2);">
+            <div style="color:var(--text-dim);font-size:9px;">FRAMEWORK BASE</div>
+            <div style="color:#e2b774;font-weight:700;">${d.framework}</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.5);padding:8px;border-radius:4px;border:1px solid rgba(226,183,116,0.2);">
+            <div style="color:var(--text-dim);font-size:9px;">CONTENEDORES DEX</div>
+            <div style="color:#fff;font-weight:700;">${d.dex_containers?.join(", ") || "Ninguno"}</div>
+          </div>
+        </div>
+        ${d.native_architectures?.length ? `<div style="margin-top:8px;font-size:10.5px;color:rgba(255,255,255,0.85);"><b>Arquitecturas Nativas:</b> ${d.native_architectures.join(" · ")}</div>` : ''}
+        ${d.embedded_servers?.length ? `<div style="margin-top:8px;font-size:10.5px;color:var(--cyan);"><b>Servidores / Enlaces Embebidos:</b><div style="font-family:monospace;font-size:9.5px;margin-top:4px;background:rgba(0,0,0,0.4);padding:6px;border-radius:4px;max-height:80px;overflow-y:auto;">${d.embedded_servers.join("<br>")}</div></div>` : ''}
+      </div>
+    `;
+    showToast("📦 Inspección de paquete completada", 2200);
+  } catch(e) {
+    if (pill) pill.textContent = "ERROR";
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error al inspeccionar paquete: ${e}</div></div>`;
+  }
+}
+
+async function runReaCleanRoomMain() {
+  const target = document.getElementById("rea-main-target-input")?.value?.trim() || "ModuloRecreado";
+  const out = document.getElementById("rea-main-output-container");
+  const pill = document.getElementById("rea-status-pill");
+  if (!out) return;
+  if (pill) pill.textContent = "DISEÑANDO...";
+  out.innerHTML = `
+    <div class="studio-result-card" style="border-color:rgba(0,229,255,0.5);">
+      <div style="color:#00e5ff;font-family:var(--font-hud);font-size:11px;">🛠️ GENERANDO PLAN CLEAN-ROOM...</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Diseñando especificación desacoplada para "${target}" sin contaminación de licencia...</div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/rea/clean-room', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target_name: target.replace(/[^a-zA-Z0-9]/g, '') || "ModuloRecreado",
+        feature_intent: "Replicar funcionalidad de forma nativa e independiente"
+      })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      if (pill) pill.textContent = "ERROR";
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error: ${d.error}</div></div>`;
+      return;
+    }
+
+    if (pill) pill.textContent = "COMPLETADO";
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:#00e5ff;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-hud);font-size:11px;color:#00e5ff;font-weight:700;">🛠️ BLUEPRINT CLEAN-ROOM: ${d.target_name}</div>
+          <span style="font-size:9px;color:var(--text-dim);font-family:monospace;">ID: ${d.spec_id}</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:6px;">
+          <b>Protocolo de Recreación Limpia:</b>
+          <div style="margin-top:4px;display:flex;flex-direction:column;gap:3px;font-size:10.5px;color:rgba(255,255,255,0.85);">
+            <div>1. ${d.clean_room_protocol?.step_1_behavior}</div>
+            <div>2. ${d.clean_room_protocol?.step_2_data_structures}</div>
+            <div>3. ${d.clean_room_protocol?.step_3_implementation}</div>
+            <div>4. ${d.clean_room_protocol?.step_4_ui_integration}</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-size:9px;color:var(--gold);font-family:monospace;">PLANTILLA NATIVA SUGERIDA (PYTHON / PYDANTIC):</div>
+          <pre style="background:rgba(0,0,0,0.6);border:1px solid rgba(0,255,163,0.25);padding:8px;border-radius:4px;color:#00ffa3;font-size:9.5px;font-family:monospace;overflow-x:auto;max-height:160px;margin-top:4px;">${d.template_code}</pre>
+        </div>
+      </div>
+    `;
+    showToast("🛠️ Blueprint Clean-Room generado", 2200);
+  } catch(e) {
+    if (pill) pill.textContent = "ERROR";
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error al generar Clean-Room: ${e}</div></div>`;
+  }
+}
+
+async function runReaListReportsMain() {
+  const out = document.getElementById("rea-main-output-container");
+  const pill = document.getElementById("rea-status-pill");
+  if (!out) return;
+  if (pill) pill.textContent = "CARGANDO...";
+
+  try {
+    const res = await fetch('/api/rea/reports');
+    const d = await res.json();
+    if (!d.ok) {
+      if (pill) pill.textContent = "ERROR";
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error: ${d.error}</div></div>`;
+      return;
+    }
+
+    if (pill) pill.textContent = `${d.reports?.length || 0} AUDITORÍAS`;
+    if (!d.reports || d.reports.length === 0) {
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#b388ff;"><div style="color:#b388ff;font-family:var(--font-hud);font-size:11px;">📂 NO HAY AUDITORÍAS GUARDADAS</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Ejecute una auditoría AST o desensamblado APK para generar el primer reporte persistente.</div></div>`;
+      return;
+    }
+
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:#b388ff;">
+        <div style="font-family:var(--font-hud);font-size:11px;color:#b388ff;font-weight:700;">📂 AUDITORÍAS &amp; REPORTES PERSISTIDOS (${d.reports.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+          ${d.reports.map(r => `
+            <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(179,136,255,0.2);padding:6px 10px;border-radius:4px;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="color:#fff;font-family:monospace;font-size:10px;font-weight:700;">${r.filename}</div>
+                <div style="color:var(--text-dim);font-size:9px;">${r.created} · ${r.size_kb} KB</div>
+              </div>
+              <span class="hud-tag" style="font-size:8.5px;color:#b388ff;border-color:rgba(179,136,255,0.4);">JSON REPORT</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+    showToast("📂 Reportes de auditoría cargados", 1800);
+  } catch(e) {
+    if (pill) pill.textContent = "ERROR";
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error al cargar reportes: ${e}</div></div>`;
+  }
+}
+
+// ── Handlers del Prompt Unificado del Live Canvas ──────────────────
+function quickFillCanvasPrompt(text) {
+  const input = document.getElementById("canvas-ai-prompt");
+  if (input) {
+    input.value = text;
+    input.focus();
+  }
+  executeCanvasPrompt();
+}
+
+async function executeCanvasPrompt() {
+  const input = document.getElementById("canvas-ai-prompt");
+  const prompt = input?.value?.trim() || "";
+  if (!prompt) {
+    showToast("✨ Escriba una orden creativa o seleccione un chip rápido", 2000);
+    return;
+  }
+
+  const pLower = prompt.toLowerCase();
+  showToast("✨ Alberth procesando instrucción de Canvas...", 2000);
+
+  // Intención 1: Logo o Identidad de Marca
+  if (pLower.includes("logo") || pLower.includes("marca") || pLower.includes("brand") || pLower.includes("isotipo") || pLower.includes("identidad")) {
+    switchCanvasTab('tab-brand');
+    const matchName = prompt.match(/(?:marca llamada|marca|para)\s+([A-ZÁÉÍÓÚa-zñ0-9_\s]{2,25})/i);
+    if (matchName && matchName[1]) {
+      const detectedName = matchName[1].trim().split(" ")[0];
+      const nameInput = document.getElementById("brand-input-name");
+      if (nameInput && detectedName.length > 2) nameInput.value = detectedName;
+    }
+    await generateBrandKitUI();
+    input.value = "";
+    return;
+  }
+
+  // Intención 2: Banners o Piezas Publicitarias
+  if (pLower.includes("banner") || pLower.includes("anuncio") || pLower.includes("post") || pLower.includes("story") || pLower.includes("publicidad") || pLower.includes("ad") || pLower.includes("ads")) {
+    switchCanvasTab('tab-banner');
+    const formatSel = document.getElementById("banner-select-format");
+    if (formatSel) {
+      if (pLower.includes("story") || pLower.includes("9:16") || pLower.includes("reel")) {
+        formatSel.value = "instagram_story";
+      } else if (pLower.includes("twitter") || pLower.includes("x")) {
+        formatSel.value = "twitter_header";
+      } else {
+        formatSel.value = "instagram_post";
+      }
+    }
+    const headInp = document.getElementById("banner-input-headline");
+    if (headInp) {
+      headInp.value = prompt.replace(/[🏷️📐📱⚡💰✨]/g, '').trim().toUpperCase();
+    }
+    await generateBannerUI();
+    input.value = "";
+    return;
+  }
+
+  // Intención 3: Widgets de Sistema / Finanzas / Tareas (OpenPage)
+  if (pLower.includes("sistema") || pLower.includes("telemetria") || pLower.includes("cpu") || pLower.includes("ram")) {
+    switchCanvasTab('tab-a2ui');
+    await loadCanvasPreset('system');
+    input.value = "";
+    return;
+  }
+  if (pLower.includes("finanza") || pLower.includes("contable") || pLower.includes("dinero") || pLower.includes("ingreso")) {
+    switchCanvasTab('tab-a2ui');
+    await loadCanvasPreset('finance');
+    input.value = "";
+    return;
+  }
+  if (pLower.includes("tarea") || pLower.includes("mision") || pLower.includes("checklist")) {
+    switchCanvasTab('tab-a2ui');
+    await loadCanvasPreset('tasks');
+    input.value = "";
+    return;
+  }
+
+  // Intención 4: Colores / Psicología
+  if (pLower.includes("color") || pLower.includes("paleta") || pLower.includes("neuro")) {
+    switchCanvasTab('tab-neuro');
+    input.value = "";
+    return;
+  }
+
+  // Default: Enviar al diálogo general para que Alberth lo asista
+  sendQuick("En el Live Canvas creativo: " + prompt);
+  input.value = "";
 }
 
 function handleCanvasUpdate(canvasData) {

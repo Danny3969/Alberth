@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "spec_id": "clean_room_1791994708",
+  "target_name": "TelemetryCollector",
+  "feature_intent": "Recolectar metricas de red y CPU de forma autonoma",
+  "context": "",
+  "clean_room_protocol": {
+    "step_1_behavior": "Modelar el contrato funcional de entrada/salida para 'Recolectar metricas de red y CPU de forma autonoma'.",
+    "step_2_data_structures": "Diseñar esquemas Pydantic desacoplados sin copiar estructuras protegidas.",
+    "step_3_implementation": "Escribir código nativo en Python/FastAPI con lógica idempotente.",
+    "step_4_ui_integration": "Integrar el componente en el Canvas / HUD de Alberth mediante WebSockets."
+  },
+  "suggested_endpoints": [
+    "/api/telemetrycollector/execute",
+    "/api/telemetrycollector/status"
+  ],
+  "template_code": "# ── Módulo Recreado Limpio: TelemetryCollector ─────────────────────\n# Generado por Alberth REA Engine (Clean-Room Standard)\nfrom pydantic import BaseModel\nfrom typing import Dict, Any, Optional\n\nclass TelemetryCollectorRequest(BaseModel):\n    action: str = \"default\"\n    payload: Dict[str, Any] = {}\n\nclass TelemetryCollectorEngine:\n    @staticmethod\n    def execute(req: TelemetryCollectorRequest) -> Dict[str, Any]:\n        # Implementación nativa desacoplada\n        return {\n            \"status\": \"success\",\n            \"feature\": \"TelemetryCollector\",\n            \"intent\": \"Recolectar metricas de red y CPU de forma autonoma\",\n            \"result\": \"Ejecución conforme al contrato funcional limpio.\"\n        }\n"
+}

@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "type": "single_file",
+  "name": "alberth_briefing.py",
+  "path": "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth/alberth_briefing.py",
+  "size_kb": 5.9,
+  "lines": 162,
+  "language": "Python",
+  "components": [],
+  "imports": [
+    "__future__",
+    "alberth_apple_helper",
+    "datetime",
+    "json",
+    "os",
+    "pathlib",
+    "subprocess",
+    "sys",
+    "time",
+    "typing",
+    "urllib.request"
+  ],
+  "endpoints": [
+    "https://wttr.in/?format=3"
+  ],
+  "secrets_detected": [],
+  "summary": "Archivo alberth_briefing.py (Python): 162 líneas, 5 funciones, 0 clases, 1 rutas/endpoints detectados.",
+  "classes": [],
+  "functions": [
+    {
+      "name": "get_live_calendar_events",
+      "async": false,
+      "decorators": [],
+      "line": 24
+    },
+    {
+      "name": "get_live_reminders",
+      "async": false,
+      "decorators": [],
+      "line": 33
+    },
+    {
+      "name": "get_system_telemetry",
+      "async": false,
+      "decorators": [],
+      "line": 42
+    },
+    {
+      "name": "get_quick_weather",
+      "async": false,
+      "decorators": [],
+      "line": 72
+    },
+    {
+      "name": "generate_executive_briefing",
+      "async": false,
+      "decorators": [],
+      "line": 83
+    }
+  ],
+  "execution_time_ms": 4.68,
+  "timestamp": "2026-10-14 11:14:29"
+}

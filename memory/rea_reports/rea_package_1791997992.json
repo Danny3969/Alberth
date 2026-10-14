@@ -1,0 +1,50 @@
+{
+  "ok": true,
+  "type": "apk_package",
+  "name": "Alberth_v5.0_Quantum.apk",
+  "path": "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth/panel/assets/Alberth_v5.0_Quantum.apk",
+  "size_mb": 76.6,
+  "framework": "React Native",
+  "total_files": 1530,
+  "dex_containers": [
+    "classes.dex",
+    "classes2.dex",
+    "classes3.dex"
+  ],
+  "native_architectures": [
+    "x86",
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64"
+  ],
+  "native_libraries_sample": [
+    "x86:libnative-filters.so",
+    "x86_64:libimagepipeline.so",
+    "armeabi-v7a:libstatic-webp.so",
+    "x86_64:libreact_codegen_safeareacontext.so",
+    "armeabi-v7a:libnative-filters.so",
+    "x86:libc++_shared.so",
+    "arm64-v8a:libexpo-modules-core.so",
+    "armeabi-v7a:libimagepipeline.so",
+    "x86_64:libnative-imagetranscoder.so",
+    "arm64-v8a:libhermesvm.so",
+    "armeabi-v7a:libhermesvm.so",
+    "arm64-v8a:libzstd-kmp.so",
+    "x86_64:libreact_codegen_rnsvg.so",
+    "arm64-v8a:libreactnative.so",
+    "x86_64:libhermestooling.so"
+  ],
+  "permissions_detected": [],
+  "embedded_endpoints": [],
+  "embedded_servers": [
+    "https://docs.expo.dev",
+    "https://react.dev",
+    "https://expo.fyi",
+    "https://github.com",
+    "https://reactnative.dev"
+  ],
+  "assets_count": 3,
+  "summary": "Paquete Alberth_v5.0_Quantum.apk (React Native): 76.6 MB. Detectados 3 archivos DEX, 64 librerías nativas y 0 declaraciones de permisos.",
+  "execution_time_ms": 150.53,
+  "timestamp": "2026-10-14 12:13:12"
+}
