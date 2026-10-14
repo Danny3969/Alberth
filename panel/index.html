@@ -3555,6 +3555,7 @@ header.hud-header {
     <button class="canvas-nav-tab" id="tab-btn-neuro" onclick="switchCanvasTab('tab-neuro')">🧠 Neuro-Color</button>
     <button class="canvas-nav-tab" id="tab-btn-banner" onclick="switchCanvasTab('tab-banner')">📐 Banners &amp; Ads</button>
     <button class="canvas-nav-tab" id="tab-btn-photo" onclick="switchCanvasTab('tab-photo')">📸 Photo Lab</button>
+    <button class="canvas-nav-tab" id="tab-btn-rea" onclick="switchCanvasTab('tab-rea')">🔬 Arquitectura REA</button>
   </div>
 
   <!-- Pestaña 1: Lienzo A2UI / OpenPage (Preservado 100%) -->
@@ -3717,6 +3718,35 @@ header.hud-header {
         <div>• <b>Separación de Fondo:</b> Preferir iluminación de contorno (rim light) con tinte cian o ámbar para recortar figuras oscuras sobre fondos negros.</div>
         <div>• <b>Temperatura de Color:</b> Frío (6500K) para transmitir precisión analítica y seguridad; Cálido (3200K) para gastronomía y prestigio.</div>
         <div>• <b>Exportación sin Pérdida:</b> Las piezas vectoriales y tipográficas de Alberth se renderizan en HTML5 dinámico con tipografías web nativas.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pestaña 6: Arquitectura REA & Reverse Engineering -->
+  <div class="canvas-tab-pane" id="pane-tab-rea">
+    <div style="font-family:var(--font-hud);font-size:10px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:2px;">ALBERTH REA · INGENIERÍA INVERSA &amp; ARQUITECTURA</div>
+    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.4;">Auditoría estructural de software, análisis de paquetes (.apk/.zip) y recreación limpia de funcionalidades.</div>
+
+    <!-- Barra de Control REA -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;background:rgba(0,10,25,0.6);padding:12px;border-radius:8px;border:1px solid rgba(0,240,255,0.15);">
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="rea-target-input" value="." placeholder="Ruta local (ej: . o alberth_briefing.py o panel/assets/Alberth_v5.0_Quantum.apk)" 
+          style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(0,240,255,0.3);color:#fff;padding:8px 12px;border-radius:6px;font-family:var(--font-data);font-size:11px;outline:none;" />
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="canvas-preset-pill" onclick="runReaInspectCode()" style="background:rgba(0,240,255,0.15);border-color:var(--cyan);color:var(--cyan);">🔍 Auditar Código / Proyecto</button>
+        <button class="canvas-preset-pill" onclick="runReaInspectPackage()" style="background:rgba(255,184,0,0.15);border-color:var(--gold);color:var(--gold);">📦 Inspeccionar Paquete / APK</button>
+        <button class="canvas-preset-pill" onclick="runReaCleanRoom()" style="background:rgba(0,255,163,0.15);border-color:var(--green);color:var(--green);">🛠️ Plan Clean-Room</button>
+      </div>
+    </div>
+
+    <!-- Resultados REA -->
+    <div id="rea-output-container" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+      <div class="studio-result-card">
+        <div style="font-family:var(--font-hud);font-size:10.5px;color:var(--cyan);font-weight:700;">🔬 ESTADO DEL MOTOR REA</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);line-height:1.4;">
+          Motor nativo de ingeniería inversa activo y enlazado al núcleo. Puede auditar cualquier archivo, directorio o APK del sistema con consumo mínimo de RAM (&lt; 20 MB) y sin bloqueos de seguridad.
+        </div>
       </div>
     </div>
   </div>
@@ -5787,6 +5817,169 @@ async function generateBannerUI() {
       btn.disabled = false;
       btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>🚀 FORJAR PIEZA PUBLICITARIA</span>`;
     }
+  }
+}
+
+// ── Alberth REA (Reverse Engineering & Architecture) Frontend Handlers ──
+async function runReaInspectCode() {
+  const target = document.getElementById("rea-target-input")?.value?.trim() || ".";
+  const out = document.getElementById("rea-output-container");
+  if (!out) return;
+  out.innerHTML = `<div class="studio-result-card" style="border-color:var(--cyan);"><div style="color:var(--cyan);font-family:var(--font-hud);">⏳ AUDITANDO CÓDIGO Y ARQUITECTURA...</div><div style="font-size:11px;color:var(--text-dim);">Inspeccionando "${target}" con AST y analizador estático...</div></div>`;
+
+  try {
+    const res = await fetch('/api/rea/inspect-path', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: target })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;font-weight:700;">⚠️ ERROR EN AUDITORÍA REA</div><div style="font-size:11px;color:#fff;">${d.error}</div></div>`;
+      return;
+    }
+
+    let detailsHtml = "";
+    if (d.type === "single_file") {
+      detailsHtml = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;border:1px solid rgba(0,240,255,0.1);">
+            <div style="color:var(--text-dim);font-size:9px;">LENGUAJE / TAMAÑO</div>
+            <div style="color:#fff;font-weight:700;">${d.language} · ${d.lines} líneas (${d.size_kb} KB)</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;border:1px solid rgba(0,240,255,0.1);">
+            <div style="color:var(--text-dim);font-size:9px;">TIEMPO DE INSPECCIÓN</div>
+            <div style="color:var(--cyan);font-weight:700;">${d.execution_time_ms} ms</div>
+          </div>
+        </div>
+        ${d.functions?.length ? `<div style="margin-top:8px;font-size:10.5px;color:rgba(255,255,255,0.85);"><b>Funciones (${d.functions.length}):</b> ${d.functions.slice(0, 10).map(f => `<span style="background:rgba(0,240,255,0.1);padding:2px 5px;border-radius:3px;margin:2px;display:inline-block;">${f.name}()</span>`).join(" ")}</div>` : ''}
+        ${d.endpoints?.length ? `<div style="margin-top:8px;font-size:10.5px;color:var(--gold);"><b>Endpoints Detectados (${d.endpoints.length}):</b><div style="font-family:monospace;font-size:10px;margin-top:4px;">${d.endpoints.slice(0, 5).join("<br>")}</div></div>` : ''}
+      `;
+    } else {
+      detailsHtml = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;border:1px solid rgba(0,240,255,0.1);">
+            <div style="color:var(--text-dim);font-size:9px;">PATRÓN DE ARQUITECTURA</div>
+            <div style="color:var(--cyan);font-weight:700;">${d.architecture_pattern}</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;border:1px solid rgba(0,240,255,0.1);">
+            <div style="color:var(--text-dim);font-size:9px;">TOTAL ARCHIVOS / LÍNEAS</div>
+            <div style="color:#fff;font-weight:700;">${d.total_files} archivos · ~${(d.total_lines_approx || 0).toLocaleString()} líneas</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10.5px;color:rgba(255,255,255,0.85);">
+          <b>Frameworks:</b> ${d.frameworks_detected?.join(", ") || "Estándar"}
+        </div>
+        ${d.entry_points?.length ? `<div style="margin-top:6px;font-size:10.5px;color:var(--green);"><b>Puntos de Entrada:</b> ${d.entry_points.join(", ")}</div>` : ''}
+      `;
+    }
+
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:var(--cyan);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-hud);font-size:11px;color:var(--cyan);font-weight:700;">🔬 REPORTE DE AUDITORÍA REA: ${d.name}</div>
+          <span style="font-size:9px;color:var(--gold);font-family:monospace;">${d.execution_time_ms} ms</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:4px;">${d.summary}</div>
+        ${detailsHtml}
+      </div>
+    `;
+    showToast("🔬 Auditoría de código completada", 2000);
+  } catch(e) {
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error de conexión con Alberth REA: ${e}</div></div>`;
+  }
+}
+
+async function runReaInspectPackage() {
+  const target = document.getElementById("rea-target-input")?.value?.trim() || "panel/assets/Alberth_v5.0_Quantum.apk";
+  const out = document.getElementById("rea-output-container");
+  if (!out) return;
+  out.innerHTML = `<div class="studio-result-card" style="border-color:var(--gold);"><div style="color:var(--gold);font-family:var(--font-hud);">⏳ DESENSAMBLANDO PAQUETE / APK...</div><div style="font-size:11px;color:var(--text-dim);">Analizando contenedores DEX, librerías nativas y assets de "${target}"...</div></div>`;
+
+  try {
+    const res = await fetch('/api/rea/inspect-package', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: target })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;font-weight:700;">⚠️ ERROR EN INSPECCIÓN DE PAQUETE</div><div style="font-size:11px;color:#fff;">${d.error}</div></div>`;
+      return;
+    }
+
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:var(--gold);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-hud);font-size:11px;color:var(--gold);font-weight:700;">📦 INSPECCIÓN DE PAQUETE: ${d.name}</div>
+          <span style="font-size:9px;color:var(--cyan);font-family:monospace;">${d.size_mb} MB · ${d.execution_time_ms} ms</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:4px;">${d.summary}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;border:1px solid rgba(255,184,0,0.2);">
+            <div style="color:var(--text-dim);font-size:9px;">FRAMEWORK BASE</div>
+            <div style="color:var(--gold);font-weight:700;">${d.framework}</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.4);padding:8px;border-radius:4px;border:1px solid rgba(255,184,0,0.2);">
+            <div style="color:var(--text-dim);font-size:9px;">CONTENEDORES DEX</div>
+            <div style="color:#fff;font-weight:700;">${d.dex_containers?.join(", ") || "Ninguno"}</div>
+          </div>
+        </div>
+        ${d.native_architectures?.length ? `<div style="margin-top:8px;font-size:10.5px;color:rgba(255,255,255,0.85);"><b>Arquitecturas Nativas:</b> ${d.native_architectures.join(" · ")}</div>` : ''}
+        ${d.embedded_servers?.length ? `<div style="margin-top:8px;font-size:10.5px;color:var(--cyan);"><b>Servidores / Enlaces Embebidos:</b><div style="font-family:monospace;font-size:9.5px;margin-top:4px;">${d.embedded_servers.join("<br>")}</div></div>` : ''}
+      </div>
+    `;
+    showToast("📦 Inspección de paquete completada", 2000);
+  } catch(e) {
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error al inspeccionar paquete: ${e}</div></div>`;
+  }
+}
+
+async function runReaCleanRoom() {
+  const target = document.getElementById("rea-target-input")?.value?.trim() || "ModuloRecreado";
+  const out = document.getElementById("rea-output-container");
+  if (!out) return;
+  out.innerHTML = `<div class="studio-result-card" style="border-color:var(--green);"><div style="color:var(--green);font-family:var(--font-hud);">🛠️ GENERANDO PLAN CLEAN-ROOM...</div><div style="font-size:11px;color:var(--text-dim);">Diseñando arquitectura desacoplada para "${target}"...</div></div>`;
+
+  try {
+    const res = await fetch('/api/rea/clean-room', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target_name: target.replace(/[^a-zA-Z0-9]/g, '') || "ModuloRecreado",
+        feature_intent: "Replicar funcionalidad de forma nativa e independiente"
+      })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error: ${d.error}</div></div>`;
+      return;
+    }
+
+    out.innerHTML = `
+      <div class="studio-result-card" style="border-color:var(--green);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-hud);font-size:11px;color:var(--green);font-weight:700;">🛠️ BLUEPRINT CLEAN-ROOM: ${d.target_name}</div>
+          <span style="font-size:9px;color:var(--text-dim);font-family:monospace;">ID: ${d.spec_id}</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:6px;">
+          <b>Protocolo de Recreación:</b>
+          <div style="margin-top:4px;display:flex;flex-direction:column;gap:3px;font-size:10.5px;color:rgba(255,255,255,0.8);">
+            <div>1. ${d.clean_room_protocol?.step_1_behavior}</div>
+            <div>2. ${d.clean_room_protocol?.step_2_data_structures}</div>
+            <div>3. ${d.clean_room_protocol?.step_3_implementation}</div>
+            <div>4. ${d.clean_room_protocol?.step_4_ui_integration}</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-size:9px;color:var(--gold);font-family:monospace;">PLANTILLA NATIVA SUGERIDA (PYTHON / PYDANTIC):</div>
+          <pre style="background:rgba(0,0,0,0.6);border:1px solid rgba(0,255,163,0.2);padding:8px;border-radius:4px;color:var(--green);font-size:9.5px;font-family:monospace;overflow-x:auto;max-height:160px;margin-top:4px;">${d.template_code}</pre>
+        </div>
+      </div>
+    `;
+    showToast("🛠️ Blueprint Clean-Room generado", 2000);
+  } catch(e) {
+    out.innerHTML = `<div class="studio-result-card" style="border-color:#FF0055;"><div style="color:#FF0055;">Error al generar Clean-Room: ${e}</div></div>`;
   }
 }
 

@@ -2223,6 +2223,58 @@ async def get_briefing():
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
+# ── Alberth REA Engine (Reverse Engineering & Architecture) Endpoints ──────────
+class REAInspectPathRequest(BaseModel):
+    path: str = "."
+
+class REAInspectPackageRequest(BaseModel):
+    path: str = "panel/assets/Alberth_v5.0_Quantum.apk"
+
+class REACleanRoomRequest(BaseModel):
+    target_name: str = "CustomFeature"
+    feature_intent: str = "Recrear lógica observada de forma desacoplada"
+    inspected_data: Optional[Dict[str, Any]] = None
+
+@app.post("/api/rea/inspect-path")
+async def rea_inspect_path(req: REAInspectPathRequest):
+    try:
+        from alberth_rea_engine import AlberthREAEngine
+        return AlberthREAEngine.inspect_code_architecture(req.path)
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.post("/api/rea/inspect-package")
+async def rea_inspect_package(req: REAInspectPackageRequest):
+    try:
+        from alberth_rea_engine import AlberthREAEngine
+        return AlberthREAEngine.inspect_package_bundle(req.path)
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.post("/api/rea/clean-room")
+async def rea_clean_room(req: REACleanRoomRequest):
+    try:
+        from alberth_rea_engine import AlberthREAEngine
+        return AlberthREAEngine.generate_clean_room_specification(req.target_name, req.feature_intent, req.inspected_data)
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+@app.get("/api/rea/reports")
+async def rea_get_reports():
+    try:
+        from alberth_rea_engine import REA_REPORTS_DIR
+        reports = []
+        if REA_REPORTS_DIR.exists():
+            for f in sorted(REA_REPORTS_DIR.glob("*.json"), key=os.path.getmtime, reverse=True)[:10]:
+                reports.append({
+                    "filename": f.name,
+                    "size_kb": round(f.stat().st_size / 1024, 2),
+                    "created": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(f.stat().st_mtime))
+                })
+        return {"ok": True, "reports": reports}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
 # ── Servir Panel ───────────────────────────────────────────────────────────────
 
 @app.get("/")

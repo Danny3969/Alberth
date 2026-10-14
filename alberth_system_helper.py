@@ -585,6 +585,33 @@ def handle_keyboard(query, query_lower):
     return None
 
 # ══════════════════════════════════════════════════════════════════════════════
+# MÓDULO 4.5: ALBERTH REA ENGINE (Arquitectura, Inspección e Ingeniería Inversa)
+# ══════════════════════════════════════════════════════════════════════════════
+def handle_rea_commands(query, query_lower):
+    if any(kw in query_lower for kw in ("ingeniería inversa", "ingenieria inversa", "reverse engineer", "rea engine", "auditar código", "auditar codigo", "inspeccionar apk", "inspeccionar paquete", "arquitectura de", "clean-room", "ingeniería limpia", "ingenieria limpia")):
+        try:
+            from alberth_rea_engine import AlberthREAEngine
+            words = query.split()
+            target = "."
+            for w in words:
+                clean_w = w.strip("'\"")
+                if "/" in clean_w or clean_w.endswith(".py") or clean_w.endswith(".js") or clean_w.endswith(".apk") or clean_w.endswith(".ts") or clean_w.endswith(".tsx") or clean_w.endswith(".json"):
+                    target = clean_w
+                    break
+
+            if target.endswith(".apk") or target.endswith(".zip"):
+                res = AlberthREAEngine.inspect_package_bundle(target)
+                summary = res.get("summary", "Inspección de paquete completada.")
+                return {"accion": "rea_inspect_package", "resultado": f"🔬 Alberth REA Package: {summary}", "data": res, "exito": True}
+            else:
+                res = AlberthREAEngine.inspect_code_architecture(target)
+                summary = res.get("summary", "Auditoría de arquitectura completada.")
+                return {"accion": "rea_inspect_code", "resultado": f"🔬 Alberth REA Architecture: {summary}", "data": res, "exito": True}
+        except Exception as e:
+            return {"accion": "rea_error", "resultado": f"Error en motor REA: {e}", "exito": False}
+    return None
+
+# ══════════════════════════════════════════════════════════════════════════════
 # MÓDULO 5: INFORMACIÓN DEL SISTEMA
 # ══════════════════════════════════════════════════════════════════════════════
 def handle_system_info(query, query_lower):
@@ -1444,6 +1471,9 @@ def dispatch(query):
     if result: return result
 
     result = handle_mouse(query, query_lower)
+    if result: return result
+
+    result = handle_rea_commands(query, query_lower)
     if result: return result
 
     result = handle_system_info(query, query_lower)
