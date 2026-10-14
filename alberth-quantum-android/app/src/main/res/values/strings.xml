@@ -1,0 +1,5 @@
+<resources>
+  <string name="app_name">Alberth</string>
+  <string name="accessibility_service_description">Permite a Alberth interactuar con la pantalla, ejecutar comandos, abrir apps y asistirte de forma inteligente.</string>
+  <string name="voice_interaction_service_description">Asistente de Inteligencia Artificial Alberth</string>
+</resources>
