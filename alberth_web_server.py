@@ -111,6 +111,24 @@ async def get_floating_bar():
         return FileResponse(str(floating_file))
     raise HTTPException(status_code=404, detail="floating.html no encontrado")
 
+@app.get("/marketing_suite.html", response_class=FileResponse)
+@app.get("/marketing_suite", response_class=FileResponse)
+@app.get("/marketing", response_class=FileResponse)
+async def get_marketing_suite():
+    marketing_file = PANEL_DIR / "marketing_suite.html"
+    if marketing_file.exists():
+        return FileResponse(str(marketing_file), media_type="text/html")
+    raise HTTPException(status_code=404, detail="marketing_suite.html no encontrado")
+
+@app.get("/tech_radar.html", response_class=FileResponse)
+@app.get("/tech_radar", response_class=FileResponse)
+@app.get("/radar", response_class=FileResponse)
+async def get_tech_radar():
+    radar_file = PANEL_DIR / "tech_radar.html"
+    if radar_file.exists():
+        return FileResponse(str(radar_file), media_type="text/html")
+    raise HTTPException(status_code=404, detail="tech_radar.html no encontrado")
+
 # ── Integración Ojo de Dios (God's Eye View) ───────────────────────────────────
 @app.get("/godseye")
 async def redirect_to_gods_eye():

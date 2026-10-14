@@ -1251,23 +1251,26 @@ header.hud-header {
   background: linear-gradient(to right, rgba(0, 240, 255, 0.25), transparent);
 }
 
-/* 5 Intelligence Cards Row */
+/* 6 Intelligence Cards Grid */
 .intel-cards-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-}
-
-@media (max-width: 1350px) {
-  .intel-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 @media (max-width: 850px) {
   .intel-cards-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.intel-card-marketing {
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(6, 12, 26, 0.85)) !important;
+}
+.intel-card-marketing:hover {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.35) !important;
 }
 
 .intel-card-osint {
@@ -3413,18 +3416,6 @@ header.hud-header {
 
       <!-- Clúster Beta: Paneles y Workspace -->
       <div class="action-group">
-        <button class="hud-btn" id="btn-marketing-suite" onclick="location.href='marketing_suite.html'" title="Suite de Neuromarketing, Branding & Campañas Ads">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path></svg>
-          <span>Marketing</span>
-          <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#a855f7;box-shadow:0 0 6px #a855f7;margin-left:2px;"></span>
-        </button>
-
-        <button class="hud-btn" id="btn-tech-radar" onclick="location.href='tech_radar.html'" title="Radar Tecnológico & GitHub Trending">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="12 6 12 12 16 14"/></svg>
-          <span>Radar</span>
-          <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#00f0ff;box-shadow:0 0 6px #00f0ff;margin-left:2px;"></span>
-        </button>
-
         <button class="hud-btn" id="btn-toggle-canvas" onclick="toggleCanvasDrawer()" title="Lienzo Dinámico A2UI / OpenPage">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
           <span id="btn-canvas-txt">Canvas</span>
@@ -3651,6 +3642,17 @@ header.hud-header {
               <div class="app-details">
                 <span class="app-name" style="color:#cc66ff;">VISION // FACIAL</span>
                 <span class="app-action" id="vision-status-label">Reconoc. Facial</span>
+              </div>
+            </div>
+
+            <!-- Marketing & Neuromarketing Suite -->
+            <div class="app-card intel-card-marketing" id="card-marketing" onclick="location.href='/marketing_suite.html'" title="Suite de Neuromarketing, Branding & Campañas Ads">
+              <div class="app-icon" style="color:#a855f7;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 2a10 10 0 0 1 10 10h-10V2z" opacity="0.5"></path></svg>
+              </div>
+              <div class="app-details">
+                <span class="app-name" style="color:#a855f7;">MARKETING // NEURO</span>
+                <span class="app-action">Branding & Ads</span>
               </div>
             </div>
 
