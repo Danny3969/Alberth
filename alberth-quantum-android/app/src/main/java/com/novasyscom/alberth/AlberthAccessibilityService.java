@@ -144,4 +144,66 @@ public class AlberthAccessibilityService extends AccessibilityService {
         }
         return false;
     }
+
+    /**
+     * Busca un elemento en pantalla que contenga el texto objetivo y simula un clic sobre él.
+     */
+    public boolean clickNodeByText(String targetText) {
+        if (targetText == null || targetText.trim().isEmpty()) return false;
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) return false;
+
+        String query = targetText.toLowerCase().trim();
+        List<AccessibilityNodeInfo> matchingNodes = root.findAccessibilityNodeInfosByText(query);
+        if (matchingNodes != null && !matchingNodes.isEmpty()) {
+            for (AccessibilityNodeInfo node : matchingNodes) {
+                if (performClickOnNodeOrParent(node)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean performClickOnNodeOrParent(AccessibilityNodeInfo node) {
+        if (node == null) return false;
+        if (node.isClickable()) {
+            return node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+        }
+        AccessibilityNodeInfo parent = node.getParent();
+        if (parent != null) {
+            boolean clicked = performClickOnNodeOrParent(parent);
+            parent.recycle();
+            return clicked;
+        }
+        return false;
+    }
+
+    /**
+     * Realiza scroll hacia adelante (abajo) o atrás (arriba) en la ventana activa.
+     */
+    public boolean scrollScreen(boolean forward) {
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) return false;
+        int action = forward ? AccessibilityNodeInfo.ACTION_SCROLL_FORWARD : AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD;
+        return root.performAction(action);
+    }
+
+    /**
+     * Inserta texto en el campo que tenga el foco activo en pantalla.
+     */
+    public boolean typeTextInFocusedField(String text) {
+        if (text == null) return false;
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) return false;
+        AccessibilityNodeInfo focused = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+        if (focused != null && focused.isEditable()) {
+            android.os.Bundle args = new android.os.Bundle();
+            args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
+            boolean res = focused.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+            focused.recycle();
+            return res;
+        }
+        return false;
+    }
 }

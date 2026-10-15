@@ -124,6 +124,41 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+
+        <!-- Servicio Listener de Notificaciones y Control Universal de Multimedia -->
+        <service
+            android:name=".AlberthNotificationService"
+            android:label="Alberth Quantum Notificaciones y Multimedia"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- Servicio de Orbe Flotante Superpuesto sobre cualquier App -->
+        <service
+            android:name=".FloatingOrbService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Servicio de Asistente de Voz Predeterminado de Android -->
+        <service
+            android:name=".AlberthVoiceInteractionService"
+            android:permission="android.permission.BIND_VOICE_INTERACTION"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.voice.VoiceInteractionService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.voice_interaction"
+                android:resource="@xml/voice_interaction_service" />
+        </service>
+
+        <service
+            android:name=".AlberthVoiceInteractionSessionService"
+            android:permission="android.permission.BIND_VOICE_INTERACTION"
+            android:exported="true" />
     </application>
 
 </manifest>

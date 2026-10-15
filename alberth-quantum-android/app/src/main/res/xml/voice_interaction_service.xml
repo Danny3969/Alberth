@@ -2,3 +2,4 @@
 <voice-interaction-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:sessionService="com.novasyscom.alberth.AlberthVoiceInteractionSessionService"
     android:supportsAssist="true" />
+

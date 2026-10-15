@@ -92,6 +92,12 @@ public class MainActivity extends AppCompatActivity {
 
     private LocationManager locationManager;
 
+    private static MainActivity instance;
+
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
     public static boolean isAppForeground() {
         return isAppInForeground;
     }
@@ -99,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
 
         configureSystemBars();
         setContentView(R.layout.activity_main);
@@ -552,6 +559,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (instance == this) {
+            instance = null;
+        }
         super.onDestroy();
         if (speechRecognizer != null) {
             try {
@@ -566,6 +576,23 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
             tts = null;
         }
+    }
+
+    public void notifyIncomingNotification(AlberthNotificationService.NotificationItem item) {
+        if (item == null || webView == null) return;
+        runOnUiThread(() -> {
+            try {
+                JSONObject obj = item.toJson();
+                String js = "if (window.onNativeNotification) { window.onNativeNotification(" + obj.toString() + "); }";
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    webView.evaluateJavascript(js, null);
+                } else {
+                    webView.loadUrl("javascript:" + js);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void initTextToSpeech() {
@@ -1013,6 +1040,140 @@ public class MainActivity extends AppCompatActivity {
                 return s.takeScreenshotAction();
             }
             return false;
+        }
+
+        // ── Métodos de Control Universal Multimedia (Spotify, YouTube Music, etc.) ──
+        @JavascriptInterface
+        public String getCurrentMediaTrack() {
+            AlberthNotificationService s = AlberthNotificationService.getInstance();
+            if (s != null) {
+                return s.getCurrentMediaTrackInfo();
+            }
+            return "{\"ok\":false,\"error\":\"Servicio de notificaciones no activo o permiso no concedido\"}";
+        }
+
+        @JavascriptInterface
+        public boolean controlUniversalMedia(String action) {
+            AlberthNotificationService s = AlberthNotificationService.getInstance();
+            if (s != null) {
+                return s.executeMediaCommand(action);
+            }
+            // Fallback a AudioManager
+            dispatchMediaControl(action);
+            return true;
+        }
+
+        // ── Métodos de Lectura de Notificaciones del Sistema ──
+        @JavascriptInterface
+        public boolean isNotificationServiceActive() {
+            return AlberthNotificationService.isServiceRunning();
+        }
+
+        @JavascriptInterface
+        public void openNotificationSettings() {
+            runOnUiThread(() -> {
+                try {
+                    Toast.makeText(MainActivity.this, "Active el interruptor de Alberth para lectura de notificaciones y control musical", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
+        public String getRecentNotifications(int maxCount) {
+            AlberthNotificationService s = AlberthNotificationService.getInstance();
+            if (s != null) {
+                return s.getRecentNotificationsJson(maxCount);
+            }
+            return "{\"ok\":false,\"notifications\":[]}";
+        }
+
+        // ── Métodos de Control de Pantalla y Accesibilidad Avanzada ──
+        @JavascriptInterface
+        public boolean clickScreenText(String text) {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.clickNodeByText(text);
+            }
+            return false;
+        }
+
+        @JavascriptInterface
+        public boolean scrollScreen(boolean forward) {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.scrollScreen(forward);
+            }
+            return false;
+        }
+
+        @JavascriptInterface
+        public boolean typeText(String text) {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.typeTextInFocusedField(text);
+            }
+            return false;
+        }
+
+        // ── Métodos de Orbe Cuántico Flotante (Overlay sobre Waze / Maps) ──
+        @JavascriptInterface
+        public boolean isFloatingOrbActive() {
+            return FloatingOrbService.isOrbActive();
+        }
+
+        @JavascriptInterface
+        public boolean canDrawOverlays() {
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public void openOverlayPermissionSettings() {
+            runOnUiThread(() -> {
+                try {
+                    Toast.makeText(MainActivity.this, "Permita superponerse a otras aplicaciones para activar el Orbe Cuántico", Toast.LENGTH_LONG).show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:" + getPackageName()));
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
+        public void toggleFloatingOrb(boolean enable) {
+            runOnUiThread(() -> {
+                if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(MainActivity.this)) {
+                    openOverlayPermissionSettings();
+                    return;
+                }
+                Intent intent = new Intent(MainActivity.this, FloatingOrbService.class);
+                intent.setAction(enable ? FloatingOrbService.ACTION_START : FloatingOrbService.ACTION_STOP);
+                startService(intent);
+            });
+        }
+
+        // ── Configuración como Asistente Digital Predeterminado de Android ──
+        @JavascriptInterface
+        public void openDefaultAssistantSettings() {
+            runOnUiThread(() -> {
+                try {
+                    Toast.makeText(MainActivity.this, "Seleccione Alberth como aplicación de Asistencia Digital predeterminada", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } catch (Exception ignored) {}
+                }
+            });
         }
     }
 }

@@ -4527,6 +4527,26 @@ header.hud-header {
       <input type="range" id="vol-slider" min="0" max="100" value="50" oninput="document.getElementById('vol-val').textContent=this.value+'%'" onchange="sysCmd('volume','--action set --value '+this.value)">
       <span id="vol-val" style="font-family:var(--font-hud);font-size:12px;color:var(--cyan);width:40px;">50%</span>
     </div>
+
+    <div id="android-superpowers-box" style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(0,240,255,0.2); display:none;">
+      <div style="font-family:var(--font-hud); font-size:11px; color:var(--cyan); margin-bottom:8px; font-weight:700; letter-spacing:0.5px;">
+        📱 SUPERPODERES ANDROID · ALBERTH
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <button class="sys-action-btn" onclick="if(window.AlberthAndroid) window.AlberthAndroid.openAccessibilitySettings()" style="height:auto; padding:8px 6px;" title="Permitir control de pantalla, toques y lectura">
+          <span>👆 Accesibilidad</span>
+        </button>
+        <button class="sys-action-btn" onclick="if(window.AlberthAndroid) window.AlberthAndroid.openNotificationSettings()" style="height:auto; padding:8px 6px;" title="Permitir control de música y notificaciones">
+          <span>📬 Notif & Música</span>
+        </button>
+        <button class="sys-action-btn" onclick="if(window.AlberthAndroid) window.AlberthAndroid.toggleFloatingOrb(!window.AlberthAndroid.isFloatingOrbActive())" style="height:auto; padding:8px 6px;" title="Mostrar orbe flotante sobre apps">
+          <span>⚡ Orbe Flotante</span>
+        </button>
+        <button class="sys-action-btn" onclick="if(window.AlberthAndroid) window.AlberthAndroid.openDefaultAssistantSettings()" style="height:auto; padding:8px 6px;" title="Establecer Alberth como Asistente Predeterminado">
+          <span>🎙️ Asistente Default</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -5312,33 +5332,130 @@ function fallbackSpeechSynth(text) {
  * Interceptor Central de Acciones de Dispositivo y Conducción:
  * Gestiona música, geolocalización GPS, mapas, navegación turn-by-turn y apps.
  */
+// ═══════════════════════════════════════════════════════════════
+// LISTENER PROACTIVO DE NOTIFICACIONES NATIVAS (WHATSAPP, TELEGRAM, ETC.)
+// ═══════════════════════════════════════════════════════════════
+window.onNativeNotification = function(notif) {
+  if (!notif) return;
+  console.log("📬 Notificación nativa recibida:", notif);
+  if (isCopilotActive) {
+    const app = notif.app_name || notif.package || "Notificación";
+    const title = notif.title || "";
+    const text = notif.text || "";
+    let alertMsg = `Señor, nuevo mensaje de ${app}`;
+    if (title) alertMsg += ` de ${title}`;
+    if (text) alertMsg += `: ${text}`;
+    speakAlberthVoicePrompt(alertMsg);
+    showToast(`📬 ${app}: ${title} - ${text}`, 5000);
+  }
+};
+
 function handleDeviceActionIntent(transcript) {
   if (!transcript) return false;
   const t = transcript.toLowerCase().trim();
 
-  // 1. Música & Playlist
+  // 1a. Identificar Canción Actual (Spotify, YouTube Music, etc.)
+  if (/\b(qu[eé]\s+(?:canci[oó]n\s+)?(?:est[aá]\s+)?sonando|qu[eé]\s+suena|c[oó]mo\s+se\s+llama\s+(?:la|esta)\s+canci[oó]n|qu[eé]\s+m[uú]sica\s+es)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.getCurrentMediaTrack) {
+      try {
+        const info = JSON.parse(window.AlberthAndroid.getCurrentMediaTrack());
+        if (info.ok && (info.title || info.artist)) {
+          let ans = `Señor, está sonando "${info.title}"`;
+          if (info.artist) ans += ` de ${info.artist}`;
+          speakAlberthVoicePrompt(ans);
+          showToast(`🎵 ${info.title} - ${info.artist}`, 5000);
+          return true;
+        } else {
+          speakAlberthVoicePrompt("Señor, no detecto ningún reproductor de música activo en este momento.");
+          return true;
+        }
+      } catch(e) {
+        console.warn("Error leyendo canción:", e);
+      }
+    }
+  }
+
+  // 1b. Música & Playlist / Reproducir
   if (/\b(reproduce|pon|inicia|abre)\s+(?:mi\s+)?(?:playlist|m[uú]sica|lista\s+de\s+reproducci[oó]n)\b/i.test(t)) {
-    speakAlberthVoicePrompt("Iniciando su playlist, Señor.", "iniciando_playlist");
+    speakAlberthVoicePrompt("Iniciando su música, Señor.", "iniciando_playlist");
     showToast("🎵 Iniciando playlist...", 3000);
     playEchoTrack(0);
-    if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+    if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+      window.AlberthAndroid.controlUniversalMedia("play");
+    } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("play");
     }
     return true;
   }
-  if (/\b(siguiente\s+canci[oó]n|cambia\s+de\s+canci[oó]n|pasa\s+la\s+canci[oó]n|otra\s+canci[oó]n)\b/i.test(t)) {
+  if (/\b(siguiente\s+canci[oó]n|cambia\s+de\s+canci[oó]n|pasa\s+la\s+canci[oó]n|otra\s+canci[oó]n|adelanta\s+la\s+canci[oó]n)\b/i.test(t)) {
     nextMediaTrack();
-    if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+    if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+      window.AlberthAndroid.controlUniversalMedia("next");
+    } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("next");
     }
+    showToast("⏭️ Siguiente canción", 2000);
+    return true;
+  }
+  if (/\b(canci[oó]n\s+anterior|retrocede\s+la\s+canci[oó]n|vuelve\s+a\s+la\s+canci[oó]n\s+anterior)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+      window.AlberthAndroid.controlUniversalMedia("prev");
+    } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+      window.AlberthAndroid.controlMedia("prev");
+    }
+    showToast("⏮️ Canción anterior", 2000);
     return true;
   }
   if (/\b(pausa|pausar|det[eé]n|detener|silencia|para)\s+(?:la\s+)?(?:m[uú]sica|canci[oó]n|reproducci[oó]n)\b/i.test(t)) {
     toggleMediaPlay();
-    if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+    if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+      window.AlberthAndroid.controlUniversalMedia("pause");
+    } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("pause");
     }
+    showToast("⏸️ Música pausada", 2000);
     return true;
+  }
+
+  // 1c. Leer Notificaciones Recientes (WhatsApp, Telegram, SMS)
+  if (/\b(lee\s+(?:mis\s+)?notificaciones|qui[eé]n\s+me\s+escribi[oó]|tengo\s+notificaciones|tengo\s+mensajes|revisa\s+(?:mis\s+)?mensajes|revisa\s+(?:mis\s+)?notificaciones|[uú]ltimas\s+notificaciones)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.getRecentNotifications) {
+      try {
+        const notifData = JSON.parse(window.AlberthAndroid.getRecentNotifications(4));
+        if (notifData.ok && notifData.notifications && notifData.notifications.length > 0) {
+          let summary = `Señor, tiene ${notifData.notifications.length} notificaciones recientes: `;
+          notifData.notifications.forEach((n, idx) => {
+            summary += `De ${n.app_name}: ${n.title ? n.title + '. ' : ''}${n.text ? n.text + '. ' : ''} `;
+          });
+          speakAlberthVoicePrompt(summary);
+          showToast(`📬 ${notifData.notifications.length} notificaciones leídas`, 5000);
+          return true;
+        } else {
+          speakAlberthVoicePrompt("Señor, no tiene notificaciones recientes sin leer o debe habilitar el permiso de lectura de notificaciones en los Ajustes.");
+          return true;
+        }
+      } catch(e) {
+        console.warn("Error leyendo notificaciones:", e);
+      }
+    }
+  }
+
+  // 1d. Control de Orbe Cuántico Flotante
+  if (/\b(activa|activar|muestra|mostrar|abre|abrir|inicia)\s+(?:el\s+)?(?:orbe|orbe\s+flotante|burbuja)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.toggleFloatingOrb) {
+      window.AlberthAndroid.toggleFloatingOrb(true);
+      speakAlberthVoicePrompt("Orbe cuántico flotante activado, Señor. Ahora estaré disponible sobre cualquier aplicación.");
+      showToast("⚡ Orbe Cuántico Activado", 3000);
+      return true;
+    }
+  }
+  if (/\b(cierra|cerrar|oculta|ocultar|quita|quitar|desactiva|desactivar)\s+(?:el\s+)?(?:orbe|orbe\s+flotante|burbuja)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.toggleFloatingOrb) {
+      window.AlberthAndroid.toggleFloatingOrb(false);
+      speakAlberthVoicePrompt("Orbe flotante desactivado, Señor.");
+      showToast("⚡ Orbe Ocultado", 2000);
+      return true;
+    }
   }
 
   // 2. Ubicación GPS / "¿Dónde estoy?"
@@ -5426,7 +5543,39 @@ function handleDeviceActionIntent(transcript) {
     }
   }
 
-  // 7. Ver y Leer Pantalla (Accesibilidad)
+  // 7. Clic Táctil por Nombre o Texto (Accesibilidad)
+  const clickMatch = t.match(/\b(haz\s+clic\s+en|haz\s+click\s+en|toca\s+(?:en\s+)?|presiona\s+(?:en\s+)?|selecciona\s+(?:en\s+)?)\s+([a-záéíóúñ0-9\s]+)/i);
+  if (clickMatch && clickMatch[2]) {
+    const targetText = clickMatch[2].trim();
+    if (window.AlberthAndroid && window.AlberthAndroid.clickScreenText) {
+      const ok = window.AlberthAndroid.clickScreenText(targetText);
+      if (ok) {
+        speakAlberthVoicePrompt(`Presionando ${targetText}, Señor.`);
+        showToast(`👆 Clic en: ${targetText}`, 2000);
+      } else {
+        speakAlberthVoicePrompt(`Señor, no encontré "${targetText}" en la pantalla.`);
+      }
+      return true;
+    }
+  }
+
+  // 8. Desplazamiento / Scroll en Pantalla (Accesibilidad)
+  if (/\b(baja\s+la\s+pantalla|desliza\s+abajo|scroll\s+abajo|avanza\s+pantalla)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.scrollScreen) {
+      window.AlberthAndroid.scrollScreen(true);
+      showToast("⬇️ Deslizando abajo", 1500);
+      return true;
+    }
+  }
+  if (/\b(sube\s+la\s+pantalla|desliza\s+arriba|scroll\s+arriba|retrocede\s+pantalla)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.scrollScreen) {
+      window.AlberthAndroid.scrollScreen(false);
+      showToast("⬆️ Deslizando arriba", 1500);
+      return true;
+    }
+  }
+
+  // 9. Ver y Leer Pantalla (Accesibilidad + Multimodal)
   if (/\b(qu[eé]\s+hay\s+en\s+la\s+pantalla|lee\s+la\s+pantalla|qu[eé]\s+dice\s+la\s+pantalla|analiza\s+mi\s+pantalla|qu[eé]\s+ves\s+en\s+mi\s+pantalla)\b/i.test(t)) {
     if (window.AlberthAndroid && window.AlberthAndroid.getScreenText) {
       const scrText = window.AlberthAndroid.getScreenText();
@@ -7675,7 +7824,12 @@ async function sysCmd(command, argStr) {
 }
 
 function toggleSysModal() {
-  document.getElementById("sys-modal").classList.toggle("open");
+  const modal = document.getElementById("sys-modal");
+  modal.classList.toggle("open");
+  if (modal.classList.contains("open") && window.AlberthAndroid) {
+    const box = document.getElementById("android-superpowers-box");
+    if (box) box.style.display = "block";
+  }
 }
 
 // ─── Echo Music / YouTube Music Player Engine ───────────────
