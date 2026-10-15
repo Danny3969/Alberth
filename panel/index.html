@@ -5293,8 +5293,11 @@ function speakAlberthVoicePrompt(text, audioKey = null) {
         promptAudioInstance = null;
         if (isCopilotActive) {
           setHUDState("listening", "🚗 COPILOTO: ESCUCHANDO A SEÑOR...");
-        } else if (copilotWakeStep === 1) {
+        } else if (copilotWakeStep === 1 || isVoiceSessionActive) {
           setHUDState("listening", "🎙️ ALBERTH: ESPERANDO ORDEN...");
+          if (window.AlberthAndroid && window.AlberthAndroid.restartVoiceAssistant) {
+            window.AlberthAndroid.restartVoiceAssistant();
+          }
         } else {
           setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
         }
@@ -5302,12 +5305,23 @@ function speakAlberthVoicePrompt(text, audioKey = null) {
 
       promptAudioInstance.onerror = () => {
         promptAudioInstance = null;
-        setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        if (isVoiceSessionActive) {
+          setHUDState("listening", "🎙️ ALBERTH: ESPERANDO ORDEN...");
+          if (window.AlberthAndroid && window.AlberthAndroid.restartVoiceAssistant) {
+            window.AlberthAndroid.restartVoiceAssistant();
+          }
+        } else {
+          setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        }
       };
 
       promptAudioInstance.play().catch(e => {
         console.warn("Audio neural pausado o bloqueado por política del navegador:", e);
-        setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        if (isVoiceSessionActive) {
+          setHUDState("listening", "🎙️ ALBERTH: ESPERANDO ORDEN...");
+        } else {
+          setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        }
       });
       return;
     } catch(err) {
@@ -5588,6 +5602,65 @@ function handleDeviceActionIntent(transcript) {
   return false;
 }
 
+function handleDeactivationVoiceCommand(cmd) {
+  if (!cmd) return false;
+  const t = cmd.toLowerCase().trim();
+  const isSleep = /\b(gracias\s+alberth(\s*,?\s*eso\s+es\s+todo)?|gracias\s+alberth|es\s+todo\s+alberth|alberth\s+eso\s+es\s+todo|alberth\s+descansar|alberth\s+puedes\s+descansar|alberth\s+cierra(\s+la\s+aplicaci[oó]n)?|cierra\s+la\s+aplicaci[oó]n|cierra\s+alberth|alberth\s+ap[aá]gate|alberth\s+apagate|alberth\s+du[eé]rmete|alberth\s+duermete|alberth\s+reposo)\b/i.test(t) ||
+    t.includes("gracias alberth") ||
+    t.includes("es todo alberth") ||
+    t.includes("alberth descansar") ||
+    t.includes("cierra alberth") ||
+    t.includes("alberth eso es todo") ||
+    t.includes("cerrar aplicacion") ||
+    t.includes("cerrar aplicación");
+
+  if (!isSleep) return false;
+
+  console.log("🌙 [Comando de Desactivación / Reposo]:", cmd);
+
+  // 1. Si está en Modo Copiloto
+  if (isCopilotActive) {
+    stopCopilotMode(true);
+    return true;
+  }
+
+  // 2. Si está en Modo Normal
+  isVoiceSessionActive = false;
+  copilotWakeStep = 0;
+  clearTimeout(vadTimer);
+  vadTimer = null;
+  clearTimeout(sessionTimeout);
+  sessionTimeout = null;
+  lastCapturedCmd = "";
+
+  if (isRecording) {
+    try { toggleRecording(); } catch(e){}
+  }
+  if (isLiveModeActive) {
+    try { toggleUltraLiveMode(); } catch(e){}
+  }
+
+  // Despedida formal a Señor
+  speakAlberthVoicePrompt("A sus órdenes, Señor. Quedo en reposo.", "a_sus_ordenes");
+  showToast("🌙 Alberth en reposo. A sus órdenes, Señor.", 3500);
+  setHUDState("idle", "EN LÍNEA · EN REPOSO");
+
+  if (hologramDisplayMode === "auto") {
+    targetMorph = 0.15;
+  }
+
+  // En Android: Minimizar la app para apagar pantalla/volver al home y ahorrar 100% de batería y datos
+  if (window.AlberthAndroid && window.AlberthAndroid.minimizeApp) {
+    setTimeout(() => {
+      try {
+        window.AlberthAndroid.minimizeApp();
+      } catch(e){}
+    }, 2200);
+  }
+
+  return true;
+}
+
 function handleCopilotVoiceStep(transcript) {
   if (!transcript) return false;
   const t = transcript.toLowerCase().trim();
@@ -5731,7 +5804,13 @@ function stopCopilotMode(withFarewell = true) {
     copilotWakeLock = null;
   }
 
-  setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+  setHUDState("idle", "EN LÍNEA · EN REPOSO");
+
+  if (withFarewell && window.AlberthAndroid && window.AlberthAndroid.minimizeApp) {
+    setTimeout(() => {
+      try { window.AlberthAndroid.minimizeApp(); } catch(e){}
+    }, 2800);
+  }
 }
 
 function toggleCopilotMode() {
@@ -7527,6 +7606,7 @@ function initWakeWordEngine() {
     console.log("📱 [Alberth Mobile] Integración con contenedor Android y Modo Copiloto.");
     window.onNativeWakeWord = function(heardPhrase) {
       console.log("🎙️ [Native Wake Word Activado]:", heardPhrase);
+      isVoiceSessionActive = true;
       const lower = (heardPhrase || "").toLowerCase();
       if (lower.includes("hola")) {
         speakAlberthVoicePrompt("Hola Señor, ¿en qué puedo servirle?", "hola_senor");
@@ -7538,17 +7618,21 @@ function initWakeWordEngine() {
         speakAlberthVoicePrompt("Dígame, Señor.", "digame_senor");
         showToast("🎙️ Alberth: 'Dígame, Señor'", 3000);
       }
-      setHUDState("listening", "🎙️ ALBERTH: 'DÍGAME, SEÑOR'...");
+      // speakAlberthVoicePrompt pone el estado en 'speaking' (Rostro 3D).
+      // Al terminar el audio del saludo (promptAudioInstance.onended),
+      // automáticamente pasará a 'listening' (Orbe 3D) y reanudará el reconocimiento nativo.
     };
     window.onNativeVoiceCommand = function(cmd) {
       if (!cmd || cmd.trim().length < 2) return;
       console.log("🎙️ [Comando Nativo Recibido]:", cmd);
-      // 1. Probar si es una orden de Copiloto (activar/cerrar)
+      // 1. Prioridad: Frase de cierre o reposo ("Gracias Alberth eso es todo")
+      if (handleDeactivationVoiceCommand(cmd)) return;
+      // 2. Probar si es una orden de Copiloto (activar)
       if (handleCopilotVoiceStep(cmd)) return;
-      // 2. Probar si es una acción de dispositivo (GPS, mapas, playlist, app)
+      // 3. Probar si es una acción de dispositivo (GPS, mapas, playlist, app)
       const actionHandled = handleDeviceActionIntent(cmd);
       if (actionHandled) return;
-      // 3. Consulta general a la IA de Alberth
+      // 4. Consulta general a la IA de Alberth
       showToast(`🎙️ Alberth: "${cmd}"`, 2500);
       setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
       sendWS({ type: "text", text: cmd });
@@ -7592,6 +7676,12 @@ function initWakeWordEngine() {
         const rawTranscript = event.results[i][0].transcript.trim();
         const transcript = rawTranscript.toLowerCase();
         const isFinal = event.results[i].isFinal;
+
+        // 0. Prioridad Máxima: Comando de Reposo / Cierre ("Gracias Alberth eso es todo")
+        if (handleDeactivationVoiceCommand(transcript)) {
+          stopAudio();
+          return;
+        }
 
         // ── A. Si Alberth está reproduciendo voz por los parlantes ──
         const isSpeakingVoice = (currentAudio && !currentAudio.paused) || (promptAudioInstance && !promptAudioInstance.paused);
@@ -7674,8 +7764,17 @@ function initWakeWordEngine() {
               }, 700);
             }
           } else if (!lastCapturedCmd) {
-            showToast("🎙️ ¡Alberth activado! Habla tu consulta...", 2500);
-            setHUDState("listening", "ALBERTH ESCUCHANDO ORDEN DE VOZ...");
+            const lowerTranscript = transcript.toLowerCase();
+            if (lowerTranscript.includes("hola")) {
+              speakAlberthVoicePrompt("Hola Señor, ¿en qué puedo servirle?", "hola_senor");
+              showToast("🎙️ Alberth: 'Hola Señor, ¿en qué puedo servirle?'", 3000);
+            } else if (lowerTranscript.includes("estas alli") || lowerTranscript.includes("estás allí") || lowerTranscript.includes("estas ahi")) {
+              speakAlberthVoicePrompt("Estoy aquí, Señor. A sus órdenes.", "estoy_aqui");
+              showToast("🎙️ Alberth: 'Estoy aquí, Señor. A sus órdenes.'", 3000);
+            } else {
+              speakAlberthVoicePrompt("Dígame, Señor.", "digame_senor");
+              showToast("🎙️ Alberth: 'Dígame, Señor'", 3000);
+            }
           }
         }
       }

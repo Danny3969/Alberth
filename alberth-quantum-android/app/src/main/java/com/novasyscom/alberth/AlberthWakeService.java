@@ -276,11 +276,25 @@ public class AlberthWakeService extends Service {
 
         for (String match : matches) {
             String lower = match.toLowerCase(Locale.ROOT).trim();
+            if (isSleepPhrase(lower)) {
+                // Si la app ya está en reposo/segundo plano, ignorar frases de cierre para no despertar la pantalla
+                return;
+            }
             if (isWakeWord(lower)) {
                 triggerWakeUp(lower);
                 break;
             }
         }
+    }
+
+    private boolean isSleepPhrase(String text) {
+        if (text == null) return false;
+        String t = text.toLowerCase(Locale.ROOT).trim();
+        return t.contains("gracias alberth") ||
+               t.contains("es todo alberth") ||
+               t.contains("alberth descansar") ||
+               t.contains("cierra alberth") ||
+               t.contains("alberth eso es todo");
     }
 
     private boolean isWakeWord(String text) {

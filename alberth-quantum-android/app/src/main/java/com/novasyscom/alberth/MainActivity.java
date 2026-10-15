@@ -390,7 +390,22 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     isListening = false;
-                    // NO relanzar en bucle continuo: evita que Android emita pitidos constantes y bloquee el micrófono
+                    // Si estamos esperando orden del usuario tras el wake word, reintentar hasta 2 veces con pausa limpia
+                    if (isAppInForeground && !isAlberthSpeaking && isExpectingFollowupCommand) {
+                        consecutiveErrors++;
+                        if (consecutiveErrors < 3) {
+                            voiceHandler.removeCallbacksAndMessages(null);
+                            voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 1000);
+                        } else {
+                            isExpectingFollowupCommand = false;
+                            consecutiveErrors = 0;
+                            runOnUiThread(() -> {
+                                if (webView != null) {
+                                    webView.evaluateJavascript("if (window.setHUDState) { window.setHUDState('idle', 'EN LÍNEA · ESPERANDO ORDEN'); }", null);
+                                }
+                            });
+                        }
+                    }
                 }
 
                 @Override
@@ -398,7 +413,6 @@ public class MainActivity extends AppCompatActivity {
                     isListening = false;
                     consecutiveErrors = 0;
                     processVoiceResults(results);
-                    // Sesión completada: no relanzar en bucle para mantener el teléfono en silencio como ChatGPT/Gemini
                 }
 
                 @Override
@@ -444,6 +458,18 @@ public class MainActivity extends AppCompatActivity {
 
         for (String match : matches) {
             String lower = match.toLowerCase(Locale.ROOT).trim();
+            // 1. Prioridad: Frase de cierre o reposo ("Gracias Alberth eso es todo")
+            if (isSleepPhraseMatch(lower)) {
+                triggerHapticFeedback(70);
+                isExpectingFollowupCommand = false;
+                voiceHandler.removeCallbacks(resetFollowupRunnable);
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
+                dispatchVoiceCommandToWeb("gracias alberth eso es todo");
+                return;
+            }
+
+            // 2. Wake Word Match ("Hola Alberth", "Alberth", "Estás allí Alberth", etc.)
             if (isWakeWordMatch(lower)) {
                 triggerHapticFeedback(70);
                 String cmd = extractCommand(lower);
@@ -453,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     isExpectingFollowupCommand = true;
                     voiceHandler.removeCallbacks(resetFollowupRunnable);
-                    voiceHandler.postDelayed(resetFollowupRunnable, 8000);
+                    voiceHandler.postDelayed(resetFollowupRunnable, 10000);
                     notifyWebWakeWordActivated(lower);
                 }
                 return;
@@ -474,12 +500,34 @@ public class MainActivity extends AppCompatActivity {
 
         for (String match : matches) {
             String lower = match.toLowerCase(Locale.ROOT).trim();
+            if (isSleepPhraseMatch(lower)) {
+                triggerHapticFeedback(60);
+                isExpectingFollowupCommand = false;
+                voiceHandler.removeCallbacks(resetFollowupRunnable);
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
+                dispatchVoiceCommandToWeb("gracias alberth eso es todo");
+                return;
+            }
             if (isWakeWordMatch(lower) && !isExpectingFollowupCommand) {
                 triggerHapticFeedback(60);
                 notifyWebWakeWordActivated(lower);
                 return;
             }
         }
+    }
+
+    private boolean isSleepPhraseMatch(String text) {
+        if (text == null) return false;
+        String t = text.toLowerCase(Locale.ROOT).trim();
+        return t.matches(".*\\b(gracias\\s+alberth(\\s*,?\\s*eso\\s+es\\s+todo)?|es\\s+todo\\s+alberth|alberth\\s+eso\\s+es\\s+todo|alberth\\s+descansar|alberth\\s+puedes\\s+descansar|alberth\\s+cierra(\\s+la\\s+aplicaci[oó]n)?|cierra\\s+la\\s+aplicaci[oó]n|cierra\\s+alberth|alberth\\s+ap[aá]gate|alberth\\s+apagate|alberth\\s+du[eé]rmete|alberth\\s+duermete|alberth\\s+reposo)\\b.*") ||
+               t.contains("gracias alberth") ||
+               t.contains("es todo alberth") ||
+               t.contains("alberth descansar") ||
+               t.contains("cierra alberth") ||
+               t.contains("alberth eso es todo") ||
+               t.contains("cerrar aplicacion") ||
+               t.contains("cerrar aplicación");
     }
 
     private boolean isWakeWordMatch(String text) {
@@ -930,6 +978,12 @@ public class MainActivity extends AppCompatActivity {
                 if (speaking) {
                     voiceHandler.removeCallbacksAndMessages(null);
                     stopListeningSafely();
+                } else {
+                    // Alberth terminó de hablar: si la app está en primer plano y espera orden del usuario, reanudar escucha
+                    if (isAppInForeground && isExpectingFollowupCommand) {
+                        voiceHandler.removeCallbacksAndMessages(null);
+                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 600);
+                    }
                 }
             });
         }
@@ -942,6 +996,7 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void stopVoiceAssistant() {
             runOnUiThread(() -> {
+                isExpectingFollowupCommand = false;
                 voiceHandler.removeCallbacksAndMessages(null);
                 stopListeningSafely();
             });
@@ -950,9 +1005,32 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void restartVoiceAssistant() {
             runOnUiThread(() -> {
+                isExpectingFollowupCommand = true;
+                consecutiveErrors = 0;
                 if (isAppInForeground && !isAlberthSpeaking) {
-                    startListeningSafely();
+                    voiceHandler.removeCallbacksAndMessages(null);
+                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 300);
                 }
+            });
+        }
+
+        @JavascriptInterface
+        public void minimizeApp() {
+            runOnUiThread(() -> {
+                isExpectingFollowupCommand = false;
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
+                moveTaskToBack(true);
+            });
+        }
+
+        @JavascriptInterface
+        public void closeApp() {
+            runOnUiThread(() -> {
+                isExpectingFollowupCommand = false;
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
+                moveTaskToBack(true);
             });
         }
 
