@@ -84,11 +84,17 @@ public class MainActivity extends AppCompatActivity {
     private SpeechRecognizer speechRecognizer;
     private Intent speechIntent;
     private TextToSpeech tts;
-    private boolean isAppInForeground = false;
+    public static volatile boolean isAppInForeground = false;
+    private volatile boolean isAlberthSpeaking = false;
     private boolean isListening = false;
+    private int consecutiveErrors = 0;
     private final Handler voiceHandler = new Handler(Looper.getMainLooper());
 
     private LocationManager locationManager;
+
+    public static boolean isAppForeground() {
+        return isAppInForeground;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,9 +120,6 @@ public class MainActivity extends AppCompatActivity {
         initTextToSpeech();
         requestHardwarePermissions();
 
-        // Iniciar Servicio Persistente en Segundo Plano de Escucha ("Alberth")
-        startPersistentWakeService();
-
         // Configurar pantalla para encenderse y mostrarse sobre bloqueo al ser invocado por voz
         configureLockScreenDisplay();
 
@@ -128,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startPersistentWakeService() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         try {
             Intent serviceIntent = new Intent(this, AlberthWakeService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -288,14 +294,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestHardwarePermissions() {
-        String[] permissions = new String[]{
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.CAMERA,
-                Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-        };
+        List<String> permList = new ArrayList<>();
+        permList.add(Manifest.permission.RECORD_AUDIO);
+        permList.add(Manifest.permission.CAMERA);
+        permList.add(Manifest.permission.MODIFY_AUDIO_SETTINGS);
+        permList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        permList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permList.add(Manifest.permission.POST_NOTIFICATIONS);
+        }
 
+        String[] permissions = permList.toArray(new String[0]);
         boolean needed = false;
         for (String p : permissions) {
             if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
@@ -308,6 +317,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQ_CODE);
         } else {
             initNativeVoiceAssistant();
+            startPersistentWakeService();
         }
     }
 
@@ -318,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
             boolean audioGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
             if (audioGranted) {
                 initNativeVoiceAssistant();
+                startPersistentWakeService();
             }
         }
     }
@@ -350,10 +361,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onReadyForSpeech(Bundle params) {
                     isListening = true;
+                    consecutiveErrors = 0;
                 }
 
                 @Override
-                public void onBeginningOfSpeech() {}
+                public void onBeginningOfSpeech() {
+                    isListening = true;
+                }
 
                 @Override
                 public void onRmsChanged(float rmsdB) {}
@@ -369,21 +383,40 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     isListening = false;
-                    // Auto-reinicio continuo en caso de silencio o pausa del usuario
-                    if (isAppInForeground) {
-                        voiceHandler.removeCallbacksAndMessages(null);
-                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 300);
+                    if (!isAppInForeground || isAlberthSpeaking) {
+                        return;
                     }
+
+                    consecutiveErrors++;
+                    long delayMs = 1500;
+
+                    if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT) {
+                        delayMs = 2500;
+                        if (consecutiveErrors >= 3) {
+                            consecutiveErrors = 0;
+                            voiceHandler.removeCallbacksAndMessages(null);
+                            voiceHandler.postDelayed(MainActivity.this::initNativeVoiceAssistant, 1200);
+                            return;
+                        }
+                    } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT || error == SpeechRecognizer.ERROR_NO_MATCH) {
+                        delayMs = 1400;
+                    } else if (error == SpeechRecognizer.ERROR_AUDIO || error == SpeechRecognizer.ERROR_SERVER) {
+                        delayMs = 2000;
+                    }
+
+                    voiceHandler.removeCallbacksAndMessages(null);
+                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, delayMs);
                 }
 
                 @Override
                 public void onResults(Bundle results) {
                     isListening = false;
+                    consecutiveErrors = 0;
                     processVoiceResults(results);
-                    // Reiniciar escucha continua inmediatamente
-                    if (isAppInForeground) {
+                    // Reiniciar escucha continua con debounce prudencial si Alberth no está hablando
+                    if (isAppInForeground && !isAlberthSpeaking) {
                         voiceHandler.removeCallbacksAndMessages(null);
-                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 350);
+                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 800);
                     }
                 }
 
@@ -396,8 +429,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onEvent(int eventType, Bundle params) {}
             });
 
-            if (isAppInForeground) {
-                voiceHandler.postDelayed(this::startListeningSafely, 400);
+            if (isAppInForeground && !isAlberthSpeaking) {
+                voiceHandler.postDelayed(this::startListeningSafely, 600);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -405,37 +438,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private synchronized void startListeningSafely() {
-        if (!isAppInForeground || speechRecognizer == null || speechIntent == null) return;
+        if (!isAppInForeground || isAlberthSpeaking || isListening || speechRecognizer == null || speechIntent == null) {
+            return;
+        }
         try {
-            muteSystemBeep(true);
             speechRecognizer.startListening(speechIntent);
-            voiceHandler.postDelayed(() -> muteSystemBeep(false), 200);
         } catch (Exception ignored) {
-            muteSystemBeep(false);
-            if (isAppInForeground) {
-                voiceHandler.postDelayed(this::startListeningSafely, 1000);
+            if (isAppInForeground && !isAlberthSpeaking) {
+                voiceHandler.postDelayed(this::startListeningSafely, 2000);
             }
         }
     }
 
     private void stopListeningSafely() {
+        isListening = false;
         if (speechRecognizer != null) {
             try {
                 speechRecognizer.stopListening();
                 speechRecognizer.cancel();
             } catch (Exception ignored) {}
         }
-        isListening = false;
-    }
-
-    private void muteSystemBeep(boolean mute) {
-        try {
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            if (am != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                am.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
-                am.adjustStreamVolume(AudioManager.STREAM_SYSTEM, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
-            }
-        } catch (Exception ignored) {}
     }
 
     private void processVoiceResults(Bundle results) {
@@ -537,7 +559,13 @@ public class MainActivity extends AppCompatActivity {
         if (AlberthWakeService.getInstance() != null) {
             AlberthWakeService.getInstance().pauseListening();
         }
-        voiceHandler.postDelayed(this::startListeningSafely, 300);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startPersistentWakeService();
+            if (!isAlberthSpeaking) {
+                voiceHandler.removeCallbacksAndMessages(null);
+                voiceHandler.postDelayed(this::startListeningSafely, 600);
+            }
+        }
     }
 
     @Override
@@ -899,9 +927,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public void setSpeakingState(boolean speaking) {
+            runOnUiThread(() -> {
+                isAlberthSpeaking = speaking;
+                if (speaking) {
+                    voiceHandler.removeCallbacksAndMessages(null);
+                    stopListeningSafely();
+                } else {
+                    voiceHandler.removeCallbacksAndMessages(null);
+                    if (isAppInForeground) {
+                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 600);
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public boolean getSpeakingState() {
+            return isAlberthSpeaking;
+        }
+
+        @JavascriptInterface
         public void restartVoiceAssistant() {
             runOnUiThread(() -> {
-                if (isAppInForeground) {
+                if (isAppInForeground && !isAlberthSpeaking) {
                     startListeningSafely();
                 }
             });

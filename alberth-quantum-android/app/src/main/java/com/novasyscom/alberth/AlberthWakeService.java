@@ -132,10 +132,30 @@ public class AlberthWakeService extends Service {
                 .setContentIntent(pi)
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
-        } else {
-            startForeground(NOTIFICATION_ID, notification);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                int type = 0;
+                if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    type |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+                }
+                if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                    androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    type |= ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+                }
+                if (type != 0) {
+                    startForeground(NOTIFICATION_ID, notification, type);
+                } else {
+                    startForeground(NOTIFICATION_ID, notification);
+                }
+            } else {
+                startForeground(NOTIFICATION_ID, notification);
+            }
+        } catch (SecurityException se) {
+            try {
+                startForeground(NOTIFICATION_ID, notification);
+            } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -177,14 +197,21 @@ public class AlberthWakeService extends Service {
                     @Override
                     public void onError(int error) {
                         isListening = false;
-                        scheduleRestart(400);
+                        if (isPaused || MainActivity.isAppForeground()) return;
+                        long delay = 1500;
+                        if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT) {
+                            delay = 3000;
+                        }
+                        scheduleRestart(delay);
                     }
 
                     @Override
                     public void onResults(Bundle results) {
                         isListening = false;
                         processResults(results);
-                        scheduleRestart(400);
+                        if (!isPaused && !MainActivity.isAppForeground()) {
+                            scheduleRestart(1200);
+                        }
                     }
 
                     @Override
@@ -202,35 +229,20 @@ public class AlberthWakeService extends Service {
     }
 
     private synchronized void startListeningInternal() {
-        if (isPaused || speechRecognizer == null || speechIntent == null) return;
+        if (isPaused || MainActivity.isAppForeground() || speechRecognizer == null || speechIntent == null) return;
         handler.post(() -> {
             try {
-                if (!isPaused && speechRecognizer != null) {
-                    muteSystemBeep(true);
+                if (!isPaused && !MainActivity.isAppForeground() && speechRecognizer != null) {
                     speechRecognizer.startListening(speechIntent);
-                    handler.postDelayed(() -> muteSystemBeep(false), 200);
                 }
             } catch (Exception ignored) {
-                muteSystemBeep(false);
-                scheduleRestart(1000);
+                scheduleRestart(2000);
             }
         });
     }
 
-    private void muteSystemBeep(boolean mute) {
-        try {
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            if (am != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    am.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
-                    am.adjustStreamVolume(AudioManager.STREAM_SYSTEM, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
-                }
-            }
-        } catch (Exception ignored) {}
-    }
-
     private void scheduleRestart(long delayMs) {
-        if (isPaused) return;
+        if (isPaused || MainActivity.isAppForeground()) return;
         handler.removeCallbacksAndMessages(null);
         handler.postDelayed(this::startListeningInternal, delayMs);
     }
@@ -249,8 +261,12 @@ public class AlberthWakeService extends Service {
     }
 
     public void resumeListening() {
+        if (MainActivity.isAppForeground()) {
+            isPaused = true;
+            return;
+        }
         isPaused = false;
-        scheduleRestart(250);
+        scheduleRestart(500);
     }
 
     private void processResults(Bundle results) {

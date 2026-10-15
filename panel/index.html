@@ -3476,10 +3476,10 @@ header.hud-header {
           <span class="holo-selector-tag">PROYECCIÓN 3D</span>
         </div>
         <div class="holo-pills-row">
-          <button class="holo-pill-btn active" id="btn-holo-face" onclick="setHologramMode('face')" title="Fijar Holograma Cuántico de Alberth continuo">
+          <button class="holo-pill-btn" id="btn-holo-face" onclick="setHologramMode('face')" title="Fijar Holograma Cuántico de Alberth continuo">
             <span>👤 ROSTRO</span>
           </button>
-          <button class="holo-pill-btn" id="btn-holo-auto" onclick="setHologramMode('auto')" title="Modo Dinámico: Holograma de Alberth durante diálogo/voz, Orbe en reposo">
+          <button class="holo-pill-btn active" id="btn-holo-auto" onclick="setHologramMode('auto')" title="Modo Dinámico: Orbe al hablar el Señor, Rostro al responder Alberth">
             <span>⚡ AUTO</span>
           </button>
           <button class="holo-pill-btn" id="btn-holo-orb" onclick="setHologramMode('orb')" title="Fijar Reactor: Orbe Cuántico continuo">
@@ -4762,6 +4762,13 @@ function stopAudio() {
     } catch(e){}
     currentAudio = null;
   }
+  if (promptAudioInstance) {
+    try {
+      promptAudioInstance.pause();
+      promptAudioInstance.currentTime = 0;
+    } catch(e){}
+    promptAudioInstance = null;
+  }
   if (window.speechSynthesis) {
     try { window.speechSynthesis.cancel(); } catch(e){}
   }
@@ -5263,8 +5270,38 @@ function speakAlberthVoicePrompt(text, audioKey = null) {
         promptAudioInstance.currentTime = 0;
       }
       promptAudioInstance = new Audio(audioUrl);
+
+      try {
+        initAudioContext();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        if (audioCtx && speakerAnalyser) {
+          const source = audioCtx.createMediaElementSource(promptAudioInstance);
+          source.connect(speakerAnalyser);
+          speakerAnalyser.connect(audioCtx.destination);
+        }
+      } catch(e) {}
+
+      setHUDState("speaking", "ALBERTH TRANSMITIENDO VOZ");
+
+      promptAudioInstance.onended = () => {
+        promptAudioInstance = null;
+        if (isCopilotActive) {
+          setHUDState("listening", "🚗 COPILOTO: ESCUCHANDO A SEÑOR...");
+        } else if (copilotWakeStep === 1) {
+          setHUDState("listening", "🎙️ ALBERTH: ESPERANDO ORDEN...");
+        } else {
+          setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        }
+      };
+
+      promptAudioInstance.onerror = () => {
+        promptAudioInstance = null;
+        setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+      };
+
       promptAudioInstance.play().catch(e => {
         console.warn("Audio neural pausado o bloqueado por política del navegador:", e);
+        setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
       });
       return;
     } catch(err) {
@@ -7413,7 +7450,8 @@ function initWakeWordEngine() {
         const isFinal = event.results[i].isFinal;
 
         // ── A. Si Alberth está reproduciendo voz por los parlantes ──
-        if (currentAudio && !currentAudio.paused) {
+        const isSpeakingVoice = (currentAudio && !currentAudio.paused) || (promptAudioInstance && !promptAudioInstance.paused);
+        if (isSpeakingVoice) {
           // 1. Interrupción de Parada Explícita ("cállate", "basta", "detente", "alberth para", "alberth stop")
           const explicitStopRegex = /\b(cállate|callate|basta|detente|alberth para|alberth callate|alberth cállate|alberth stop|alberth silencio)\b/i;
           if (explicitStopRegex.test(transcript)) {
@@ -8331,34 +8369,59 @@ function setHUDState(state, label) {
   const dotEl = document.getElementById("hud-state-dot");
   const pillEl = document.getElementById("hud-state-pill");
 
-  textEl.textContent = label;
+  if (textEl) textEl.textContent = label;
+
+  // Notificar al contenedor Android del estado de voz para evitar bucles y colisiones de micro
+  if (window.AlberthAndroid && window.AlberthAndroid.setSpeakingState) {
+    window.AlberthAndroid.setSpeakingState(state === "speaking");
+  }
 
   if (state === "listening") {
-    pillEl.style.borderColor = "var(--cyan)";
-    pillEl.style.boxShadow = "0 0 24px rgba(0, 240, 255, 0.7)";
-    dotEl.style.background = "var(--cyan)";
-    dotEl.style.boxShadow = "0 0 12px var(--cyan)";
+    if (pillEl) {
+      pillEl.style.borderColor = "var(--cyan)";
+      pillEl.style.boxShadow = "0 0 24px rgba(0, 240, 255, 0.7)";
+    }
+    if (dotEl) {
+      dotEl.style.background = "var(--cyan)";
+      dotEl.style.boxShadow = "0 0 12px var(--cyan)";
+    }
   } else if (state === "thinking") {
-    pillEl.style.borderColor = "#00f0ff";
-    pillEl.style.boxShadow = "0 0 24px rgba(0, 240, 255, 0.85)";
-    dotEl.style.background = "#ffffff";
-    dotEl.style.boxShadow = "0 0 12px #00f0ff";
+    if (pillEl) {
+      pillEl.style.borderColor = "#00f0ff";
+      pillEl.style.boxShadow = "0 0 24px rgba(0, 240, 255, 0.85)";
+    }
+    if (dotEl) {
+      dotEl.style.background = "#ffffff";
+      dotEl.style.boxShadow = "0 0 12px #00f0ff";
+    }
   } else if (state === "speaking") {
-    pillEl.style.borderColor = "#38f9d7";
-    pillEl.style.boxShadow = "0 0 24px rgba(56, 249, 215, 0.6)";
-    dotEl.style.background = "#38f9d7";
-    dotEl.style.boxShadow = "0 0 12px #38f9d7";
+    if (pillEl) {
+      pillEl.style.borderColor = "#38f9d7";
+      pillEl.style.boxShadow = "0 0 24px rgba(56, 249, 215, 0.6)";
+    }
+    if (dotEl) {
+      dotEl.style.background = "#38f9d7";
+      dotEl.style.boxShadow = "0 0 12px #38f9d7";
+    }
   } else if (state === "disconnected") {
-    pillEl.style.borderColor = "var(--red)";
-    pillEl.style.boxShadow = "0 0 24px var(--red-glow)";
-    dotEl.style.background = "var(--red)";
-    dotEl.style.boxShadow = "0 0 12px var(--red)";
+    if (pillEl) {
+      pillEl.style.borderColor = "var(--red)";
+      pillEl.style.boxShadow = "0 0 24px var(--red-glow)";
+    }
+    if (dotEl) {
+      dotEl.style.background = "var(--red)";
+      dotEl.style.boxShadow = "0 0 12px var(--red)";
+    }
   } else {
     // idle
-    pillEl.style.borderColor = "rgba(0, 240, 255, 0.4)";
-    pillEl.style.boxShadow = "0 0 16px var(--cyan-glow)";
-    dotEl.style.background = "var(--cyan)";
-    dotEl.style.boxShadow = "0 0 8px var(--cyan)";
+    if (pillEl) {
+      pillEl.style.borderColor = "rgba(0, 240, 255, 0.4)";
+      pillEl.style.boxShadow = "0 0 16px var(--cyan-glow)";
+    }
+    if (dotEl) {
+      dotEl.style.background = "var(--cyan)";
+      dotEl.style.boxShadow = "0 0 8px var(--cyan)";
+    }
   }
 }
 
@@ -8376,10 +8439,10 @@ let quantumParticlesMesh;
 const PARTICLE_COUNT = 2800;
 let particlePositions, faceCloudPositions, orbCloudPositions, particleColors;
 
-// Modos de Visualización y Morphing
-let hologramDisplayMode = "face"; // "face" | "auto" | "orb"
-let morphProgress = 1.0;          // 0.0 = Orbe Cuántico, 1.0 = Rostro Holográfico
-let targetMorph = 1.0;
+// Modos de Visualización y Morphing (Auto por defecto: Orbe al hablar el Señor, Rostro al responder Alberth)
+let hologramDisplayMode = "auto"; // "face" | "auto" | "orb"
+let morphProgress = 0.15;         // 0.0 = Orbe Cuántico, 1.0 = Rostro Holográfico
+let targetMorph = 0.15;
 let lastUserVoiceActivity = Date.now();
 
 // Seguimiento Interactivo de Mirada (Cursor Parallax 3D)
@@ -8406,9 +8469,16 @@ function setHologramMode(mode) {
   } else if (mode === "orb") {
     targetMorph = 0.0;
   } else {
-    // auto: Rostro activo durante habla/escucha o reposo sereno
-    const isEngaged = isRecording || currentState === "speaking" || currentState === "listening" || currentState === "thinking";
-    targetMorph = (isEngaged || (Date.now() - lastUserVoiceActivity < 6000)) ? 1.0 : 0.85;
+    // auto: Orbe cuando el Señor habla (escuchando), Rostro cuando Alberth contesta (hablando)
+    if (currentState === "speaking") {
+      targetMorph = 1.0;
+    } else if (currentState === "listening" || isRecording) {
+      targetMorph = 0.0;
+    } else if (currentState === "thinking") {
+      targetMorph = 0.85;
+    } else {
+      targetMorph = 0.15;
+    }
   }
 }
 
@@ -8600,13 +8670,29 @@ function animateHologram() {
   }
 
   // 2. Control de Modos (Auto / Rostro / Orbe)
-  const isEngaged = isRecording || currentState === "speaking" || currentState === "listening" || currentState === "thinking";
-  if (isEngaged) {
+  const isSpeakingNow = currentState === "speaking" || 
+                        (currentAudio && !currentAudio.paused) || 
+                        (promptAudioInstance && !promptAudioInstance.paused);
+  const isListeningNow = currentState === "listening" || isRecording;
+  const isThinkingNow = currentState === "thinking";
+
+  if (isSpeakingNow || isListeningNow || isThinkingNow) {
     lastUserVoiceActivity = Date.now();
   }
 
   if (hologramDisplayMode === "auto") {
-    targetMorph = (isEngaged || (Date.now() - lastUserVoiceActivity < 6000)) ? 1.0 : 0.85;
+    // REGLA DEL SEÑOR:
+    // Al hablar el Señor (o estar escuchando) -> ORBE CUÁNTICO (0.0)
+    // Al responder Alberth (o hablar) -> ROSTRO HOLOGRÁFICO (1.0)
+    if (isSpeakingNow) {
+      targetMorph = 1.0;
+    } else if (isThinkingNow) {
+      targetMorph = 0.85;
+    } else if (isListeningNow) {
+      targetMorph = 0.0;
+    } else {
+      targetMorph = 0.15; // Orbe sutil en reposo
+    }
   } else if (hologramDisplayMode === "face") {
     targetMorph = 1.0;
   } else if (hologramDisplayMode === "orb") {
@@ -8669,17 +8755,14 @@ function animateHologram() {
 
       if (currentState === "thinking") {
         // --- MODO PENSAMIENTO: ONDAS DE EXPANSIÓN SINÁPTICA Y DESTELLOS DE LUZ ---
-        // 1. Distancia euclídea al centro de la mente
         const dist = Math.sqrt(fx * fx + fy * fy + fz * fz) || 1.0;
         const normX = fx / dist;
         const normY = fy / dist;
         const normZ = fz / dist;
 
-        // 2. Ondas de respiración radial suave (en lugar de girar como un enjambre)
         const radialWave = Math.sin(time * 3.4 - dist * 0.075);
-        const expansion = radialWave * 5.5; // Expansión suave de aura
+        const expansion = radialWave * 5.5;
 
-        // 3. Micro-deriva cuántica en reposo armónico
         const driftX = Math.sin(time * 1.2 + i * 0.2) * 1.0;
         const driftY = Math.cos(time * 1.1 + i * 0.25) * 1.2;
         const driftZ = Math.sin(time * 1.0 + i * 0.3) * 0.8;
@@ -8692,13 +8775,32 @@ function animateHologram() {
         pos[idx + 1] = oy * (1 - ease) + targetY * ease;
         pos[idx + 2] = oz * (1 - ease) + targetZ * ease;
 
-        // 4. Pulso de luz sináptica pura (Onda que viaja verticalmente iluminando partículas)
         const distToPulse = Math.abs(fy - thinkingPulseY);
         const pulseGlow = Math.exp(-(distToPulse * distToPulse) / 200.0);
 
-        // Destello en Blanco Plasma (#ffffff) con Cyan Eléctrico (#00f0ff)
         col[idx] = 0.15 + 0.85 * pulseGlow;
         col[idx + 1] = 0.88 + 0.12 * pulseGlow;
+        col[idx + 2] = 1.00;
+
+      } else if (isListeningNow) {
+        // --- MODO ESCUCHA: EL SEÑOR HABLA -> ORBE REACTIVO A SUS DECIBELES ---
+        const micBoost = audioEnergy * 4.5;
+        const distOrb = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1.0;
+        const normOrbX = ox / distOrb;
+        const normOrbY = oy / distOrb;
+        const normOrbZ = oz / distOrb;
+
+        const orbPulseX = ox + normOrbX * micBoost + Math.sin(time * 2.2 + i * 0.3) * 1.5;
+        const orbPulseY = oy + normOrbY * micBoost + Math.cos(time * 2.0 + i * 0.3) * 1.5;
+        const orbPulseZ = oz + normOrbZ * micBoost + Math.sin(time * 1.8 + i * 0.4) * 1.5;
+
+        pos[idx] = orbPulseX * (1 - ease) + fx * ease;
+        pos[idx + 1] = orbPulseY * (1 - ease) + fy * ease;
+        pos[idx + 2] = orbPulseZ * (1 - ease) + fz * ease;
+
+        // Color Cian Eléctrico (#00f0ff) vibrando al ritmo de la voz del Señor
+        col[idx] = 0.05 + audioEnergy * 0.4;
+        col[idx + 1] = 0.95;
         col[idx + 2] = 1.00;
 
       } else if (currentState === "speaking") {
@@ -8710,15 +8812,13 @@ function animateHologram() {
         pos[idx + 1] = oy * (1 - ease) + (fy + driftY + vocalHarmonic) * ease;
         pos[idx + 2] = oz * (1 - ease) + (fz + vocalHarmonic * 0.8) * ease;
 
-        // Resonancia luminosa en partículas del campo
         const vocalGlow = audioEnergy * 0.55;
         col[idx] = 0.10 + vocalGlow;
         col[idx + 1] = 0.90 + vocalGlow * 0.1;
         col[idx + 2] = 1.00;
 
       } else {
-        // --- MODO REPOSO / ESCUCHA: POLVO ESTELAR EN GRAVEDAD CERO ---
-        // Deriva browniana lenta y serena
+        // --- MODO REPOSO: POLVO ESTELAR EN GRAVEDAD CERO ---
         const driftX = Math.sin(time * 0.55 + i * 0.4) * 1.6;
         const driftY = Math.cos(time * 0.45 + i * 0.5) * 1.8;
         const driftZ = Math.sin(time * 0.35 + i * 0.6) * 1.4;
@@ -8727,7 +8827,6 @@ function animateHologram() {
         pos[idx + 1] = oy * (1 - ease) + (fy + driftY) * ease;
         pos[idx + 2] = oz * (1 - ease) + (fz + driftZ) * ease;
 
-        // Micro-escintilación estelar pura
         const twinkle = (Math.sin(time * 2.2 + i * 1.8) > 0.82);
         col[idx] = twinkle ? 0.92 : 0.05;
         col[idx + 1] = twinkle ? 0.99 : 0.88;
@@ -8736,13 +8835,15 @@ function animateHologram() {
     }
 
     if (quantumParticlesMesh.material) {
-      // Modulación suave de tamaño y opacidad
       if (currentState === "thinking") {
         quantumParticlesMesh.material.opacity = 0.95;
         quantumParticlesMesh.material.size = 2.9 + Math.sin(time * 3.4) * 0.35;
       } else if (currentState === "speaking") {
         quantumParticlesMesh.material.opacity = 0.90;
         quantumParticlesMesh.material.size = 2.8 + audioEnergy * 0.6;
+      } else if (isListeningNow) {
+        quantumParticlesMesh.material.opacity = 0.92;
+        quantumParticlesMesh.material.size = 2.7 + audioEnergy * 0.8;
       } else {
         quantumParticlesMesh.material.opacity = 0.86;
         quantumParticlesMesh.material.size = 2.6;
