@@ -5211,6 +5211,9 @@ let promptAudioInstance = null;
 
 const ALBERTH_PROMPT_AUDIOS = {
   "digame_senor": "/panel/assets/audio/digame_senor.mp3",
+  "estoy_aqui": "/panel/assets/audio/estoy_aqui.mp3",
+  "hola_senor": "/panel/assets/audio/hola_senor.mp3",
+  "a_sus_ordenes": "/panel/assets/audio/a_sus_ordenes.mp3",
   "copilot_activo": "/panel/assets/audio/copilot_activo.mp3",
   "copilot_fin": "/panel/assets/audio/copilot_fin.mp3",
   "abriendo_mapa": "/panel/assets/audio/abriendo_mapa.mp3",
@@ -5225,7 +5228,13 @@ function speakAlberthVoicePrompt(text, audioKey = null) {
     audioUrl = ALBERTH_PROMPT_AUDIOS[audioKey];
   } else {
     const lower = (text || "").toLowerCase().trim();
-    if (lower.includes("dígame") || lower.includes("digame")) {
+    if (lower.includes("hola")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["hola_senor"];
+    } else if (lower.includes("estás allí") || lower.includes("estas alli") || lower.includes("estoy aquí")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["estoy_aqui"];
+    } else if (lower.includes("sus órdenes") || lower.includes("sus ordenes")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["a_sus_ordenes"];
+    } else if (lower.includes("dígame") || lower.includes("digame")) {
       audioUrl = ALBERTH_PROMPT_AUDIOS["digame_senor"];
     } else if (lower.includes("copiloto activado")) {
       audioUrl = ALBERTH_PROMPT_AUDIOS["copilot_activo"];
@@ -5255,26 +5264,24 @@ function speakAlberthVoicePrompt(text, audioKey = null) {
       }
       promptAudioInstance = new Audio(audioUrl);
       promptAudioInstance.play().catch(e => {
-        console.warn("Fallo reproducción de audio neural:", e);
-        fallbackSpeechSynth(text);
+        console.warn("Audio neural pausado o bloqueado por política del navegador:", e);
       });
       return;
     } catch(err) {
-      console.warn("Error creando instancia de Audio:", err);
+      console.warn("Error creando instancia de Audio neural:", err);
     }
   }
-  fallbackSpeechSynth(text);
 }
 
+// Eliminado el sintetizador robótico local de Android para garantizar que Alberth
+// hable única y exclusivamente con su voz neuronal JorgeNeural en todo momento.
 function fallbackSpeechSynth(text) {
-  if ('speechSynthesis' in window) {
+  // Redirigir dinámicamente a la API neuronal de Alberth
+  if (text && text.trim().length > 0) {
     try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'es-ES';
-      u.rate = 1.05;
-      window.speechSynthesis.speak(u);
-    } catch(e) {}
+      const a = new Audio(`/api/tts?text=${encodeURIComponent(text.trim())}`);
+      a.play().catch(()=>{});
+    } catch(e){}
   }
 }
 
@@ -5496,7 +5503,7 @@ async function startCopilotMode(fromVoice = false) {
   if (btn) btn.classList.add("active");
   if (dot) dot.style.display = "inline-block";
 
-  speakAlberthVoicePrompt("Modo Copiloto activado. A sus órdenes, Señor.");
+  speakAlberthVoicePrompt("Modo Copiloto activado. A sus órdenes, Señor.", "copilot_activo");
   showToast("🚗 Modo Copiloto Activo · Manos Libres", 4000);
   setHUDState("speaking", "🚗 MODO COPILOTO ACTIVO");
 
@@ -5511,10 +5518,11 @@ async function startCopilotMode(fromVoice = false) {
   } catch(e) {}
 
   setTimeout(() => {
-    if (!isLiveModeActive) {
-      toggleUltraLiveMode();
+    setHUDState("listening", "🚗 COPILOTO: ESCUCHANDO A SEÑOR...");
+    if (window.AlberthAndroid && window.AlberthAndroid.restartVoiceAssistant) {
+      window.AlberthAndroid.restartVoiceAssistant();
     }
-  }, 1200);
+  }, 1500);
 }
 
 function stopCopilotMode(withFarewell = true) {
@@ -5528,12 +5536,8 @@ function stopCopilotMode(withFarewell = true) {
   if (dot) dot.style.display = "none";
 
   if (withFarewell) {
-    speakAlberthVoicePrompt("Entendido Señor, que tenga un excelente viaje.");
+    speakAlberthVoicePrompt("Entendido Señor, que tenga un excelente viaje.", "copilot_fin");
     showToast("🚗 Modo Copiloto finalizado. Buen viaje, Señor.", 4000);
-  }
-
-  if (isLiveModeActive) {
-    toggleUltraLiveMode();
   }
 
   if (window.AlberthAndroid && window.AlberthAndroid.stopCopilotService) {
@@ -7341,20 +7345,33 @@ function initWakeWordEngine() {
   // Integración con el Asistente Nativo de Android (Quantum Container)
   if (window.AlberthAndroid) {
     console.log("📱 [Alberth Mobile] Integración con contenedor Android y Modo Copiloto.");
-    window.onNativeWakeWord = function() {
-      handleCopilotVoiceStep("alberth");
+    window.onNativeWakeWord = function(heardPhrase) {
+      console.log("🎙️ [Native Wake Word Activado]:", heardPhrase);
+      const lower = (heardPhrase || "").toLowerCase();
+      if (lower.includes("hola")) {
+        speakAlberthVoicePrompt("Hola Señor, ¿en qué puedo servirle?", "hola_senor");
+        showToast("🎙️ Alberth: 'Hola Señor, ¿en qué puedo servirle?'", 3000);
+      } else if (lower.includes("estas alli") || lower.includes("estás allí") || lower.includes("estas ahi")) {
+        speakAlberthVoicePrompt("Estoy aquí, Señor. A sus órdenes.", "estoy_aqui");
+        showToast("🎙️ Alberth: 'Estoy aquí, Señor. A sus órdenes.'", 3000);
+      } else {
+        speakAlberthVoicePrompt("Dígame, Señor.", "digame_senor");
+        showToast("🎙️ Alberth: 'Dígame, Señor'", 3000);
+      }
+      setHUDState("listening", "🎙️ ALBERTH: 'DÍGAME, SEÑOR'...");
     };
     window.onNativeVoiceCommand = function(cmd) {
       if (!cmd || cmd.trim().length < 2) return;
-      const handled = handleCopilotVoiceStep(cmd);
-      if (!handled) {
-        const actionHandled = handleDeviceActionIntent(cmd);
-        if (!actionHandled) {
-          showToast(`🎙️ Alberth: "${cmd}"`, 2500);
-          setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
-          sendWS({ type: "text", text: cmd });
-        }
-      }
+      console.log("🎙️ [Comando Nativo Recibido]:", cmd);
+      // 1. Probar si es una orden de Copiloto (activar/cerrar)
+      if (handleCopilotVoiceStep(cmd)) return;
+      // 2. Probar si es una acción de dispositivo (GPS, mapas, playlist, app)
+      const actionHandled = handleDeviceActionIntent(cmd);
+      if (actionHandled) return;
+      // 3. Consulta general a la IA de Alberth
+      showToast(`🎙️ Alberth: "${cmd}"`, 2500);
+      setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
+      sendWS({ type: "text", text: cmd });
     };
   }
 
