@@ -383,29 +383,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     isListening = false;
-                    if (!isAppInForeground || isAlberthSpeaking) {
-                        return;
-                    }
-
-                    consecutiveErrors++;
-                    long delayMs = 1500;
-
-                    if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT) {
-                        delayMs = 2500;
-                        if (consecutiveErrors >= 3) {
-                            consecutiveErrors = 0;
-                            voiceHandler.removeCallbacksAndMessages(null);
-                            voiceHandler.postDelayed(MainActivity.this::initNativeVoiceAssistant, 1200);
-                            return;
-                        }
-                    } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT || error == SpeechRecognizer.ERROR_NO_MATCH) {
-                        delayMs = 1400;
-                    } else if (error == SpeechRecognizer.ERROR_AUDIO || error == SpeechRecognizer.ERROR_SERVER) {
-                        delayMs = 2000;
-                    }
-
-                    voiceHandler.removeCallbacksAndMessages(null);
-                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, delayMs);
+                    // NO relanzar en bucle continuo: evita que Android emita pitidos constantes y bloquee el micrófono
                 }
 
                 @Override
@@ -413,11 +391,7 @@ public class MainActivity extends AppCompatActivity {
                     isListening = false;
                     consecutiveErrors = 0;
                     processVoiceResults(results);
-                    // Reiniciar escucha continua con debounce prudencial si Alberth no está hablando
-                    if (isAppInForeground && !isAlberthSpeaking) {
-                        voiceHandler.removeCallbacksAndMessages(null);
-                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 800);
-                    }
+                    // Sesión completada: no relanzar en bucle para mantener el teléfono en silencio como ChatGPT/Gemini
                 }
 
                 @Override
@@ -428,10 +402,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onEvent(int eventType, Bundle params) {}
             });
-
-            if (isAppInForeground && !isAlberthSpeaking) {
-                voiceHandler.postDelayed(this::startListeningSafely, 600);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -933,11 +903,6 @@ public class MainActivity extends AppCompatActivity {
                 if (speaking) {
                     voiceHandler.removeCallbacksAndMessages(null);
                     stopListeningSafely();
-                } else {
-                    voiceHandler.removeCallbacksAndMessages(null);
-                    if (isAppInForeground) {
-                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 600);
-                    }
                 }
             });
         }
@@ -945,6 +910,14 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public boolean getSpeakingState() {
             return isAlberthSpeaking;
+        }
+
+        @JavascriptInterface
+        public void stopVoiceAssistant() {
+            runOnUiThread(() -> {
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
+            });
         }
 
         @JavascriptInterface

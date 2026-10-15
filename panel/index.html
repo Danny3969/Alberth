@@ -4715,6 +4715,7 @@ function sendWS(obj) {
 
 // ─── Web Audio API & Waveform Analysis ──────────────────────
 let audioCtx, micAnalyser, speakerAnalyser, micSource, audioSource;
+let liveSpeakerAnalyser = null, liveMicAnalyser = null;
 let micStream = null;
 let currentAudioVolume = 0;
 let currentAudio = null;
@@ -4799,19 +4800,6 @@ function playAudioUrlSingle(url) {
     const audio = new Audio(url);
     currentAudio = audio;
 
-    try {
-      initAudioContext();
-      if (audioCtx && audioCtx.state === "suspended") {
-        audioCtx.resume();
-      }
-      if (audioCtx && speakerAnalyser) {
-        if (audioSource) { try { audioSource.disconnect(); } catch(e){} }
-        audioSource = audioCtx.createMediaElementSource(audio);
-        audioSource.connect(speakerAnalyser);
-        speakerAnalyser.connect(audioCtx.destination);
-      }
-    } catch(e) {}
-    
     setHUDState("speaking", "ALBERTH TRANSMITIENDO VOZ");
     const playPromise = audio.play();
     if (playPromise !== undefined) {
@@ -4826,7 +4814,11 @@ function playAudioUrlSingle(url) {
         playNextAudioChunk();
       } else {
         isPlayingChunkQueue = false;
-        setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        if (isCopilotActive) {
+          setHUDState("listening", "🚗 COPILOTO: ESCUCHANDO A SEÑOR...");
+        } else {
+          setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+        }
       }
     };
     audio.onerror = () => {
@@ -4946,12 +4938,12 @@ async function startLiveAudioCapture() {
 
     liveMicSource = liveAudioCtx.createMediaStreamSource(liveMediaStream);
 
-    // Conectar a micAnalyser para que el HUD visualice el habla del usuario
-    if (!micAnalyser) {
-      micAnalyser = liveAudioCtx.createAnalyser();
-      micAnalyser.fftSize = 256;
+    // Conectar a liveMicAnalyser dedicado en liveAudioCtx (evita colisión de contexto)
+    if (!liveMicAnalyser) {
+      liveMicAnalyser = liveAudioCtx.createAnalyser();
+      liveMicAnalyser.fftSize = 256;
     }
-    liveMicSource.connect(micAnalyser);
+    liveMicSource.connect(liveMicAnalyser);
 
     // ScriptProcessor para extracción de muestras PCM (buffer 2048: ~128ms)
     liveProcessor = liveAudioCtx.createScriptProcessor(2048, 1, 1);
@@ -5026,13 +5018,13 @@ function playLivePCMChunk(base64Data) {
     const source = liveAudioCtx.createBufferSource();
     source.buffer = audioBuffer;
 
-    // Conectar a speakerAnalyser para que los anillos HUD reaccionen dinámicamente
-    if (speakerAnalyser) {
-      source.connect(speakerAnalyser);
-      speakerAnalyser.connect(liveAudioCtx.destination);
-    } else {
-      source.connect(liveAudioCtx.destination);
+    // Conectar a liveSpeakerAnalyser dedicado en liveAudioCtx (evita colisión de contexto)
+    if (!liveSpeakerAnalyser) {
+      liveSpeakerAnalyser = liveAudioCtx.createAnalyser();
+      liveSpeakerAnalyser.fftSize = 256;
     }
+    source.connect(liveSpeakerAnalyser);
+    liveSpeakerAnalyser.connect(liveAudioCtx.destination);
 
     const now = liveAudioCtx.currentTime;
     const startTime = Math.max(now, liveNextAudioStartTime);
@@ -5270,17 +5262,6 @@ function speakAlberthVoicePrompt(text, audioKey = null) {
         promptAudioInstance.currentTime = 0;
       }
       promptAudioInstance = new Audio(audioUrl);
-
-      try {
-        initAudioContext();
-        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-        if (audioCtx && speakerAnalyser) {
-          const source = audioCtx.createMediaElementSource(promptAudioInstance);
-          source.connect(speakerAnalyser);
-          speakerAnalyser.connect(audioCtx.destination);
-        }
-      } catch(e) {}
-
       setHUDState("speaking", "ALBERTH TRANSMITIENDO VOZ");
 
       promptAudioInstance.onended = () => {
@@ -5544,6 +5525,11 @@ async function startCopilotMode(fromVoice = false) {
   showToast("🚗 Modo Copiloto Activo · Manos Libres", 4000);
   setHUDState("speaking", "🚗 MODO COPILOTO ACTIVO");
 
+  // Detener el asistente de voz nativo en Android para evitar pitidos y colisiones
+  if (window.AlberthAndroid && window.AlberthAndroid.stopVoiceAssistant) {
+    window.AlberthAndroid.stopVoiceAssistant();
+  }
+
   if (window.AlberthAndroid && window.AlberthAndroid.startCopilotService) {
     window.AlberthAndroid.startCopilotService();
   }
@@ -5555,11 +5541,10 @@ async function startCopilotMode(fromVoice = false) {
   } catch(e) {}
 
   setTimeout(() => {
-    setHUDState("listening", "🚗 COPILOTO: ESCUCHANDO A SEÑOR...");
-    if (window.AlberthAndroid && window.AlberthAndroid.restartVoiceAssistant) {
-      window.AlberthAndroid.restartVoiceAssistant();
+    if (!isLiveModeActive) {
+      toggleUltraLiveMode();
     }
-  }, 1500);
+  }, 1200);
 }
 
 function stopCopilotMode(withFarewell = true) {
@@ -5575,6 +5560,10 @@ function stopCopilotMode(withFarewell = true) {
   if (withFarewell) {
     speakAlberthVoicePrompt("Entendido Señor, que tenga un excelente viaje.", "copilot_fin");
     showToast("🚗 Modo Copiloto finalizado. Buen viaje, Señor.", 4000);
+  }
+
+  if (isLiveModeActive) {
+    toggleUltraLiveMode();
   }
 
   if (window.AlberthAndroid && window.AlberthAndroid.stopCopilotService) {
@@ -7410,6 +7399,7 @@ function initWakeWordEngine() {
       setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
       sendWS({ type: "text", text: cmd });
     };
+    return; // En Android WebView el contenedor nativo gestiona la voz; no iniciar Web Speech en el navegador
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -8655,26 +8645,37 @@ function animateHologram() {
 
   // 1. Detección de Energía de Audio (Micrófono o Altavoz TTS)
   let audioEnergy = 0;
-  if (isRecording && micAnalyser) {
+  const isSpeakingNow = currentState === "speaking" || 
+                        (currentAudio && !currentAudio.paused) || 
+                        (promptAudioInstance && !promptAudioInstance.paused) ||
+                        (isLiveModeActive && liveActiveSources.length > 0);
+  const isListeningNow = currentState === "listening" || isRecording || (isLiveModeActive && liveActiveSources.length === 0);
+  const isThinkingNow = currentState === "thinking";
+
+  if (isLiveModeActive) {
+    if (liveActiveSources.length > 0 && liveSpeakerAnalyser) {
+      const data = new Uint8Array(liveSpeakerAnalyser.frequencyBinCount);
+      liveSpeakerAnalyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i];
+      audioEnergy = (sum / data.length) / 128.0;
+    } else if (liveMicAnalyser) {
+      const data = new Uint8Array(liveMicAnalyser.frequencyBinCount);
+      liveMicAnalyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i];
+      audioEnergy = (sum / data.length) / 128.0;
+    }
+  } else if (isSpeakingNow) {
+    // Modulación armónica para TTS sin interceptar el elemento <audio> en mobile
+    audioEnergy = 0.40 + 0.35 * Math.sin(time * 14.0) * Math.cos(time * 8.5);
+  } else if (isRecording && micAnalyser) {
     const data = new Uint8Array(micAnalyser.frequencyBinCount);
     micAnalyser.getByteFrequencyData(data);
     let sum = 0;
     for (let i = 0; i < data.length; i++) sum += data[i];
     audioEnergy = (sum / data.length) / 128.0;
-  } else if (speakerAnalyser && currentState === "speaking") {
-    const data = new Uint8Array(speakerAnalyser.frequencyBinCount);
-    speakerAnalyser.getByteFrequencyData(data);
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) sum += data[i];
-    audioEnergy = (sum / data.length) / 128.0;
   }
-
-  // 2. Control de Modos (Auto / Rostro / Orbe)
-  const isSpeakingNow = currentState === "speaking" || 
-                        (currentAudio && !currentAudio.paused) || 
-                        (promptAudioInstance && !promptAudioInstance.paused);
-  const isListeningNow = currentState === "listening" || isRecording;
-  const isThinkingNow = currentState === "thinking";
 
   if (isSpeakingNow || isListeningNow || isThinkingNow) {
     lastUserVoiceActivity = Date.now();
