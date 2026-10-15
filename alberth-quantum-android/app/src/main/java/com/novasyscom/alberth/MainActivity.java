@@ -5,22 +5,33 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
+import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
+import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
@@ -45,8 +56,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import org.json.JSONObject;
+
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,16 +88,17 @@ public class MainActivity extends AppCompatActivity {
     private boolean isListening = false;
     private final Handler voiceHandler = new Handler(Looper.getMainLooper());
 
+    private LocationManager locationManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Barra de estado y navegación en color Sci-Fi oscuro (#040711)
         configureSystemBars();
-
         setContentView(R.layout.activity_main);
 
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         rootLayout = findViewById(R.id.rootLayout);
         webView = findViewById(R.id.webView);
@@ -115,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             if (Intent.ACTION_ASSIST.equals(action) || Intent.ACTION_VOICE_COMMAND.equals(action)) {
                 triggerHapticFeedback(90);
-                speakNativeText("Dígame, Señor");
                 notifyWebWakeWordActivated();
             }
         }
@@ -130,10 +147,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Aplica padding exacto para la barra de estado superior y la barra de navegación inferior,
-     * garantizando que el HUD de Alberth encuadre al 100% sin ser tapado por el reloj, batería o botones.
-     */
     private void applyWindowInsetsPadding() {
         if (rootLayout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, windowInsets) -> {
@@ -162,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
+        s.setGeolocationEnabled(true);
+        s.setGeolocationDatabasePath(getFilesDir().getPath());
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(true);
@@ -177,11 +192,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         webView.setBackgroundColor(Color.parseColor("#040711"));
-
-        // Interfaz nativa accesible desde JavaScript (window.AlberthAndroid)
         webView.addJavascriptInterface(new AlberthBridge(), "AlberthAndroid");
 
-        // WebChromeClient con concesión directa de permisos de Micrófono y Cámara
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
@@ -192,6 +204,11 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 });
+            }
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
             }
 
             @Override
@@ -207,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // WebViewClient para mantener la navegación inmersiva y controlar el estado
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -236,7 +252,9 @@ public class MainActivity extends AppCompatActivity {
         String[] permissions = new String[]{
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.CAMERA,
-                Manifest.permission.MODIFY_AUDIO_SETTINGS
+                Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
         };
 
         boolean needed = false;
@@ -258,15 +276,8 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQ_CODE) {
-            boolean allGranted = true;
-            for (int r : grantResults) {
-                if (r != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-            if (allGranted) {
-                Toast.makeText(this, "🎙️ Permisos de audio y visión activados", Toast.LENGTH_SHORT).show();
+            boolean audioGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+            if (audioGranted) {
                 initNativeVoiceAssistant();
             }
         }
@@ -316,14 +327,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     isListening = false;
-                    // NO relanzar en bucle continuo: evita que Android emita pitidos constantes y parpadee el icono verde
                 }
 
                 @Override
                 public void onResults(Bundle results) {
                     isListening = false;
                     processVoiceResults(results);
-                    // Sesión completada: no relanzar en bucle para mantener el teléfono en silencio como ChatGPT/Gemini
                 }
 
                 @Override
@@ -477,6 +486,202 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // ─── Geolocalización & GPS Nativo ───────────────────────────────
+
+    private Location getLastKnownLocation() {
+        if (locationManager == null) return null;
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+
+        Location best = null;
+        List<String> providers = locationManager.getProviders(true);
+        for (String p : providers) {
+            try {
+                Location l = locationManager.getLastKnownLocation(p);
+                if (l != null && (best == null || l.getAccuracy() < best.getAccuracy())) {
+                    best = l;
+                }
+            } catch (Exception ignored) {}
+        }
+        return best;
+    }
+
+    public String getCurrentLocationJson() {
+        JSONObject obj = new JSONObject();
+        try {
+            Location loc = getLastKnownLocation();
+            if (loc == null) {
+                obj.put("ok", false);
+                obj.put("error", "No se pudo obtener señal GPS del teléfono.");
+                return obj.toString();
+            }
+
+            double lat = loc.getLatitude();
+            double lng = loc.getLongitude();
+            float speedKmh = Math.round(loc.getSpeed() * 3.6f);
+
+            obj.put("ok", true);
+            obj.put("latitude", lat);
+            obj.put("longitude", lng);
+            obj.put("speed_kmh", speedKmh);
+            obj.put("altitude", loc.getAltitude());
+            obj.put("accuracy_meters", loc.getAccuracy());
+
+            // Geocodificación inversa
+            try {
+                Geocoder geocoder = new Geocoder(this, new Locale("es", "ES"));
+                List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address addr = addresses.get(0);
+                    String thoroughfare = addr.getThoroughfare();
+                    String subThoroughfare = addr.getSubThoroughfare();
+                    String locality = addr.getLocality();
+                    String subLocality = addr.getSubLocality();
+                    String country = addr.getCountryName();
+
+                    StringBuilder sb = new StringBuilder();
+                    if (thoroughfare != null) sb.append(thoroughfare);
+                    if (subThoroughfare != null) sb.append(" ").append(subThoroughfare);
+                    if (subLocality != null && !subLocality.equals(thoroughfare)) sb.append(", ").append(subLocality);
+                    if (locality != null) sb.append(", ").append(locality);
+                    if (country != null) sb.append(", ").append(country);
+
+                    String humanAddress = sb.toString().trim();
+                    if (humanAddress.isEmpty() && addr.getAddressLine(0) != null) {
+                        humanAddress = addr.getAddressLine(0);
+                    }
+                    obj.put("address", humanAddress);
+                    obj.put("city", locality != null ? locality : "");
+                } else {
+                    obj.put("address", String.format(Locale.ROOT, "Lat: %.5f, Lng: %.5f", lat, lng));
+                }
+            } catch (Exception ge) {
+                obj.put("address", String.format(Locale.ROOT, "Lat: %.5f, Lng: %.5f", lat, lng));
+            }
+        } catch (Exception e) {
+            try {
+                obj.put("ok", false);
+                obj.put("error", e.getMessage());
+            } catch (Exception ignored) {}
+        }
+        return obj.toString();
+    }
+
+    public void openNativeMap(String query) {
+        runOnUiThread(() -> {
+            try {
+                Intent intent;
+                if (query != null && !query.trim().isEmpty()) {
+                    Uri uri = Uri.parse("geo:0,0?q=" + Uri.encode(query.trim()));
+                    intent = new Intent(Intent.ACTION_VIEW, uri);
+                } else {
+                    Location loc = getLastKnownLocation();
+                    if (loc != null) {
+                        Uri uri = Uri.parse("geo:" + loc.getLatitude() + "," + loc.getLongitude() + "?z=16");
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                    } else {
+                        Uri uri = Uri.parse("geo:0,0?q=mi+ubicacion");
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                    }
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(this, "No se encontró aplicación de mapas", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void startNativeNavigation(String destination) {
+        runOnUiThread(() -> {
+            try {
+                Uri navUri = Uri.parse("google.navigation:q=" + Uri.encode(destination.trim()));
+                Intent navIntent = new Intent(Intent.ACTION_VIEW, navUri);
+                navIntent.setPackage("com.google.android.apps.maps");
+                navIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(navIntent);
+            } catch (Exception e) {
+                try {
+                    Uri genericUri = Uri.parse("geo:0,0?q=" + Uri.encode(destination.trim()));
+                    Intent fallback = new Intent(Intent.ACTION_VIEW, genericUri);
+                    fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(fallback);
+                } catch (Exception ex) {
+                    Toast.makeText(this, "No se pudo iniciar navegación GPS", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    // ─── Gestión de Aplicaciones y Media ─────────────────────────────
+
+    private static final Map<String, String> COMMON_PACKAGES = new HashMap<>();
+    static {
+        COMMON_PACKAGES.put("whatsapp", "com.whatsapp");
+        COMMON_PACKAGES.put("spotify", "com.spotify.music");
+        COMMON_PACKAGES.put("maps", "com.google.android.apps.maps");
+        COMMON_PACKAGES.put("mapas", "com.google.android.apps.maps");
+        COMMON_PACKAGES.put("waze", "com.waze");
+        COMMON_PACKAGES.put("youtube", "com.google.android.youtube");
+        COMMON_PACKAGES.put("chrome", "com.android.chrome");
+        COMMON_PACKAGES.put("telegram", "org.telegram.messenger");
+        COMMON_PACKAGES.put("instagram", "com.instagram.android");
+        COMMON_PACKAGES.put("uber", "com.ubercab");
+        COMMON_PACKAGES.put("camara", "com.android.camera");
+        COMMON_PACKAGES.put("fotos", "com.google.android.apps.photos");
+    }
+
+    public boolean openAppByName(String appName) {
+        if (appName == null || appName.trim().isEmpty()) return false;
+        String normalized = appName.toLowerCase().trim();
+
+        // 1. Coincidencia directa por paquete conocido
+        if (COMMON_PACKAGES.containsKey(normalized)) {
+            String pkg = COMMON_PACKAGES.get(normalized);
+            Intent launch = getPackageManager().getLaunchIntentForPackage(pkg);
+            if (launch != null) {
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(launch);
+                return true;
+            }
+        }
+
+        // 2. Búsqueda por etiqueta de aplicación instalada
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        for (ApplicationInfo app : packages) {
+            String label = pm.getApplicationLabel(app).toString().toLowerCase();
+            if (label.contains(normalized)) {
+                Intent launch = pm.getLaunchIntentForPackage(app.packageName);
+                if (launch != null) {
+                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(launch);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void dispatchMediaControl(String action) {
+        int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+        if ("next".equalsIgnoreCase(action)) keyCode = KeyEvent.KEYCODE_MEDIA_NEXT;
+        else if ("prev".equalsIgnoreCase(action)) keyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+        else if ("pause".equalsIgnoreCase(action)) keyCode = KeyEvent.KEYCODE_MEDIA_PAUSE;
+        else if ("play".equalsIgnoreCase(action)) keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
+
+        long eventTime = SystemClock.uptimeMillis();
+        Intent down = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        down.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyCode, 0));
+        sendOrderedBroadcast(down, null);
+
+        Intent up = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        up.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyCode, 0));
+        sendOrderedBroadcast(up, null);
+    }
+
     // ─── Navegación y URLs ──────────────────────────────────────────
 
     private void loadActiveUrl() {
@@ -539,7 +744,7 @@ public class MainActivity extends AppCompatActivity {
     public class AlberthBridge {
         @JavascriptInterface
         public String getAppVersion() {
-            return "6.3-Quantum";
+            return "6.4-Quantum";
         }
 
         @JavascriptInterface
@@ -599,6 +804,92 @@ public class MainActivity extends AppCompatActivity {
                     startListeningSafely();
                 }
             });
+        }
+
+        // ── Métodos de Geolocalización y Mapas ──
+        @JavascriptInterface
+        public String getLocationInfo() {
+            return getCurrentLocationJson();
+        }
+
+        @JavascriptInterface
+        public void openMap(String query) {
+            openNativeMap(query);
+        }
+
+        @JavascriptInterface
+        public void startNavigation(String destination) {
+            startNativeNavigation(destination);
+        }
+
+        // ── Métodos de Lanzador de Aplicaciones y Control Multimedia ──
+        @JavascriptInterface
+        public boolean openApp(String appName) {
+            return openAppByName(appName);
+        }
+
+        @JavascriptInterface
+        public void controlMedia(String action) {
+            dispatchMediaControl(action);
+        }
+
+        // ── Métodos de Accesibilidad y Control de Pantalla ──
+        @JavascriptInterface
+        public boolean isAccessibilityEnabled() {
+            return AlberthAccessibilityService.isServiceRunning();
+        }
+
+        @JavascriptInterface
+        public void openAccessibilitySettings() {
+            runOnUiThread(() -> {
+                try {
+                    Toast.makeText(MainActivity.this, "Active el interruptor de Alberth para permitir control de pantalla y aplicaciones", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception ignored) {}
+            });
+        }
+
+        @JavascriptInterface
+        public String getScreenText() {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.getScreenContentSummary();
+            }
+            return "Servicio de Accesibilidad de Alberth no habilitado. Active el servicio en los Ajustes de Accesibilidad de Android.";
+        }
+
+        @JavascriptInterface
+        public boolean pressHome() {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.goHome();
+            }
+            // Fallback de navegación si accesibilidad no está activa
+            Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startMain);
+            return true;
+        }
+
+        @JavascriptInterface
+        public boolean pressBack() {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.goBack();
+            }
+            return false;
+        }
+
+        @JavascriptInterface
+        public boolean takeScreenshot() {
+            AlberthAccessibilityService s = AlberthAccessibilityService.getInstance();
+            if (s != null) {
+                return s.takeScreenshotAction();
+            }
+            return false;
         }
     }
 }

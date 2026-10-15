@@ -5143,6 +5143,8 @@ async function connectLiveWS() {
         renderLiveTranscript("user", data.text);
         if (isCopilotActive) {
           handleCopilotVoiceStep(data.text);
+        } else {
+          handleDeviceActionIntent(data.text);
         }
       } else if (data.type === "ai_transcript") {
         renderLiveTranscript("alberth", data.text);
@@ -5205,11 +5207,67 @@ let isCopilotActive = false;
 let copilotWakeStep = 0; // 0 = Standby, 1 = Esperando "Activa modo copiloto", 2 = Conversación activa
 let copilotStepTimeout = null;
 let copilotWakeLock = null;
+let promptAudioInstance = null;
 
-function speakAlberthVoicePrompt(text) {
-  if (window.AlberthAndroid && window.AlberthAndroid.speakNative) {
-    window.AlberthAndroid.speakNative(text);
-  } else if ('speechSynthesis' in window) {
+const ALBERTH_PROMPT_AUDIOS = {
+  "digame_senor": "/panel/assets/audio/digame_senor.mp3",
+  "copilot_activo": "/panel/assets/audio/copilot_activo.mp3",
+  "copilot_fin": "/panel/assets/audio/copilot_fin.mp3",
+  "abriendo_mapa": "/panel/assets/audio/abriendo_mapa.mp3",
+  "iniciando_navegacion": "/panel/assets/audio/iniciando_navegacion.mp3",
+  "iniciando_playlist": "/panel/assets/audio/iniciando_playlist.mp3",
+  "abriendo_app": "/panel/assets/audio/abriendo_app.mp3"
+};
+
+function speakAlberthVoicePrompt(text, audioKey = null) {
+  let audioUrl = null;
+  if (audioKey && ALBERTH_PROMPT_AUDIOS[audioKey]) {
+    audioUrl = ALBERTH_PROMPT_AUDIOS[audioKey];
+  } else {
+    const lower = (text || "").toLowerCase().trim();
+    if (lower.includes("dígame") || lower.includes("digame")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["digame_senor"];
+    } else if (lower.includes("copiloto activado")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["copilot_activo"];
+    } else if (lower.includes("excelente viaje") || lower.includes("finalizado")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["copilot_fin"];
+    } else if (lower.includes("abriendo el mapa") || lower.includes("mapa")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["abriendo_mapa"];
+    } else if (lower.includes("navegación") || lower.includes("navegacion") || lower.includes("ruta")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["iniciando_navegacion"];
+    } else if (lower.includes("playlist")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["iniciando_playlist"];
+    } else if (lower.includes("aplicación") || lower.includes("aplicacion")) {
+      audioUrl = ALBERTH_PROMPT_AUDIOS["abriendo_app"];
+    }
+  }
+
+  // Si no es un prompt estático pero hay texto dinámico, usar síntesis neural de Alberth (/api/tts)
+  if (!audioUrl && text && text.trim().length > 0) {
+    audioUrl = `/api/tts?text=${encodeURIComponent(text.trim())}`;
+  }
+
+  if (audioUrl) {
+    try {
+      if (promptAudioInstance) {
+        promptAudioInstance.pause();
+        promptAudioInstance.currentTime = 0;
+      }
+      promptAudioInstance = new Audio(audioUrl);
+      promptAudioInstance.play().catch(e => {
+        console.warn("Fallo reproducción de audio neural:", e);
+        fallbackSpeechSynth(text);
+      });
+      return;
+    } catch(err) {
+      console.warn("Error creando instancia de Audio:", err);
+    }
+  }
+  fallbackSpeechSynth(text);
+}
+
+function fallbackSpeechSynth(text) {
+  if ('speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
@@ -5220,15 +5278,149 @@ function speakAlberthVoicePrompt(text) {
   }
 }
 
+/**
+ * Interceptor Central de Acciones de Dispositivo y Conducción:
+ * Gestiona música, geolocalización GPS, mapas, navegación turn-by-turn y apps.
+ */
+function handleDeviceActionIntent(transcript) {
+  if (!transcript) return false;
+  const t = transcript.toLowerCase().trim();
+
+  // 1. Música & Playlist
+  if (/\b(reproduce|pon|inicia|abre)\s+(?:mi\s+)?(?:playlist|m[uú]sica|lista\s+de\s+reproducci[oó]n)\b/i.test(t)) {
+    speakAlberthVoicePrompt("Iniciando su playlist, Señor.", "iniciando_playlist");
+    showToast("🎵 Iniciando playlist...", 3000);
+    playEchoTrack(0);
+    if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+      window.AlberthAndroid.controlMedia("play");
+    }
+    return true;
+  }
+  if (/\b(siguiente\s+canci[oó]n|cambia\s+de\s+canci[oó]n|pasa\s+la\s+canci[oó]n|otra\s+canci[oó]n)\b/i.test(t)) {
+    nextMediaTrack();
+    if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+      window.AlberthAndroid.controlMedia("next");
+    }
+    return true;
+  }
+  if (/\b(pausa|pausar|det[eé]n|detener|silencia|para)\s+(?:la\s+)?(?:m[uú]sica|canci[oó]n|reproducci[oó]n)\b/i.test(t)) {
+    toggleMediaPlay();
+    if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
+      window.AlberthAndroid.controlMedia("pause");
+    }
+    return true;
+  }
+
+  // 2. Ubicación GPS / "¿Dónde estoy?"
+  if (/\b(d[oó]nde\s+estoy|d[oó]nde\s+me\s+encuentro|cu[aá]l\s+es\s+mi\s+ubicaci[oó]n|ubicaci[oó]n\s+actual|en\s+qu[eé]\s+calle\s+estoy)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.getLocationInfo) {
+      try {
+        const rawLoc = window.AlberthAndroid.getLocationInfo();
+        const loc = JSON.parse(rawLoc);
+        if (loc.ok && loc.address) {
+          let msg = `Señor, actualmente se encuentra en ${loc.address}.`;
+          if (loc.speed_kmh && loc.speed_kmh > 4) {
+            msg += ` Su velocidad estimada es de ${loc.speed_kmh} kilómetros por hora.`;
+          }
+          speakAlberthVoicePrompt(msg);
+          showToast(`📍 ${loc.address}`, 5000);
+          return true;
+        }
+      } catch(e) {
+        console.warn("Error leyendo GPS nativo:", e);
+      }
+    }
+    // Fallback Geolocation API Web
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude.toFixed(4);
+        const lng = pos.coords.longitude.toFixed(4);
+        const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
+        let msg = `Señor, sus coordenadas GPS son latitud ${lat}, longitud ${lng}.`;
+        if (spd > 4) msg += ` Velocidad: ${spd} km/h.`;
+        speakAlberthVoicePrompt(msg);
+        showToast(`📍 Lat: ${lat}, Lng: ${lng}`, 4000);
+      }, () => {
+        speakAlberthVoicePrompt("Señor, no fue posible acceder a los sensores de geolocalización.");
+      });
+      return true;
+    }
+    speakAlberthVoicePrompt("Señor, la geolocalización no está disponible en este dispositivo.");
+    return true;
+  }
+
+  // 3. Mapas / "Abre el mapa"
+  if (/\b(abre|abrir|muestra|mostrar|ver|pon)\s+(?:el\s+)?(?:mapa|maps|google\s+maps|waze)\b/i.test(t)) {
+    speakAlberthVoicePrompt("Abriendo el mapa, Señor.", "abriendo_mapa");
+    showToast("🗺️ Abriendo Google Maps...", 3000);
+    if (window.AlberthAndroid && window.AlberthAndroid.openMap) {
+      window.AlberthAndroid.openMap("");
+    } else {
+      window.open("https://www.google.com/maps", "_blank");
+    }
+    return true;
+  }
+
+  // 4. Navegación Turn-by-Turn GPS / "Llévame a..." / "Ubica las calles..."
+  const navMatch = t.match(/\b(ll[eé]vame\s+a|gu[ií]ame\s+a|c[oó]mo\s+llego\s+a|inicia\s+navegaci[oó]n\s+a|ubica\s+las\s+calles|ubica\s+la\s+calle|busca\s+las\s+calles|ruta\s+a|ruta\s+hacia)\s+(.+)/i);
+  if (navMatch && navMatch[2]) {
+    const dest = navMatch[2].trim();
+    speakAlberthVoicePrompt(`Calculando ruta hacia ${dest}. Abriendo navegación, Señor.`, "iniciando_navegacion");
+    showToast(`🧭 Navegando hacia: "${dest}"`, 4000);
+    if (window.AlberthAndroid && window.AlberthAndroid.startNavigation) {
+      window.AlberthAndroid.startNavigation(dest);
+    } else {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`, "_blank");
+    }
+    return true;
+  }
+
+  // 5. Abrir Aplicaciones del Teléfono ("Abre WhatsApp", "Abre Spotify", etc.)
+  const appMatch = t.match(/\b(abre|abrir|inicia|iniciar|lanza|ejecuta)\s+(?:la\s+app\s+|la\s+aplicaci[oó]n\s+)?(whatsapp|spotify|youtube|waze|maps|mapas|c[aá]mara|camara|tel[eé]fono|telefono|contactos|galer[ií]a|galeria|fotos|reloj|ajustes|configuraci[oó]n|calculadora|uber|instagram|telegram)\b/i);
+  if (appMatch && appMatch[2]) {
+    const appName = appMatch[2].trim().toLowerCase();
+    speakAlberthVoicePrompt(`Abriendo ${appName} en su dispositivo, Señor.`, "abriendo_app");
+    showToast(`📱 Abriendo ${appName}...`, 3000);
+    if (window.AlberthAndroid && window.AlberthAndroid.openApp) {
+      window.AlberthAndroid.openApp(appName);
+    }
+    return true;
+  }
+
+  // 6. Cerrar Aplicación / Pantalla Principal (Accesibilidad)
+  if (/\b(cierra\s+la\s+app|cierra\s+la\s+aplicaci[oó]n|ve\s+al\s+inicio|ir\s+al\s+inicio|pantalla\s+principal|ir\s+a\s+home)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.pressHome) {
+      window.AlberthAndroid.pressHome();
+      showToast("🏠 Pantalla Principal", 2000);
+      return true;
+    }
+  }
+
+  // 7. Ver y Leer Pantalla (Accesibilidad)
+  if (/\b(qu[eé]\s+hay\s+en\s+la\s+pantalla|lee\s+la\s+pantalla|qu[eé]\s+dice\s+la\s+pantalla|analiza\s+mi\s+pantalla|qu[eé]\s+ves\s+en\s+mi\s+pantalla)\b/i.test(t)) {
+    if (window.AlberthAndroid && window.AlberthAndroid.getScreenText) {
+      const scrText = window.AlberthAndroid.getScreenText();
+      showToast("👁️ Leyendo pantalla...", 3000);
+      sendWS({ type: "text", text: `Por favor analiza y explícame detalladamente lo que hay en mi pantalla de teléfono: ${scrText}` });
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function handleCopilotVoiceStep(transcript) {
   if (!transcript) return false;
   const t = transcript.toLowerCase().trim();
 
-  // Caso A: Si ya estamos en conversación activa, escuchar frase de cierre
+  // Caso A: Si ya estamos en conversación activa, escuchar frase de cierre o acciones del dispositivo
   if (isCopilotActive && isLiveModeActive) {
     if (/\b(gracias\s+alberth\s*,?\s*es\s+todo|gracias\s+alberth|es\s+todo\s+alberth|alberth\s+descansar|alberth\s+es\s+todo|cerrar\s+copiloto)\b/i.test(t)) {
       console.log("🛑 Frase de cierre detectada en Copiloto:", t);
       stopCopilotMode(true);
+      return true;
+    }
+    if (handleDeviceActionIntent(t)) {
       return true;
     }
     return false;
@@ -5240,11 +5432,18 @@ function handleCopilotVoiceStep(transcript) {
       copilotWakeStep = 1;
       setHUDState("listening", "🎙️ ALBERTH: 'DÍGAME, SEÑOR'...");
       showToast("🎙️ Alberth: 'Dígame, Señor'", 3000);
-      speakAlberthVoicePrompt("Dígame, Señor");
+      speakAlberthVoicePrompt("Dígame, Señor", "digame_senor");
 
       // Si el usuario dijo la frase completa de corrido (ej. "Alberth activa modo copiloto")
       if (/\b(activa|activar|pon|inicia|iniciar)\b.*\b(copiloto|modo\s+copiloto)\b/i.test(t)) {
         setTimeout(() => startCopilotMode(true), 1200);
+        return true;
+      }
+
+      // Si dijo directamente una orden de acción (ej. "Alberth dónde estoy", "Alberth abre el mapa")
+      const cleanedAfterWake = t.replace(/^.*?(alberth|albert|alberto|albeth|álberth|álbert|alverth)\s*/i, "").trim();
+      if (cleanedAfterWake.length >= 2 && handleDeviceActionIntent(cleanedAfterWake)) {
+        copilotWakeStep = 0;
         return true;
       }
 
@@ -5269,7 +5468,7 @@ function handleCopilotVoiceStep(transcript) {
     }
   }
 
-  // Caso C: Paso 2 — Esperando confirmación "Activa modo copiloto"
+  // Caso C: Paso 2 — Esperando confirmación "Activa modo copiloto" u orden directa
   if (copilotWakeStep === 1) {
     if (/\b(activa|activar|pon|inicia|iniciar|abrir|abre|modo)\b.*\b(copiloto|modo\s+copiloto)\b/i.test(t) || /\b(copiloto)\b/i.test(t)) {
       clearTimeout(copilotStepTimeout);
@@ -5278,6 +5477,9 @@ function handleCopilotVoiceStep(transcript) {
     } else {
       clearTimeout(copilotStepTimeout);
       copilotWakeStep = 0;
+      if (handleDeviceActionIntent(t)) {
+        return true;
+      }
       sendWS({ type: "text", text: t });
       return true;
     }
@@ -7146,12 +7348,14 @@ function initWakeWordEngine() {
       if (!cmd || cmd.trim().length < 2) return;
       const handled = handleCopilotVoiceStep(cmd);
       if (!handled) {
-        showToast(`🎙️ Alberth: "${cmd}"`, 2500);
-        setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
-        sendWS({ type: "text", text: cmd });
+        const actionHandled = handleDeviceActionIntent(cmd);
+        if (!actionHandled) {
+          showToast(`🎙️ Alberth: "${cmd}"`, 2500);
+          setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
+          sendWS({ type: "text", text: cmd });
+        }
       }
     };
-    return;
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -7178,9 +7382,12 @@ function initWakeWordEngine() {
         lastCapturedCmd = "";
         isVoiceSessionActive = false; // RESETEAR SESIÓN: elimina bucles infinitos de habla y ecos
         
-        showToast(`🎙️ Enviando consulta: "${finalCmd}"`, 2500);
-        setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
-        sendWS({ type: "text", text: finalCmd });
+        const actionHandled = handleDeviceActionIntent(finalCmd);
+        if (!actionHandled) {
+          showToast(`🎙️ Enviando consulta: "${finalCmd}"`, 2500);
+          setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
+          sendWS({ type: "text", text: finalCmd });
+        }
       };
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {

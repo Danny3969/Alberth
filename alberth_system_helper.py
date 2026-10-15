@@ -13,6 +13,7 @@ import subprocess
 import json
 import os
 import time
+import urllib.parse
 from pathlib import Path
 
 WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE") or os.environ.get("ALBERTH_WORKSPACE") or Path(__file__).resolve().parent)
@@ -362,6 +363,47 @@ def handle_apps(query, query_lower):
         if ok:
             return {"accion": "aplicacion_cerrada", "app": app_name, "resultado": f'Aplicación "{app_name}" cerrada correctamente.', "exito": True}
         return {"accion": "aplicacion_cerrada", "app": app_name, "resultado": f'No se pudo cerrar "{app_name}". Error: {out}', "exito": False}
+
+    return None
+
+def handle_geolocation_and_maps(query, query_lower):
+    """Detecta y ejecuta intenciones de geolocalización, mapas y navegación GPS."""
+    # 1. Dónde estoy
+    if re.search(r'\b(d[oó]nde\s+estoy|d[oó]nde\s+me\s+encuentro|cu[aá]l\s+es\s+mi\s+ubicaci[oó]n|ubicaci[oó]n\s+actual|en\s+qu[eé]\s+calle\s+estoy)\b', query_lower):
+        try:
+            import requests
+            r = requests.get("https://ipinfo.io/json", timeout=4)
+            if r.status_code == 200:
+                d = r.json()
+                city = d.get("city", "")
+                region = d.get("region", "")
+                country = d.get("country", "")
+                loc = d.get("loc", "")
+                msg = f"Señor, de acuerdo con la telemetría de red, su ubicación estimada es {city}, {region}, {country} (coordenadas {loc}). En su teléfono móvil con GPS activo, Alberth reporta la calle exacta."
+                return {"accion": "geolocalizacion", "resultado": msg, "exito": True}
+        except Exception:
+            pass
+        return {"accion": "geolocalizacion", "resultado": "Señor, para conocer su calle y velocidad exacta en tiempo real, consulte directamente a través de su aplicación móvil Alberth con GPS.", "exito": True}
+
+    # 2. Navegación GPS hacia destino
+    nav_match = re.search(r'\b(ll[eé]vame\s+a|gu[ií]ame\s+a|c[oó]mo\s+llego\s+a|inicia\s+navegaci[oó]n\s+a|ubica\s+las\s+calles|ubica\s+la\s+calle|busca\s+las\s+calles|ruta\s+a|ruta\s+hacia)\s+(.+)', query_lower)
+    if nav_match:
+        dest = nav_match.group(2).strip()
+        run_shell(["open", f"https://www.google.com/maps/dir/?api=1&destination={urllib.parse.quote(dest)}"])
+        return {
+            "accion": "navegacion_mapa",
+            "resultado": f"Señor, calculando la ruta hacia '{dest}' y abriendo el mapa de navegación.",
+            "exito": True
+        }
+
+    # 3. Abrir mapa general
+    if re.search(r'\b(abre|abrir|muestra|mostrar|ver|pon)\s+(?:el\s+)?(?:mapa|maps|google\s+maps|waze)\b', query_lower):
+        run_shell(["open", "https://www.google.com/maps"])
+        return {
+            "accion": "mapa_abierto",
+            "resultado": "Señor, he abierto el mapa interactivo en pantalla.",
+            "exito": True
+        }
 
     return None
 
@@ -1464,7 +1506,9 @@ def dispatch(query):
     if result: return result
 
     result = handle_apps(query, query_lower)
+    if result: return result
 
+    result = handle_geolocation_and_maps(query, query_lower)
     if result: return result
 
     result = handle_keyboard(query, query_lower)

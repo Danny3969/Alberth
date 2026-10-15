@@ -1472,6 +1472,28 @@ def run_sys_cmd(command: str, args: dict) -> dict:
         return {"ok": r.returncode == 0, "output": (r.stdout or r.stderr).strip()}
     except Exception as e: return {"ok": False, "output": str(e)}
 
+@app.get("/api/tts")
+async def get_tts(text: str):
+    q = text.strip()
+    if not q:
+        raise HTTPException(status_code=400, detail="Texto vacío")
+    import hashlib
+    text_hash = hashlib.md5(q.encode("utf-8")).hexdigest()
+    out_dir = PANEL_DIR / "assets" / "audio" / "cache"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_file = out_dir / f"tts_{text_hash}.mp3"
+    if not out_file.exists() or out_file.stat().st_size == 0:
+        py_bin = str(WORKSPACE / "venv" / "bin" / "python3") if (WORKSPACE / "venv" / "bin" / "python3").exists() else sys.executable
+        tts_script = WORKSPACE / "alberth_tts_premium.py"
+        proc = await asyncio.create_subprocess_exec(
+            py_bin, str(tts_script), q, str(out_file),
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        await proc.communicate()
+    if out_file.exists() and out_file.stat().st_size > 0:
+        return FileResponse(out_file, media_type="audio/mpeg")
+    raise HTTPException(status_code=500, detail="Error al sintetizar voz")
+
 @app.websocket("/ws")
 async def ws_chat(ws: WebSocket):
     # Validar token de acceso por query params (permitir localhost automáticamente)
