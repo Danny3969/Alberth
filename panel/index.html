@@ -7637,6 +7637,11 @@ function initWakeWordEngine() {
       setHUDState("thinking", "PENSANDO · PROCESANDO ORDEN...");
       sendWS({ type: "text", text: cmd });
     };
+    window.onNativeListeningState = function(listening) {
+      if (listening && hudCurrentState !== "speaking" && hudCurrentState !== "thinking") {
+        setHUDState("listening", isVoiceSessionActive ? "🎙️ ALBERTH: ESPERANDO ORDEN..." : "🎙️ ALBERTH: ESCUCHA ACTIVA");
+      }
+    };
     return; // En Android WebView el contenedor nativo gestiona la voz; no iniciar Web Speech en el navegador
   }
 

@@ -81,13 +81,33 @@ public class CopilotService extends Service {
             e.printStackTrace();
         }
 
-        // 3. Enrutar audio al casco / audífonos Bluetooth (Bluetooth SCO)
+        // 3. Enrutar audio al casco / audífonos Bluetooth (Bluetooth SCO) sólo si hay dispositivo conectado
         try {
             if (audioManager != null) {
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                if (audioManager.isBluetoothScoAvailableOffCall()) {
+                boolean hasBluetoothHeadset = false;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    android.media.AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS);
+                    if (devices != null) {
+                        for (android.media.AudioDeviceInfo device : devices) {
+                            int type = device.getType();
+                            if (type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                                type == android.media.AudioDeviceInfo.TYPE_BLE_HEADSET) {
+                                hasBluetoothHeadset = true;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    hasBluetoothHeadset = audioManager.isBluetoothA2dpOn() || audioManager.isBluetoothScoOn();
+                }
+
+                if (hasBluetoothHeadset && audioManager.isBluetoothScoAvailableOffCall()) {
+                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                     audioManager.startBluetoothSco();
                     audioManager.setBluetoothScoOn(true);
+                } else {
+                    // Mantener micrófono nativo del teléfono activo
+                    audioManager.setMode(AudioManager.MODE_NORMAL);
                 }
             }
         } catch (Exception e) {

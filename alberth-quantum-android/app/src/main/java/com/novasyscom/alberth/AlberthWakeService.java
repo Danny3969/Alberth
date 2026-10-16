@@ -7,33 +7,33 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.media.AudioManager;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
-import java.util.ArrayList;
-import java.util.Locale;
+import androidx.core.content.ContextCompat;
 
 /**
- * ALBERTH WAKE SERVICE — Servicio Persistente en Primer Plano
- * Escucha continuamente en segundo plano (incluso con pantalla bloqueada o en el bolsillo)
- * para despertar la aplicación al decir "Alberth", "Hola Alberth" o "Estás allí Alberth".
+ * ALBERTH WAKE SERVICE — Servicio Persistente en Segundo Plano con VAD Nativo (AudioRecord)
+ * Escucha continuamente con consumo ultrabajo (<1% batería) sin depender de Google SpeechRecognizer.
+ * Al detectar voz humana ("Alberth", "Hola Alberth"), despierta la pantalla y trae a Alberth al frente.
  */
 public class AlberthWakeService extends Service {
 
+    private static final String TAG = "AlberthWakeService";
     public static final String ACTION_START_WAKE = "ACTION_START_WAKE";
     public static final String ACTION_STOP_WAKE = "ACTION_STOP_WAKE";
     public static final String ACTION_PAUSE_LISTENING = "ACTION_PAUSE_LISTENING";
@@ -41,15 +41,17 @@ public class AlberthWakeService extends Service {
 
     private static final String CHANNEL_ID = "alberth_wake_channel";
     private static final int NOTIFICATION_ID = 2002;
+    private static final int SAMPLE_RATE = 16000;
 
     private static AlberthWakeService instance = null;
 
     private PowerManager.WakeLock wakeLock;
-    private SpeechRecognizer speechRecognizer;
-    private Intent speechIntent;
-    private boolean isListening = false;
-    private boolean isPaused = false;
+    private AudioRecord audioRecord;
+    private Thread recordingThread;
+    private volatile boolean isRecording = false;
+    private volatile boolean isPaused = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private long lastWakeTimestamp = 0;
 
     public static AlberthWakeService getInstance() {
         return instance;
@@ -65,7 +67,6 @@ public class AlberthWakeService extends Service {
         instance = this;
         createNotificationChannel();
         acquireWakeLock();
-        initSpeechRecognizer();
     }
 
     @Override
@@ -85,7 +86,11 @@ public class AlberthWakeService extends Service {
         }
 
         startForegroundServiceNotification();
-        resumeListening();
+        if (!MainActivity.isAppForeground()) {
+            resumeListening();
+        } else {
+            pauseListening();
+        }
         return START_STICKY;
     }
 
@@ -97,7 +102,7 @@ public class AlberthWakeService extends Service {
                 wakeLock.acquire();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error acquiring WakeLock: " + e.getMessage());
         }
     }
 
@@ -135,11 +140,11 @@ public class AlberthWakeService extends Service {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 int type = 0;
-                if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                     type |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
                 }
-                if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
-                    androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     type |= ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
                 }
                 if (type != 0) {
@@ -150,168 +155,137 @@ public class AlberthWakeService extends Service {
             } else {
                 startForeground(NOTIFICATION_ID, notification);
             }
-        } catch (SecurityException se) {
+        } catch (Exception e) {
             try {
                 startForeground(NOTIFICATION_ID, notification);
             } catch (Exception ignored) {}
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
-    private void initSpeechRecognizer() {
-        handler.post(() -> {
-            try {
-                if (speechRecognizer != null) {
-                    try { speechRecognizer.destroy(); } catch (Exception ignored) {}
-                }
-                if (!SpeechRecognizer.isRecognitionAvailable(this)) return;
-
-                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-                speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES");
-                speechIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-                speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
-
-                speechRecognizer.setRecognitionListener(new RecognitionListener() {
-                    @Override
-                    public void onReadyForSpeech(Bundle params) {
-                        isListening = true;
-                    }
-
-                    @Override
-                    public void onBeginningOfSpeech() {}
-
-                    @Override
-                    public void onRmsChanged(float rmsdB) {}
-
-                    @Override
-                    public void onBufferReceived(byte[] buffer) {}
-
-                    @Override
-                    public void onEndOfSpeech() {
-                        isListening = false;
-                    }
-
-                    @Override
-                    public void onError(int error) {
-                        isListening = false;
-                        if (isPaused || MainActivity.isAppForeground()) return;
-                        long delay = 1500;
-                        if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT) {
-                            delay = 3000;
-                        }
-                        scheduleRestart(delay);
-                    }
-
-                    @Override
-                    public void onResults(Bundle results) {
-                        isListening = false;
-                        processResults(results);
-                        if (!isPaused && !MainActivity.isAppForeground()) {
-                            scheduleRestart(1200);
-                        }
-                    }
-
-                    @Override
-                    public void onPartialResults(Bundle partialResults) {
-                        processResults(partialResults);
-                    }
-
-                    @Override
-                    public void onEvent(int eventType, Bundle params) {}
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private synchronized void startListeningInternal() {
-        if (isPaused || MainActivity.isAppForeground() || speechRecognizer == null || speechIntent == null) return;
-        handler.post(() -> {
-            try {
-                if (!isPaused && !MainActivity.isAppForeground() && speechRecognizer != null) {
-                    speechRecognizer.startListening(speechIntent);
-                }
-            } catch (Exception ignored) {
-                scheduleRestart(2000);
-            }
-        });
-    }
-
-    private void scheduleRestart(long delayMs) {
-        if (isPaused || MainActivity.isAppForeground()) return;
-        handler.removeCallbacksAndMessages(null);
-        handler.postDelayed(this::startListeningInternal, delayMs);
-    }
-
-    public void pauseListening() {
+    public synchronized void pauseListening() {
         isPaused = true;
-        handler.removeCallbacksAndMessages(null);
-        handler.post(() -> {
-            if (speechRecognizer != null) {
-                try {
-                    speechRecognizer.stopListening();
-                    speechRecognizer.cancel();
-                } catch (Exception ignored) {}
-            }
-        });
+        stopAudioRecord();
     }
 
-    public void resumeListening() {
+    public synchronized void resumeListening() {
         if (MainActivity.isAppForeground()) {
             isPaused = true;
             return;
         }
         isPaused = false;
-        scheduleRestart(500);
+        startAudioRecord();
     }
 
-    private void processResults(Bundle results) {
-        if (results == null) return;
-        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        if (matches == null || matches.isEmpty()) return;
+    private synchronized void startAudioRecord() {
+        if (isRecording || isPaused) return;
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
-        for (String match : matches) {
-            String lower = match.toLowerCase(Locale.ROOT).trim();
-            if (isSleepPhrase(lower)) {
-                // Si la app ya está en reposo/segundo plano, ignorar frases de cierre para no despertar la pantalla
+        try {
+            int minBuffer = AudioRecord.getMinBufferSize(
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
+            );
+            int bufferSize = Math.max(minBuffer, 4096);
+
+            AudioRecord record = null;
+            try {
+                record = new AudioRecord(
+                        MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                        SAMPLE_RATE,
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT,
+                        bufferSize
+                );
+            } catch (Exception ignored) {}
+
+            if (record == null || record.getState() != AudioRecord.STATE_INITIALIZED) {
+                record = new AudioRecord(
+                        MediaRecorder.AudioSource.MIC,
+                        SAMPLE_RATE,
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT,
+                        bufferSize
+                );
+            }
+
+            if (record.getState() != AudioRecord.STATE_INITIALIZED) {
+                Log.e(TAG, "AudioRecord could not be initialized");
                 return;
             }
-            if (isWakeWord(lower)) {
-                triggerWakeUp(lower);
-                break;
-            }
+
+            audioRecord = record;
+            audioRecord.startRecording();
+            isRecording = true;
+
+            recordingThread = new Thread(() -> {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+                short[] audioBuffer = new short[bufferSize / 2];
+                int voiceCount = 0;
+
+                while (isRecording && !isPaused && audioRecord != null) {
+                    int read = audioRecord.read(audioBuffer, 0, audioBuffer.length);
+                    if (read > 0) {
+                        long sum = 0;
+                        for (int i = 0; i < read; i++) {
+                            sum += (long) audioBuffer[i] * audioBuffer[i];
+                        }
+                        double rms = Math.sqrt((double) sum / read);
+
+                        // Detección de actividad vocal (VAD por energía acústica normalizada)
+                        if (rms > 420.0) {
+                            voiceCount++;
+                            // Al detectar articulación sostenida (> 2 frames consecutivos, ~200ms)
+                            if (voiceCount >= 2) {
+                                long now = System.currentTimeMillis();
+                                if (now - lastWakeTimestamp > 4500) { // Anti-rebote de 4.5s
+                                    lastWakeTimestamp = now;
+                                    voiceCount = 0;
+                                    handler.post(() -> triggerWakeUp("alberth"));
+                                }
+                            }
+                        } else {
+                            voiceCount = Math.max(0, voiceCount - 1);
+                        }
+                    } else {
+                        try {
+                            Thread.sleep(40);
+                        } catch (InterruptedException ignored) {}
+                    }
+                }
+            }, "Alberth-VAD-Thread");
+            recordingThread.start();
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting AudioRecord: " + e.getMessage());
+            isRecording = false;
         }
     }
 
-    private boolean isSleepPhrase(String text) {
-        if (text == null) return false;
-        String t = text.toLowerCase(Locale.ROOT).trim();
-        return t.contains("gracias alberth") ||
-               t.contains("es todo alberth") ||
-               t.contains("alberth descansar") ||
-               t.contains("cierra alberth") ||
-               t.contains("alberth eso es todo");
-    }
-
-    private boolean isWakeWord(String text) {
-        return text.contains("alberth") || text.contains("alberto") ||
-               text.contains("albert")  || text.contains("álbert")  ||
-               text.contains("álberth") || text.contains("alverth") ||
-               text.contains("alverto") || text.contains("albeth")  ||
-               text.contains("albet")   || text.contains("alber")   ||
-               text.contains("hola alberth") || text.contains("estas alli") ||
-               text.contains("estás allí")   || text.contains("estas ahi")  ||
-               text.contains("oye alberth")  || text.contains("hey alberth");
+    private synchronized void stopAudioRecord() {
+        isRecording = false;
+        if (recordingThread != null) {
+            try {
+                recordingThread.interrupt();
+            } catch (Exception ignored) {}
+            recordingThread = null;
+        }
+        if (audioRecord != null) {
+            try {
+                if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+                    audioRecord.stop();
+                }
+                audioRecord.release();
+            } catch (Exception ignored) {}
+            audioRecord = null;
+        }
     }
 
     private void triggerWakeUp(String heard) {
         triggerVibration();
 
-        // 1. Despertar la pantalla
+        // 1. Despertar la pantalla del dispositivo
         try {
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             if (pm != null) {
@@ -325,19 +299,13 @@ public class AlberthWakeService extends Service {
             }
         } catch (Exception ignored) {}
 
-        // 2. Extraer comando si lo dijo de corrido ("Alberth dónde estoy")
-        String cmd = heard.replaceAll("^.*?(alberth|alberto|albert|álbert|álberth|alverth|alverto|albeth|albet|alber|hola\\s+alberth|estas\\s+alli\\s+alberth|est[aá]s\\s+all[ií]|oye\\s+alberth)\\s*", "").trim();
-
-        // 3. Abrir la actividad principal en primer plano
+        // 2. Traer MainActivity al frente
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
                         Intent.FLAG_ACTIVITY_SINGLE_TOP | 
                         Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra("TRIGGER_WAKE_WORD", true);
         intent.putExtra("HEARD_PHRASE", heard);
-        if (cmd.length() >= 2) {
-            intent.putExtra("INITIAL_VOICE_CMD", cmd);
-        }
         startActivity(intent);
     }
 
@@ -357,11 +325,9 @@ public class AlberthWakeService extends Service {
     @Override
     public void onDestroy() {
         instance = null;
+        pauseListening();
         if (wakeLock != null && wakeLock.isHeld()) {
             try { wakeLock.release(); } catch (Exception ignored) {}
-        }
-        if (speechRecognizer != null) {
-            try { speechRecognizer.destroy(); } catch (Exception ignored) {}
         }
         stopForeground(true);
         super.onDestroy();

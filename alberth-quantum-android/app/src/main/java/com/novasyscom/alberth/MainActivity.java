@@ -343,7 +343,27 @@ public class MainActivity extends AppCompatActivity {
     // ─── Reconocimiento de Voz Nativo Continuo & Wake Word ("Alberth") ───────
 
     private boolean isExpectingFollowupCommand = false;
-    private final Runnable resetFollowupRunnable = () -> isExpectingFollowupCommand = false;
+    private final Runnable resetFollowupRunnable = () -> {
+        isExpectingFollowupCommand = false;
+        runOnUiThread(() -> {
+            if (webView != null) {
+                webView.evaluateJavascript("if (window.setHUDState) { window.setHUDState('idle', 'EN LÍNEA · ESPERANDO ORDEN'); }", null);
+            }
+        });
+    };
+
+    private void muteSystemBeep(boolean mute) {
+        try {
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    am.adjustStreamVolume(AudioManager.STREAM_SYSTEM, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
+                } else {
+                    am.setStreamMute(AudioManager.STREAM_SYSTEM, mute);
+                }
+            }
+        } catch (Exception ignored) {}
+    }
 
     private void initNativeVoiceAssistant() {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
@@ -369,6 +389,12 @@ public class MainActivity extends AppCompatActivity {
                 public void onReadyForSpeech(Bundle params) {
                     isListening = true;
                     consecutiveErrors = 0;
+                    muteSystemBeep(false);
+                    runOnUiThread(() -> {
+                        if (webView != null) {
+                            webView.evaluateJavascript("if (window.onNativeListeningState) { window.onNativeListeningState(true); }", null);
+                        }
+                    });
                 }
 
                 @Override
@@ -390,13 +416,18 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     isListening = false;
-                    // Si estamos esperando orden del usuario tras el wake word, reintentar hasta 2 veces con pausa limpia
-                    if (isAppInForeground && !isAlberthSpeaking && isExpectingFollowupCommand) {
+                    muteSystemBeep(false);
+                    if (speechRecognizer != null) {
+                        try { speechRecognizer.cancel(); } catch (Exception ignored) {}
+                    }
+                    if (!isAppInForeground || isAlberthSpeaking) {
+                        return;
+                    }
+
+                    // Si pasaron varios ciclos de silencio tras el wake word, devolver el HUD a reposo/idle
+                    if (isExpectingFollowupCommand) {
                         consecutiveErrors++;
-                        if (consecutiveErrors < 3) {
-                            voiceHandler.removeCallbacksAndMessages(null);
-                            voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 1000);
-                        } else {
+                        if (consecutiveErrors >= 3) {
                             isExpectingFollowupCommand = false;
                             consecutiveErrors = 0;
                             runOnUiThread(() -> {
@@ -406,13 +437,25 @@ public class MainActivity extends AppCompatActivity {
                             });
                         }
                     }
+
+                    // Bucle continuo e inmortal en primer plano: reintentar siempre tras una breve pausa
+                    long delay = (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) ? 600 : 350;
+                    voiceHandler.removeCallbacksAndMessages(null);
+                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, delay);
                 }
 
                 @Override
                 public void onResults(Bundle results) {
                     isListening = false;
+                    muteSystemBeep(false);
                     consecutiveErrors = 0;
-                    processVoiceResults(results);
+                    boolean handledSleep = processVoiceResults(results);
+
+                    // Si no fue comando de reposo, reiniciar inmediatamente la escucha continua
+                    if (!handledSleep && isAppInForeground && !isAlberthSpeaking) {
+                        voiceHandler.removeCallbacksAndMessages(null);
+                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 350);
+                    }
                 }
 
                 @Override
@@ -429,20 +472,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private synchronized void startListeningSafely() {
-        if (!isAppInForeground || isAlberthSpeaking || isListening || speechRecognizer == null || speechIntent == null) {
+        if (!isAppInForeground || isAlberthSpeaking || speechRecognizer == null || speechIntent == null) {
             return;
         }
         try {
+            speechRecognizer.cancel();
+            muteSystemBeep(true);
             speechRecognizer.startListening(speechIntent);
+            isListening = true;
+            voiceHandler.postDelayed(() -> muteSystemBeep(false), 250);
         } catch (Exception ignored) {
+            isListening = false;
+            muteSystemBeep(false);
             if (isAppInForeground && !isAlberthSpeaking) {
-                voiceHandler.postDelayed(this::startListeningSafely, 2000);
+                voiceHandler.removeCallbacksAndMessages(null);
+                voiceHandler.postDelayed(this::startListeningSafely, 600);
             }
         }
     }
 
     private void stopListeningSafely() {
         isListening = false;
+        muteSystemBeep(false);
         if (speechRecognizer != null) {
             try {
                 speechRecognizer.stopListening();
@@ -451,14 +502,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void processVoiceResults(Bundle results) {
-        if (results == null) return;
+    private boolean processVoiceResults(Bundle results) {
+        if (results == null) return false;
         ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        if (matches == null || matches.isEmpty()) return;
+        if (matches == null || matches.isEmpty()) return false;
 
         for (String match : matches) {
             String lower = match.toLowerCase(Locale.ROOT).trim();
-            // 1. Prioridad: Frase de cierre o reposo ("Gracias Alberth eso es todo")
+            // 1. Prioridad Máxima: Frase de cierre o reposo ("Gracias Alberth eso es todo")
             if (isSleepPhraseMatch(lower)) {
                 triggerHapticFeedback(70);
                 isExpectingFollowupCommand = false;
@@ -466,7 +517,13 @@ public class MainActivity extends AppCompatActivity {
                 voiceHandler.removeCallbacksAndMessages(null);
                 stopListeningSafely();
                 dispatchVoiceCommandToWeb("gracias alberth eso es todo");
-                return;
+                // Programar reactivación suave tras la despedida de voz
+                voiceHandler.postDelayed(() -> {
+                    if (isAppInForeground && !isAlberthSpeaking) {
+                        startListeningSafely();
+                    }
+                }, 3500);
+                return true;
             }
 
             // 2. Wake Word Match ("Hola Alberth", "Alberth", "Estás allí Alberth", etc.)
@@ -482,15 +539,16 @@ public class MainActivity extends AppCompatActivity {
                     voiceHandler.postDelayed(resetFollowupRunnable, 10000);
                     notifyWebWakeWordActivated(lower);
                 }
-                return;
+                return false;
             } else if (isExpectingFollowupCommand) {
                 triggerHapticFeedback(50);
                 isExpectingFollowupCommand = false;
                 voiceHandler.removeCallbacks(resetFollowupRunnable);
                 dispatchVoiceCommandToWeb(lower);
-                return;
+                return false;
             }
         }
+        return false;
     }
 
     private void processPartialVoiceResults(Bundle partialResults) {
@@ -526,19 +584,27 @@ public class MainActivity extends AppCompatActivity {
                t.contains("alberth descansar") ||
                t.contains("cierra alberth") ||
                t.contains("alberth eso es todo") ||
+               t.contains("eso es todo alberth") ||
                t.contains("cerrar aplicacion") ||
-               t.contains("cerrar aplicación");
+               t.contains("cerrar aplicación") ||
+               t.contains("alberth apagate") ||
+               t.contains("alberth duermete") ||
+               t.contains("alberth a dormir");
     }
 
     private boolean isWakeWordMatch(String text) {
-        return text.contains("alberth") || text.contains("alberto") ||
-               text.contains("albert")  || text.contains("álbert")  ||
-               text.contains("álberth") || text.contains("alverth") ||
-               text.contains("alverto") || text.contains("albeth")  ||
-               text.contains("albet")   || text.contains("alber")   ||
-               text.contains("hola alberth") || text.contains("estas alli") ||
-               text.contains("estás allí")   || text.contains("estas ahi")  ||
-               text.contains("oye alberth")  || text.contains("hey alberth");
+        if (text == null) return false;
+        String t = text.toLowerCase(Locale.ROOT).trim();
+        return t.contains("alberth") || t.contains("alberto") ||
+               t.contains("albert")  || t.contains("álbert")  ||
+               t.contains("álberth") || t.contains("alverth") ||
+               t.contains("alverto") || t.contains("albeth")  ||
+               t.contains("albet")   || t.contains("alber")   ||
+               t.contains("hola alberth") || t.contains("estas alli") ||
+               t.contains("estás allí")   || t.contains("estas ahi")  ||
+               t.contains("estás ahí")    || t.contains("estas hay")  ||
+               t.contains("oye alberth")  || t.contains("hey alberth") ||
+               t.contains("alberth estás") || t.contains("alberth estas");
     }
 
     private String extractCommand(String text) {
@@ -979,10 +1045,10 @@ public class MainActivity extends AppCompatActivity {
                     voiceHandler.removeCallbacksAndMessages(null);
                     stopListeningSafely();
                 } else {
-                    // Alberth terminó de hablar: si la app está en primer plano y espera orden del usuario, reanudar escucha
-                    if (isAppInForeground && isExpectingFollowupCommand) {
+                    // Alberth terminó de hablar: reanudar inmediatamente la escucha en primer plano
+                    if (isAppInForeground) {
                         voiceHandler.removeCallbacksAndMessages(null);
-                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 600);
+                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 500);
                     }
                 }
             });
@@ -1220,6 +1286,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } catch (Exception ignored) {}
             });
+        }
+
+        @JavascriptInterface
+        public void toggleFloatingOrb() {
+            toggleFloatingOrb(!FloatingOrbService.isOrbActive());
         }
 
         @JavascriptInterface
