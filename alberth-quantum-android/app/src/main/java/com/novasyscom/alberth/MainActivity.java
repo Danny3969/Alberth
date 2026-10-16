@@ -1124,10 +1124,11 @@ public class MainActivity extends AppCompatActivity {
         public void restartVoiceAssistant() {
             runOnUiThread(() -> {
                 isExpectingFollowupCommand = true;
+                isAlberthSpeaking = false;
                 consecutiveErrors = 0;
-                if (isAppInForeground && !isAlberthSpeaking) {
+                if (isAppInForeground) {
                     voiceHandler.removeCallbacksAndMessages(null);
-                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 700);
+                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 400);
                 }
             });
         }
