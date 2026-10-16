@@ -150,10 +150,27 @@ public class AlberthNotificationService extends NotificationListenerService {
                 return res.toString();
             }
 
+            // Priorizar controlador que pertenezca a Echo Music o que esté reproduciendo activamente
+            MediaController bestMc = null;
             for (MediaController mc : controllers) {
                 PlaybackState state = mc.getPlaybackState();
                 boolean isPlaying = state != null && state.getState() == PlaybackState.STATE_PLAYING;
-                MediaMetadata meta = mc.getMetadata();
+                String pkg = mc.getPackageName() != null ? mc.getPackageName().toLowerCase() : "";
+
+                if (pkg.contains("echo")) {
+                    bestMc = mc;
+                    if (isPlaying) break;
+                } else if (isPlaying && (bestMc == null || !bestMc.getPackageName().toLowerCase().contains("echo"))) {
+                    bestMc = mc;
+                } else if (bestMc == null) {
+                    bestMc = mc;
+                }
+            }
+
+            if (bestMc != null) {
+                PlaybackState state = bestMc.getPlaybackState();
+                boolean isPlaying = state != null && state.getState() == PlaybackState.STATE_PLAYING;
+                MediaMetadata meta = bestMc.getMetadata();
 
                 String title = "";
                 String artist = "";
@@ -169,15 +186,13 @@ public class AlberthNotificationService extends NotificationListenerService {
                 if (artist == null) artist = "";
                 if (album == null) album = "";
 
-                if (isPlaying || (!title.isEmpty() || !artist.isEmpty())) {
-                    res.put("ok", true);
-                    res.put("is_playing", isPlaying);
-                    res.put("title", title);
-                    res.put("artist", artist);
-                    res.put("album", album);
-                    res.put("package", mc.getPackageName());
-                    return res.toString();
-                }
+                res.put("ok", true);
+                res.put("is_playing", isPlaying);
+                res.put("title", title.isEmpty() ? "Echo Music" : title);
+                res.put("artist", artist.isEmpty() ? "Reproductor Nativo" : artist);
+                res.put("album", album);
+                res.put("package", bestMc.getPackageName());
+                return res.toString();
             }
 
             res.put("ok", false);
@@ -205,35 +220,50 @@ public class AlberthNotificationService extends NotificationListenerService {
             List<MediaController> controllers = msm.getActiveSessions(cn);
             if (controllers == null || controllers.isEmpty()) return false;
 
-            boolean handled = false;
+            // Priorizar controlador de Echo Music o el que esté sonando
+            MediaController target = null;
             for (MediaController mc : controllers) {
-                MediaController.TransportControls tc = mc.getTransportControls();
-                if (tc == null) continue;
+                String pkg = mc.getPackageName() != null ? mc.getPackageName().toLowerCase() : "";
+                PlaybackState state = mc.getPlaybackState();
+                boolean isPlaying = state != null && state.getState() == PlaybackState.STATE_PLAYING;
 
-                if ("play".equalsIgnoreCase(action)) {
-                    tc.play();
-                    handled = true;
-                } else if ("pause".equalsIgnoreCase(action)) {
-                    tc.pause();
-                    handled = true;
-                } else if ("next".equalsIgnoreCase(action) || "skip".equalsIgnoreCase(action)) {
-                    tc.skipToNext();
-                    handled = true;
-                } else if ("prev".equalsIgnoreCase(action) || "previous".equalsIgnoreCase(action)) {
-                    tc.skipToPrevious();
-                    handled = true;
-                } else if ("toggle".equalsIgnoreCase(action)) {
-                    PlaybackState state = mc.getPlaybackState();
-                    if (state != null && state.getState() == PlaybackState.STATE_PLAYING) {
-                        tc.pause();
-                    } else {
-                        tc.play();
-                    }
-                    handled = true;
+                if (pkg.contains("echo")) {
+                    target = mc;
+                    break;
                 }
-                if (handled) break;
+                if (isPlaying && target == null) {
+                    target = mc;
+                }
             }
-            return handled;
+            if (target == null) {
+                target = controllers.get(0);
+            }
+
+            MediaController.TransportControls tc = target.getTransportControls();
+            if (tc == null) return false;
+
+            if ("play".equalsIgnoreCase(action)) {
+                tc.play();
+                return true;
+            } else if ("pause".equalsIgnoreCase(action)) {
+                tc.pause();
+                return true;
+            } else if ("next".equalsIgnoreCase(action) || "skip".equalsIgnoreCase(action)) {
+                tc.skipToNext();
+                return true;
+            } else if ("prev".equalsIgnoreCase(action) || "previous".equalsIgnoreCase(action)) {
+                tc.skipToPrevious();
+                return true;
+            } else if ("toggle".equalsIgnoreCase(action)) {
+                PlaybackState state = target.getPlaybackState();
+                if (state != null && state.getState() == PlaybackState.STATE_PLAYING) {
+                    tc.pause();
+                } else {
+                    tc.play();
+                }
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

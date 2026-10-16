@@ -3539,13 +3539,13 @@ header.hud-header {
           </div>
         </div>
 
-        <div class="media-body">
+        <div class="media-body" onclick="openEchoMusicApp()" style="cursor:pointer;" title="Tocar para abrir Echo Music en el teléfono">
           <div class="media-art-wrap" id="media-art-container">
             <img src="/panel/assets/highway_to_hell.jpg" class="media-art" id="media-art-img" onerror="this.src='https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&q=80'" alt="Album Art">
           </div>
           <div class="media-info" style="overflow:hidden;">
             <div class="media-title" id="media-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Conectando con Echo Music...</div>
-            <div class="media-artist" id="media-artist" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">YouTube Music · Hi-Fi Opus</div>
+            <div class="media-artist" id="media-artist" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">YouTube Music · Local / 0MB</div>
           </div>
         </div>
 
@@ -5395,22 +5395,26 @@ function handleDeviceActionIntent(transcript) {
 
   // 1b. Música & Playlist / Reproducir
   if (/\b(reproduce|pon|inicia|abre)\s+(?:mi\s+)?(?:playlist|m[uú]sica|lista\s+de\s+reproducci[oó]n)\b/i.test(t)) {
-    speakAlberthVoicePrompt("Iniciando su música, Señor.", "iniciando_playlist");
-    showToast("🎵 Iniciando playlist...", 3000);
-    playEchoTrack(0);
+    speakAlberthVoicePrompt("Iniciando su música en Echo Music, Señor.", "iniciando_musica");
+    showToast("🎵 Reproduciendo música en Echo Music...", 3000);
     if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
       window.AlberthAndroid.controlUniversalMedia("play");
+      setTimeout(syncNativeMediaWidget, 800);
     } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("play");
+    } else {
+      playEchoTrack(0);
     }
     return true;
   }
   if (/\b(siguiente\s+canci[oó]n|cambia\s+de\s+canci[oó]n|pasa\s+la\s+canci[oó]n|otra\s+canci[oó]n|adelanta\s+la\s+canci[oó]n)\b/i.test(t)) {
-    nextMediaTrack();
     if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
       window.AlberthAndroid.controlUniversalMedia("next");
+      setTimeout(syncNativeMediaWidget, 800);
     } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("next");
+    } else {
+      nextMediaTrack();
     }
     showToast("⏭️ Siguiente canción", 2000);
     return true;
@@ -5418,18 +5422,23 @@ function handleDeviceActionIntent(transcript) {
   if (/\b(canci[oó]n\s+anterior|retrocede\s+la\s+canci[oó]n|vuelve\s+a\s+la\s+canci[oó]n\s+anterior)\b/i.test(t)) {
     if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
       window.AlberthAndroid.controlUniversalMedia("prev");
+      setTimeout(syncNativeMediaWidget, 800);
     } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("prev");
+    } else {
+      prevMediaTrack();
     }
     showToast("⏮️ Canción anterior", 2000);
     return true;
   }
   if (/\b(pausa|pausar|det[eé]n|detener|silencia|para)\s+(?:la\s+)?(?:m[uú]sica|canci[oó]n|reproducci[oó]n)\b/i.test(t)) {
-    toggleMediaPlay();
     if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
       window.AlberthAndroid.controlUniversalMedia("pause");
+      setTimeout(syncNativeMediaWidget, 500);
     } else if (window.AlberthAndroid && window.AlberthAndroid.controlMedia) {
       window.AlberthAndroid.controlMedia("pause");
+    } else {
+      toggleMediaPlay();
     }
     showToast("⏸️ Música pausada", 2000);
     return true;
@@ -5540,8 +5549,8 @@ function handleDeviceActionIntent(transcript) {
     return true;
   }
 
-  // 5. Abrir Aplicaciones del Teléfono ("Abre WhatsApp", "Abre Spotify", etc.)
-  const appMatch = t.match(/\b(abre|abrir|inicia|iniciar|lanza|ejecuta)\s+(?:la\s+app\s+|la\s+aplicaci[oó]n\s+)?(whatsapp|spotify|youtube|waze|maps|mapas|c[aá]mara|camara|tel[eé]fono|telefono|contactos|galer[ií]a|galeria|fotos|reloj|ajustes|configuraci[oó]n|calculadora|uber|instagram|telegram)\b/i);
+  // 5. Abrir Aplicaciones del Teléfono ("Abre WhatsApp", "Abre Spotify", "Abre Echo Music", etc.)
+  const appMatch = t.match(/\b(abre|abrir|inicia|iniciar|lanza|ejecuta)\s+(?:la\s+app\s+|la\s+aplicaci[oó]n\s+)?(whatsapp|spotify|echo|echo\s+music|echomusic|m[uú]sica|youtube|waze|maps|mapas|c[aá]mara|camara|tel[eé]fono|telefono|contactos|galer[ií]a|galeria|fotos|reloj|ajustes|configuraci[oó]n|calculadora|uber|instagram|telegram)\b/i);
   if (appMatch && appMatch[2]) {
     const appName = appMatch[2].trim().toLowerCase();
     speakAlberthVoicePrompt(`Abriendo ${appName} en su dispositivo, Señor.`, "abriendo_app");
@@ -8151,6 +8160,11 @@ async function playDirectTrack(track) {
 }
 
 async function toggleMediaPlay() {
+  if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+    window.AlberthAndroid.controlUniversalMedia("toggle");
+    setTimeout(syncNativeMediaWidget, 400);
+    return;
+  }
   const audio = getAudioPlayer();
   if (!audio) return;
 
@@ -8170,6 +8184,11 @@ async function toggleMediaPlay() {
 }
 
 function nextMediaTrack() {
+  if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+    window.AlberthAndroid.controlUniversalMedia("next");
+    setTimeout(syncNativeMediaWidget, 600);
+    return;
+  }
   if (!echoPlaylist || echoPlaylist.length === 0) return;
   let nextIdx;
   if (isEchoShuffle) {
@@ -8187,6 +8206,11 @@ function nextMediaTrack() {
 }
 
 function prevMediaTrack() {
+  if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+    window.AlberthAndroid.controlUniversalMedia("prev");
+    setTimeout(syncNativeMediaWidget, 600);
+    return;
+  }
   const audio = getAudioPlayer();
   if (audio && audio.currentTime > 4) {
     audio.currentTime = 0;
@@ -8195,6 +8219,52 @@ function prevMediaTrack() {
   if (!echoPlaylist || echoPlaylist.length === 0) return;
   const prevIdx = (echoCurrentIndex - 1 + echoPlaylist.length) % echoPlaylist.length;
   playEchoTrack(prevIdx);
+}
+
+function openEchoMusicApp() {
+  if (window.AlberthAndroid && window.AlberthAndroid.openApp) {
+    let opened = window.AlberthAndroid.openApp("echo");
+    if (!opened) opened = window.AlberthAndroid.openApp("echo music");
+    if (!opened) opened = window.AlberthAndroid.openApp("echomusic");
+    showToast("🎵 Abriendo Echo Music...", 2500);
+  }
+}
+
+function syncNativeMediaWidget() {
+  if (!window.AlberthAndroid || !window.AlberthAndroid.getCurrentMediaTrack) return;
+  try {
+    const raw = window.AlberthAndroid.getCurrentMediaTrack();
+    const info = JSON.parse(raw);
+    if (info && info.ok) {
+      const titleEl = document.getElementById("media-title");
+      const artistEl = document.getElementById("media-artist");
+      const label = document.getElementById("active-playlist-label");
+      const countEl = document.getElementById("media-playlist-count");
+      
+      if (titleEl && info.title) titleEl.textContent = info.title;
+      if (artistEl) {
+        let art = info.artist || "Echo Music";
+        let pkgName = (info.package || "").toLowerCase();
+        if (pkgName.includes("echo")) art += " · Echo Music (Offline / 0MB)";
+        else if (pkgName.includes("youtube.music")) art += " · YouTube Music";
+        else if (pkgName.includes("spotify")) art += " · Spotify";
+        else art += " · Reproductor Local";
+        artistEl.textContent = art;
+      }
+      if (label) label.textContent = "ECHO MUSIC NATIVO";
+      if (countEl) countEl.textContent = "OFFLINE 0MB";
+      
+      setEchoPlayState(Boolean(info.is_playing));
+    }
+  } catch (e) {
+    console.warn("syncNativeMediaWidget error:", e);
+  }
+}
+
+// Sincronización continua de estado con Echo Music nativo
+if (typeof window !== "undefined") {
+  setInterval(syncNativeMediaWidget, 2500);
+  setTimeout(syncNativeMediaWidget, 1000);
 }
 
 function toggleShuffle(explicitVal) {
@@ -8573,6 +8643,25 @@ function renderTracklistItems(tracks) {
 }
 
 function handleRemoteMusicAction(action, trackData, fullMsg) {
+  if (window.AlberthAndroid && window.AlberthAndroid.controlUniversalMedia) {
+    if (action === "play" || action === "play_playlist") {
+      window.AlberthAndroid.controlUniversalMedia("play");
+      setTimeout(syncNativeMediaWidget, 600);
+      return;
+    } else if (action === "pause") {
+      window.AlberthAndroid.controlUniversalMedia("pause");
+      setTimeout(syncNativeMediaWidget, 600);
+      return;
+    } else if (action === "next") {
+      window.AlberthAndroid.controlUniversalMedia("next");
+      setTimeout(syncNativeMediaWidget, 600);
+      return;
+    } else if (action === "prev") {
+      window.AlberthAndroid.controlUniversalMedia("prev");
+      setTimeout(syncNativeMediaWidget, 600);
+      return;
+    }
+  }
   if (action === "play") {
     const audio = getAudioPlayer();
     if (audio && !isMediaPlaying) toggleMediaPlay();

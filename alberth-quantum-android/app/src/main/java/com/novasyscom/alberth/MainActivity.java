@@ -914,16 +914,25 @@ public class MainActivity extends AppCompatActivity {
         COMMON_PACKAGES.put("uber", "com.ubercab");
         COMMON_PACKAGES.put("camara", "com.android.camera");
         COMMON_PACKAGES.put("fotos", "com.google.android.apps.photos");
+        COMMON_PACKAGES.put("echo", "echo.music.iad1tya");
+        COMMON_PACKAGES.put("echo music", "echo.music.iad1tya");
+        COMMON_PACKAGES.put("echomusic", "echo.music.iad1tya");
+        COMMON_PACKAGES.put("musica", "echo.music.iad1tya");
+        COMMON_PACKAGES.put("música", "echo.music.iad1tya");
+        COMMON_PACKAGES.put("ytmusic", "com.google.android.apps.youtube.music");
+        COMMON_PACKAGES.put("youtube music", "com.google.android.apps.youtube.music");
     }
 
     public boolean openAppByName(String appName) {
         if (appName == null || appName.trim().isEmpty()) return false;
         String normalized = appName.toLowerCase().trim();
 
+        PackageManager pm = getPackageManager();
+
         // 1. Coincidencia directa por paquete conocido
         if (COMMON_PACKAGES.containsKey(normalized)) {
             String pkg = COMMON_PACKAGES.get(normalized);
-            Intent launch = getPackageManager().getLaunchIntentForPackage(pkg);
+            Intent launch = pm.getLaunchIntentForPackage(pkg);
             if (launch != null) {
                 launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(launch);
@@ -931,19 +940,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // 2. Búsqueda por etiqueta de aplicación instalada
-        PackageManager pm = getPackageManager();
-        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        for (ApplicationInfo app : packages) {
-            String label = pm.getApplicationLabel(app).toString().toLowerCase();
-            if (label.contains(normalized)) {
-                Intent launch = pm.getLaunchIntentForPackage(app.packageName);
-                if (launch != null) {
-                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(launch);
-                    return true;
+        // 2. Búsqueda por etiqueta o nombre de paquete instalado
+        try {
+            List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+            for (ApplicationInfo app : packages) {
+                String label = pm.getApplicationLabel(app).toString().toLowerCase();
+                String pkgName = app.packageName.toLowerCase();
+                if (label.contains(normalized) || pkgName.contains(normalized)) {
+                    Intent launch = pm.getLaunchIntentForPackage(app.packageName);
+                    if (launch != null) {
+                        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(launch);
+                        return true;
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -1252,11 +1265,26 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public boolean controlUniversalMedia(String action) {
             AlberthNotificationService s = AlberthNotificationService.getInstance();
+            boolean handled = false;
             if (s != null) {
-                return s.executeMediaCommand(action);
+                handled = s.executeMediaCommand(action);
             }
-            // Fallback a AudioManager
-            dispatchMediaControl(action);
+            if (!handled) {
+                // Si la acción es reproducir y no hay reproductor activo en memoria,
+                // despertamos Echo Music para que inicie la sesión de audio local/offline
+                if ("play".equalsIgnoreCase(action) || "toggle".equalsIgnoreCase(action)) {
+                    boolean opened = openAppByName("echo");
+                    if (!opened) opened = openAppByName("echo.music.iad1tya");
+                    if (!opened) opened = openAppByName("echomusic");
+                    if (!opened) opened = openAppByName("spotify");
+
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        dispatchMediaControl("play");
+                    }, 1200);
+                    return true;
+                }
+                dispatchMediaControl(action);
+            }
             return true;
         }
 
