@@ -4669,9 +4669,12 @@ function connectWS() {
         updateActionFeedback(msg.message.content);
         if (msg.message.role === "alberth") {
           setHUDState("speaking", "ALBERTH RESPONDIENDO");
+          // Watchdog de seguridad (25s): Solo restablece si NINGÚN audio está reproduciéndose ni en cola
           setTimeout(() => {
-            if (currentState === "speaking") setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
-          }, 4500);
+            if (currentState === "speaking" && !currentAudio && (!audioChunkQueue || audioChunkQueue.length === 0) && !promptAudioInstance) {
+              setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
+            }
+          }, 25000);
         }
       } else if (msg.type === "thinking") {
         document.getElementById("thinking").classList.toggle("visible", msg.active);
@@ -7604,7 +7607,14 @@ function initWakeWordEngine() {
   // Integración con el Asistente Nativo de Android (Quantum Container)
   if (window.AlberthAndroid) {
     console.log("📱 [Alberth Mobile] Integración con contenedor Android y Modo Copiloto.");
+    let lastNativeWakeTime = 0;
     window.onNativeWakeWord = function(heardPhrase) {
+      const now = Date.now();
+      if (now - lastNativeWakeTime < 2500) {
+        console.log("🎙️ [Native Wake Word] Ignorando evento duplicado en ventana de 2.5s");
+        return;
+      }
+      lastNativeWakeTime = now;
       console.log("🎙️ [Native Wake Word Activado]:", heardPhrase);
       isVoiceSessionActive = true;
       const lower = (heardPhrase || "").toLowerCase();

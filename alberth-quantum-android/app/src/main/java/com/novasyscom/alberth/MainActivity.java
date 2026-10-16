@@ -102,10 +102,13 @@ public class MainActivity extends AppCompatActivity {
         return isAppInForeground;
     }
 
+    private long lastAssistantIntentTimestamp = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         instance = this;
+        isAppInForeground = true;
 
         configureSystemBars();
         setContentView(R.layout.activity_main);
@@ -135,6 +138,15 @@ public class MainActivity extends AppCompatActivity {
 
         loadActiveUrl();
         handleAssistantIntent(getIntent());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isAppInForeground = true;
+        if (AlberthWakeService.getInstance() != null) {
+            AlberthWakeService.getInstance().pauseListening();
+        }
     }
 
     private void startPersistentWakeService() {
@@ -177,6 +189,13 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             boolean isWakeTrigger = intent.getBooleanExtra("TRIGGER_WAKE_WORD", false);
             if (isWakeTrigger || Intent.ACTION_ASSIST.equals(action) || Intent.ACTION_VOICE_COMMAND.equals(action)) {
+                long now = System.currentTimeMillis();
+                if (now - lastAssistantIntentTimestamp < 2500) {
+                    // Evitar doble invocación si el servicio y el speech nativo coinciden
+                    return;
+                }
+                lastAssistantIntentTimestamp = now;
+
                 configureLockScreenDisplay();
                 triggerHapticFeedback(90);
                 String heard = intent.getStringExtra("HEARD_PHRASE");
@@ -449,10 +468,10 @@ public class MainActivity extends AppCompatActivity {
                     isListening = false;
                     muteSystemBeep(false);
                     consecutiveErrors = 0;
-                    boolean handledSleep = processVoiceResults(results);
+                    boolean handled = processVoiceResults(results);
 
-                    // Si no fue comando de reposo, reiniciar inmediatamente la escucha continua
-                    if (!handledSleep && isAppInForeground && !isAlberthSpeaking) {
+                    // Si no fue comando ni wake word, reiniciar la escucha continua en reposo
+                    if (!handled && isAppInForeground && !isAlberthSpeaking) {
                         voiceHandler.removeCallbacksAndMessages(null);
                         voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 350);
                     }
@@ -513,22 +532,28 @@ public class MainActivity extends AppCompatActivity {
             if (isSleepPhraseMatch(lower)) {
                 triggerHapticFeedback(70);
                 isExpectingFollowupCommand = false;
+                isAlberthSpeaking = true;
                 voiceHandler.removeCallbacks(resetFollowupRunnable);
                 voiceHandler.removeCallbacksAndMessages(null);
                 stopListeningSafely();
                 dispatchVoiceCommandToWeb("gracias alberth eso es todo");
                 // Programar reactivación suave tras la despedida de voz
                 voiceHandler.postDelayed(() -> {
-                    if (isAppInForeground && !isAlberthSpeaking) {
+                    isAlberthSpeaking = false;
+                    if (isAppInForeground) {
                         startListeningSafely();
                     }
-                }, 3500);
+                }, 4000);
                 return true;
             }
 
             // 2. Wake Word Match ("Hola Alberth", "Alberth", "Estás allí Alberth", etc.)
             if (isWakeWordMatch(lower)) {
                 triggerHapticFeedback(70);
+                isAlberthSpeaking = true; // Mutex acústico inmediato: silenciar micro mientras Alberth saluda
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
+
                 String cmd = extractCommand(lower);
                 if (cmd.length() >= 2) {
                     isExpectingFollowupCommand = false;
@@ -539,13 +564,16 @@ public class MainActivity extends AppCompatActivity {
                     voiceHandler.postDelayed(resetFollowupRunnable, 10000);
                     notifyWebWakeWordActivated(lower);
                 }
-                return false;
+                return true; // Retornamos true para evitar que onResults reinicie a los 350ms
             } else if (isExpectingFollowupCommand) {
                 triggerHapticFeedback(50);
                 isExpectingFollowupCommand = false;
+                isAlberthSpeaking = true; // Mutex acústico mientras Alberth procesa y responde
                 voiceHandler.removeCallbacks(resetFollowupRunnable);
+                voiceHandler.removeCallbacksAndMessages(null);
+                stopListeningSafely();
                 dispatchVoiceCommandToWeb(lower);
-                return false;
+                return true; // Retornamos true para evitar que onResults reinicie a los 350ms
             }
         }
         return false;
@@ -561,17 +589,14 @@ public class MainActivity extends AppCompatActivity {
             if (isSleepPhraseMatch(lower)) {
                 triggerHapticFeedback(60);
                 isExpectingFollowupCommand = false;
+                isAlberthSpeaking = true;
                 voiceHandler.removeCallbacks(resetFollowupRunnable);
                 voiceHandler.removeCallbacksAndMessages(null);
                 stopListeningSafely();
                 dispatchVoiceCommandToWeb("gracias alberth eso es todo");
                 return;
             }
-            if (isWakeWordMatch(lower) && !isExpectingFollowupCommand) {
-                triggerHapticFeedback(60);
-                notifyWebWakeWordActivated(lower);
-                return;
-            }
+            // NOTA: No llamamos notifyWebWakeWordActivated en partialResults para evitar duplicar el saludo
         }
     }
 
@@ -1045,10 +1070,10 @@ public class MainActivity extends AppCompatActivity {
                     voiceHandler.removeCallbacksAndMessages(null);
                     stopListeningSafely();
                 } else {
-                    // Alberth terminó de hablar: reanudar inmediatamente la escucha en primer plano
+                    // Alberth terminó de hablar: esperar 700ms para disipar el eco del altavoz antes de abrir el micro
                     if (isAppInForeground) {
                         voiceHandler.removeCallbacksAndMessages(null);
-                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 500);
+                        voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 700);
                     }
                 }
             });
@@ -1075,7 +1100,7 @@ public class MainActivity extends AppCompatActivity {
                 consecutiveErrors = 0;
                 if (isAppInForeground && !isAlberthSpeaking) {
                     voiceHandler.removeCallbacksAndMessages(null);
-                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 300);
+                    voiceHandler.postDelayed(MainActivity.this::startListeningSafely, 700);
                 }
             });
         }

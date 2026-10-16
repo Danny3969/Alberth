@@ -225,7 +225,7 @@ public class AlberthWakeService extends Service {
                 short[] audioBuffer = new short[bufferSize / 2];
                 int voiceCount = 0;
 
-                while (isRecording && !isPaused && audioRecord != null) {
+                while (isRecording && !isPaused && !MainActivity.isAppForeground() && audioRecord != null) {
                     int read = audioRecord.read(audioBuffer, 0, audioBuffer.length);
                     if (read > 0) {
                         long sum = 0;
@@ -283,6 +283,12 @@ public class AlberthWakeService extends Service {
     }
 
     private void triggerWakeUp(String heard) {
+        // 0. Si MainActivity ya está en primer plano, no intervenir ni lanzar intents desde segundo plano
+        if (MainActivity.isAppForeground()) {
+            Log.d(TAG, "MainActivity ya está en primer plano; suprimiendo activación background duplicada");
+            return;
+        }
+
         triggerVibration();
 
         // 1. Despertar la pantalla del dispositivo
@@ -299,14 +305,39 @@ public class AlberthWakeService extends Service {
             }
         } catch (Exception ignored) {}
 
-        // 2. Traer MainActivity al frente
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP | 
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra("TRIGGER_WAKE_WORD", true);
-        intent.putExtra("HEARD_PHRASE", heard);
-        startActivity(intent);
+        // 2. Traer MainActivity al frente usando PendingIntent y FullScreenIntent (Android 10+ compliant)
+        Intent openIntent = new Intent(this, MainActivity.class);
+        openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP | 
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        openIntent.putExtra("TRIGGER_WAKE_WORD", true);
+        openIntent.putExtra("HEARD_PHRASE", heard);
+
+        PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
+                this, 101, openIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0)
+        );
+
+        NotificationCompat.Builder wakeNotification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("⚡ Alberth Activado por Voz")
+                .setContentText("A sus órdenes, Señor")
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setAutoCancel(true)
+                .setContentIntent(fullScreenPendingIntent)
+                .setFullScreenIntent(fullScreenPendingIntent, true);
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null) {
+            nm.notify(NOTIFICATION_ID + 1, wakeNotification.build());
+        }
+
+        try {
+            startActivity(openIntent);
+        } catch (Exception e) {
+            Log.w(TAG, "Direct startActivity deferred to fullScreenIntent: " + e.getMessage());
+        }
     }
 
     private void triggerVibration() {
