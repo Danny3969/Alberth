@@ -1057,7 +1057,7 @@ def run_alberth_full(text: str) -> dict:
         chunk_0_file = VOICE_OUTPUT / f"alberth_{ts}_c0.mp3"
         t0 = threading.Thread(target=_synth_file, args=(_chunks[0], chunk_0_file), daemon=True)
         t0.start()
-        t0.join(timeout=1.8)
+        t0.join(timeout=3.8)
         
         if chunk_0_file.exists() and chunk_0_file.stat().st_size > 0:
             audio_url = f"/output/{chunk_0_file.name}"

@@ -4669,12 +4669,13 @@ function connectWS() {
         updateActionFeedback(msg.message.content);
         if (msg.message.role === "alberth") {
           setHUDState("speaking", "ALBERTH RESPONDIENDO");
-          // Watchdog de seguridad (25s): Solo restablece si NINGÚN audio está reproduciéndose ni en cola
+          // Watchdog ágil (4s): Si ningún audio está reproduciéndose ni en cola, regresar a idle para no congelar el HUD
           setTimeout(() => {
             if (currentState === "speaking" && !currentAudio && (!audioChunkQueue || audioChunkQueue.length === 0) && !promptAudioInstance) {
+              console.log("⚠️ [Watchdog] Audio no detectado tras 4s; liberando HUD a reposo");
               setHUDState("idle", "EN LÍNEA · ESPERANDO ORDEN");
             }
-          }, 25000);
+          }, 4000);
         }
       } else if (msg.type === "thinking") {
         document.getElementById("thinking").classList.toggle("visible", msg.active);
@@ -7464,6 +7465,12 @@ function appendMsg(msg, animate) {
 
   if (animate && msg.audio_url) {
     playAudioUrl(msg.audio_url);
+  } else if (animate && msg.role === "alberth" && !msg.audio_url && msg.content) {
+    // Si no llegó audio_url del servidor, usar síntesis local para evitar que Alberth quede mudo
+    const cleanSpeech = msg.content.replace(/\*\*.*?\*\*/g, "").replace(/[`#*_~]/g, "").trim();
+    if (cleanSpeech.length > 0) {
+      speakAlberthVoicePrompt(cleanSpeech);
+    }
   }
 }
 

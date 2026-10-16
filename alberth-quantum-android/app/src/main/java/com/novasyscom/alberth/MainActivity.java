@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private Intent speechIntent;
     private TextToSpeech tts;
     public static volatile boolean isAppInForeground = false;
+    public static volatile boolean isCopilotModeActive = false;
     private volatile boolean isAlberthSpeaking = false;
     private boolean isListening = false;
     private int consecutiveErrors = 0;
@@ -343,7 +344,6 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQ_CODE);
         } else {
             initNativeVoiceAssistant();
-            startPersistentWakeService();
         }
     }
 
@@ -354,7 +354,6 @@ public class MainActivity extends AppCompatActivity {
             boolean audioGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
             if (audioGranted) {
                 initNativeVoiceAssistant();
-                startPersistentWakeService();
             }
         }
     }
@@ -377,8 +376,10 @@ public class MainActivity extends AppCompatActivity {
             if (am != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     am.adjustStreamVolume(AudioManager.STREAM_SYSTEM, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
+                    am.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0);
                 } else {
                     am.setStreamMute(AudioManager.STREAM_SYSTEM, mute);
+                    am.setStreamMute(AudioManager.STREAM_NOTIFICATION, mute);
                 }
             }
         } catch (Exception ignored) {}
@@ -676,7 +677,9 @@ public class MainActivity extends AppCompatActivity {
             AlberthWakeService.getInstance().pauseListening();
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            startPersistentWakeService();
+            if (isCopilotModeActive) {
+                startPersistentWakeService();
+            }
             if (!isAlberthSpeaking) {
                 voiceHandler.removeCallbacksAndMessages(null);
                 voiceHandler.postDelayed(this::startListeningSafely, 600);
@@ -690,9 +693,24 @@ public class MainActivity extends AppCompatActivity {
         isAppInForeground = false;
         voiceHandler.removeCallbacksAndMessages(null);
         stopListeningSafely();
-        // Reanudar escucha en segundo plano permanente para responder a "Alberth"
-        if (AlberthWakeService.getInstance() != null) {
-            AlberthWakeService.getInstance().resumeListening();
+
+        // OPCIÓN B: En Modo Normal, el micrófono se apaga al 100% al salir de la app (0% batería, sin punto verde).
+        // Solo en Modo Copiloto se mantiene la escucha en segundo plano con pantalla apagada.
+        if (isCopilotModeActive) {
+            if (AlberthWakeService.getInstance() != null) {
+                AlberthWakeService.getInstance().resumeListening();
+            } else {
+                startPersistentWakeService();
+            }
+        } else {
+            // Modo Normal: asegurar que el servicio de segundo plano se detenga y libere el micrófono
+            if (AlberthWakeService.getInstance() != null) {
+                AlberthWakeService.getInstance().pauseListening();
+                try {
+                    Intent stopWake = new Intent(this, AlberthWakeService.class);
+                    stopService(stopWake);
+                } catch (Exception ignored) {}
+            }
         }
     }
 
@@ -1035,6 +1053,7 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void startCopilotService() {
             runOnUiThread(() -> {
+                isCopilotModeActive = true;
                 try {
                     Intent serviceIntent = new Intent(MainActivity.this, CopilotService.class);
                     serviceIntent.setAction(CopilotService.ACTION_START_COPILOT);
@@ -1043,6 +1062,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         startService(serviceIntent);
                     }
+                    startPersistentWakeService();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1052,10 +1072,17 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void stopCopilotService() {
             runOnUiThread(() -> {
+                isCopilotModeActive = false;
                 try {
                     Intent serviceIntent = new Intent(MainActivity.this, CopilotService.class);
                     serviceIntent.setAction(CopilotService.ACTION_STOP_COPILOT);
                     startService(serviceIntent);
+
+                    if (AlberthWakeService.getInstance() != null) {
+                        AlberthWakeService.getInstance().pauseListening();
+                    }
+                    Intent stopWake = new Intent(MainActivity.this, AlberthWakeService.class);
+                    stopService(stopWake);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

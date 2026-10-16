@@ -117,6 +117,7 @@ public class CopilotService extends Service {
 
     private void stopCopilotMode() {
         isRunning = false;
+        MainActivity.isCopilotModeActive = false;
 
         // Liberar WakeLock
         if (wakeLock != null && wakeLock.isHeld()) {
@@ -136,6 +137,15 @@ public class CopilotService extends Service {
                 audioManager.setMode(AudioManager.MODE_NORMAL);
             } catch (Exception ignored) {}
         }
+
+        // Detener AlberthWakeService y liberar hardware de micrófono
+        try {
+            if (AlberthWakeService.getInstance() != null) {
+                AlberthWakeService.getInstance().pauseListening();
+            }
+            Intent stopWake = new Intent(this, AlberthWakeService.class);
+            stopService(stopWake);
+        } catch (Exception ignored) {}
 
         stopForeground(true);
     }
