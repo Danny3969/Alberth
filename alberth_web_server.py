@@ -169,7 +169,7 @@ async def run_osint(req: OsintRequest):
     """Ejecuta un análisis OSINT en segundo plano y devuelve resultados."""
     import asyncio, concurrent.futures
     try:
-        from alberth_osint import search_username, check_email_breach, lookup_domain, generate_html_report
+        from alberth_osint import search_username, check_email_breach, lookup_domain, generate_html_report, lookup_phone
         loop = asyncio.get_event_loop()
         with concurrent.futures.ThreadPoolExecutor() as pool:
             if req.mode == "username":
@@ -177,6 +177,9 @@ async def run_osint(req: OsintRequest):
                 found = [r for r in results if r["found"]]
                 return JSONResponse({"success": True, "target": req.target, "mode": req.mode,
                                      "found_count": len(found), "results": found[:50]})
+            elif req.mode == "phone":
+                result = await loop.run_in_executor(pool, lambda: lookup_phone(req.target))
+                return JSONResponse({"success": True, **result})
             elif req.mode == "email":
                 result = await loop.run_in_executor(pool, lambda: check_email_breach(req.target))
                 return JSONResponse({"success": True, **result})

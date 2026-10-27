@@ -9269,8 +9269,9 @@ document.addEventListener("DOMContentLoaded", () => {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
         <div>
           <label style="font-family:var(--font-data);font-size:10px;color:#ff6600;letter-spacing:1px;display:block;margin-bottom:6px;">MODO</label>
-          <select id="osint-mode" style="width:100%;background:#ffffff0a;border:1px solid #ff660033;color:#e0e0e0;padding:8px 12px;border-radius:6px;font-family:var(--font-data);font-size:12px;">
+          <select id="osint-mode" onchange="updateOsintPlaceholder()" style="width:100%;background:#ffffff0a;border:1px solid #ff660033;color:#e0e0e0;padding:8px 12px;border-radius:6px;font-family:var(--font-data);font-size:12px;">
             <option value="username">👤 Username — Redes Sociales</option>
+            <option value="phone">📱 Teléfono — Operadora, País & Redes</option>
             <option value="email">📧 Email — Brechas de Datos</option>
             <option value="domain">🌐 Dominio — DNS / WHOIS</option>
             <option value="report">📄 Reporte HTML Completo</option>
@@ -9278,7 +9279,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div>
           <label style="font-family:var(--font-data);font-size:10px;color:#ff6600;letter-spacing:1px;display:block;margin-bottom:6px;">OBJETIVO</label>
-          <input id="osint-target" type="text" placeholder="username, email@dominio.com o dominio.com" style="width:100%;background:#ffffff0a;border:1px solid #ff660033;color:#fff;padding:8px 12px;border-radius:6px;font-family:var(--font-data);font-size:12px;box-sizing:border-box;" />
+          <input id="osint-target" type="text" placeholder="username, email@dominio.com, +59399... o dominio.com" style="width:100%;background:#ffffff0a;border:1px solid #ff660033;color:#fff;padding:8px 12px;border-radius:6px;font-family:var(--font-data);font-size:12px;box-sizing:border-box;" />
         </div>
       </div>
       <button onclick="runOsintScan()" style="width:100%;background:linear-gradient(135deg,#ff6600,#ff4400);border:none;color:#fff;padding:10px;border-radius:8px;font-family:var(--font-data);font-size:12px;letter-spacing:2px;cursor:pointer;margin-bottom:16px;">⚡ INICIAR ANÁLISIS OSINT</button>
@@ -9373,9 +9374,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script>
 // ─── OSINT ────────────────────────────────────────────────────────────────────
+function updateOsintPlaceholder() {
+  const mode = document.getElementById('osint-mode').value;
+  const input = document.getElementById('osint-target');
+  if (mode === 'phone') input.placeholder = 'Ej: 0996219630 o +593996219630';
+  else if (mode === 'email') input.placeholder = 'ejemplo@correo.com';
+  else if (mode === 'domain') input.placeholder = 'ejemplo.com';
+  else if (mode === 'report') input.placeholder = 'username o alias';
+  else input.placeholder = 'username o alias en redes';
+}
+
 function openOsintPanel() {
   const modal = document.getElementById('osint-modal');
   modal.style.display = 'flex';
+  updateOsintPlaceholder();
 }
 
 async function runOsintScan() {
@@ -9384,7 +9396,7 @@ async function runOsintScan() {
   const resultsEl = document.getElementById('osint-results');
   if (!target) { resultsEl.innerHTML = '<span style="color:#ff6600;">⚠️ Ingresa un objetivo primero.</span>'; return; }
 
-  resultsEl.innerHTML = '<span style="color:#ff6600;">⟳ Ejecutando análisis OSINT — puede tardar hasta 60 segundos...</span>';
+  resultsEl.innerHTML = '<span style="color:#ff6600;">⟳ Ejecutando análisis OSINT — procesando objetivo...</span>';
   try {
     const res = await fetch('/api/osint/scan', {
       method: 'POST',
@@ -9397,7 +9409,48 @@ async function runOsintScan() {
       return;
     }
     let html = `<div style="color:#ff6600;margin-bottom:8px;">✅ Análisis completado · Objetivo: <b>${target}</b></div>`;
-    if (data.found_count !== undefined) {
+    if (data.line_type !== undefined) {
+      const isValid = data.valid;
+      const statusBadge = isValid 
+        ? '<span style="background:#00f0ff22;color:#00f0ff;border:1px solid #00f0ff55;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:bold;">✅ NÚMERO VÁLIDO</span>'
+        : '<span style="background:#ff444422;color:#ff4444;border:1px solid #ff444455;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:bold;">⚠️ NO VÁLIDO / DESCONOCIDO</span>';
+      
+      html += `
+        <div style="background:#ffffff06;border:1px solid #ff660033;border-radius:8px;padding:14px;margin-top:6px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:15px;color:#fff;font-weight:bold;letter-spacing:1px;">📱 ${data.international || data.e164 || target}</span>
+            ${statusBadge}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;font-size:11px;margin-top:4px;">
+            <div>🌍 <span style="color:#888;">País:</span> <b style="color:#ff6600;">${data.country} (${data.region_code})</b></div>
+            <div>📡 <span style="color:#888;">Operadora:</span> <b style="color:#00f0ff;">${data.carrier}</b></div>
+            <div>🏷️ <span style="color:#888;">Tipo de línea:</span> <b style="color:#e0e0e0;">${data.line_type}</b></div>
+            <div>🔢 <span style="color:#888;">E.164:</span> <b style="color:#aaa;">${data.e164}</b></div>
+            <div>📞 <span style="color:#888;">Nacional:</span> <b style="color:#aaa;">${data.national}</b></div>
+            <div>⏰ <span style="color:#888;">Zona Horaria:</span> <b style="color:#aaa;">${(data.timezones || []).join(', ') || 'N/A'}</b></div>
+          </div>
+
+          <div style="margin-top:6px;border-top:1px solid #ffffff11;padding-top:10px;">
+            <div style="font-size:10px;color:#ff6600;letter-spacing:1px;margin-bottom:6px;font-weight:bold;">ACCESO DIRECTO & VERIFICACIÓN</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${data.links?.whatsapp ? `<a href="${data.links.whatsapp}" target="_blank" style="background:#25D36622;border:1px solid #25D36666;color:#25D366;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;">💬 WhatsApp Directo</a>` : ''}
+              ${data.links?.telegram ? `<a href="${data.links.telegram}" target="_blank" style="background:#0088cc22;border:1px solid #0088cc66;color:#0088cc;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;">✈️ Telegram</a>` : ''}
+              ${data.links?.truecaller ? `<a href="${data.links.truecaller}" target="_blank" style="background:#0066ff22;border:1px solid #0066ff66;color:#00b4d8;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;">🔍 Truecaller</a>` : ''}
+              ${data.links?.syncme ? `<a href="${data.links.syncme}" target="_blank" style="background:#ff007f22;border:1px solid #ff007f66;color:#ff4d94;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:4px;">🆔 Sync.me</a>` : ''}
+            </div>
+          </div>
+
+          <div style="margin-top:4px;border-top:1px solid #ffffff11;padding-top:10px;">
+            <div style="font-size:10px;color:#ffaa00;letter-spacing:1px;margin-bottom:6px;font-weight:bold;">INTELIGENCIA Y RASTREO (GOOGLE DORKS)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${data.dorks?.google_all ? `<a href="${data.dorks.google_all}" target="_blank" style="background:#ffffff0a;border:1px solid #ffffff22;color:#e0e0e0;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;">🔎 Búsqueda Global Dork</a>` : ''}
+              ${data.dorks?.google_social ? `<a href="${data.dorks.google_social}" target="_blank" style="background:#ffffff0a;border:1px solid #ffffff22;color:#e0e0e0;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;">👥 Rastro en Redes Sociales</a>` : ''}
+              ${data.dorks?.google_docs ? `<a href="${data.dorks.google_docs}" target="_blank" style="background:#ffffff0a;border:1px solid #ffffff22;color:#e0e0e0;padding:5px 12px;border-radius:6px;text-decoration:none;font-size:11px;">📄 Filtraciones en Documentos</a>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (data.found_count !== undefined) {
       html += `<div style="margin-bottom:8px;">Perfiles encontrados: <b style="color:#ff6600;">${data.found_count}</b></div>`;
       if (data.results && data.results.length) {
         data.results.forEach(r => {

@@ -183,7 +183,7 @@ def cmd_register(name: str):
 
         # Detectar rostros en tiempo real
         small = cv2.resize(frame, (0, 0), fx=SCALE_FACTOR, fy=SCALE_FACTOR)
-        rgb_small = small[:, :, ::-1]
+        rgb_small = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
         locations = fr.face_locations(rgb_small, model=DETECTION_MODEL)
 
         for (top, right, bottom, left) in locations:
@@ -204,7 +204,7 @@ def cmd_register(name: str):
                 continue
 
             # Tomar el primer rostro
-            rgb_full = frame[:, :, ::-1]
+            rgb_full = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             encodings = fr.face_encodings(rgb_full, [locations[0]])
             if not encodings:
                 print("   ⚠️  No se pudo calcular el encoding. Reintenta.")
@@ -264,7 +264,7 @@ def cmd_live(notify_callback=None):
         # Procesar solo 1 de cada 3 frames para rendimiento
         if frame_count % 3 == 0:
             small = cv2.resize(frame, (0, 0), fx=SCALE_FACTOR, fy=SCALE_FACTOR)
-            rgb_small = small[:, :, ::-1]
+            rgb_small = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
             locations = fr.face_locations(rgb_small, model=DETECTION_MODEL)
             encodings = fr.face_encodings(rgb_small, locations)
 
@@ -311,7 +311,7 @@ def cmd_live(notify_callback=None):
             cap_name = input("\n   Nombre de la persona: ").strip()
             if cap_name:
                 # Capturar frame actual para registrar
-                rgb_full = frame[:, :, ::-1]
+                rgb_full = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 if locations:
                     encs = fr.face_encodings(rgb_full, [locations[0]])
                     if encs:
@@ -337,7 +337,7 @@ def cmd_identify(image_path: str):
         print(f"❌ No se pudo cargar: {image_path}")
         return
 
-    rgb = img[:, :, ::-1]
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     locations = fr.face_locations(rgb, model=DETECTION_MODEL)
     encodings = fr.face_encodings(rgb, locations)
 
@@ -453,7 +453,7 @@ def cmd_server(port: int = 8765):
             frame_count += 1
             if frame_count % 5 == 0:  # 1 de cada 5 frames
                 small = cv2.resize(frame, (0, 0), fx=SCALE_FACTOR, fy=SCALE_FACTOR)
-                rgb_small = small[:, :, ::-1]
+                rgb_small = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
 
                 def _detect():
                     locs = fr.face_locations(rgb_small, model=DETECTION_MODEL)

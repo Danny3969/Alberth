@@ -188,6 +188,118 @@ def lookup_domain(domain: str) -> dict:
 
     return result
 
+def lookup_phone(phone_raw: str, default_region: str = "EC") -> dict:
+    """
+    Análisis e inteligencia OSINT de número telefónico:
+    - Validación y formato internacional E.164, Nacional y RFC3966.
+    - Detección de país, región y huso horario.
+    - Operadora de telefonía móvil / fija (Carrier).
+    - Tipo de línea (Móvil, Fija, VoIP, Toll-free).
+    - Enlaces directos a mensajería (WhatsApp, Telegram).
+    - Búsqueda de huella digital y dorks de investigación (Google, Truecaller, Sync.me).
+    """
+    clean_input = (phone_raw or "").strip()
+    print(f"\n📱 ALBERTH OSINT — Analizando número telefónico: {clean_input}")
+
+    result: dict = {
+        "raw": clean_input,
+        "valid": False,
+        "possible": False,
+        "e164": clean_input,
+        "national": clean_input,
+        "international": clean_input,
+        "country": "Desconocido",
+        "region_code": "??",
+        "carrier": "No identificado",
+        "line_type": "Desconocido",
+        "timezones": [],
+        "links": {},
+        "dorks": {}
+    }
+
+    if not clean_input:
+        result["error"] = "Número telefónico vacío"
+        return result
+
+    try:
+        import phonenumbers
+        from phonenumbers import geocoder, carrier, timezone
+
+        if clean_input.startswith("+"):
+            parsed = phonenumbers.parse(clean_input, None)
+        else:
+            parsed = phonenumbers.parse(clean_input, default_region)
+
+        is_valid = phonenumbers.is_valid_number(parsed)
+        is_possible = phonenumbers.is_possible_number(parsed)
+        e164 = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        national = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.NATIONAL)
+        international = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+        country_name = geocoder.description_for_number(parsed, "es") or geocoder.description_for_number(parsed, "en") or "Desconocido"
+        carrier_name = carrier.name_for_number(parsed, "es") or carrier.name_for_number(parsed, "en") or "Operadora no identificada"
+        tz_list = list(timezone.time_zones_for_number(parsed) or [])
+        reg_code = phonenumbers.region_code_for_number(parsed) or default_region
+
+        type_code = phonenumbers.number_type(parsed)
+        type_labels = {
+            phonenumbers.PhoneNumberType.FIXED_LINE: "Línea Fija (Convencional)",
+            phonenumbers.PhoneNumberType.MOBILE: "Móvil / Celular",
+            phonenumbers.PhoneNumberType.FIXED_LINE_OR_MOBILE: "Fijo o Móvil",
+            phonenumbers.PhoneNumberType.TOLL_FREE: "Número Gratuito (Toll-Free)",
+            phonenumbers.PhoneNumberType.PREMIUM_RATE: "Tarifa Especial / Premium",
+            phonenumbers.PhoneNumberType.SHARED_COST: "Costo Compartido",
+            phonenumbers.PhoneNumberType.VOIP: "Voz sobre IP (VoIP)",
+            phonenumbers.PhoneNumberType.PERSONAL_NUMBER: "Número Personal",
+            phonenumbers.PhoneNumberType.PAGER: "Buscapersonas (Pager)",
+            phonenumbers.PhoneNumberType.UAN: "Número Universal (UAN)",
+            phonenumbers.PhoneNumberType.VOICEMAIL: "Buzón de Voz",
+            phonenumbers.PhoneNumberType.UNKNOWN: "Línea no especificada"
+        }
+        line_type_str = type_labels.get(type_code, "Línea no especificada")
+
+        clean_digits = re.sub(r"[^\d]", "", e164)
+
+        links = {
+            "whatsapp": f"https://wa.me/{clean_digits}",
+            "telegram": f"https://t.me/+{clean_digits}",
+            "truecaller": f"https://www.truecaller.com/search/{reg_code.lower()}/{re.sub(r'[^0-9]', '', national)}",
+            "syncme": f"https://sync.me/search/?number={clean_digits}"
+        }
+
+        dork_query = f'"{e164}" OR "{national}"'
+        dorks = {
+            "google_all": f"https://www.google.com/search?q={urllib.parse.quote(dork_query)}",
+            "google_docs": f"https://www.google.com/search?q={urllib.parse.quote(f'{dork_query} filetype:pdf OR filetype:xlsx')}",
+            "google_social": f"https://www.google.com/search?q={urllib.parse.quote(f'{dork_query} (site:facebook.com OR site:instagram.com OR site:linkedin.com)')}"
+        }
+
+        result.update({
+            "valid": is_valid,
+            "possible": is_possible,
+            "e164": e164,
+            "national": national,
+            "international": international,
+            "country": country_name,
+            "region_code": reg_code,
+            "carrier": carrier_name,
+            "line_type": line_type_str,
+            "timezones": tz_list,
+            "links": links,
+            "dorks": dorks
+        })
+
+        print(f"   Estado: {'✅ VÁLIDO' if is_valid else '⚠️ NO VÁLIDO'}")
+        print(f"   País: {country_name} ({reg_code})")
+        print(f"   Operadora: {carrier_name}")
+        print(f"   Tipo: {line_type_str}")
+        print(f"   E.164: {e164} | Nacional: {national}")
+
+    except Exception as e:
+        print(f"   ❌ Error parseando teléfono: {e}")
+        result["error"] = str(e)
+
+    return result
+
 def generate_html_report(username: str, results: list[dict]) -> Path:
     """Genera un reporte HTML visual del análisis OSINT."""
     found = [r for r in results if r["found"]]
@@ -239,7 +351,7 @@ def save_json(data: dict | list, filename: str) -> Path:
 # ─── CLI ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Uso: python3 alberth_osint.py [username|email|domain|report] <valor>")
+        print("Uso: python3 alberth_osint.py [username|phone|email|domain|report] <valor>")
         sys.exit(1)
 
     mode = sys.argv[1].lower()
@@ -248,6 +360,10 @@ if __name__ == "__main__":
     if mode == "username":
         results = search_username(target)
         save_json(results, f"username_{target}_{int(time.time())}.json")
+
+    elif mode == "phone":
+        result = lookup_phone(target)
+        save_json(result, f"phone_{re.sub(r'[^0-9]','',target)}_{int(time.time())}.json")
 
     elif mode == "report":
         results = search_username(target)
@@ -264,4 +380,4 @@ if __name__ == "__main__":
         save_json(result, f"domain_{target}_{int(time.time())}.json")
 
     else:
-        print(f"Modo '{mode}' no reconocido. Usa: username, email, domain, report")
+        print(f"Modo '{mode}' no reconocido. Usa: username, phone, email, domain, report")
