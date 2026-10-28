@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="100%" height="100%">
+  <defs>
+    <linearGradient id="jayajGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8EFD4"/>
+      <stop offset="40%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#9A7810"/>
+    </linearGradient>
+    <linearGradient id="jayajPlatinum" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+    <linearGradient id="glowEffect" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0A0D14" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Obsidian -->
+  <rect width="1000" height="650" fill="#0A0D14" rx="20"/>
+
+  <!-- Subtle Blueprint Precision Grid -->
+  <g opacity="0.08" stroke="#FFFFFF" stroke-width="0.5">
+    <line x1="500" y1="40" x2="500" y2="610" stroke-dasharray="4 4"/>
+    <line x1="100" y1="210" x2="900" y2="210" stroke-dasharray="4 4"/>
+    <line x1="100" y1="420" x2="900" y2="420" stroke-dasharray="4 4"/>
+    <circle cx="500" cy="210" r="160" fill="none"/>
+    <circle cx="500" cy="210" r="110" fill="none"/>
+    <circle cx="500" cy="210" r="60" fill="none"/>
+  </g>
+
+  <!-- ISOTIPO: Monograma Simétrico JYJ -->
+  <g transform="translate(500, 210)">
+    <!-- Aura de iluminación central -->
+    <circle cx="0" cy="0" r="95" fill="url(#glowEffect)"/>
+
+    <!-- Vector Central Y (Ascenso y Multiplicador) -->
+    <!-- Ramas superiores de la Y -->
+    <path d="M -45,-85 L 0,-25 L 45,-85 L 25,-85 L 0,-50 L -25,-85 Z" fill="url(#jayajGold)"/>
+    <!-- Tronco de la Y -->
+    <path d="M -7,-25 L 7,-25 L 7,45 L -7,45 Z" fill="url(#jayajGold)"/>
+
+    <!-- J Izquierda (Alas y Pilares Protectores - Espejo) -->
+    <path d="M -30,-65 L -15,-65 L -15,22 C -15,44 -38,52 -60,52 C -78,52 -90,38 -90,22 L -74,22 C -74,30 -67,37 -60,37 C -42,37 -30,30 -30,22 Z" fill="url(#jayajPlatinum)"/>
+    <rect x="-90" y="-65" width="75" height="12" rx="3" fill="url(#jayajPlatinum)"/>
+
+    <!-- J Derecha (Alas y Pilares Protectores - Directa) -->
+    <path d="M 30,-65 L 15,-65 L 15,22 C 15,44 38,52 60,52 C 78,52 90,38 90,22 L 74,22 C 74,30 67,37 60,37 C 42,37 30,30 30,22 Z" fill="url(#jayajPlatinum)"/>
+    <rect x="15" y="-65" width="75" height="12" rx="3" fill="url(#jayajPlatinum)"/>
+  </g>
+
+  <!-- LOGOTIPO: JAYAJ (Tipografía Geométrica de Proporción Áurea) -->
+  <text x="500" y="445" 
+        text-anchor="middle" 
+        font-family="'Inter', 'Montserrat', -apple-system, sans-serif" 
+        font-size="82" 
+        font-weight="800" 
+        letter-spacing="24" 
+        fill="url(#jayajPlatinum)">
+    JAYAJ
+  </text>
+
+  <!-- DESCRIPTOR DE HOLDING -->
+  <text x="500" y="505" 
+        text-anchor="middle" 
+        font-family="'JetBrains Mono', 'SF Pro Text', monospace" 
+        font-size="16" 
+        font-weight="600" 
+        letter-spacing="14" 
+        fill="url(#jayajGold)">
+    VENTURE HOLDING
+  </text>
+
+  <!-- Detalles de ingeniería y endoso de marca -->
+  <g opacity="0.4" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B">
+    <text x="80" y="605">EST. 2026 · LATAM ↔ GLOBAL</text>
+    <text x="500" y="605" text-anchor="middle">BILATERAL PALINDROMIC SYMMETRY</text>
+    <text x="920" y="605" text-anchor="end">GOLDEN RATIO 1:1.618</text>
+  </g>
+
+  <!-- Línea base de horizonte -->
+  <line x1="320" y1="535" x2="680" y2="535" stroke="#334155" stroke-width="1" stroke-dasharray="6 6"/>
+</svg>
