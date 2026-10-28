@@ -29,47 +29,37 @@
     <circle cx="500" cy="210" r="60" fill="none"/>
   </g>
 
-  <!-- ISOTIPO: Monograma Simétrico JYJ con Y Unificada Continua -->
-  <g transform="translate(500, 210)">
+  <!-- ISOTIPO V2-A: EL PRISMA AXIAL (THE APEX PRISM) -->
+  <g transform="translate(500, 210) scale(1.15)">
     <!-- Aura de iluminación central -->
     <circle cx="0" cy="0" r="95" fill="url(#glowEffect)"/>
 
-    <!-- Vector Central Y: Trazo único continuo monolítico -->
-    <path d="M -50,-100 L -9,-21 L -9,58 L 9,58 L 9,-21 L 50,-100 L 30,-100 L 0,-42 L -30,-100 Z" fill="url(#jayajGold)"/>
+    <!-- Vector Central Y: Aguja Ascendente de Inversión y Expansión -->
+    <path d="M 0,-30 L -36,-105 L -16,-105 L 0,-62 Z" fill="url(#jayajGold)"/>
+    <path d="M 0,-30 L 36,-105 L 16,-105 L 0,-62 Z" fill="url(#jayajGold)"/>
+    <path d="M -7,-24 L 7,-24 L 7,65 L 0,80 L -7,65 Z" fill="url(#jayajGold)"/>
 
-    <!-- J Izquierda (Pilar y Ala Protectora - Espejo) -->
-    <path d="M -34,-75 L -17,-75 L -17,22 C -17,49 -41,58 -66,58 C -85,58 -100,42 -100,22 L -82,22 C -82,32 -75,40 -66,40 C -46,40 -34,32 -34,22 Z" fill="url(#jayajPlatinum)"/>
-    <rect x="-100" y="-75" width="83" height="12" rx="3" fill="url(#jayajPlatinum)"/>
+    <!-- J Izquierda (Vector de Impulso - Espejo) -->
+    <path d="M -48,-85 L -30,-85 L -30,20 C -30,52 -52,70 -84,70 C -112,70 -128,52 -128,26 L -110,26 C -110,38 -100,52 -84,52 C -65,52 -48,40 -48,20 Z" fill="url(#jayajPlatinum)"/>
+    <polygon points="-48,-85 -30,-85 -40,-102 -58,-102" fill="url(#jayajPlatinum)"/>
 
-    <!-- J Derecha (Pilar y Ala Protectora - Directa) -->
-    <path d="M 34,-75 L 17,-75 L 17,22 C 17,49 41,58 66,58 C 85,58 100,42 100,22 L 82,22 C 82,32 75,40 66,40 C 46,40 34,32 34,22 Z" fill="url(#jayajPlatinum)"/>
-    <rect x="17" y="-75" width="83" height="12" rx="3" fill="url(#jayajPlatinum)"/>
+    <!-- Ⴑ Derecha (Vector Protector - Simetría Especular) -->
+    <path d="M 48,-85 L 30,-85 L 30,20 C 30,52 52,70 84,70 C 112,70 128,52 128,26 L 110,26 C 110,38 100,52 84,52 C 65,52 48,40 48,20 Z" fill="url(#jayajPlatinum)"/>
+    <polygon points="48,-85 30,-85 40,-102 58,-102" fill="url(#jayajPlatinum)"/>
   </g>
 
-  <!-- LOGOTIPO: J A Y A Ⴑ (Simetría Especular con J en Espejo) -->
-  <g transform="translate(500, 445)">
+  <!-- LOGOTIPO V2: J A Y A Ⴑ (Sans Bespoke sin remate superior en J) -->
+  <g transform="translate(500, 445) scale(0.72)">
     <!-- J Inicial -->
-    <g transform="translate(-250, 0)">
-      <path d="M 23,-49 L 46,-49 L 46,18 C 46,39 27,49 4,49 C -18,49 -36,37 -36,20 L -16,20 C -16,27 -9,32 4,32 C 18,32 23,25 23,18 Z" fill="url(#jayajPlatinum)"/>
-      <rect x="-36" y="-49" width="82" height="13" rx="2" fill="url(#jayajPlatinum)"/>
-    </g>
-    <!-- A Izquierda -->
-    <g transform="translate(-125, 0)">
-      <path d="M -43,49 L -4,-49 L 14,-49 L 54,49 L 32,49 L 23,24 L -23,24 L -32,49 Z M -16,9 L 16,9 L 0,-31 Z" fill="url(#jayajPlatinum)"/>
-    </g>
+    <path d="M -290,-55 L -272,-55 L -272,15 C -272,38 -290,52 -315,52 C -340,52 -355,38 -355,18 L -337,18 C -337,28 -328,36 -315,36 C -300,36 -290,28 -290,15 Z" fill="url(#jayajPlatinum)"/>
+    <!-- A Primera -->
+    <path d="M -160,-55 L -140,-55 L -105,52 L -125,52 L -134,22 L -186,22 L -195,52 L -215,52 Z M -160,-15 L -178,8 L -142,8 Z" fill="url(#jayajPlatinum)"/>
     <!-- Y Central -->
-    <g transform="translate(0, 0)">
-      <path d="M -32,-49 L 0,-4 L 32,-49 L 54,-49 L 12,11 L 12,49 L -12,49 L -12,11 L -54,-49 Z" fill="url(#jayajGold)"/>
-    </g>
-    <!-- A Derecha -->
-    <g transform="translate(125, 0)">
-      <path d="M -43,49 L -4,-49 L 14,-49 L 54,49 L 32,49 L 23,24 L -23,24 L -32,49 Z M -16,9 L 16,9 L 0,-31 Z" fill="url(#jayajPlatinum)"/>
-    </g>
-    <!-- J Final Reflejada -->
-    <g transform="translate(250, 0) scale(-1, 1)">
-      <path d="M 23,-49 L 46,-49 L 46,18 C 46,39 27,49 4,49 C -18,49 -36,37 -36,20 L -16,20 C -16,27 -9,32 4,32 C 18,32 23,25 23,18 Z" fill="url(#jayajPlatinum)"/>
-      <rect x="-36" y="-49" width="82" height="13" rx="2" fill="url(#jayajPlatinum)"/>
-    </g>
+    <path d="M -48,-55 L -10,12 L -10,52 L 10,52 L 10,12 L 48,-55 L 28,-55 L 0,-12 L -28,-55 Z" fill="url(#jayajGold)"/>
+    <!-- A Segunda -->
+    <path d="M 160,-55 L 180,-55 L 215,52 L 195,52 L 186,22 L 134,22 L 125,52 L 105,52 Z M 160,-15 L 142,8 L 178,8 Z" fill="url(#jayajPlatinum)"/>
+    <!-- Ⴑ Final Espejo -->
+    <path d="M 290,-55 L 272,-55 L 272,15 C 272,38 290,52 315,52 C 340,52 355,38 355,18 L 337,18 C 337,28 328,36 315,36 C 300,36 290,28 290,15 Z" fill="url(#jayajPlatinum)"/>
   </g>
 
   <!-- DESCRIPTOR DE HOLDING -->

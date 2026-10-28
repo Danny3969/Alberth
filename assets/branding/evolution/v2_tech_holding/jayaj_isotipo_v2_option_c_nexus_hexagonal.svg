@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldTechC" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF8E2"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#8C6D0D"/>
+    </linearGradient>
+
+    <linearGradient id="platTechC" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" fill="#0A0D14" rx="28"/>
+
+  <!-- ========================================================
+       OPCIÓN C: "EL NÉXUS HEXAGONAL / VENTURE HORIZON"
+       - Inspiración: Paradigm, Founders Fund, DeepTech Labs.
+       - Arquitectura facetada de diamante / prisma de 5 filiales.
+       - Geometría angular impecable con espacio negativo de 16px.
+       ======================================================== -->
+  <g transform="translate(200, 200)">
+    <!-- Y Central: Prisma de Diamante Vertical (Ascenso de Capital y Tecnología) -->
+    <!-- Faceta Superior Triangular de la Y -->
+    <polygon points="0,-95 -38,-45 38,-45" fill="url(#goldTechC)"/>
+    <!-- Vástago Inferior Prisma Hexagonal -->
+    <polygon points="0,-35 -14,-15 -14,65 0,82 14,65 14,-15" fill="url(#goldTechC)"/>
+
+    <!-- J Izquierda Espejo: Escudo Facetado de Vanguardia -->
+    <path d="M -54,-45 L -72,-45 L -72,25 C -72,55 -95,72 -125,72 L -125,52 C -105,52 -90,40 -90,25 L -90,-25 L -54,-68 Z" fill="url(#platTechC)"/>
+
+    <!-- Ⴑ Derecha Directa: Escudo Facetado Especular -->
+    <path d="M 54,-45 L 72,-45 L 72,25 C 72,55 95,72 125,72 L 125,52 C 105,52 90,40 90,25 L 90,-25 L 54,-68 Z" fill="url(#platTechC)"/>
+
+    <!-- Línea Guía de Horizonte Cuántico (Sutileza de Eje Simétrico) -->
+    <circle cx="0" cy="-110" r="3" fill="#D4AF37"/>
+    <line x1="-125" y1="92" x2="125" y2="92" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="4 6"/>
+  </g>
+</svg>

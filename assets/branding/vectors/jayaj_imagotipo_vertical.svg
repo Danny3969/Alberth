@@ -1,82 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 850" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="100%" height="100%">
   <defs>
-    <linearGradient id="vGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FBF4DD"/>
+    <linearGradient id="goldV2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF8E2"/>
       <stop offset="50%" stop-color="#D4AF37"/>
       <stop offset="100%" stop-color="#997812"/>
     </linearGradient>
-    <linearGradient id="vPlatinum" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="platV2" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
       <stop offset="60%" stop-color="#E2E8F0"/>
       <stop offset="100%" stop-color="#94A3B8"/>
     </linearGradient>
   </defs>
 
-  <!-- Background Obsidian -->
-  <rect width="1000" height="850" fill="#0A0D14" rx="24"/>
+  <rect width="600" height="700" fill="#0A0D14" rx="24"/>
 
-  <!-- Guías de Alineación Arquitectónica (Sutil) -->
-  <g opacity="0.1" stroke="#FFFFFF" stroke-width="0.8">
-    <line x1="500" y1="60" x2="500" y2="790" stroke-dasharray="4 4"/>
-    <circle cx="500" cy="270" r="140" fill="none"/>
+  <!-- ==================== ISOTIPO V2-A: EL PRISMA AXIAL ==================== -->
+  <g transform="translate(300, 210) scale(1.15)">
+    <!-- Vector Central Y: Aguja Ascendente de Inversión y Expansión -->
+    <path d="M 0,-30 L -36,-105 L -16,-105 L 0,-62 Z" fill="url(#goldV2)"/>
+    <path d="M 0,-30 L 36,-105 L 16,-105 L 0,-62 Z" fill="url(#goldV2)"/>
+    <path d="M -7,-24 L 7,-24 L 7,65 L 0,80 L -7,65 Z" fill="url(#goldV2)"/>
+
+    <!-- J Izquierda Espejo -->
+    <path d="M -48,-85 L -30,-85 L -30,20 C -30,52 -52,70 -84,70 C -112,70 -128,52 -128,26 L -110,26 C -110,38 -100,52 -84,52 C -65,52 -48,40 -48,20 Z" fill="url(#platV2)"/>
+    <polygon points="-48,-85 -30,-85 -40,-102 -58,-102" fill="url(#platV2)"/>
+
+    <!-- Ⴑ Derecha Directa -->
+    <path d="M 48,-85 L 30,-85 L 30,20 C 30,52 52,70 84,70 C 112,70 128,52 128,26 L 110,26 C 110,38 100,52 84,52 C 65,52 48,40 48,20 Z" fill="url(#platV2)"/>
+    <polygon points="48,-85 30,-85 40,-102 58,-102" fill="url(#platV2)"/>
   </g>
 
-  <!-- ISOTIPO CENTRAL (Monograma Simétrico JYJ con Y Monolítica Unificada) -->
-  <g transform="translate(500, 270)">
-    <!-- Vector Central Y: Trazo único continuo monolítico -->
-    <path d="M -56,-115 L -10,-24 L -10,65 L 10,65 L 10,-24 L 56,-115 L 34,-115 L 0,-48 L -34,-115 Z" fill="url(#vGold)"/>
-
-    <!-- J Izquierda (Pilar y Ala Protectora - Espejo) -->
-    <path d="M -38,-85 L -19,-85 L -19,25 C -19,55 -46,65 -74,65 C -96,65 -112,47 -112,25 L -92,25 C -92,36 -84,45 -74,45 C -52,45 -38,36 -38,25 Z" fill="url(#vPlatinum)"/>
-    <rect x="-112" y="-85" width="93" height="14" rx="3" fill="url(#vPlatinum)"/>
-
-    <!-- J Derecha (Pilar y Ala Protectora - Directa) -->
-    <path d="M 38,-85 L 19,-85 L 19,25 C 19,55 46,65 74,65 C 96,65 112,47 112,25 L 92,25 C 92,36 84,45 74,45 C 52,45 38,36 38,25 Z" fill="url(#vPlatinum)"/>
-    <rect x="19" y="-85" width="93" height="14" rx="3" fill="url(#vPlatinum)"/>
+  <!-- ==================== LOGOTIPO BESPOKE GEOMÉTRICO (SIN SERIFAS EN J) ==================== -->
+  <g transform="translate(300, 480) scale(0.68)">
+    <!-- J Inicial -->
+    <path d="M -290,-55 L -272,-55 L -272,15 C -272,38 -290,52 -315,52 C -340,52 -355,38 -355,18 L -337,18 C -337,28 -328,36 -315,36 C -300,36 -290,28 -290,15 Z" fill="url(#platV2)"/>
+    <!-- A Primera -->
+    <path d="M -160,-55 L -140,-55 L -105,52 L -125,52 L -134,22 L -186,22 L -195,52 L -215,52 Z M -160,-15 L -178,8 L -142,8 Z" fill="url(#platV2)"/>
+    <!-- Y Central -->
+    <path d="M -48,-55 L -10,12 L -10,52 L 10,52 L 10,12 L 48,-55 L 28,-55 L 0,-12 L -28,-55 Z" fill="url(#goldV2)"/>
+    <!-- A Segunda -->
+    <path d="M 160,-55 L 180,-55 L 215,52 L 195,52 L 186,22 L 134,22 L 125,52 L 105,52 Z M 160,-15 L 142,8 L 178,8 Z" fill="url(#platV2)"/>
+    <!-- Ⴑ Final Espejo -->
+    <path d="M 290,-55 L 272,-55 L 272,15 C 272,38 290,52 315,52 C 340,52 355,38 355,18 L 337,18 C 337,28 328,36 315,36 C 300,36 290,28 290,15 Z" fill="url(#platV2)"/>
   </g>
 
-  <!-- LOGOTIPO CENTRAL CON J EN ESPEJO (J A Y A Ⴑ) -->
-  <g transform="translate(500, 560)">
-    <!-- J Inicial (Gancho Izquierda) -->
-    <g transform="translate(-280, 0)">
-      <path d="M 26,-55 L 52,-55 L 52,20 C 52,44 30,55 5,55 C -20,55 -40,42 -40,22 L -18,22 C -18,30 -10,36 5,36 C 20,36 26,28 26,20 Z" fill="url(#vPlatinum)"/>
-      <rect x="-40" y="-55" width="92" height="15" rx="3" fill="url(#vPlatinum)"/>
-    </g>
+  <!-- LÍNEA DE CRISTAL GUÍA -->
+  <line x1="160" y1="565" x2="440" y2="565" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="300" cy="565" r="2.5" fill="#D4AF37"/>
 
-    <!-- A Izquierda -->
-    <g transform="translate(-140, 0)">
-      <path d="M -48,55 L -4,-55 L 16,-55 L 60,55 L 36,55 L 26,27 L -26,27 L -36,55 Z M -18,10 L 18,10 L 0,-35 Z" fill="url(#vPlatinum)"/>
-    </g>
-
-    <!-- Y Central (Eje Axial y Vector Dorado) -->
-    <g transform="translate(0, 0)">
-      <path d="M -36,-55 L 0,-5 L 36,-55 L 60,-55 L 14,12 L 14,55 L -14,55 L -14,12 L -60,-55 Z" fill="url(#vGold)"/>
-    </g>
-
-    <!-- A Derecha (Simétrica) -->
-    <g transform="translate(140, 0)">
-      <path d="M -48,55 L -4,-55 L 16,-55 L 60,55 L 36,55 L 26,27 L -26,27 L -36,55 Z M -18,10 L 18,10 L 0,-35 Z" fill="url(#vPlatinum)"/>
-    </g>
-
-    <!-- J Final Reflejada (Gancho Derecha - Espejo Puro 180°) -->
-    <g transform="translate(280, 0) scale(-1, 1)">
-      <path d="M 26,-55 L 52,-55 L 52,20 C 52,44 30,55 5,55 C -20,55 -40,42 -40,22 L -18,22 C -18,30 -10,36 5,36 C 20,36 26,28 26,20 Z" fill="url(#vPlatinum)"/>
-      <rect x="-40" y="-55" width="92" height="15" rx="3" fill="url(#vPlatinum)"/>
-    </g>
-  </g>
-
-  <!-- DESCRIPTOR DE CATEGORÍA: VENTURE HOLDING -->
-  <text x="500" y="680" 
-        text-anchor="middle" 
-        font-family="'JetBrains Mono', 'SF Pro Text', monospace" 
-        font-size="18" 
-        font-weight="600" 
-        letter-spacing="18" 
-        fill="url(#vGold)">
-    VENTURE HOLDING
-  </text>
-
-  <!-- Línea decorativa sutil de horizonte -->
-  <line x1="300" y1="710" x2="700" y2="710" stroke="#334155" stroke-width="1" stroke-dasharray="6 6" opacity="0.6"/>
-  <text x="500" y="750" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="6">MÉTODOS MATRICIALES · ALTA TECNOLOGÍA</text>
+  <!-- SUBTÍTULO INSTITUCIONAL (MONOSPACE REFINADA) -->
+  <text x="300" y="605" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#94A3B8" letter-spacing="8">VENTURE HOLDING</text>
+  <text x="300" y="630" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="400" fill="#64748B" letter-spacing="4">INNOVATION ECOSYSTEM</text>
 </svg>

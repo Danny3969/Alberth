@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldV2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF8E2"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#997812"/>
+    </linearGradient>
+    <linearGradient id="platV2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="600" height="700" fill="#0A0D14" rx="24"/>
+
+  <!-- ==================== ISOTIPO V2-A: EL PRISMA AXIAL ==================== -->
+  <g transform="translate(300, 210) scale(1.15)">
+    <!-- Vector Central Y: Aguja Ascendente de Inversión y Expansión -->
+    <path d="M 0,-30 L -36,-105 L -16,-105 L 0,-62 Z" fill="url(#goldV2)"/>
+    <path d="M 0,-30 L 36,-105 L 16,-105 L 0,-62 Z" fill="url(#goldV2)"/>
+    <path d="M -7,-24 L 7,-24 L 7,65 L 0,80 L -7,65 Z" fill="url(#goldV2)"/>
+
+    <!-- J Izquierda Espejo -->
+    <path d="M -48,-85 L -30,-85 L -30,20 C -30,52 -52,70 -84,70 C -112,70 -128,52 -128,26 L -110,26 C -110,38 -100,52 -84,52 C -65,52 -48,40 -48,20 Z" fill="url(#platV2)"/>
+    <polygon points="-48,-85 -30,-85 -40,-102 -58,-102" fill="url(#platV2)"/>
+
+    <!-- Ⴑ Derecha Directa -->
+    <path d="M 48,-85 L 30,-85 L 30,20 C 30,52 52,70 84,70 C 112,70 128,52 128,26 L 110,26 C 110,38 100,52 84,52 C 65,52 48,40 48,20 Z" fill="url(#platV2)"/>
+    <polygon points="48,-85 30,-85 40,-102 58,-102" fill="url(#platV2)"/>
+  </g>
+
+  <!-- ==================== LOGOTIPO BESPOKE GEOMÉTRICO (SIN SERIFAS EN J) ==================== -->
+  <g transform="translate(300, 480) scale(0.68)">
+    <!-- J Inicial -->
+    <path d="M -290,-55 L -272,-55 L -272,15 C -272,38 -290,52 -315,52 C -340,52 -355,38 -355,18 L -337,18 C -337,28 -328,36 -315,36 C -300,36 -290,28 -290,15 Z" fill="url(#platV2)"/>
+    <!-- A Primera -->
+    <path d="M -160,-55 L -140,-55 L -105,52 L -125,52 L -134,22 L -186,22 L -195,52 L -215,52 Z M -160,-15 L -178,8 L -142,8 Z" fill="url(#platV2)"/>
+    <!-- Y Central -->
+    <path d="M -48,-55 L -10,12 L -10,52 L 10,52 L 10,12 L 48,-55 L 28,-55 L 0,-12 L -28,-55 Z" fill="url(#goldV2)"/>
+    <!-- A Segunda -->
+    <path d="M 160,-55 L 180,-55 L 215,52 L 195,52 L 186,22 L 134,22 L 125,52 L 105,52 Z M 160,-15 L 142,8 L 178,8 Z" fill="url(#platV2)"/>
+    <!-- Ⴑ Final Espejo -->
+    <path d="M 290,-55 L 272,-55 L 272,15 C 272,38 290,52 315,52 C 340,52 355,38 355,18 L 337,18 C 337,28 328,36 315,36 C 300,36 290,28 290,15 Z" fill="url(#platV2)"/>
+  </g>
+
+  <!-- LÍNEA DE CRISTAL GUÍA -->
+  <line x1="160" y1="565" x2="440" y2="565" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="300" cy="565" r="2.5" fill="#D4AF37"/>
+
+  <!-- SUBTÍTULO INSTITUCIONAL (MONOSPACE REFINADA) -->
+  <text x="300" y="605" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#94A3B8" letter-spacing="8">VENTURE HOLDING</text>
+  <text x="300" y="630" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="400" fill="#64748B" letter-spacing="4">INNOVATION ECOSYSTEM</text>
+</svg>

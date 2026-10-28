@@ -1,44 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" width="100%" height="100%">
   <defs>
+    <!-- Gradiente Titanio Puro -->
+    <linearGradient id="logoPlat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#F1F5F9"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+
+    <!-- Gradiente Oro Champaña para el Eje Central Y -->
     <linearGradient id="logoGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FBF4DD"/>
+      <stop offset="0%" stop-color="#FDF8E2"/>
       <stop offset="50%" stop-color="#D4AF37"/>
       <stop offset="100%" stop-color="#997812"/>
     </linearGradient>
-    <linearGradient id="logoPlatinum" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="60%" stop-color="#E2E8F0"/>
-      <stop offset="100%" stop-color="#94A3B8"/>
-    </linearGradient>
   </defs>
 
-  <!-- Logotipo Monolítico: J A Y A Ⴑ (Simetría Especular Bilateral) -->
-  <g transform="translate(450, 120)">
-    <!-- J Inicial (Gancho Izquierda) -->
-    <g transform="translate(-320, 0)">
-      <path d="M 30,-70 L 60,-70 L 60,25 C 60,55 35,70 5,70 C -25,70 -50,52 -50,28 L -22,28 C -22,38 -12,45 5,45 C 24,45 32,35 32,25 Z" fill="url(#logoPlatinum)"/>
-      <rect x="-50" y="-70" width="110" height="20" rx="3" fill="url(#logoPlatinum)"/>
-    </g>
+  <rect width="900" height="240" fill="#0A0D14" rx="20"/>
 
-    <!-- A Izquierda -->
-    <g transform="translate(-160, 0)">
-      <path d="M -60,70 L -5,-70 L 20,-70 L 75,70 L 46,70 L 32,35 L -32,35 L -46,70 Z M -23,12 L 23,12 L 0,-44 Z" fill="url(#logoPlatinum)"/>
-    </g>
+  <!-- ========================================================
+       LOGOTIPO JAYAJ V2: SANS GEOMÉTRICA DE AUTOR (SIN SERIFAS EN J)
+       - J y Ⴑ con fustes limpios (sin sombrerete de columna)
+       - Simetría axial bilateral matemática
+       - Proporciones cinematográficas
+       ======================================================== -->
+  <g transform="translate(450, 95)">
+    <!-- J Inicial (x = -320): Fuste limpio vertical de 16px con gancho circular suave -->
+    <path d="M -290,-55 L -272,-55 L -272,15 C -272,38 -290,52 -315,52 C -340,52 -355,38 -355,18 L -337,18 C -337,28 -328,36 -315,36 C -300,36 -290,28 -290,15 Z" fill="url(#logoPlat)"/>
 
-    <!-- Y Central (Eje Axial y Vector Áureo) -->
-    <g transform="translate(0, 0)">
-      <path d="M -45,-70 L 0,-6 L 45,-70 L 76,-70 L 17,16 L 17,70 L -17,70 L -17,16 L -76,-70 Z" fill="url(#logoGold)"/>
-    </g>
+    <!-- A Primera (x = -160): Ángulo afilado y travesaño flotante de precisión -->
+    <path d="M -160,-55 L -140,-55 L -105,52 L -125,52 L -134,22 L -186,22 L -195,52 L -215,52 Z M -160,-15 L -178,8 L -142,8 Z" fill="url(#logoPlat)"/>
 
-    <!-- A Derecha (Simétrica) -->
-    <g transform="translate(160, 0)">
-      <path d="M -60,70 L -5,-70 L 20,-70 L 75,70 L 46,70 L 32,35 L -32,35 L -46,70 Z M -23,12 L 23,12 L 0,-44 Z" fill="url(#logoPlatinum)"/>
-    </g>
+    <!-- Y Central (x = 0): Eje Pivote en Oro Champaña (Monolítica Continua) -->
+    <path d="M -48,-55 L -10,12 L -10,52 L 10,52 L 10,12 L 48,-55 L 28,-55 L 0,-12 L -28,-55 Z" fill="url(#logoGold)"/>
 
-    <!-- J Final Reflejada (Gancho Derecha - Espejo Puro 180°) -->
-    <g transform="translate(320, 0) scale(-1, 1)">
-      <path d="M 30,-70 L 60,-70 L 60,25 C 60,55 35,70 5,70 C -25,70 -50,52 -50,28 L -22,28 C -22,38 -12,45 5,45 C 24,45 32,35 32,25 Z" fill="url(#logoPlatinum)"/>
-      <rect x="-50" y="-70" width="110" height="20" rx="3" fill="url(#logoPlatinum)"/>
-    </g>
+    <!-- A Segunda (x = +160): Duplicado Simétrico Perfecto -->
+    <path d="M 160,-55 L 180,-55 L 215,52 L 195,52 L 186,22 L 134,22 L 125,52 L 105,52 Z M 160,-15 L 142,8 L 178,8 Z" fill="url(#logoPlat)"/>
+
+    <!-- Ⴑ Final Espejo (x = +320): Simetría Especular Axial sin Serifa -->
+    <path d="M 290,-55 L 272,-55 L 272,15 C 272,38 290,52 315,52 C 340,52 355,38 355,18 L 337,18 C 337,28 328,36 315,36 C 300,36 290,28 290,15 Z" fill="url(#logoPlat)"/>
   </g>
+
+  <!-- LÍNEA DE CRISTAL GUÍA DE PRECISIÓN -->
+  <line x1="80" y1="170" x2="820" y2="170" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="450" cy="170" r="3" fill="#D4AF37"/>
+
+  <!-- SUBTÍTULO INSTITUCIONAL: MONOSPACE TÉCNICA REFINADA -->
+  <text x="450" y="198" text-anchor="middle" font-family="'JetBrains Mono', 'Space Mono', monospace" font-size="12" font-weight="600" fill="#94A3B8" letter-spacing="9">VENTURE HOLDING · INNOVATION ECOSYSTEM</text>
 </svg>

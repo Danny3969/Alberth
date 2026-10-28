@@ -1,28 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
-    <linearGradient id="isoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Gradiente Champaña Oro Cepillado -->
+    <linearGradient id="goldTech" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FBF4DD"/>
-      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="45%" stop-color="#D4AF37"/>
       <stop offset="100%" stop-color="#997812"/>
     </linearGradient>
-    <linearGradient id="isoPlatinum" x1="0%" y1="0%" x2="100%" y2="100%">
+
+    <!-- Gradiente Titanio Platino -->
+    <linearGradient id="titaniumTech" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
       <stop offset="60%" stop-color="#E2E8F0"/>
       <stop offset="100%" stop-color="#94A3B8"/>
     </linearGradient>
+
+    <!-- Sombra de Profundidad Ultra-Sutil -->
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
 
-  <!-- Isotipo Centrado Monograma Simétrico JYJ (Y Monolítica Continua Unificada) -->
-  <g transform="translate(200, 200)">
-    <!-- Vector Central Y: Trazo único continuo monolítico (sin corte V sobre I) -->
-    <path d="M -56,-115 L -10,-24 L -10,65 L 10,65 L 10,-24 L 56,-115 L 34,-115 L 0,-48 L -34,-115 Z" fill="url(#isoGold)"/>
+  <!-- Fondo Obsidiana de Alto Contraste -->
+  <rect width="400" height="400" fill="#0A0D14" rx="28"/>
 
-    <!-- J Izquierda (Pilar y Ala Protectora - Espejo) -->
-    <path d="M -38,-85 L -19,-85 L -19,25 C -19,55 -46,65 -74,65 C -96,65 -112,47 -112,25 L -92,25 C -92,36 -84,45 -74,45 C -52,45 -38,36 -38,25 Z" fill="url(#isoPlatinum)"/>
-    <rect x="-112" y="-85" width="93" height="14" rx="3" fill="url(#isoPlatinum)"/>
+  <!-- ========================================================
+       OPCIÓN A: "EL PRISMA AXIAL" (THE APEX PRISM)
+       - Cero solapamiento (Espacio negativo respirable de 22px)
+       - Cero remates de serifa/columnas (Look Deep-Tech / Aeroespacial)
+       - Cero efecto "M" en monocromático
+       ======================================================== -->
+  <g transform="translate(200, 205)">
+    <!-- Vector Central Y: Aguja Ascendente de Inversión y Expansión -->
+    <!-- Ala izquierda de la Y central -->
+    <path d="M 0,-30 L -36,-105 L -16,-105 L 0,-62 Z" fill="url(#goldTech)"/>
+    <!-- Ala derecha de la Y central -->
+    <path d="M 0,-30 L 36,-105 L 16,-105 L 0,-62 Z" fill="url(#goldTech)"/>
+    <!-- Fuste inferior de aceleración de la Y -->
+    <path d="M -7,-24 L 7,-24 L 7,65 L 0,80 L -7,65 Z" fill="url(#goldTech)"/>
 
-    <!-- J Derecha (Pilar y Ala Protectora - Directa) -->
-    <path d="M 38,-85 L 19,-85 L 19,25 C 19,55 46,65 74,65 C 96,65 112,47 112,25 L 92,25 C 92,36 84,45 74,45 C 52,45 38,36 38,25 Z" fill="url(#isoPlatinum)"/>
-    <rect x="19" y="-85" width="93" height="14" rx="3" fill="url(#isoPlatinum)"/>
+    <!-- J Izquierda (Vector de Impulso - Espejo): Curva geométrica aerodinámica sin serifa superior -->
+    <path d="M -48,-85 L -30,-85 L -30,20 C -30,52 -52,70 -84,70 C -112,70 -128,52 -128,26 L -110,26 C -110,38 -100,52 -84,52 C -65,52 -48,40 -48,20 Z" fill="url(#titaniumTech)"/>
+    <!-- Detalle de corte aéreo a 45 grados en el ápice -->
+    <polygon points="-48,-85 -30,-85 -40,-102 -58,-102" fill="url(#titaniumTech)"/>
+
+    <!-- Ⴑ Derecha (Vector Protector - Simetría Especular): Curva geométrica pura -->
+    <path d="M 48,-85 L 30,-85 L 30,20 C 30,52 52,70 84,70 C 112,70 128,52 128,26 L 110,26 C 110,38 100,52 84,52 C 65,52 48,40 48,20 Z" fill="url(#titaniumTech)"/>
+    <!-- Detalle de corte aéreo a 45 grados en el ápice -->
+    <polygon points="48,-85 30,-85 40,-102 58,-102" fill="url(#titaniumTech)"/>
   </g>
 </svg>

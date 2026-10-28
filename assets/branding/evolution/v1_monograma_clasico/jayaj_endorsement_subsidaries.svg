@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="100%" height="100%">
+  <defs>
+    <linearGradient id="badgeGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF4DD"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#997812"/>
+    </linearGradient>
+    <linearGradient id="badgePlat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo Obsidian -->
+  <rect width="1200" height="900" fill="#0A0D14" rx="24"/>
+
+  <!-- Título Principal -->
+  <text x="600" y="60" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="url(#badgeGold)" letter-spacing="8">JAYAJ VENTURE HOLDING · SELLOS DE ENDOSO DE FILIALES</text>
+  <line x1="200" y1="85" x2="1000" y2="85" stroke="#334155" stroke-width="1" stroke-dasharray="6 6"/>
+
+  <!-- ================= FILIAL 1: MACONDO EXPRESS ================= -->
+  <g transform="translate(100, 120)">
+    <rect width="1000" height="120" fill="#0F1420" rx="14" stroke="#1E293B" stroke-width="1"/>
+    <!-- Ícono Filial -->
+    <circle cx="60" cy="60" r="32" fill="#10B981" fill-opacity="0.1" stroke="#10B981" stroke-width="1.5"/>
+    <text x="60" y="66" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold" fill="#10B981">ME</text>
+    <!-- Nombre Filial -->
+    <text x="120" y="52" font-family="-apple-system, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF" letter-spacing="2">MACONDO EXPRESS</text>
+    <text x="120" y="78" font-family="'JetBrains Mono', monospace" font-size="12" fill="#94A3B8">Movilidad Intermunicipal &amp; Courier Puerta a Puerta</text>
+    <!-- Sello Endoso JAYAJ -->
+    <g transform="translate(820, 60)">
+      <text x="0" y="-8" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="4">OPERATED AS</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="url(#badgeGold)" letter-spacing="3">A JAYAJ MOBILITY CO.</text>
+    </g>
+  </g>
+
+  <!-- ================= FILIAL 2: CRANIUMFIT ================= -->
+  <g transform="translate(100, 265)">
+    <rect width="1000" height="120" fill="#0F1420" rx="14" stroke="#1E293B" stroke-width="1"/>
+    <!-- Ícono Filial -->
+    <circle cx="60" cy="60" r="32" fill="#0EA5E9" fill-opacity="0.1" stroke="#0EA5E9" stroke-width="1.5"/>
+    <text x="60" y="66" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold" fill="#0EA5E9">CF</text>
+    <!-- Nombre Filial -->
+    <text x="120" y="52" font-family="-apple-system, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF" letter-spacing="2">CRANIUMFIT</text>
+    <text x="120" y="78" font-family="'JetBrains Mono', monospace" font-size="12" fill="#94A3B8">HealthTech, Modelado 3D &amp; Ortesis Craneales Pediátricas</text>
+    <!-- Sello Endoso JAYAJ -->
+    <g transform="translate(820, 60)">
+      <text x="0" y="-8" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="4">OPERATED AS</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="url(#badgeGold)" letter-spacing="3">A JAYAJ HEALTHTECH CO.</text>
+    </g>
+  </g>
+
+  <!-- ================= FILIAL 3: VALEX (DIVISAS) ================= -->
+  <g transform="translate(100, 410)">
+    <rect width="1000" height="120" fill="#0F1420" rx="14" stroke="#1E293B" stroke-width="1"/>
+    <!-- Ícono Filial -->
+    <circle cx="60" cy="60" r="32" fill="#EAB308" fill-opacity="0.1" stroke="#EAB308" stroke-width="1.5"/>
+    <text x="60" y="66" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold" fill="#EAB308">VX</text>
+    <!-- Nombre Filial -->
+    <text x="120" y="52" font-family="-apple-system, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF" letter-spacing="2">VALEX DIVISAS</text>
+    <text x="120" y="78" font-family="'JetBrains Mono', monospace" font-size="12" fill="#94A3B8">Fintech de Cambio de Divisas &amp; Pagos Transfronterizos EC ↔ PE</text>
+    <!-- Sello Endoso JAYAJ -->
+    <g transform="translate(820, 60)">
+      <text x="0" y="-8" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="4">OPERATED AS</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="url(#badgeGold)" letter-spacing="3">A JAYAJ FINANCE CO.</text>
+    </g>
+  </g>
+
+  <!-- ================= FILIAL 4: DRIVO ONE ================= -->
+  <g transform="translate(100, 555)">
+    <rect width="1000" height="120" fill="#0F1420" rx="14" stroke="#1E293B" stroke-width="1"/>
+    <!-- Ícono Filial -->
+    <circle cx="60" cy="60" r="32" fill="#6366F1" fill-opacity="0.1" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="60" y="66" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold" fill="#6366F1">D1</text>
+    <!-- Nombre Filial -->
+    <text x="120" y="52" font-family="-apple-system, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF" letter-spacing="2">DRIVO ONE</text>
+    <text x="120" y="78" font-family="'JetBrains Mono', monospace" font-size="12" fill="#94A3B8">Quick-Commerce, Marketplace Multitienda &amp; Última Milla</text>
+    <!-- Sello Endoso JAYAJ -->
+    <g transform="translate(820, 60)">
+      <text x="0" y="-8" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="4">OPERATED AS</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="url(#badgeGold)" letter-spacing="3">A JAYAJ VENTURE CO.</text>
+    </g>
+  </g>
+
+  <!-- ================= FILIAL 5: GLOBALMARKET ================= -->
+  <g transform="translate(100, 700)">
+    <rect width="1000" height="120" fill="#0F1420" rx="14" stroke="#1E293B" stroke-width="1"/>
+    <!-- Ícono Filial -->
+    <circle cx="60" cy="60" r="32" fill="#84CC16" fill-opacity="0.1" stroke="#84CC16" stroke-width="1.5"/>
+    <text x="60" y="66" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold" fill="#84CC16">GM</text>
+    <!-- Nombre Filial -->
+    <text x="120" y="52" font-family="-apple-system, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF" letter-spacing="2">GLOBALMARKET / JUMOFRESH</text>
+    <text x="120" y="78" font-family="'JetBrains Mono', monospace" font-size="12" fill="#94A3B8">Agroexportación B2B &amp; Comercialización Directa de Origen</text>
+    <!-- Sello Endoso JAYAJ -->
+    <g transform="translate(820, 60)">
+      <text x="0" y="-8" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="4">OPERATED AS</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="url(#badgeGold)" letter-spacing="3">A JAYAJ AGROTECH CO.</text>
+    </g>
+  </g>
+</svg>

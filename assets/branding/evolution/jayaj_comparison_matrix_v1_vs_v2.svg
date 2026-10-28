@@ -1,0 +1,190 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldComp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF4DD"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#997812"/>
+    </linearGradient>
+    <linearGradient id="platComp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1400" height="900" fill="#07090E" rx="24"/>
+
+  <!-- Header -->
+  <text x="700" y="55" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="700" fill="#D4AF37" letter-spacing="6">MATRIZ COMPARATIVA DE EVOLUCIÓN · AUDITORÍA V1 VS PROPUESTAS V2</text>
+  <text x="700" y="80" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#64748B" letter-spacing="2">VERIFICACIÓN ESTRICTA: TEST MONOCROMÁTICO (CERO ILUSIÓN 'M') Y TEST DE SECTOR (VENTURE HOLDING)</text>
+  <line x1="100" y1="105" x2="1300" y2="105" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- ==========================================
+       COLUMNA 1: V1.0 - MONOGRAMA ENTRELAZADO (DESCARTE)
+       ========================================== -->
+  <g transform="translate(185, 130)">
+    <!-- Card Background -->
+    <rect x="-160" y="0" width="320" height="730" fill="#0D111A" rx="16" stroke="#EF4444" stroke-width="1.5" stroke-opacity="0.6"/>
+    <rect x="-160" y="0" width="320" height="36" fill="#EF4444" fill-opacity="0.15" rx="16"/>
+    <text x="0" y="24" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#EF4444" letter-spacing="2">V1.0 · RETIRADA</text>
+
+    <!-- Preview Color -->
+    <text x="0" y="65" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#94A3B8">VISTA COLOR ORIGINAL</text>
+    <rect x="-140" y="80" width="280" height="180" fill="#05070A" rx="12" stroke="#1E293B"/>
+    <g transform="translate(0, 175) scale(0.65)">
+      <path d="M -56,-115 L -10,-24 L -10,65 L 10,65 L 10,-24 L 56,-115 L 34,-115 L 0,-48 L -34,-115 Z" fill="url(#goldComp)"/>
+      <path d="M -38,-85 L -19,-85 L -19,25 C -19,55 -46,65 -74,65 C -96,65 -112,47 -112,25 L -92,25 C -92,36 -84,45 -74,45 C -52,45 -38,36 -38,25 Z" fill="url(#platComp)"/>
+      <rect x="-112" y="-85" width="93" height="14" rx="3" fill="url(#platComp)"/>
+      <path d="M 38,-85 L 19,-85 L 19,25 C 19,55 46,65 74,65 C 96,65 112,47 112,25 L 92,25 C 92,36 84,45 74,45 C 52,45 38,36 38,25 Z" fill="url(#platComp)"/>
+      <rect x="19" y="-85" width="93" height="14" rx="3" fill="url(#platComp)"/>
+    </g>
+
+    <!-- Preview Monocromo -->
+    <text x="0" y="285" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#EF4444">TEST MONOCROMÁTICO SILUETA</text>
+    <rect x="-140" y="300" width="280" height="180" fill="#F8FAFC" rx="12"/>
+    <!-- Silueta V1 en Negro Puro -->
+    <g transform="translate(0, 395) scale(0.65)">
+      <path d="M -56,-115 L -10,-24 L -10,65 L 10,65 L 10,-24 L 56,-115 L 34,-115 L 0,-48 L -34,-115 Z" fill="#000000"/>
+      <path d="M -38,-85 L -19,-85 L -19,25 C -19,55 -46,65 -74,65 C -96,65 -112,47 -112,25 L -92,25 C -92,36 -84,45 -74,45 C -52,45 -38,36 -38,25 Z" fill="#000000"/>
+      <rect x="-112" y="-85" width="93" height="14" rx="3" fill="#000000"/>
+      <path d="M 38,-85 L 19,-85 L 19,25 C 19,55 46,65 74,65 C 96,65 112,47 112,25 L 92,25 C 92,36 84,45 74,45 C 52,45 38,36 38,25 Z" fill="#000000"/>
+      <rect x="19" y="-85" width="93" height="14" rx="3" fill="#000000"/>
+    </g>
+
+    <!-- Audit Diagnostics -->
+    <text x="-130" y="510" font-family="-apple-system, sans-serif" font-size="11" fill="#EF4444" font-weight="700">PROBLEMAS CONFIRMADOS:</text>
+    <text x="-130" y="535" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✗ En monocromo forma silueta "M".</text>
+    <text x="-130" y="555" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✗ Barras superiores parecen columnas.</text>
+    <text x="-130" y="575" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✗ Evoca bufete jurídico o notaría.</text>
+    <text x="-130" y="595" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✗ Solapamiento difuso sin aire.</text>
+
+    <rect x="-135" y="650" width="270" height="48" fill="#1E1B24" rx="8" stroke="#EF4444" stroke-width="1"/>
+    <text x="0" y="678" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#EF4444" font-weight="700">ESTATUS: ARCHIVADO</text>
+  </g>
+
+  <!-- ==========================================
+       COLUMNA 2: V2-A - EL PRISMA AXIAL (THE APEX PRISM)
+       ========================================== -->
+  <g transform="translate(525, 130)">
+    <rect x="-160" y="0" width="320" height="730" fill="#0F1420" rx="16" stroke="#D4AF37" stroke-width="1.5"/>
+    <rect x="-160" y="0" width="320" height="36" fill="#D4AF37" fill-opacity="0.15" rx="16"/>
+    <text x="0" y="24" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#D4AF37" letter-spacing="2">V2-A · PRISMA AXIAL</text>
+
+    <!-- Preview Color -->
+    <text x="0" y="65" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#94A3B8">VISTA COLOR MASTER</text>
+    <rect x="-140" y="80" width="280" height="180" fill="#05070A" rx="12" stroke="#1E293B"/>
+    <g transform="translate(0, 175) scale(0.7)">
+      <path d="M 0,-30 L -36,-105 L -16,-105 L 0,-62 Z" fill="url(#goldComp)"/>
+      <path d="M 0,-30 L 36,-105 L 16,-105 L 0,-62 Z" fill="url(#goldComp)"/>
+      <path d="M -7,-24 L 7,-24 L 7,65 L 0,80 L -7,65 Z" fill="url(#goldComp)"/>
+      <path d="M -48,-85 L -30,-85 L -30,20 C -30,52 -52,70 -84,70 C -112,70 -128,52 -128,26 L -110,26 C -110,38 -100,52 -84,52 C -65,52 -48,40 -48,20 Z" fill="url(#platComp)"/>
+      <polygon points="-48,-85 -30,-85 -40,-102 -58,-102" fill="url(#platComp)"/>
+      <path d="M 48,-85 L 30,-85 L 30,20 C 30,52 52,70 84,70 C 112,70 128,52 128,26 L 110,26 C 110,38 100,52 84,52 C 65,52 48,40 48,20 Z" fill="url(#platComp)"/>
+      <polygon points="48,-85 30,-85 40,-102 58,-102" fill="url(#platComp)"/>
+    </g>
+
+    <!-- Preview Monocromo -->
+    <text x="0" y="285" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#10B981">TEST MONOCROMÁTICO SILUETA</text>
+    <rect x="-140" y="300" width="280" height="180" fill="#F8FAFC" rx="12"/>
+    <g transform="translate(0, 395) scale(0.7)">
+      <path d="M 0,-30 L -36,-105 L -16,-105 L 0,-62 Z" fill="#000000"/>
+      <path d="M 0,-30 L 36,-105 L 16,-105 L 0,-62 Z" fill="#000000"/>
+      <path d="M -7,-24 L 7,-24 L 7,65 L 0,80 L -7,65 Z" fill="#000000"/>
+      <path d="M -48,-85 L -30,-85 L -30,20 C -30,52 -52,70 -84,70 C -112,70 -128,52 -128,26 L -110,26 C -110,38 -100,52 -84,52 C -65,52 -48,40 -48,20 Z" fill="#000000"/>
+      <polygon points="-48,-85 -30,-85 -40,-102 -58,-102" fill="#000000"/>
+      <path d="M 48,-85 L 30,-85 L 30,20 C 30,52 52,70 84,70 C 112,70 128,52 128,26 L 110,26 C 110,38 100,52 84,52 C 65,52 48,40 48,20 Z" fill="#000000"/>
+      <polygon points="48,-85 30,-85 40,-102 58,-102" fill="#000000"/>
+    </g>
+
+    <!-- Audit Diagnostics -->
+    <text x="-130" y="510" font-family="-apple-system, sans-serif" font-size="11" fill="#10B981" font-weight="700">VENTAJAS DE NEURODISEÑO:</text>
+    <text x="-130" y="535" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ CERO forma de M en monocromo.</text>
+    <text x="-130" y="555" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Corte angular a 45° tipo aeroespacial.</text>
+    <text x="-130" y="575" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Aguja central proyecta crecimiento.</text>
+    <text x="-130" y="595" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Espacio negativo de 22px entre trazos.</text>
+
+    <rect x="-135" y="650" width="270" height="48" fill="#13231B" rx="8" stroke="#10B981" stroke-width="1"/>
+    <text x="0" y="678" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#10B981" font-weight="700">RECOMENDACIÓN TOP 1</text>
+  </g>
+
+  <!-- ==========================================
+       COLUMNA 3: V2-B - EL NÚCLEO SINGULAR
+       ========================================== -->
+  <g transform="translate(865, 130)">
+    <rect x="-160" y="0" width="320" height="730" fill="#0F1420" rx="16" stroke="#1E293B" stroke-width="1.5"/>
+    <rect x="-160" y="0" width="320" height="36" fill="#38BDF8" fill-opacity="0.1" rx="16"/>
+    <text x="0" y="24" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#38BDF8" letter-spacing="2">V2-B · NÚCLEO SINGULAR</text>
+
+    <!-- Preview Color -->
+    <text x="0" y="65" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#94A3B8">VISTA COLOR MASTER</text>
+    <rect x="-140" y="80" width="280" height="180" fill="#05070A" rx="12" stroke="#1E293B"/>
+    <g transform="translate(0, 175) scale(0.7)">
+      <path d="M 0,-100 L 22,-52 L 7,-52 L 7,65 L -7,65 L -7,-52 L -22,-52 Z" fill="url(#goldComp)"/>
+      <path d="M -50,-85 C -38,-85 -32,-78 -32,-66 L -32,15 C -32,55 -60,75 -95,75 C -125,75 -135,56 -135,35 L -116,35 C -116,46 -108,58 -95,58 C -72,58 -52,44 -52,15 L -52,-66 C -52,-78 -58,-85 -50,-85 Z" fill="url(#platComp)"/>
+      <path d="M 50,-85 C 38,-85 32,-78 32,-66 L 32,15 C 32,55 60,75 95,75 C 125,75 135,56 135,35 L 116,35 C 116,46 108,58 95,58 C 72,58 52,44 52,15 L 52,-66 C 52,-78 58,-85 50,-85 Z" fill="url(#platComp)"/>
+      <circle cx="0" cy="-115" r="4" fill="#D4AF37"/>
+    </g>
+
+    <!-- Preview Monocromo -->
+    <text x="0" y="285" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#38BDF8">TEST MONOCROMÁTICO SILUETA</text>
+    <rect x="-140" y="300" width="280" height="180" fill="#F8FAFC" rx="12"/>
+    <g transform="translate(0, 395) scale(0.7)">
+      <path d="M 0,-100 L 22,-52 L 7,-52 L 7,65 L -7,65 L -7,-52 L -22,-52 Z" fill="#000000"/>
+      <path d="M -50,-85 C -38,-85 -32,-78 -32,-66 L -32,15 C -32,55 -60,75 -95,75 C -125,75 -135,56 -135,35 L -116,35 C -116,46 -108,58 -95,58 C -72,58 -52,44 -52,15 L -52,-66 C -52,-78 -58,-85 -50,-85 Z" fill="#000000"/>
+      <path d="M 50,-85 C 38,-85 32,-78 32,-66 L 32,15 C 32,55 60,75 95,75 C 125,75 135,56 135,35 L 116,35 C 116,46 108,58 95,58 C 72,58 52,44 52,15 L 52,-66 C 52,-78 58,-85 50,-85 Z" fill="#000000"/>
+      <circle cx="0" cy="-115" r="4" fill="#000000"/>
+    </g>
+
+    <!-- Audit Diagnostics -->
+    <text x="-130" y="510" font-family="-apple-system, sans-serif" font-size="11" fill="#38BDF8" font-weight="700">VENTAJAS DE NEURODISEÑO:</text>
+    <text x="-130" y="535" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Fluidez orgánica nórdica (Polestar).</text>
+    <text x="-130" y="555" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Puntos de anclaje de micro-precisión.</text>
+    <text x="-130" y="575" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Arco cóncavo que genera escudo.</text>
+    <text x="-130" y="595" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Sensación de holding de biotecnología.</text>
+
+    <rect x="-135" y="650" width="270" height="48" fill="#13202E" rx="8" stroke="#38BDF8" stroke-width="1"/>
+    <text x="0" y="678" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#38BDF8" font-weight="700">ENFOQUE NÓRDICO TECH</text>
+  </g>
+
+  <!-- ==========================================
+       COLUMNA 4: V2-C - EL NÉXUS HEXAGONAL
+       ========================================== -->
+  <g transform="translate(1205, 130)">
+    <rect x="-160" y="0" width="320" height="730" fill="#0F1420" rx="16" stroke="#1E293B" stroke-width="1.5"/>
+    <rect x="-160" y="0" width="320" height="36" fill="#A855F7" fill-opacity="0.1" rx="16"/>
+    <text x="0" y="24" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#A855F7" letter-spacing="2">V2-C · NÉXUS HEXAGONAL</text>
+
+    <!-- Preview Color -->
+    <text x="0" y="65" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#94A3B8">VISTA COLOR MASTER</text>
+    <rect x="-140" y="80" width="280" height="180" fill="#05070A" rx="12" stroke="#1E293B"/>
+    <g transform="translate(0, 175) scale(0.7)">
+      <polygon points="0,-95 -38,-45 38,-45" fill="url(#goldComp)"/>
+      <polygon points="0,-35 -14,-15 -14,65 0,82 14,65 14,-15" fill="url(#goldComp)"/>
+      <path d="M -54,-45 L -72,-45 L -72,25 C -72,55 -95,72 -125,72 L -125,52 C -105,52 -90,40 -90,25 L -90,-25 L -54,-68 Z" fill="url(#platComp)"/>
+      <path d="M 54,-45 L 72,-45 L 72,25 C 72,55 95,72 125,72 L 125,52 C 105,52 90,40 90,25 L 90,-25 L 54,-68 Z" fill="url(#platComp)"/>
+      <circle cx="0" cy="-110" r="3" fill="#D4AF37"/>
+    </g>
+
+    <!-- Preview Monocromo -->
+    <text x="0" y="285" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#A855F7">TEST MONOCROMÁTICO SILUETA</text>
+    <rect x="-140" y="300" width="280" height="180" fill="#F8FAFC" rx="12"/>
+    <g transform="translate(0, 395) scale(0.7)">
+      <polygon points="0,-95 -38,-45 38,-45" fill="#000000"/>
+      <polygon points="0,-35 -14,-15 -14,65 0,82 14,65 14,-15" fill="#000000"/>
+      <path d="M -54,-45 L -72,-45 L -72,25 C -72,55 -95,72 -125,72 L -125,52 C -105,52 -90,40 -90,25 L -90,-25 L -54,-68 Z" fill="#000000"/>
+      <path d="M 54,-45 L 72,-45 L 72,25 C 72,55 95,72 125,72 L 125,52 C 105,52 90,40 90,25 L 90,-25 L 54,-68 Z" fill="#000000"/>
+      <circle cx="0" cy="-110" r="3" fill="#000000"/>
+    </g>
+
+    <!-- Audit Diagnostics -->
+    <text x="-130" y="510" font-family="-apple-system, sans-serif" font-size="11" fill="#A855F7" font-weight="700">VENTAJAS DE NEURODISEÑO:</text>
+    <text x="-130" y="535" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Facetado angular estilo venture capital.</text>
+    <text x="-130" y="555" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Vértices limpios para corte láser/titanio.</text>
+    <text x="-130" y="575" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Núcleo en prisma de inversión (Y).</text>
+    <text x="-130" y="595" font-family="-apple-system, sans-serif" font-size="11" fill="#CBD5E1">✓ Rigor geométrico de holding financiero.</text>
+
+    <rect x="-135" y="650" width="270" height="48" fill="#23172E" rx="8" stroke="#A855F7" stroke-width="1"/>
+    <text x="0" y="678" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#A855F7" font-weight="700">ENFOQUE VENTURE CAPITAL</text>
+  </g>
+</svg>
