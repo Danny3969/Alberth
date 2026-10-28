@@ -15,11 +15,10 @@
   <!-- Background Obsidian -->
   <rect width="1100" height="280" fill="#0A0D14" rx="16"/>
 
-  <!-- ISOTIPO IZQUIERDA (JYJ Monograma) -->
+  <!-- ISOTIPO IZQUIERDA (JYJ Monograma con Y Unificada) -->
   <g transform="translate(160, 140)">
-    <!-- Vector Central Y -->
-    <path d="M -35,-70 L 0,-20 L 35,-70 L 18,-70 L 0,-44 L -18,-70 Z" fill="url(#hGold)"/>
-    <path d="M -6,-20 L 6,-20 L 6,38 L -6,38 Z" fill="url(#hGold)"/>
+    <!-- Vector Central Y: Trazo único continuo monolítico -->
+    <path d="M -35,-70 L -6,-15 L -6,40 L 6,40 L 6,-15 L 35,-70 L 21,-70 L 0,-29 L -21,-70 Z" fill="url(#hGold)"/>
 
     <!-- J Izquierda (Pilar y Ala - Espejo) -->
     <path d="M -24,-52 L -12,-52 L -12,18 C -12,36 -30,44 -48,44 C -62,44 -72,32 -72,18 L -59,18 C -59,25 -54,30 -48,30 C -34,30 -24,25 -24,18 Z" fill="url(#hPlatinum)"/>

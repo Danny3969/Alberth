@@ -21,19 +21,18 @@
     <circle cx="500" cy="270" r="140" fill="none"/>
   </g>
 
-  <!-- ISOTIPO CENTRAL (Monograma Simétrico JYJ) -->
+  <!-- ISOTIPO CENTRAL (Monograma Simétrico JYJ con Y Monolítica Unificada) -->
   <g transform="translate(500, 270)">
-    <!-- Vector Central Y -->
-    <path d="M -50,-100 L 0,-30 L 50,-100 L 26,-100 L 0,-62 L -26,-100 Z" fill="url(#vGold)"/>
-    <path d="M -8,-30 L 8,-30 L 8,55 L -8,55 Z" fill="url(#vGold)"/>
+    <!-- Vector Central Y: Trazo único continuo monolítico -->
+    <path d="M -56,-115 L -10,-24 L -10,65 L 10,65 L 10,-24 L 56,-115 L 34,-115 L 0,-48 L -34,-115 Z" fill="url(#vGold)"/>
 
     <!-- J Izquierda (Pilar y Ala Protectora - Espejo) -->
-    <path d="M -35,-75 L -18,-75 L -18,25 C -18,52 -44,62 -68,62 C -90,62 -105,45 -105,25 L -86,25 C -86,35 -78,43 -68,43 C -48,43 -35,35 -35,25 Z" fill="url(#vPlatinum)"/>
-    <rect x="-105" y="-75" width="87" height="14" rx="3" fill="url(#vPlatinum)"/>
+    <path d="M -38,-85 L -19,-85 L -19,25 C -19,55 -46,65 -74,65 C -96,65 -112,47 -112,25 L -92,25 C -92,36 -84,45 -74,45 C -52,45 -38,36 -38,25 Z" fill="url(#vPlatinum)"/>
+    <rect x="-112" y="-85" width="93" height="14" rx="3" fill="url(#vPlatinum)"/>
 
     <!-- J Derecha (Pilar y Ala Protectora - Directa) -->
-    <path d="M 35,-75 L 18,-75 L 18,25 C 18,52 44,62 68,62 C 90,62 105,45 105,25 L 86,25 C 86,35 78,43 68,43 C 48,43 35,35 35,25 Z" fill="url(#vPlatinum)"/>
-    <rect x="18" y="-75" width="87" height="14" rx="3" fill="url(#vPlatinum)"/>
+    <path d="M 38,-85 L 19,-85 L 19,25 C 19,55 46,65 74,65 C 96,65 112,47 112,25 L 92,25 C 92,36 84,45 74,45 C 52,45 38,36 38,25 Z" fill="url(#vPlatinum)"/>
+    <rect x="19" y="-85" width="93" height="14" rx="3" fill="url(#vPlatinum)"/>
   </g>
 
   <!-- LOGOTIPO CENTRAL CON J EN ESPEJO (J A Y A Ⴑ) -->

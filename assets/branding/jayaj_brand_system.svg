@@ -29,39 +29,51 @@
     <circle cx="500" cy="210" r="60" fill="none"/>
   </g>
 
-  <!-- ISOTIPO: Monograma Simétrico JYJ -->
+  <!-- ISOTIPO: Monograma Simétrico JYJ con Y Unificada Continua -->
   <g transform="translate(500, 210)">
     <!-- Aura de iluminación central -->
     <circle cx="0" cy="0" r="95" fill="url(#glowEffect)"/>
 
-    <!-- Vector Central Y (Ascenso y Multiplicador) -->
-    <!-- Ramas superiores de la Y -->
-    <path d="M -45,-85 L 0,-25 L 45,-85 L 25,-85 L 0,-50 L -25,-85 Z" fill="url(#jayajGold)"/>
-    <!-- Tronco de la Y -->
-    <path d="M -7,-25 L 7,-25 L 7,45 L -7,45 Z" fill="url(#jayajGold)"/>
+    <!-- Vector Central Y: Trazo único continuo monolítico -->
+    <path d="M -50,-100 L -9,-21 L -9,58 L 9,58 L 9,-21 L 50,-100 L 30,-100 L 0,-42 L -30,-100 Z" fill="url(#jayajGold)"/>
 
-    <!-- J Izquierda (Alas y Pilares Protectores - Espejo) -->
-    <path d="M -30,-65 L -15,-65 L -15,22 C -15,44 -38,52 -60,52 C -78,52 -90,38 -90,22 L -74,22 C -74,30 -67,37 -60,37 C -42,37 -30,30 -30,22 Z" fill="url(#jayajPlatinum)"/>
-    <rect x="-90" y="-65" width="75" height="12" rx="3" fill="url(#jayajPlatinum)"/>
+    <!-- J Izquierda (Pilar y Ala Protectora - Espejo) -->
+    <path d="M -34,-75 L -17,-75 L -17,22 C -17,49 -41,58 -66,58 C -85,58 -100,42 -100,22 L -82,22 C -82,32 -75,40 -66,40 C -46,40 -34,32 -34,22 Z" fill="url(#jayajPlatinum)"/>
+    <rect x="-100" y="-75" width="83" height="12" rx="3" fill="url(#jayajPlatinum)"/>
 
-    <!-- J Derecha (Alas y Pilares Protectores - Directa) -->
-    <path d="M 30,-65 L 15,-65 L 15,22 C 15,44 38,52 60,52 C 78,52 90,38 90,22 L 74,22 C 74,30 67,37 60,37 C 42,37 30,30 30,22 Z" fill="url(#jayajPlatinum)"/>
-    <rect x="15" y="-65" width="75" height="12" rx="3" fill="url(#jayajPlatinum)"/>
+    <!-- J Derecha (Pilar y Ala Protectora - Directa) -->
+    <path d="M 34,-75 L 17,-75 L 17,22 C 17,49 41,58 66,58 C 85,58 100,42 100,22 L 82,22 C 82,32 75,40 66,40 C 46,40 34,32 34,22 Z" fill="url(#jayajPlatinum)"/>
+    <rect x="17" y="-75" width="83" height="12" rx="3" fill="url(#jayajPlatinum)"/>
   </g>
 
-  <!-- LOGOTIPO: JAYAJ (Tipografía Geométrica de Proporción Áurea) -->
-  <text x="500" y="445" 
-        text-anchor="middle" 
-        font-family="'Inter', 'Montserrat', -apple-system, sans-serif" 
-        font-size="82" 
-        font-weight="800" 
-        letter-spacing="24" 
-        fill="url(#jayajPlatinum)">
-    JAYAJ
-  </text>
+  <!-- LOGOTIPO: J A Y A Ⴑ (Simetría Especular con J en Espejo) -->
+  <g transform="translate(500, 445)">
+    <!-- J Inicial -->
+    <g transform="translate(-250, 0)">
+      <path d="M 23,-49 L 46,-49 L 46,18 C 46,39 27,49 4,49 C -18,49 -36,37 -36,20 L -16,20 C -16,27 -9,32 4,32 C 18,32 23,25 23,18 Z" fill="url(#jayajPlatinum)"/>
+      <rect x="-36" y="-49" width="82" height="13" rx="2" fill="url(#jayajPlatinum)"/>
+    </g>
+    <!-- A Izquierda -->
+    <g transform="translate(-125, 0)">
+      <path d="M -43,49 L -4,-49 L 14,-49 L 54,49 L 32,49 L 23,24 L -23,24 L -32,49 Z M -16,9 L 16,9 L 0,-31 Z" fill="url(#jayajPlatinum)"/>
+    </g>
+    <!-- Y Central -->
+    <g transform="translate(0, 0)">
+      <path d="M -32,-49 L 0,-4 L 32,-49 L 54,-49 L 12,11 L 12,49 L -12,49 L -12,11 L -54,-49 Z" fill="url(#jayajGold)"/>
+    </g>
+    <!-- A Derecha -->
+    <g transform="translate(125, 0)">
+      <path d="M -43,49 L -4,-49 L 14,-49 L 54,49 L 32,49 L 23,24 L -23,24 L -32,49 Z M -16,9 L 16,9 L 0,-31 Z" fill="url(#jayajPlatinum)"/>
+    </g>
+    <!-- J Final Reflejada -->
+    <g transform="translate(250, 0) scale(-1, 1)">
+      <path d="M 23,-49 L 46,-49 L 46,18 C 46,39 27,49 4,49 C -18,49 -36,37 -36,20 L -16,20 C -16,27 -9,32 4,32 C 18,32 23,25 23,18 Z" fill="url(#jayajPlatinum)"/>
+      <rect x="-36" y="-49" width="82" height="13" rx="2" fill="url(#jayajPlatinum)"/>
+    </g>
+  </g>
 
   <!-- DESCRIPTOR DE HOLDING -->
-  <text x="500" y="505" 
+  <text x="500" y="520" 
         text-anchor="middle" 
         font-family="'JetBrains Mono', 'SF Pro Text', monospace" 
         font-size="16" 
@@ -79,5 +91,5 @@
   </g>
 
   <!-- Línea base de horizonte -->
-  <line x1="320" y1="535" x2="680" y2="535" stroke="#334155" stroke-width="1" stroke-dasharray="6 6"/>
+  <line x1="320" y1="545" x2="680" y2="545" stroke="#334155" stroke-width="1" stroke-dasharray="6 6"/>
 </svg>
