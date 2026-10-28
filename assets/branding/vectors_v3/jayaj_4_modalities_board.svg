@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 950" width="100%" height="100%">
+  <defs>
+    <!-- Oro Champaña Imperial -->
+    <linearGradient id="boardGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5DC"/>
+      <stop offset="35%" stop-color="#E5C158"/>
+      <stop offset="70%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#805F0D"/>
+    </linearGradient>
+
+    <!-- Platino Titanio -->
+    <linearGradient id="boardPlat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#8899A6"/>
+    </linearGradient>
+
+    <!-- Resplandor -->
+    <radialGradient id="boardAura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#07090E" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="950" fill="#07090E" rx="28"/>
+
+  <!-- Encabezado General -->
+  <text x="800" y="55" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="700" fill="#D4AF37" letter-spacing="8">JAYAJ VENTURE HOLDING · MATRIZ DE LAS 4 MODALIDADES DE MARCA</text>
+  <text x="800" y="82" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#94A3B8" letter-spacing="3">DEMOSTRACIÓN DE COHERENCIA SISTÉMICA: ISOTIPO · LOGOTIPO · IMAGOTIPO · ISOLOGO</text>
+  <line x1="80" y1="110" x2="1520" y2="110" stroke="#1E293B" stroke-width="1.5"/>
+
+  <!-- ========================================================
+       MODALIDAD 1: ISOTIPO (SÍMBOLO PURO)
+       ======================================================== -->
+  <g transform="translate(225, 140)">
+    <rect x="-175" y="0" width="350" height="740" fill="#0D111A" rx="20" stroke="#1E293B" stroke-width="1.5"/>
+    <rect x="-175" y="0" width="350" height="42" fill="#1E293B" fill-opacity="0.5" rx="20"/>
+    <text x="0" y="26" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#D4AF37" letter-spacing="3">01 · ISOTIPO</text>
+
+    <!-- Previsualización Visual -->
+    <rect x="-150" y="60" width="300" height="340" fill="#05070A" rx="14" stroke="#1E293B"/>
+    <circle cx="0" cy="230" r="110" fill="url(#boardAura)"/>
+
+    <g transform="translate(0, 230) scale(0.95)">
+      <path d="M 0,-50 L -46,-135 L -22,-135 L 0,-92 L 22,-135 L 46,-135 Z" fill="url(#boardGold)"/>
+      <polygon points="0,-82 -18,-45 0,-15 18,-45" fill="url(#boardGold)"/>
+      <path d="M -9,-10 L 9,-10 L 9,95 L 0,115 L -9,95 Z" fill="url(#boardGold)"/>
+
+      <path d="M -56,-115 L -34,-115 L -34,25 C -34,68 -65,95 -112,95 C -150,95 -172,70 -172,36 L -148,36 C -148,54 -134,72 -112,72 C -80,72 -56,52 -56,25 Z" fill="url(#boardPlat)"/>
+      <polygon points="-56,-115 -34,-115 -48,-138 -70,-138" fill="url(#boardPlat)"/>
+
+      <path d="M 56,-115 L 34,-115 L 34,25 C 34,68 65,95 112,95 C 150,95 172,70 172,36 L 148,36 C 148,54 134,72 112,72 C 80,72 56,52 56,25 Z" fill="url(#boardPlat)"/>
+      <polygon points="56,-115 34,-115 48,-138 70,-138" fill="url(#boardPlat)"/>
+
+      <circle cx="0" cy="-152" r="3" fill="#D4AF37"/>
+      <circle cx="0" cy="132" r="3" fill="#E2E8F0"/>
+    </g>
+
+    <!-- Ficha Técnica -->
+    <text x="-140" y="435" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CONCEPTO:</text>
+    <text x="-140" y="458" font-family="-apple-system, sans-serif" font-size="12" fill="#CBD5E1">"El Tótem de la Victoria"</text>
+
+    <text x="-140" y="495" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">DEFINICIÓN:</text>
+    <text x="-140" y="518" font-family="-apple-system, sans-serif" font-size="12" fill="#94A3B8">Símbolo gráfico puro que funciona sin necesidad de texto.</text>
+
+    <text x="-140" y="570" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CASOS DE USO:</text>
+    <text x="-140" y="593" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Favicon de 16x16 / 32x32 px</text>
+    <text x="-140" y="613" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Icono de aplicaciones móviles</text>
+    <text x="-140" y="633" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Pines de solapa en titanio / oro</text>
+    <text x="-140" y="653" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Bordado textil y hardware</text>
+
+    <rect x="-145" y="680" width="290" height="38" fill="rgba(212, 175, 55, 0.1)" rx="8" stroke="#D4AF37" stroke-width="1"/>
+    <text x="0" y="704" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#D4AF37">TEST SILUETA: 100% ÓPTIMO</text>
+  </g>
+
+  <!-- ========================================================
+       MODALIDAD 2: LOGOTIPO (WORDMARK PURO)
+       ======================================================== -->
+  <g transform="translate(605, 140)">
+    <rect x="-175" y="0" width="350" height="740" fill="#0D111A" rx="20" stroke="#1E293B" stroke-width="1.5"/>
+    <rect x="-175" y="0" width="350" height="42" fill="#1E293B" fill-opacity="0.5" rx="20"/>
+    <text x="0" y="26" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#D4AF37" letter-spacing="3">02 · LOGOTIPO</text>
+
+    <!-- Previsualización Visual -->
+    <rect x="-150" y="60" width="300" height="340" fill="#05070A" rx="14" stroke="#1E293B"/>
+
+    <g transform="translate(0, 210) scale(0.48)">
+      <g transform="translate(-330, 0)">
+        <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#boardPlat)"/>
+        <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#boardPlat)"/>
+      </g>
+      <g transform="translate(-165, 0)">
+        <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#boardPlat)"/>
+      </g>
+      <g transform="translate(0, 0)">
+        <path d="M -54,-70 L -12,8 L -12,58 L 12,58 L 12,8 L 54,-70 L 32,-70 L 0,-18 L -32,-70 Z" fill="url(#boardGold)"/>
+        <polygon points="0,-32 -8,-18 0,-4 8,-18" fill="url(#boardGold)"/>
+      </g>
+      <g transform="translate(165, 0)">
+        <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#boardPlat)"/>
+      </g>
+      <g transform="translate(330, 0) scale(-1, 1)">
+        <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#boardPlat)"/>
+        <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#boardPlat)"/>
+      </g>
+    </g>
+    <line x1="-100" y1="260" x2="100" y2="260" stroke="#1E293B" stroke-width="1"/>
+    <text x="0" y="285" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#94A3B8" letter-spacing="5">VENTURE HOLDING</text>
+
+    <!-- Ficha Técnica -->
+    <text x="-140" y="435" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CONCEPTO:</text>
+    <text x="-140" y="458" font-family="-apple-system, sans-serif" font-size="12" fill="#CBD5E1">Sans de Autor Cinética (Incisiones 30°)</text>
+
+    <text x="-140" y="495" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">DEFINICIÓN:</text>
+    <text x="-140" y="518" font-family="-apple-system, sans-serif" font-size="12" fill="#94A3B8">Representación verbal tipográfica exclusiva, sin acompañamiento de isotipo.</text>
+
+    <text x="-140" y="570" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CASOS DE USO:</text>
+    <text x="-140" y="593" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Letreros corpóreos retroiluminados</text>
+    <text x="-140" y="613" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Pie de página y copyright formal</text>
+    <text x="-140" y="633" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Contratos legales y patentes</text>
+    <text x="-140" y="653" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Títulos de memorias corporativas</text>
+
+    <rect x="-145" y="680" width="290" height="38" fill="rgba(212, 175, 55, 0.1)" rx="8" stroke="#D4AF37" stroke-width="1"/>
+    <text x="0" y="704" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#D4AF37">TIPOGRAFÍA PROPIETARIA</text>
+  </g>
+
+  <!-- ========================================================
+       MODALIDAD 3: IMAGOTIPO (SÍMBOLO + TEXTO SEPARABLES)
+       ======================================================== -->
+  <g transform="translate(985, 140)">
+    <rect x="-175" y="0" width="350" height="740" fill="#0D111A" rx="20" stroke="#1E293B" stroke-width="1.5"/>
+    <rect x="-175" y="0" width="350" height="42" fill="#1E293B" fill-opacity="0.5" rx="20"/>
+    <text x="0" y="26" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#D4AF37" letter-spacing="3">03 · IMAGOTIPO</text>
+
+    <!-- Previsualización Visual -->
+    <rect x="-150" y="60" width="300" height="340" fill="#05070A" rx="14" stroke="#1E293B"/>
+
+    <!-- Isotipo Reducido Arriba -->
+    <g transform="translate(0, 160) scale(0.60)">
+      <path d="M 0,-50 L -46,-135 L -22,-135 L 0,-92 L 22,-135 L 46,-135 Z" fill="url(#boardGold)"/>
+      <polygon points="0,-82 -18,-45 0,-15 18,-45" fill="url(#boardGold)"/>
+      <path d="M -9,-10 L 9,-10 L 9,95 L 0,115 L -9,95 Z" fill="url(#boardGold)"/>
+      <path d="M -56,-115 L -34,-115 L -34,25 C -34,68 -65,95 -112,95 C -150,95 -172,70 -172,36 L -148,36 C -148,54 -134,72 -112,72 C -80,72 -56,52 -56,25 Z" fill="url(#boardPlat)"/>
+      <polygon points="-56,-115 -34,-115 -48,-138 -70,-138" fill="url(#boardPlat)"/>
+      <path d="M 56,-115 L 34,-115 L 34,25 C 34,68 65,95 112,95 C 150,95 172,70 172,36 L 148,36 C 148,54 134,72 112,72 C 80,72 56,52 56,25 Z" fill="url(#boardPlat)"/>
+      <polygon points="56,-115 34,-115 48,-138 70,-138" fill="url(#boardPlat)"/>
+    </g>
+
+    <!-- Logotipo Reducido Abajo -->
+    <g transform="translate(0, 310) scale(0.38)">
+      <g transform="translate(-330, 0)">
+        <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#boardPlat)"/>
+        <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#boardPlat)"/>
+      </g>
+      <g transform="translate(-165, 0)">
+        <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#boardPlat)"/>
+      </g>
+      <g transform="translate(0, 0)">
+        <path d="M -54,-70 L -12,8 L -12,58 L 12,58 L 12,8 L 54,-70 L 32,-70 L 0,-18 L -32,-70 Z" fill="url(#boardGold)"/>
+      </g>
+      <g transform="translate(165, 0)">
+        <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#boardPlat)"/>
+      </g>
+      <g transform="translate(330, 0) scale(-1, 1)">
+        <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#boardPlat)"/>
+        <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#boardPlat)"/>
+      </g>
+    </g>
+    <text x="0" y="360" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" fill="#94A3B8" letter-spacing="4">VENTURE HOLDING</text>
+
+    <!-- Ficha Técnica -->
+    <text x="-140" y="435" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CONCEPTO:</text>
+    <text x="-140" y="458" font-family="-apple-system, sans-serif" font-size="12" fill="#CBD5E1">Símbolo y Tipografía en Convivencia</text>
+
+    <text x="-140" y="495" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">DEFINICIÓN:</text>
+    <text x="-140" y="518" font-family="-apple-system, sans-serif" font-size="12" fill="#94A3B8">Coexistencia equilibrada donde cada elemento puede funcionar por separado.</text>
+
+    <text x="-140" y="570" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CASOS DE USO:</text>
+    <text x="-140" y="593" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Cabecera (Navbar) web institucional</text>
+    <text x="-140" y="613" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Diapositivas de Pitch Decks a fondos</text>
+    <text x="-140" y="633" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Tarjetas personales ejecutivas</text>
+    <text x="-140" y="653" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Patrocinios y eventos globales</text>
+
+    <rect x="-145" y="680" width="290" height="38" fill="rgba(212, 175, 55, 0.1)" rx="8" stroke="#D4AF37" stroke-width="1"/>
+    <text x="0" y="704" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#D4AF37">FORMATO VERSÁTIL PRINCIPAL</text>
+  </g>
+
+  <!-- ========================================================
+       MODALIDAD 4: ISOLOGO (SÍMBOLO Y TEXTO INDIVISIBLES)
+       ======================================================== -->
+  <g transform="translate(1365, 140)">
+    <rect x="-175" y="0" width="350" height="740" fill="#0D111A" rx="20" stroke="#10B981" stroke-width="1.5"/>
+    <rect x="-175" y="0" width="350" height="42" fill="#10B981" fill-opacity="0.15" rx="20"/>
+    <text x="0" y="26" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#10B981" letter-spacing="3">04 · ISOLOGO</text>
+
+    <!-- Previsualización Visual -->
+    <rect x="-150" y="60" width="300" height="340" fill="#05070A" rx="14" stroke="#1E293B"/>
+
+    <g transform="translate(0, 230) scale(0.48)">
+      <polygon points="0,-290 220,-290 260,-250 260,250 220,290 -220,290 -260,250 -260,-250 -220,-290" fill="#0B0F19" stroke="#1E293B" stroke-width="3"/>
+      <polygon points="0,-278 212,-278 248,-242 248,242 212,278 -212,278 -248,242 -248,-242 -212,-278" fill="none" stroke="url(#boardGold)" stroke-width="2" stroke-opacity="0.7"/>
+
+      <text x="0" y="-245" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#D4AF37" letter-spacing="6">EST. 2026 · VENTURE</text>
+
+      <!-- Isotipo Integrado -->
+      <g transform="translate(0, -90) scale(0.85)">
+        <path d="M 0,-45 L -42,-125 L -20,-125 L 0,-85 L 20,-125 L 42,-125 Z" fill="url(#boardGold)"/>
+        <polygon points="0,-75 -16,-40 0,-12 16,-40" fill="url(#boardGold)"/>
+        <path d="M -8,-8 L 8,-8 L 8,90 L 0,108 L -8,90 Z" fill="url(#boardGold)"/>
+        <path d="M -52,-105 L -32,-105 L -32,25 C -32,65 -60,90 -105,90 C -140,90 -160,68 -160,35 L -138,35 C -138,50 -125,68 -105,68 C -75,68 -52,50 -52,25 Z" fill="url(#boardPlat)"/>
+        <polygon points="-52,-105 -32,-105 -44,-126 -64,-126" fill="url(#boardPlat)"/>
+        <path d="M 52,-105 L 32,-105 L 32,25 C 32,65 60,90 105,90 C 140,90 160,68 160,35 L 138,35 C 138,50 125,68 105,68 C 75,68 52,50 52,25 Z" fill="url(#boardPlat)"/>
+        <polygon points="52,-105 32,-105 44,-126 64,-126" fill="url(#boardPlat)"/>
+      </g>
+
+      <!-- Logotipo Integrado -->
+      <g transform="translate(0, 95) scale(0.55)">
+        <g transform="translate(-290, 0)"><path d="M 30,-50 L 48,-50 L 48,15 C 48,40 28,55 2,55 C -24,55 -40,40 -40,18 L -22,18 C -22,26 -12,36 2,36 C 18,36 28,26 28,15 Z" fill="url(#boardPlat)"/><polygon points="30,-50 48,-50 36,-65 18,-65" fill="url(#boardPlat)"/></g>
+        <g transform="translate(-145, 0)"><path d="M 0,-65 L 20,-65 L 55,55 L 35,55 L 25,18 L -25,18 L -35,55 L -55,55 Z M 0,-22 L -18,4 L 18,4 Z" fill="url(#boardPlat)"/></g>
+        <g transform="translate(0, 0)"><path d="M -50,-65 L -10,8 L -10,55 L 10,55 L 10,8 L 50,-65 L 30,-65 L 0,-16 L -30,-65 Z" fill="url(#boardGold)"/></g>
+        <g transform="translate(145, 0)"><path d="M 0,-65 L 20,-65 L 55,55 L 35,55 L 25,18 L -25,18 L -35,55 L -55,55 Z M 0,-22 L -18,4 L 18,4 Z" fill="url(#boardPlat)"/></g>
+        <g transform="translate(290, 0) scale(-1, 1)"><path d="M 30,-50 L 48,-50 L 48,15 C 48,40 28,55 2,55 C -24,55 -40,40 -40,18 L -22,18 C -22,26 -12,36 2,36 C 18,36 28,26 28,15 Z" fill="url(#boardPlat)"/><polygon points="30,-50 48,-50 36,-65 18,-65" fill="url(#boardPlat)"/></g>
+      </g>
+      <text x="0" y="200" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#94A3B8" letter-spacing="7">INNOVATION ECOSYSTEM</text>
+    </g>
+
+    <!-- Ficha Técnica -->
+    <text x="-140" y="435" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CONCEPTO:</text>
+    <text x="-140" y="458" font-family="-apple-system, sans-serif" font-size="12" fill="#10B981">"El Emblema Soberano"</text>
+
+    <text x="-140" y="495" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">DEFINICIÓN:</text>
+    <text x="-140" y="518" font-family="-apple-system, sans-serif" font-size="12" fill="#94A3B8">Símbolo y texto fusionados en un solo cuerpo arquitectónico. No se separan.</text>
+
+    <text x="-140" y="570" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFFFFF">CASOS DE USO:</text>
+    <text x="-140" y="593" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Sellos de lacrado y títulos de acciones</text>
+    <text x="-140" y="613" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Endoso oficial en las 5 filiales</text>
+    <text x="-140" y="633" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Certificados de inversión institucional</text>
+    <text x="-140" y="653" font-family="-apple-system, sans-serif" font-size="11" fill="#94A3B8">• Medallas y placas de inauguración</text>
+
+    <rect x="-145" y="680" width="290" height="38" fill="rgba(16, 185, 129, 0.12)" rx="8" stroke="#10B981" stroke-width="1"/>
+    <text x="0" y="704" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#10B981">MÁXIMA JERARQUÍA INSTITUCIONAL</text>
+  </g>
+</svg>

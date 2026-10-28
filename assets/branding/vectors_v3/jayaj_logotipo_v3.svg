@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 280" width="100%" height="100%">
+  <defs>
+    <!-- Gradiente Platino Titanio -->
+    <linearGradient id="logoPlatV3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+
+    <!-- Gradiente Oro Champaña para el Eje Y -->
+    <linearGradient id="logoGoldV3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5DC"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#805F0D"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="280" fill="#07090E" rx="24"/>
+
+  <!-- ========================================================
+       LOGOTIPO JAYAJ V3: TIPOGRAFÍA DE AUTOR CON INCISIONES CINÉTICAS
+       - Bespoke Architectural Geometric Letterforms
+       - Incisiones a 30° en vértices superiores
+       - Simetría axial bilateral pura (Ⴑ en espejo)
+       ======================================================== -->
+  <g transform="translate(500, 105)">
+    <!-- J INICIAL (x = -330): Fuste monolítico con corte a 30° en cabeza y gancho circular -->
+    <g transform="translate(-330, 0)">
+      <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#logoPlatV3)"/>
+      <!-- Incisión cinética en el ápice -->
+      <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#logoPlatV3)"/>
+    </g>
+
+    <!-- A PRIMERA (x = -165): Doble diagonal de precisión con travesaño óptico -->
+    <g transform="translate(-165, 0)">
+      <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#logoPlatV3)"/>
+    </g>
+
+    <!-- Y CENTRAL (x = 0): El Pivote de Oro (Cáliz y Fuste Continuo) -->
+    <g transform="translate(0, 0)">
+      <path d="M -54,-70 L -12,8 L -12,58 L 12,58 L 12,8 L 54,-70 L 32,-70 L 0,-18 L -32,-70 Z" fill="url(#logoGoldV3)"/>
+      <polygon points="0,-32 -8,-18 0,-4 8,-18" fill="url(#logoGoldV3)"/>
+    </g>
+
+    <!-- A SEGUNDA (x = +165): Reflejo Idéntico -->
+    <g transform="translate(165, 0)">
+      <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#logoPlatV3)"/>
+    </g>
+
+    <!-- Ⴑ FINAL EN ESPEJO (x = +330): Simetría Especular Pura -->
+    <g transform="translate(330, 0) scale(-1, 1)">
+      <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#logoPlatV3)"/>
+      <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#logoPlatV3)"/>
+    </g>
+  </g>
+
+  <!-- LÍNEA DE PRECISIÓN DE CRISTAL -->
+  <line x1="120" y1="195" x2="880" y2="195" stroke="#1E293B" stroke-width="1.5"/>
+  <circle cx="500" cy="195" r="3" fill="#D4AF37"/>
+
+  <!-- DESCRIPTOR INSTITUCIONAL TÉCNICO (NIVEL 2) -->
+  <text x="500" y="228" text-anchor="middle" font-family="'JetBrains Mono', 'Space Mono', monospace" font-size="12" font-weight="700" fill="#94A3B8" letter-spacing="10">VENTURE HOLDING · INNOVATION ECOSYSTEM</text>
+
+  <!-- LEMA EDITORIAL DE PRESTIGIO (NIVEL 3) -->
+  <text x="500" y="254" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-style="italic" font-size="15" fill="#D4AF37" letter-spacing="3">The Architecture of Next</text>
+</svg>

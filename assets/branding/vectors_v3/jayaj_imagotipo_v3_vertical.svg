@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 780" width="100%" height="100%">
+  <defs>
+    <!-- Oro Champaña Imperial -->
+    <linearGradient id="v3Gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5DC"/>
+      <stop offset="35%" stop-color="#E5C158"/>
+      <stop offset="70%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#805F0D"/>
+    </linearGradient>
+
+    <!-- Platino Titanio -->
+    <linearGradient id="v3Plat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#8899A6"/>
+    </linearGradient>
+
+    <!-- Resplandor Central -->
+    <radialGradient id="v3Aura" cx="50%" cy="32%" r="45%">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#07090E" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="650" height="780" fill="#07090E" rx="28"/>
+  <circle cx="325" cy="240" r="180" fill="url(#v3Aura)"/>
+
+  <!-- ========================================================
+       IMAGOTIPO VERTICAL JAYAJ V3 (SÍMBOLO + TEXTO SEPARABLES)
+       ======================================================== -->
+
+  <!-- 1. ISOTIPO CENTRAL (EL TÓTEM DE LA VICTORIA) -->
+  <g transform="translate(325, 240) scale(1.15)">
+    <!-- Crisol / Antorcha Central (Y) -->
+    <path d="M 0,-50 L -46,-135 L -22,-135 L 0,-92 L 22,-135 L 46,-135 Z" fill="url(#v3Gold)"/>
+    <polygon points="0,-82 -18,-45 0,-15 18,-45" fill="url(#v3Gold)"/>
+    <path d="M -9,-10 L 9,-10 L 9,95 L 0,115 L -9,95 Z" fill="url(#v3Gold)"/>
+
+    <!-- Guardián Izquierdo (J Espejo) -->
+    <path d="M -56,-115 L -34,-115 L -34,25 C -34,68 -65,95 -112,95 C -150,95 -172,70 -172,36 L -148,36 C -148,54 -134,72 -112,72 C -80,72 -56,52 -56,25 Z" fill="url(#v3Plat)"/>
+    <polygon points="-56,-115 -34,-115 -48,-138 -70,-138" fill="url(#v3Plat)"/>
+
+    <!-- Guardián Derecho (Ⴑ Directa) -->
+    <path d="M 56,-115 L 34,-115 L 34,25 C 34,68 65,95 112,95 C 150,95 172,70 172,36 L 148,36 C 148,54 134,72 112,72 C 80,72 56,52 56,25 Z" fill="url(#v3Plat)"/>
+    <polygon points="56,-115 34,-115 48,-138 70,-138" fill="url(#v3Plat)"/>
+
+    <circle cx="0" cy="-152" r="3.5" fill="#D4AF37"/>
+    <circle cx="0" cy="132" r="3.5" fill="#E2E8F0"/>
+  </g>
+
+  <!-- 2. LOGOTIPO BESPOKE CENTRADO -->
+  <g transform="translate(325, 530) scale(0.68)">
+    <!-- J Inicial -->
+    <g transform="translate(-330, 0)">
+      <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#v3Plat)"/>
+      <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#v3Plat)"/>
+    </g>
+    <!-- A Primera -->
+    <g transform="translate(-165, 0)">
+      <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#v3Plat)"/>
+    </g>
+    <!-- Y Central -->
+    <g transform="translate(0, 0)">
+      <path d="M -54,-70 L -12,8 L -12,58 L 12,58 L 12,8 L 54,-70 L 32,-70 L 0,-18 L -32,-70 Z" fill="url(#v3Gold)"/>
+      <polygon points="0,-32 -8,-18 0,-4 8,-18" fill="url(#v3Gold)"/>
+    </g>
+    <!-- A Segunda -->
+    <g transform="translate(165, 0)">
+      <path d="M 0,-70 L 22,-70 L 60,58 L 38,58 L 27,20 L -27,20 L -38,58 L -60,58 Z M 0,-24 L -19,4 L 19,4 Z" fill="url(#v3Plat)"/>
+    </g>
+    <!-- Ⴑ Final Espejo -->
+    <g transform="translate(330, 0) scale(-1, 1)">
+      <path d="M 32,-55 L 50,-55 L 50,15 C 50,42 30,58 2,58 C -26,58 -44,42 -44,18 L -24,18 C -24,28 -14,38 2,38 C 20,38 30,28 30,15 Z" fill="url(#v3Plat)"/>
+      <polygon points="32,-55 50,-55 38,-70 20,-70" fill="url(#v3Plat)"/>
+    </g>
+  </g>
+
+  <!-- LÍNEA GUÍA Y DESCRIPTORES -->
+  <line x1="160" y1="620" x2="490" y2="620" stroke="#1E293B" stroke-width="1.5"/>
+  <circle cx="325" cy="620" r="3" fill="#D4AF37"/>
+
+  <text x="325" y="658" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#94A3B8" letter-spacing="10">VENTURE HOLDING</text>
+  <text x="325" y="684" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="500" fill="#64748B" letter-spacing="5">INNOVATION ECOSYSTEM</text>
+  <text x="325" y="720" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-style="italic" font-size="16" fill="#D4AF37" letter-spacing="3">The Architecture of Next</text>
+</svg>
