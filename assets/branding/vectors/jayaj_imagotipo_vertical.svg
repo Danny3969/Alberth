@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 850" width="100%" height="100%">
+  <defs>
+    <linearGradient id="vGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF4DD"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#997812"/>
+    </linearGradient>
+    <linearGradient id="vPlatinum" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#94A3B8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Obsidian -->
+  <rect width="1000" height="850" fill="#0A0D14" rx="24"/>
+
+  <!-- Guías de Alineación Arquitectónica (Sutil) -->
+  <g opacity="0.1" stroke="#FFFFFF" stroke-width="0.8">
+    <line x1="500" y1="60" x2="500" y2="790" stroke-dasharray="4 4"/>
+    <circle cx="500" cy="270" r="140" fill="none"/>
+  </g>
+
+  <!-- ISOTIPO CENTRAL (Monograma Simétrico JYJ) -->
+  <g transform="translate(500, 270)">
+    <!-- Vector Central Y -->
+    <path d="M -50,-100 L 0,-30 L 50,-100 L 26,-100 L 0,-62 L -26,-100 Z" fill="url(#vGold)"/>
+    <path d="M -8,-30 L 8,-30 L 8,55 L -8,55 Z" fill="url(#vGold)"/>
+
+    <!-- J Izquierda (Pilar y Ala Protectora - Espejo) -->
+    <path d="M -35,-75 L -18,-75 L -18,25 C -18,52 -44,62 -68,62 C -90,62 -105,45 -105,25 L -86,25 C -86,35 -78,43 -68,43 C -48,43 -35,35 -35,25 Z" fill="url(#vPlatinum)"/>
+    <rect x="-105" y="-75" width="87" height="14" rx="3" fill="url(#vPlatinum)"/>
+
+    <!-- J Derecha (Pilar y Ala Protectora - Directa) -->
+    <path d="M 35,-75 L 18,-75 L 18,25 C 18,52 44,62 68,62 C 90,62 105,45 105,25 L 86,25 C 86,35 78,43 68,43 C 48,43 35,35 35,25 Z" fill="url(#vPlatinum)"/>
+    <rect x="18" y="-75" width="87" height="14" rx="3" fill="url(#vPlatinum)"/>
+  </g>
+
+  <!-- LOGOTIPO CENTRAL CON J EN ESPEJO (J A Y A Ⴑ) -->
+  <g transform="translate(500, 560)">
+    <!-- J Inicial (Gancho Izquierda) -->
+    <g transform="translate(-280, 0)">
+      <path d="M 26,-55 L 52,-55 L 52,20 C 52,44 30,55 5,55 C -20,55 -40,42 -40,22 L -18,22 C -18,30 -10,36 5,36 C 20,36 26,28 26,20 Z" fill="url(#vPlatinum)"/>
+      <rect x="-40" y="-55" width="92" height="15" rx="3" fill="url(#vPlatinum)"/>
+    </g>
+
+    <!-- A Izquierda -->
+    <g transform="translate(-140, 0)">
+      <path d="M -48,55 L -4,-55 L 16,-55 L 60,55 L 36,55 L 26,27 L -26,27 L -36,55 Z M -18,10 L 18,10 L 0,-35 Z" fill="url(#vPlatinum)"/>
+    </g>
+
+    <!-- Y Central (Eje Axial y Vector Dorado) -->
+    <g transform="translate(0, 0)">
+      <path d="M -36,-55 L 0,-5 L 36,-55 L 60,-55 L 14,12 L 14,55 L -14,55 L -14,12 L -60,-55 Z" fill="url(#vGold)"/>
+    </g>
+
+    <!-- A Derecha (Simétrica) -->
+    <g transform="translate(140, 0)">
+      <path d="M -48,55 L -4,-55 L 16,-55 L 60,55 L 36,55 L 26,27 L -26,27 L -36,55 Z M -18,10 L 18,10 L 0,-35 Z" fill="url(#vPlatinum)"/>
+    </g>
+
+    <!-- J Final Reflejada (Gancho Derecha - Espejo Puro 180°) -->
+    <g transform="translate(280, 0) scale(-1, 1)">
+      <path d="M 26,-55 L 52,-55 L 52,20 C 52,44 30,55 5,55 C -20,55 -40,42 -40,22 L -18,22 C -18,30 -10,36 5,36 C 20,36 26,28 26,20 Z" fill="url(#vPlatinum)"/>
+      <rect x="-40" y="-55" width="92" height="15" rx="3" fill="url(#vPlatinum)"/>
+    </g>
+  </g>
+
+  <!-- DESCRIPTOR DE CATEGORÍA: VENTURE HOLDING -->
+  <text x="500" y="680" 
+        text-anchor="middle" 
+        font-family="'JetBrains Mono', 'SF Pro Text', monospace" 
+        font-size="18" 
+        font-weight="600" 
+        letter-spacing="18" 
+        fill="url(#vGold)">
+    VENTURE HOLDING
+  </text>
+
+  <!-- Línea decorativa sutil de horizonte -->
+  <line x1="300" y1="710" x2="700" y2="710" stroke="#334155" stroke-width="1" stroke-dasharray="6 6" opacity="0.6"/>
+  <text x="500" y="750" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748B" letter-spacing="6">MÉTODOS MATRICIALES · ALTA TECNOLOGÍA</text>
+</svg>
