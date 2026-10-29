@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+CONTROL="$REPO_ROOT/skills/agent-orchestration-skill/bin/agentic-orchestration-control"
+if [[ ! -x "$CONTROL" ]]; then
+  echo "Missing executable wrapper: $CONTROL" >&2
+  exit 1
+fi
+exec "$CONTROL" "$@"
