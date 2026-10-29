@@ -1,0 +1,246 @@
+from playwright.sync_api import sync_playwright
+
+html_file = "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth/assets/branding/jayaj_hybrid_board.html"
+png_file = "/Users/contabilidad/.gemini/antigravity-ide/scratch/Alberth/assets/branding/jayaj_hybrid_master_board.png"
+artifact_png = "/Users/contabilidad/.gemini/antigravity-ide/brain/fa5fa454-ce6d-4e6f-9a30-77dc642032c3/jayaj_hybrid_master_board.png"
+
+html_code = """<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>JAYAJ Master Board - Identidad Híbrida Oficial</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: #060B18;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      width: 1400px;
+      padding: 60px 70px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #1E2D4A;
+      margin-bottom: 40px;
+    }
+    .tag {
+      color: #38BDF8;
+      font-family: monospace;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .meta {
+      text-align: right;
+      color: #64748B;
+      font-size: 13px;
+      font-family: monospace;
+    }
+    .main-showcase {
+      background: #081126;
+      border: 1px solid #1E2E50;
+      border-radius: 20px;
+      padding: 50px 40px;
+      margin-bottom: 35px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    }
+    .section-label {
+      font-size: 12px;
+      color: #38BDF8;
+      font-family: monospace;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 25px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 35px;
+    }
+    .sub-card {
+      background: #0A1428;
+      border: 1px solid #172642;
+      border-radius: 16px;
+      padding: 35px;
+      text-align: center;
+    }
+    .anatomy-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      background: #0A1428;
+      border: 1px solid #172642;
+      border-radius: 16px;
+      padding: 30px;
+    }
+    .anatomy-box {
+      border-left: 2px solid #0066FF;
+      padding-left: 18px;
+    }
+    .anatomy-box h3 {
+      font-size: 15px;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+    .anatomy-box p {
+      font-size: 13px;
+      color: #94A3B8;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <div class="tag">JAYAJ VENTURE HOLDING · BRANDING BOARD</div>
+      <h1>Fusión Tipográfica Oficial · Isotipo + Wordmark Simétrico</h1>
+    </div>
+    <div class="meta">
+      VERSIÓN MAESTRA HÍBRIDA<br>
+      OCTUBRE 2026 · IDENTIDAD FINAL
+    </div>
+  </div>
+
+  <!-- SHOWCASE 1: WORDMARK EXACTO -->
+  <div class="main-showcase">
+    <div class="section-label">Logotipo Oficial (J con Remate + AYA sin Travesaño + Ⴑ en Espejo)</div>
+    <img src="/Users/contabilidad/.gemini/antigravity-ide/brain/fa5fa454-ce6d-4e6f-9a30-77dc642032c3/jayaj_master_hybrid_official.png" style="width: 100%; max-width: 1100px; height: auto; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  </div>
+
+  <!-- SHOWCASE 2: IMAGOTIPO CON ISOTIPO CINTA 3D Y MONOCROMÁTICOS -->
+  <div class="grid-2">
+    <!-- Imagotipo Completo -->
+    <div class="sub-card">
+      <div class="section-label">Imagotipo Completo (Isotipo 3D + Wordmark)</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" width="100%" height="260">
+        <defs>
+          <linearGradient id="gBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0066FF"/><stop offset="100%" stop-color="#003DB3"/>
+          </linearGradient>
+          <linearGradient id="gPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9333EA"/><stop offset="100%" stop-color="#6B21A8"/>
+          </linearGradient>
+          <linearGradient id="gCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#38BDF8"/><stop offset="100%" stop-color="#0284C7"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Ribbon 3D -->
+        <g transform="translate(300, 85) scale(0.9)">
+          <polygon points="-32,22 0,48 0,14 -32,-12" fill="#003DB3"/>
+          <polygon points="-32,-12 0,14 0,-38 -32,-64" fill="url(#gBlue)"/>
+          <polygon points="0,-38 0,14 36,-16 36,-68" fill="url(#gPurple)"/>
+          <polygon points="0,14 0,48 36,18 36,-16" fill="#581C87"/>
+          <polygon points="-32,-64 0,-38 36,-68 4,-94" fill="url(#gCyan)"/>
+        </g>
+
+        <!-- Wordmark Vectorial Híbrido -->
+        <g transform="translate(300, 240) scale(0.65)">
+          <!-- J -->
+          <g transform="translate(-215, 0)">
+            <rect x="-38" y="-40" width="68" height="12" rx="2" fill="#FFFFFF"/>
+            <path d="M 8,-40 L 30,-40 L 30,15 C 30,32 14,40 -12,40 C -34,40 -48,28 -48,14 L -32,14 C -32,22 -24,28 -14,28 C -2,28 8,20 8,15 Z" fill="#FFFFFF"/>
+          </g>
+          <!-- A (sin travesaño) -->
+          <g transform="translate(-105, 0)">
+            <path d="M 0,-40 L 22,-40 L 56,40 L 36,40 L 11,-16 L -16,40 L -36,40 Z" fill="#FFFFFF"/>
+          </g>
+          <!-- Y -->
+          <g transform="translate(0, 0)">
+            <path d="M -35,-40 L -16,-40 L 0,8 L 16,-40 L 35,-40 L 10,24 L 10,40 L -10,40 L -10,24 Z" fill="#FFFFFF"/>
+          </g>
+          <!-- A (sin travesaño) -->
+          <g transform="translate(105, 0)">
+            <path d="M 0,-40 L 22,-40 L 56,40 L 36,40 L 11,-16 L -16,40 L -36,40 Z" fill="#FFFFFF"/>
+          </g>
+          <!-- Ⴑ -->
+          <g transform="translate(215, 0) scale(-1, 1)">
+            <rect x="-38" y="-40" width="68" height="12" rx="2" fill="#FFFFFF"/>
+            <path d="M 8,-40 L 30,-40 L 30,15 C 30,32 14,40 -12,40 C -34,40 -48,28 -48,14 L -32,14 C -32,22 -24,28 -14,28 C -2,28 8,20 8,15 Z" fill="#FFFFFF"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Monocromático Negro sobre Blanco -->
+    <div class="sub-card" style="background: #FFFFFF; border-color: #E2E8F0;">
+      <div class="section-label" style="color: #64748B;">Monocromático Positivo (Facturas, Sellos, Papelería)</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" width="100%" height="260">
+        <!-- Ribbon en Tinta Sólida -->
+        <g transform="translate(300, 85) scale(0.9)">
+          <polygon points="-32,22 0,48 0,14 -32,-12" fill="#0A0F1D"/>
+          <polygon points="-32,-12 0,14 0,-38 -32,-64" fill="#1E293B"/>
+          <polygon points="0,-38 0,14 36,-16 36,-68" fill="#334155"/>
+          <polygon points="0,14 0,48 36,18 36,-16" fill="#0A0F1D"/>
+          <polygon points="-32,-64 0,-38 36,-68 4,-94" fill="#475569"/>
+        </g>
+
+        <!-- Wordmark Negro -->
+        <g transform="translate(300, 240) scale(0.65)">
+          <g transform="translate(-215, 0)">
+            <rect x="-38" y="-40" width="68" height="12" rx="2" fill="#0A0F1D"/>
+            <path d="M 8,-40 L 30,-40 L 30,15 C 30,32 14,40 -12,40 C -34,40 -48,28 -48,14 L -32,14 C -32,22 -24,28 -14,28 C -2,28 8,20 8,15 Z" fill="#0A0F1D"/>
+          </g>
+          <g transform="translate(-105, 0)">
+            <path d="M 0,-40 L 22,-40 L 56,40 L 36,40 L 11,-16 L -16,40 L -36,40 Z" fill="#0A0F1D"/>
+          </g>
+          <g transform="translate(0, 0)">
+            <path d="M -35,-40 L -16,-40 L 0,8 L 16,-40 L 35,-40 L 10,24 L 10,40 L -10,40 L -10,24 Z" fill="#0A0F1D"/>
+          </g>
+          <g transform="translate(105, 0)">
+            <path d="M 0,-40 L 22,-40 L 56,40 L 36,40 L 11,-16 L -16,40 L -36,40 Z" fill="#0A0F1D"/>
+          </g>
+          <g transform="translate(215, 0) scale(-1, 1)">
+            <rect x="-38" y="-40" width="68" height="12" rx="2" fill="#0A0F1D"/>
+            <path d="M 8,-40 L 30,-40 L 30,15 C 30,32 14,40 -12,40 C -34,40 -48,28 -48,14 L -32,14 C -32,22 -24,28 -14,28 C -2,28 8,20 8,15 Z" fill="#0A0F1D"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- DESGLOSE ANATÓMICO -->
+  <div class="anatomy-row">
+    <div class="anatomy-box">
+      <h3>1. Las Letras J y Ⴑ (De la Imagen 1)</h3>
+      <p>Incorporan el capitel horizontal y gancho de autor. Eliminan la confusión con la "L" y le otorgan jerarquía, porte institucional y simetría bilateral de holding.</p>
+    </div>
+    <div class="anatomy-box" style="border-left-color: #38BDF8;">
+      <h3>2. A-Y-A Minimalista (De la Imagen 2)</h3>
+      <p>La letra "A" en forma chevron sin travesaño transversal aporta el dinamismo tecnológico y aeroespacial que buscabas en la referencia moderna.</p>
+    </div>
+    <div class="anatomy-box" style="border-left-color: #9333EA;">
+      <h3>3. Legibilidad y Ambigrama</h3>
+      <p>Se lee inequívocamente <strong>J A Y A J</strong> tanto de izquierda a derecha como de derecha a izquierda, cumpliendo la perfección del palíndromo.</p>
+    </div>
+  </div>
+
+</body>
+</html>
+"""
+
+with open(html_file, "w") as f:
+    f.write(html_code)
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={"width": 1400, "height": 1300})
+    page.goto(f"file://{html_file}")
+    page.wait_for_timeout(1000)
+    page.screenshot(path=png_file, full_page=True)
+    page.screenshot(path=artifact_png, full_page=True)
+    browser.close()
+
+print("Master board rendered to:", png_file)

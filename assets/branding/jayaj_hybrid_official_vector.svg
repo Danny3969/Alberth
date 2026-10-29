@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 240" width="100%" height="100%">
+  <!-- Fondo Opcional Transparente / Color según contexto -->
+  <rect width="1000" height="240" fill="#081126" rx="16"/>
+
+  <!-- WORDMARK HÍBRIDO OFICIAL J A Y A Ⴑ -->
+  <g transform="translate(500, 120)">
+    <!-- J INICIAL (Capitel superior + gancho de autor) -->
+    <g transform="translate(-385, 0) scale(1.6)">
+      <rect x="-206" y="-40" width="64" height="10" rx="2" fill="#FFFFFF"/>
+      <path d="M -160,-40 L -142,-40 L -142,15 C -142,32 -158,40 -178,40 C -195,40 -206,30 -206,16 L -190,16 C -190,22 -185,26 -178,26 C -166,26 -160,20 -160,15 Z" fill="#FFFFFF"/>
+    </g>
+
+    <!-- A PRIMERA (Sin travesaño transversal) -->
+    <g transform="translate(-190, 0) scale(1.6)">
+      <path d="M 0,-40 L 15,-40 L 48,40 L 33,40 L 7.5,-21 L -18,40 L -33,40 Z" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Y CENTRAL (Eje axial de simetría) -->
+    <g transform="translate(0, 0) scale(1.6)">
+      <path d="M -30,-40 L -15,-40 L 0,3 L 15,-40 L 30,-40 L 8,17 L 8,40 L -8,40 L -8,17 Z" fill="#FFFFFF"/>
+    </g>
+
+    <!-- A SEGUNDA (Sin travesaño transversal) -->
+    <g transform="translate(190, 0) scale(1.6)">
+      <path d="M 0,-40 L 15,-40 L 48,40 L 33,40 L 7.5,-21 L -18,40 L -33,40 Z" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Ⴑ FINAL (J en espejo perfecto hacia la derecha) -->
+    <g transform="scale(-1, 1)">
+      <g transform="translate(-385, 0) scale(1.6)">
+        <rect x="-206" y="-40" width="64" height="10" rx="2" fill="#FFFFFF"/>
+        <path d="M -160,-40 L -142,-40 L -142,15 C -142,32 -158,40 -178,40 C -195,40 -206,30 -206,16 L -190,16 C -190,22 -185,26 -178,26 C -166,26 -160,20 -160,15 Z" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+</svg>

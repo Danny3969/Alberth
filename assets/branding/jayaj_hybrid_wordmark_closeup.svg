@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 400" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Fondo Azul Profundo (idéntico a la imagen del usuario) -->
+  <rect width="1400" height="400" fill="#0B1225"/>
+
+  <g transform="translate(700, 200)">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         J INICIAL · TIPOGRAFÍA DE AUTOR CON REMATE Y GANCHO
+         Posición: x = -520
+         ═══════════════════════════════════════════════════════════ -->
+    <g transform="translate(-520, 0)">
+      <!-- Remate / Capitel Superior Horizontal (la visera) -->
+      <rect x="-42" y="-100" width="90" height="18" rx="2" fill="#E8EBF0"/>
+      <!-- Fuste Vertical Central -->
+      <rect x="6" y="-100" width="24" height="148" fill="#E8EBF0"/>
+      <!-- Gancho Curvo Inferior Amplio y Ascendente -->
+      <path d="
+        M 30,30
+        L 30,45
+        C 30,82 12,100 -18,100
+        C -44,100 -60,82 -60,56
+        L -34,56
+        C -34,70 -26,80 -16,80
+        C -2,80 6,68 6,48
+        L 6,30
+        Z
+      " fill="#E8EBF0"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         A PRIMERA · MONTSERRAT EXTRABOLD
+         Posición: x = -300
+         ═══════════════════════════════════════════════════════════ -->
+    <g transform="translate(-300, 0)">
+      <!-- Diagonales y Travesaño de la A geométrica tipo Montserrat -->
+      <path d="
+        M 0,-100
+        L 18,-100
+        L 66,100
+        L 42,100
+        L 32,60
+        L -32,60
+        L -42,100
+        L -66,100
+        Z
+        M 0,-40
+        L -22,42
+        L 22,42
+        Z
+      " fill="#E8EBF0"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Y CENTRAL · MONTSERRAT EXTRABOLD (Pivote de Simetría)
+         Posición: x = 0
+         ═══════════════════════════════════════════════════════════ -->
+    <g transform="translate(0, 0)">
+      <path d="
+        M -54,-100
+        L -14,0
+        L -14,100
+        L 14,100
+        L 14,0
+        L 54,-100
+        L 28,-100
+        L 0,-28
+        L -28,-100
+        Z
+      " fill="#E8EBF0"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         A SEGUNDA · MONTSERRAT EXTRABOLD (Reflejo Simétrico)
+         Posición: x = +300
+         ═══════════════════════════════════════════════════════════ -->
+    <g transform="translate(300, 0)">
+      <path d="
+        M 0,-100
+        L 18,-100
+        L 66,100
+        L 42,100
+        L 32,60
+        L -32,60
+        L -42,100
+        L -66,100
+        Z
+        M 0,-40
+        L -22,42
+        L 22,42
+        Z
+      " fill="#E8EBF0"/>
+    </g>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Ⴑ FINAL · TIPOGRAFÍA DE AUTOR EN ESPEJO (scale -1,1)
+         Posición: x = +520
+         ═══════════════════════════════════════════════════════════ -->
+    <g transform="translate(520, 0) scale(-1, 1)">
+      <!-- Remate / Capitel Superior Horizontal (la visera) -->
+      <rect x="-42" y="-100" width="90" height="18" rx="2" fill="#E8EBF0"/>
+      <!-- Fuste Vertical Central -->
+      <rect x="6" y="-100" width="24" height="148" fill="#E8EBF0"/>
+      <!-- Gancho Curvo Inferior Amplio y Ascendente -->
+      <path d="
+        M 30,30
+        L 30,45
+        C 30,82 12,100 -18,100
+        C -44,100 -60,82 -60,56
+        L -34,56
+        C -34,70 -26,80 -16,80
+        C -2,80 6,68 6,48
+        L 6,30
+        Z
+      " fill="#E8EBF0"/>
+    </g>
+
+  </g>
+</svg>

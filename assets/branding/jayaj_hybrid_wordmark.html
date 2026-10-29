@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAYAJ · Logotipo Híbrido con J de Autor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0B1225;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .wordmark-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      position: relative;
+    }
+
+    /* Las letras A, Y, A en Montserrat Bold idéntica a la imagen del usuario */
+    .montserrat-letter {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 220px;
+      color: #E8EBF0;
+      line-height: 1;
+      letter-spacing: 8px;
+      user-select: none;
+    }
+
+    /* SVG containers para las J de autor */
+    .j-author {
+      display: inline-block;
+      width: 140px;
+      height: 240px;
+      position: relative;
+      bottom: -4px;
+    }
+
+    .j-author svg {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wordmark-container">
+
+    <!-- ═══════════════════════════════════════════
+         J INICIAL — Tipografía de autor con remate
+         ═══════════════════════════════════════════ -->
+    <div class="j-author">
+      <svg viewBox="0 0 120 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- Remate / Capitel Superior Horizontal -->
+        <rect x="10" y="8" width="100" height="22" rx="2" fill="#E8EBF0"/>
+        <!-- Fuste Vertical -->
+        <rect x="52" y="8" width="28" height="162" fill="#E8EBF0"/>
+        <!-- Gancho Curvo Inferior (amplio y ascendente) -->
+        <path d="M 80,150 L 80,170 C 80,200 60,214 35,214 C 8,214 -6,196 -6,172 L 22,172 C 22,184 28,194 38,194 C 52,194 52,182 52,170 L 52,150 Z" fill="#E8EBF0"/>
+      </svg>
+    </div>
+
+    <!-- A (Montserrat) -->
+    <span class="montserrat-letter" style="margin-left: -6px;">A</span>
+
+    <!-- Y (Montserrat) -->
+    <span class="montserrat-letter">Y</span>
+
+    <!-- A (Montserrat) -->
+    <span class="montserrat-letter">A</span>
+
+    <!-- ═══════════════════════════════════════════
+         Ⴑ FINAL — Tipografía de autor EN ESPEJO
+         (Misma J reflejada horizontalmente)
+         ═══════════════════════════════════════════ -->
+    <div class="j-author" style="margin-left: -6px;">
+      <svg viewBox="0 0 120 220" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(120, 0) scale(-1, 1)">
+          <!-- Remate / Capitel Superior Horizontal -->
+          <rect x="10" y="8" width="100" height="22" rx="2" fill="#E8EBF0"/>
+          <!-- Fuste Vertical -->
+          <rect x="52" y="8" width="28" height="162" fill="#E8EBF0"/>
+          <!-- Gancho Curvo Inferior (amplio y ascendente) -->
+          <path d="M 80,150 L 80,170 C 80,200 60,214 35,214 C 8,214 -6,196 -6,172 L 22,172 C 22,184 28,194 38,194 C 52,194 52,182 52,170 L 52,150 Z" fill="#E8EBF0"/>
+        </g>
+      </svg>
+    </div>
+
+  </div>
+
+</body>
+</html>
